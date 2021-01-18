@@ -1,0 +1,31 @@
+logging:
+  file:
+    name: roach-bank-client.log
+  max-history: 3
+spring:
+  output:
+    ansi:
+      enabled: always
+roachbank:
+  history:
+    file: roach-bank-history.log
+  http:
+    # Total concurrent http connections
+    maxTotal: -1
+    # Total concurrent http connections per route (endpoint)
+    defaultMaxPerRoute: -1
+  threadPool:
+    # Total core thread pool size, e.g. the number of threads to keep in the pool even if they are idle. The thread
+    # pool will prefer to start new threads up to this size rather than queue workers.
+    #
+    # A positive value denotes a fixed pool size.
+    # A negative value denotes the following formula:
+    #   Runtime.getRuntime().availableProcessors() * (1 + blocking_coef)
+    corePoolSize: -1
+
+    # Used to calc pool size if not fixed.
+    #   blocking_coef: wait_time / service_time
+    #   wait_time: time spent waiting for IO (HTTP request+response)
+    #   service_time: time spent processing response (unmarshalling, transformations, control loops)
+    # Default: 20ms/1ms
+    blockingCoef: 20

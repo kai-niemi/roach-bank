@@ -1,0 +1,35 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: io.roach.bank.repository.jpa.CockroachDBDialect
+    show-sql: false
+    open-in-view: false
+  main:
+    allow-bean-definition-overriding: true
+  liquibase:
+    contexts: db-crdb
+    default-schema:
+    drop-first: false
+    enabled: true
+    change-log: classpath:db/changelog-master.xml
+    database-change-log-table: db_changelog
+    database-change-log-lock-table: db_changelog_lock
+#############################
+roachbank:
+  health:
+    validation-query: select node_id from [SHOW CLUSTER SESSIONS] limit 1
+  datasource:
+    url: jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable&reWriteBatchedInserts=true&useServerPrepStmts=true&cachePrepStmts=true
+    driver-class-name: org.postgresql.Driver
+    username: root
+    password:
+    configuration:
+      pool-name: roach-bank
+      connection-init-sql: SELECT 1
+      connection-timeout: 30000
+      validation-timeout: 20000
+      # baseline 36vcpu x 9 nodes x 4 (1 instance)
+      maximum-pool-size: 1300
+      # should be same as maximum-pool-size
+      minimum-idle: 1300

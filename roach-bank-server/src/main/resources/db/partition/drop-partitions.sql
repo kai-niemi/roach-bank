@@ -1,0 +1,12 @@
+ALTER TABLE account PARTITION BY NOTHING;
+ALTER TABLE transaction PARTITION BY NOTHING;
+ALTER TABLE transaction_type PARTITION BY NOTHING;
+
+ALTER TABLE account CONFIGURE ZONE DISCARD;
+ALTER TABLE transaction CONFIGURE ZONE DISCARD;
+ALTER TABLE transaction_type CONFIGURE ZONE DISCARD;
+
+DROP INDEX IF EXISTS transaction_type@idx_us_west;
+DROP INDEX IF EXISTS transaction_type@idx_us_central;
+DROP INDEX IF EXISTS transaction_type@idx_eu;
+DROP INDEX IF EXISTS transaction_type@idx_ap;

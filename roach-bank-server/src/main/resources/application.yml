@@ -1,0 +1,94 @@
+##############################################
+# Spring boot properties
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+#
+# See README.md for available Spring Profiles
+##############################################
+
+spring:
+  application:
+    name: roach-bank
+  profiles:
+    active: db-crdb,retry-backoff,cdc-aop
+  output:
+    ansi:
+      enabled: ALWAYS
+  jackson:
+    serialization:
+      indent_output: true
+      write_dates_as_timestamps: false
+    deserialization:
+      fail_on_unknown_properties: false
+      fail_on_ignored_properties: false
+    default-property-inclusion: non_null
+    locale: en_US
+  mvc:
+    throw-exception-if-no-handler-found: true
+  thymeleaf:
+    cache: false
+    mode: HTML
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 0
+          no-cache: true
+          no-store: true
+#############################
+logging:
+  file:
+    name: roach-bank-server.log
+  logback:
+    rollingpolicy:
+      max-history: 3
+#############################
+info:
+  build:
+    artifact: io.roach.bank.server
+    name: Roach Bank
+    description: Accounting ledger based on Spring Boot and CockroachDB
+    version: 1.0.0
+    app-label: Roach Bank
+#############################
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: conditions,env,info,health,metrics,threaddump,liquibase,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: false
+  metrics:
+    tags:
+      application: ${spring.application.name}
+#############################
+server:
+  port: 8090
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: always
+  jetty:
+    threads:
+      max: 250
+#############################
+roachbank:
+  health:
+    # Admin UI endpoint base URL
+    admin-endpoint: http://localhost:8080
+    # Validation query for datasource health check
+    validation-query: select 1
+  # Interval of pushing cached balance reports (millis)
+  reportPushInterval: 10000
+  # Report query timeout (millis)
+  reportQueryTimeout: 60000
+  # Default number of accounts per region for random selection in client workloads (lower number = more conflicts)
+  accountsPerRegionLimit: 10
+  # Region name for labeling
+  region: all

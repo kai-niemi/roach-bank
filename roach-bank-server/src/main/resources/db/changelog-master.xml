@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="1" author="root" context="db-psql">
+        <validCheckSum>ANY</validCheckSum>
+        <sqlFile path="db/create/create-psql.sql"/>
+        <sqlFile path="db/load/load-metadata.sql"/>
+        <sqlFile path="db/load/load-accounts.sql"/>
+    </changeSet>
+
+    <changeSet id="2" author="root" context="db-crdb">
+        <validCheckSum>ANY</validCheckSum>
+        <sqlFile path="db/create/create-crdb.sql"/>
+        <sqlFile path="db/load/load-locations.sql"/>
+        <sqlFile path="db/load/load-metadata.sql"/>
+        <sqlFile path="db/load/load-accounts.sql"/>
+    </changeSet>
+</databaseChangeLog>
