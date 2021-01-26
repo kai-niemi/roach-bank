@@ -176,7 +176,7 @@ public class ThrottledExecutor {
             });
         } else {
             futures.add(future);
-            logger.trace("Adding worker for group '{}'", groupName);
+            logger.debug("Adding worker for group '{}'", groupName);
         }
 
         return future;

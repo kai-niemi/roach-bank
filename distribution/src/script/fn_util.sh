@@ -29,33 +29,6 @@ fn_sleep_time(){
   sleep 0.5
 }
 
-fn_echo_dots(){
-	echo -en "${creeol}[ .... ] $*"
-	fn_sleep_time
-}
-
-fn_echo_dots_nl(){
-	echo -e "${creeol}[ .... ] $*"
-	fn_sleep_time
-	echo -en "\n"
-}
-
-fn_echo_ok(){
-  echo -en "${creeol}[${green}  OK  ${default}] $*"
-	fn_sleep_time
-}
-
-fn_echo_ok_nl(){
-	echo -en "${creeol}[${green}  OK  ${default}] $*"
-	fn_sleep_time
-	echo -en "\n"
-}
-
-fn_echo_info(){
-  echo -en "${creeol}[${cyan} INFO ${default}] $*"
-	fn_sleep_time
-}
-
 fn_echo_info_nl(){
   echo -en "${creeol}[${cyan} INFO ${default}] $*"
 	fn_sleep_time
@@ -73,29 +46,13 @@ fn_echo_fail_nl(){
 	echo -en "\n"
 }
 
-fn_echo_dryrun(){
-  echo -en "${creeol}[${lightblue} DRYRUN ${default}] $*"
-	fn_sleep_time
-}
-
 fn_echo_dryrun_nl(){
-  echo -en "${creeol}[${lightblue} DRYRUN ${default}] $*"
-	fn_sleep_time
+  echo -en "[DRYRUN] $*"
 	echo -en "\n"
 }
 
 fn_echo_warning(){
 	echo -en "${lightyellow}Warning!${default} $*"
-	fn_sleep_time
-}
-
-fn_echo_complete(){
-	echo -en "${green}Complete!${default} $*"
-	fn_sleep_time
-}
-
-fn_echo_complete_nl(){
-	echo -e "${green}Complete!${default} $*"
 	fn_sleep_time
 }
 
@@ -128,9 +85,9 @@ fn_prompt_yes_no(){
 }
 
 fn_failcheck(){
-    if [ "${dryrun}" != "off" ]; then
-      fn_echo_dryrun "$@"
-      sleep 3
+    if [ "${dryrun}" == "on" ]; then
+      fn_echo_dryrun_nl "$@"
+      sleep 1
     else
       "$@"
       local status=$?

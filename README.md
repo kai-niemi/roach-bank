@@ -1,40 +1,40 @@
-Roach Bank represents a financial ledger demo, designed to demonstrate the safety and liveness 
-properties of a full-stack accounting ledger deployed across the globe using 
-[CockroachDB](https://www.cockroachlabs.com/). 
+Roach Bank represents a full-stack, financial accounting ledger demo running on [CockroachDB](https://www.cockroachlabs.com/). 
+It's designed to demonstrate the safety and liveness properties of a globally deployed, system-of-record type 
+of workload.
 
 # Introduction
 
-Each bank instance provides a single HTML page that displays the top accounts in the system, grouped 
-by currency and region (city) represented by colored rectangles. The concept is to concurrently 
-transfer funds between thse different accounts by using balanced, multi-legged monetary transactions.
+Each Roach Bank instance provides a single page that displays the top accounts in the system, grouped 
+by currency and region (city) represented by colored rectangles. In a multi-region deployment, the 
+displayed cities are filtered by region.
 
 ![frontend](diagram_frontend.png)
                 
-# Requirements
+The demo concept is to move funds between accounts using balanced, multi-legged transactions at a high
+frequency. As a financial ledger, it needs to conserve money at all times and also provide an audit trail 
+of all transactions performed towards accounts. 
 
-As a financial ledger, it needs to conserve money and show an audit trail of all transactions
-performed towards accounts. In Roach Bank, there are two key invariants that must hold true
-at all times regardless of observer, during failures in infrastructure and concurrent 
-conflicting operations (updating same accounts concurrently).
+## Key Invariants
 
-* The total balance of all accounts is constant at all times.
-* All user accounts must have a positive balance.
+In Roach Bank, there are two key invariants that must hold true at all times, regardless of observer
+and activities such as infrastructure failure and conflicting operations if updating the same accounts 
+concurrently.
 
-The bank is a stateless service, so these invariants are safeguarded by the ACID transactional 
-guarantees of CockroachDB. The system must refuse forward progress if an operation would result 
-in any invariant being compromised. If a variation of the total balances is observed at any 
-given time for instance, it means these rules have been breached and money has either been 
-invented or destroyed.
+* The total balance of all accounts must be constant
+* All user accounts must have a positive balance
 
-## Double-entry Principle
+The system must refuse forward progress if an operation would result in any invariant being compromised. 
+For instance, if a variation of the total balances is observed at any given time it means these rules 
+have been breached and money has either been invented or destroyed. Because it's a stateless service, 
+these invariants are safeguarded by the ACID transactional guarantees of the database.
+
+## Double-entry Bookkeeping
 
 Roach Bank follows the [double-entry bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping)
 principle for monetary transactions. This principle was originally formalized and published by the italian 
-mathematician Luca Pacioli during the 15:th century. 
-
-It involves making at least two account entries for every monetary transaction called legs.
-A debit in one account and a corresponding credit in another account. The sum of all debits must equal
-the sum of all credits, providing a simple method for error detection.
+mathematician Luca Pacioli during the 15:th century. It involves making at least two account entries for 
+every transaction. A debit in one account and a corresponding credit in another account. The sum of all 
+debits must equal the sum of all credits, providing a simple method for error detection.
 
     Account | Credit(+) | Debit(-) |
     A         100               
@@ -46,34 +46,35 @@ the sum of all credits, providing a simple method for error detection.
     ------------------------------------------
     Σ         125    +   -125 = 0 
 
-_(Note: real accouting doesn't use negative numbers, so this is a simplification)_
+Real accounting doesn't use negative numbers, but in Roach Bank a positive value means increasing value (credit),
+and a negative value decreasing value (debit). A transaction is balanced when the sum of the legs with
+the same currency equals zero.
 
 ## Deployment
          
-Roach Bank can run anywhere, but it's really intended to be globally deployed across multiple 
+Roach Bank can run anywhere, but it's intended to be globally deployed across multiple 
 regions in a single cloud, multi-cloud or on-prem. 
 
-When the bank is deployed in a multi-regional topology like US-EU, the accounts and 
-transactions needs to be pinned/domiciled to each region for best performance. This is
-done through the geo-partitioned replicas topology (SQL scripts are provided). 
-
-This will provide local read and write latencies and also for one entire region to be 
-brought down without affecting forward progress in any of the other regions.
+When deployed in a multi-regional topology (like US-EU), the accounts and transactions needs 
+to be pinned/domiciled to each region for best performance. This is done through the 
+geo-partitioned replicas topology (SQL scripts are provided). It will provide both 
+local read and write latencies and also for one entire region to be brought down without 
+affecting forward progress in any of the other regions.
 
 See [Deployment Tutorial](distribution/README.md) on how to deploy it to a single 
 or multi-region AWS or GCE cluster.
 
 ## Implementation
 
-Roach Bank is a full-stack, distributed system. It provides a backend service with a single 
-page web front-end, and a Hypermedia API for traffic generating clients.
+Roach Bank provides a backend service with a single page web front-end, and a Hypermedia API 
+for workload-generating clients. The clients issue transfer requests to the service API, 
+which in turn executes the SQL transactions and publishes push event for the frontend. 
 
-Transfer requests are issued by regional REST clients interacting with the service API, 
-which in turn executes the SQL transactions and publishes push event for the frontend.
+As an option, CDC can be used to push change events to either Kafka or an HTTP endpoint, 
+which are translated to websocket push events. These push events signals account balance updates
+and drives the frontend updates. Push events are regionally scoped.
 
-A regionally scoped load balancer sits between the service and CockroachDB nodes. Kafka
-is optional to use with CDC to generate websocket push events to signal balance updates
-for the frontend.
+A regionally scoped load balancer also sits between the service and CockroachDB nodes.
 
 ![architecture](diagram_architecture.png)
 
@@ -85,7 +86,7 @@ mechanisms used.
 
 ## Project Setup
 
-Tutorial on how to build the service.
+How to build the service.
 
 ### Subprojects
 

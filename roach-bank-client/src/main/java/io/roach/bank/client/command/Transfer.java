@@ -33,7 +33,7 @@ import static io.roach.bank.api.BankLinkRelations.*;
 import static io.roach.bank.api.support.RandomData.selectRandom;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_WORKLOAD_COMMANDS)
+@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class Transfer extends RestCommandSupport {
     protected final Logger logger = LoggerFactory.getLogger("io.roach.TX_LOG");
 
@@ -48,7 +48,7 @@ public class Transfer extends RestCommandSupport {
             "Cockroaches can run up to three miles in an hour"
     );
 
-    @ShellMethod(value = "Transfer funds between random accounts", key = {"t","transfer"})
+    @ShellMethod(value = "Transfer funds between accounts", key = {"tf","transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.25-5.00") final String amount,
@@ -63,18 +63,15 @@ public class Transfer extends RestCommandSupport {
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
-            console.warn("No matching regions found for: %s ", regions);
+            return;
+        }
+        final Map<String, List<AccountModel>> accountMap = lookupAccounts(regionMap.keySet(), accountLimit);
+        if (accountMap.isEmpty()) {
             return;
         }
 
         final int concurrencyLevel = concurrency > 0 ? concurrency :
                 Math.max(1, Runtime.getRuntime().availableProcessors() * 2 / regionMap.size());
-
-        final Map<String, List<AccountModel>> accountMap = lookupAccounts(regionMap.keySet(), accountLimit);
-        if (accountMap.isEmpty()) {
-            console.warn("No accounts found for regions %s ", regionMap.keySet());
-            return;
-        }
 
         final long refreshIntervalSec = TimeFormat.parseDuration(refreshInterval).getSeconds();
 
@@ -118,15 +115,14 @@ public class Transfer extends RestCommandSupport {
                         groupName -> balanceUpdater.ifPresent(future -> future.cancel(true)))
                 ));
 
-        console.info(">> Transfer workload started");
-        console.info("             Account regions: %s", regionMap.keySet());
-        console.info("                Multi-region: %s", crossRegion);
+        console.info("Account regions: %s", regionMap.keySet());
+        console.info("Multi-region: %s", crossRegion);
         console.info("Amount range per transaction: %s", amount);
-        console.info("        Legs per transaction: %s", legs);
-        console.info("     Max accounts per region: %d", accountLimit);
-        console.info("    Refresh balance interval: %ds", refreshIntervalSec);
+        console.info("Legs per transaction: %s", legs);
+        console.info("Max accounts per region: %d", accountLimit);
+        console.info("Refresh balance interval: %ds", refreshIntervalSec);
         console.info("Concurrency level per region: %d", concurrencyLevel);
-        console.info("          Execution duration: %s", duration);
+        console.info("Execution duration: %s", duration);
     }
 
     private void updateBalanceSnapshots(Map<String, List<AccountModel>> accounts) {

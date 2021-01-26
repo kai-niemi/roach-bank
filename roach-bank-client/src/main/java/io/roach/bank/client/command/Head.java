@@ -14,7 +14,7 @@ import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.util.TimeFormat;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_WORKLOAD_COMMANDS)
+@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class Head extends RestCommandSupport {
     @ShellMethod(value = "Send HEAD request to API root")
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)

@@ -57,6 +57,9 @@ public class AccountController {
     @Value("${roachbank.accountsPerRegionLimit}")
     private int accountsPerRegionLimit = 1000;
 
+    @Value("${roachbank.locality}")
+    private String locality;
+
     @Autowired
     private AccountController selfProxy;
 
@@ -120,7 +123,7 @@ public class AccountController {
             @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
             @PageableDefault(size = 5, direction = Sort.Direction.ASC) Pageable page) {
         if (regions.isEmpty()) {
-            regions = metadataRepository.getRegions();
+            regions = metadataRepository.getLocalRegions();
         }
 
         Set<String> resolvedRegions = metadataRepository.resolveRegions(regions).keySet();
@@ -162,7 +165,7 @@ public class AccountController {
     @TransactionBoundary(readOnly = true)
     public Set<String> resolveRegions(List<String> regions) {
         if (regions.isEmpty()) {
-            regions = metadataRepository.getRegions();
+            regions = metadataRepository.getLocalRegions();
         }
 
         Set<String> resolvedRegions = metadataRepository.resolveRegions(regions).keySet();

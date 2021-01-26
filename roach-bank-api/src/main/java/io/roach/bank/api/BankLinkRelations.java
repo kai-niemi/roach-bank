@@ -40,15 +40,14 @@ public abstract class BankLinkRelations {
 
     // Meta
 
-    public static final String REGION_NAME_REL = "region-name";
-
-    public static final String REGION_CONFIG_REL = "region-config";
 
     public static final String REGION_GROUPS_REL = "region-groups";
 
     public static final String REGION_CURRENCY_REL = "region-currency";
 
     public static final String REGIONS_REL = "regions";
+
+    public static final String LOCAL_REGIONS_REL = "local-regions";
 
     public static final String CURRENCIES_REL = "currencies";
 

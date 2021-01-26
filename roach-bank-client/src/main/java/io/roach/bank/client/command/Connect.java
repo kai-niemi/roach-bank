@@ -20,7 +20,7 @@ import io.roach.bank.client.support.ConnectionUpdatedEvent;
 import io.roach.bank.client.support.Console;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_COMMANDS)
+@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class Connect {
     public static final String DEFAULT_URL = "http://localhost:8090/api/";
 

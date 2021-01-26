@@ -55,7 +55,6 @@ public class GenerateCSV extends RestCommandSupport {
     ) throws IOException {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
-            console.warn("No matching regions found for: %s ", regions);
             return;
         }
 

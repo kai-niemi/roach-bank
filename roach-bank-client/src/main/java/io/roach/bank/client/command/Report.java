@@ -19,7 +19,7 @@ import static io.roach.bank.api.BankLinkRelations.TRANSACTION_SUMMARY_REL;
 public class Report extends RestCommandSupport {
     @ShellMethod(value = "Print account summary report")
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void accountSummary() {
+    public void reportAccounts() {
         ResponseEntity<List> accountSummary = traverson.fromRoot()
                 .follow(BankLinkRelations.withCurie(REPORTING_REL))
                 .follow(BankLinkRelations.withCurie(ACCOUNT_SUMMARY_REL))
@@ -31,7 +31,7 @@ public class Report extends RestCommandSupport {
 
     @ShellMethod(value = "Print transaction summary report")
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void transactionSummary() {
+    public void reportTransactions() {
         ResponseEntity<List> transactionSummary = traverson.fromRoot()
                 .follow(BankLinkRelations.withCurie(REPORTING_REL))
                 .follow(BankLinkRelations.withCurie(TRANSACTION_SUMMARY_REL))

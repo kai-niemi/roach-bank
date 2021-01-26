@@ -6,45 +6,34 @@
 
 title="CockroachDB single region deployment (AWS)"
 # CRDB release version
-releaseversion="v20.2.3"
+releaseversion="v20.2.4"
 # Number of node instances in total including clients
 nodes="12"
 # Nodes hosting CRDB
 crdbnodes="1-9"
-# Nodes hosting LB, client and server apps
-clientnodes="10-12"
-# Regional client nodes
-client1="10"
-client2="11"
-client3="12"
+# Array of client nodes (must match size of regions)
+clients=(10 11 12)
+# Array of client localities (must match partition names)
+localities=('eu-central-1' 'eu-central-1' 'eu-central-1')
 # AWS/GCE cloud (aws|gce)
-#cloud="aws"
 cloud="gce"
-# AWS/GCE region prefix
-region="eu-central-1"
-region1="eu-central-1a"
-region2="eu-central-1b"
-region3="eu-central-1c"
 # AWS/GCE region zones (must align with nodes size)
 zones="\
-${region}a,\
-${region}a,\
-${region}a,\
-${region}b,\
-${region}b,\
-${region}b,\
-${region}c,\
-${region}c,\
-${region}c,\
-${region}a,\
-${region}b,\
-${region}c"
+eu-central-1a,\
+eu-central-1a,\
+eu-central-1a,\
+eu-central-1b,\
+eu-central-1b,\
+eu-central-1b,\
+eu-central-1c,\
+eu-central-1c,\
+eu-central-1c,\
+eu-central-1a,\
+eu-central-1b,\
+eu-central-1c"
 # AWS/GCE machine types
 machinetypes="c5d.9xlarge"
-# Dry-run mode on|off
-dryrun=off
 
-# Bootstrap
 # DO NOT EDIT BELOW THIS LINE
 #############################
 

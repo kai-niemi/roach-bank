@@ -5,8 +5,9 @@ Deployment tutorial for setting up a full-stack Roach Bank demo using either a s
 ## Prerequisites
 
 - JDK8+ with 1.8 language level
-- [roachprod](https://github.com/cockroachdb/cockroach/tree/master/pkg/cmd/roachprod) - for AWS/GCE VM provisioning and setup
-
+- [Roachprod](https://github.com/cockroachdb/cockroach/tree/master/pkg/cmd/roachprod) - a Cockroach Labs internal
+  tool for ramping AWS/GCE VM clusters (you will need the AWS/GCE client SDK and an account)
+  
 ## Scripted Setup
  
 Clone, build and unpack:

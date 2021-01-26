@@ -1,5 +1,9 @@
          (o o)      (/   Welcome to text-only Roach Bank!
-         /'v'     ,-'    You are in a dark, indoor lobby (type help for commands)
- ,------/ >< \---'
-/)     ;  --  :          Active profiles: ${spring.profiles.active}
-   ,---| ---- |--.       Datasource URL: ${roachbank.datasource.url}
+         /'v'     ,-'    You are in a dark, indoor lobby.
+ ,------/ >< \---'       Type help for commands.
+/)     ;  --  :
+   ,---| ---- |--.
+
+Active spring profiles: ${spring.profiles.active}
+Datasource URL: ${roachbank.datasource.url}
+Bank locality: ${roachbank.locality}

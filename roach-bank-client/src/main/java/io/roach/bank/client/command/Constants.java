@@ -6,9 +6,7 @@ import org.springframework.hateoas.PagedModel;
 import io.roach.bank.api.AccountModel;
 
 public abstract class Constants {
-    public static final String API_COMMANDS = "General Commands";
-
-    public static final String API_WORKLOAD_COMMANDS = "Workload Commands";
+    public static final String API_MAIN_COMMANDS = "Main Commands";
 
     public static final String API_REPORTING_COMMANDS = "Reporting Commands";
 

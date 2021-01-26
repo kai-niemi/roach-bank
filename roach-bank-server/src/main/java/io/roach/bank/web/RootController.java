@@ -8,6 +8,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,13 +29,17 @@ public class RootController {
     @Autowired
     private CacheManager cacheManager;
 
-    @Value("${roachbank.region}")
-    private String region;
+    @Value("${roachbank.locality}")
+    private String locality;
 
     @GetMapping
     public String homePage(Model model) {
         model.addAttribute("randomFact", CockroachFacts.nextFact());
-        model.addAttribute("title", "Roach Bank " + region);
+        if (StringUtils.hasLength(locality)) {
+            model.addAttribute("title", "Roach Bank (" + locality + ")");
+        } else {
+            model.addAttribute("title", "Roach Bank");
+        }
         return "home";
     }
 

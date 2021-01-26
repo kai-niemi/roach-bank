@@ -77,7 +77,7 @@ public class TransactionFormController {
             throw new BadRequestException("Accounts per region must be a multiple of 2: " + accountsPerRegion);
         }
         if (regions.isEmpty()) {
-            regions = Collections.singletonList(RandomData.selectRandom(metadataRepository.getRegions()));
+            regions = Collections.singletonList(RandomData.selectRandom(metadataRepository.getLocalRegions()));
         }
 
         List<Account> accounts = new ArrayList<>();

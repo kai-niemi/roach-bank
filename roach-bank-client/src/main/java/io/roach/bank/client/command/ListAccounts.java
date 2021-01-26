@@ -25,7 +25,7 @@ import static io.roach.bank.api.BankLinkRelations.withCurie;
 import static io.roach.bank.client.command.Constants.ACCOUNT_MODEL_PTR;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_COMMANDS)
+@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class ListAccounts extends RestCommandSupport {
     @ShellMethod(value = "List accounts using pagination")
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
@@ -34,7 +34,6 @@ public class ListAccounts extends RestCommandSupport {
                              @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
-            console.warn("No matching regions found for: %s ", regions);
             return;
         }
 

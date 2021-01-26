@@ -1,15 +1,14 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -17,7 +16,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import io.roach.bank.annotation.TransactionMandatory;
-import io.roach.bank.api.RegionConfig;
 import io.roach.bank.repository.MetadataRepository;
 
 @Repository
@@ -29,10 +27,46 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    @Value("${roachbank.locality}")
+    private String locality;
+
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    }
+
+    @Override
+    public List<String> getLocalRegions() {
+        List<String> listValues;
+
+        if ("".equals(locality) || "all".equals(locality)) {
+            listValues = this.jdbcTemplate.query(
+                    "SELECT distinct(name),list_value FROM crdb_internal.partitions where name <> 'default'",
+                    (resultSet, i) -> {
+                        return resultSet.getString(2);
+                    });
+        } else {
+            listValues = this.jdbcTemplate.query(
+                    "SELECT list_value FROM crdb_internal.partitions WHERE name=?",
+                    (rs, rowNum) -> rs.getString(1),
+                    locality);
+        }
+
+        Set<String> filteredValues = new HashSet<>();
+
+        listValues.forEach(s -> {
+            List<String> p = Arrays.stream(
+                    s.split(",")).map(x -> x.trim().replaceAll("^\\('|'\\)$", ""))
+                    .collect(Collectors.toList());
+            filteredValues.addAll(p);
+        });
+
+        if (filteredValues.isEmpty()) {
+            filteredValues.addAll(getRegions());
+        }
+
+        return new ArrayList<>(filteredValues);
     }
 
     @Override
@@ -105,21 +139,6 @@ public class JdbcMetadataRepository implements MetadataRepository {
         return result;
     }
 
-    @Override
-    public List<RegionConfig> getRegionConfigs() {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        return this.namedParameterJdbcTemplate.query(
-                "SELECT name,currency FROM region_config GROUP BY name,currency",
-                parameters,
-                (rs, rowNum) -> {
-                    RegionConfig regionConfig = new RegionConfig();
-                    regionConfig.setRegion(rs.getString(1));
-                    regionConfig.setCurrency(Currency.getInstance(rs.getString(2)));
-                    regionConfig.setGroupNames(groupNamesByRegion(rs.getString(1)));
-                    return regionConfig;
-                });
-    }
-
     private List<String> regionsByCurrency(Currency currency) {
         return this.jdbcTemplate.query(
                 "SELECT name FROM region_config WHERE currency=? group by name",
@@ -131,13 +150,6 @@ public class JdbcMetadataRepository implements MetadataRepository {
         return this.jdbcTemplate.query(
                 "SELECT name FROM region_config WHERE group_name=? group by name",
                 new Object[] {group},
-                (rs, rowNum) -> rs.getString(1));
-    }
-
-    private List<String> groupNamesByRegion(String name) {
-        return this.jdbcTemplate.query(
-                "SELECT group_name FROM region_config WHERE name=?",
-                new Object[] {name},
                 (rs, rowNum) -> rs.getString(1));
     }
 }

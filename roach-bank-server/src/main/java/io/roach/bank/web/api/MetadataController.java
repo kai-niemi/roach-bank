@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.annotation.TransactionNotSupported;
 import io.roach.bank.api.BankLinkRelations;
-import io.roach.bank.api.RegionConfig;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.web.support.MessageModel;
 
@@ -34,8 +32,8 @@ public class MetadataController {
     @Autowired
     private MetadataRepository metadataRepository;
 
-    @Value("${roachbank.region}")
-    private String region;
+    @Value("${roachbank.locality}")
+    private String locality;
 
     @GetMapping
     public MessageModel index() {
@@ -64,21 +62,11 @@ public class MetadataController {
                 .withTitle("All regions"));
 
         index.add(linkTo(methodOn(getClass())
-                .getRegionConfigs())
-                .withRel(BankLinkRelations.REGION_CONFIG_REL)
-                .withTitle("All region mappings"));
-
-        index.add(linkTo(methodOn(getClass())
-                .regionName())
-                .withRel(BankLinkRelations.REGION_NAME_REL)
-                .withTitle("Local app region name"));
+                .localRegions())
+                .withRel(BankLinkRelations.LOCAL_REGIONS_REL)
+                .withTitle("Local regions"));
 
         return index;
-    }
-
-    @GetMapping(value = "/region")
-    public ResponseEntity<String> regionName() {
-        return ResponseEntity.ok(region);
     }
 
     @GetMapping(value = "/region-groups")
@@ -92,7 +80,7 @@ public class MetadataController {
     public Map<String, Currency> regionCurrency(
             @RequestParam(name = "regions", required = false, defaultValue = "") List<String> regions) {
         if (regions.isEmpty()) {
-            regions = metadataRepository.getRegions();
+            regions = metadataRepository.getLocalRegions();
         }
         return metadataRepository.resolveRegions(regions);
     }
@@ -109,9 +97,9 @@ public class MetadataController {
         return metadataRepository.getRegions();
     }
 
-    @GetMapping(value = "/region-config")
+    @GetMapping(value = "/local-regions")
     @TransactionBoundary(readOnly = true)
-    public List<RegionConfig> getRegionConfigs() {
-        return metadataRepository.getRegionConfigs();
+    public List<String> localRegions() {
+        return metadataRepository.getLocalRegions();
     }
 }

@@ -24,8 +24,8 @@ import io.roach.bank.client.util.TimeFormat;
 import static io.roach.bank.api.BankLinkRelations.withCurie;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_WORKLOAD_COMMANDS)
-public class ReadBalance extends RestCommandSupport {
+@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
+public class Balance extends RestCommandSupport {
     @ShellMethod(value = "Query account balances", key = {"b","balance"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void balance(
@@ -37,18 +37,15 @@ public class ReadBalance extends RestCommandSupport {
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
-            console.warn("No matching regions found for: %s ", regions);
+            return;
+        }
+        final Map<String, List<AccountModel>> accountMap = lookupAccounts(regionMap.keySet(), accountLimit);
+        if (accountMap.isEmpty()) {
             return;
         }
 
         final int concurrencyLevel = concurrency > 0 ? concurrency :
                 Math.max(1, Runtime.getRuntime().availableProcessors() * 2 / regionMap.size());
-
-        final Map<String, List<AccountModel>> accountMap = lookupAccounts(regionMap.keySet(), accountLimit);
-        if (accountMap.isEmpty()) {
-            console.warn("No accounts found for regions %s ", regionMap.keySet());
-            return;
-        }
 
         final List<Link> links = new ArrayList<>();
 
@@ -67,7 +64,6 @@ public class ReadBalance extends RestCommandSupport {
                         key)
                 ));
 
-        console.info(">> Balance workload started");
         console.info("Account regions: %s", regionMap.keySet());
         console.info("Max accounts per region: %d", accountLimit);
         console.info("Use follower reads: %s", followerReads);
