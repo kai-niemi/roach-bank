@@ -15,6 +15,8 @@ crdbnodes="1-9"
 clients=(10 11 12)
 # Array of client localities (must match partition names)
 localities=('eu-central-1' 'eu-central-1' 'eu-central-1')
+# Array of regions localities (must match zone names)
+regions=('eu-central-1' 'eu-central-1' 'eu-central-1')
 # AWS/GCE cloud (aws|gce)
 cloud="gce"
 # AWS/GCE region zones (must align with nodes size)

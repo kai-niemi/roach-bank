@@ -50,15 +50,18 @@ fn_failcheck roachprod admin --open --ips $CLUSTER:1
 i=0;
 for c in "${clients[@]}"
 do
-  locality=${localities[$i]}
+  region=${regions[$i]}
   i=($i+1)
 
-  fn_echo_info_nl "Deploying binaries to $locality.."
+  fn_echo_info_nl "Deploying binaries to $region.."
 
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq update'
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y haproxy'
-  fn_failcheck roachprod run ${CLUSTER}:$c "./cockroach gen haproxy --insecure --host $(roachprod ip $CLUSTER:1 --external) --locality=region=$locality"
+  fn_failcheck roachprod run ${CLUSTER}:$c "./cockroach gen haproxy --insecure --host $(roachprod ip $CLUSTER:1 --external) --locality=region=$region"
+  fn_failcheck roachprod run ${CLUSTER}:$c 'nohup haproxy -f haproxy.cfg > /dev/null 2>&1 &'
+
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-8-jre-headless'
+
   fn_failcheck roachprod put ${CLUSTER}:$c roach-bank.tar.gz
   fn_failcheck roachprod run ${CLUSTER}:$c 'tar xvf roach-bank.tar.gz'
 done
@@ -78,8 +81,6 @@ do
   i=($i+1)
 
   fn_echo_info_nl "Starting bank service in $locality.."
-
-  fn_failcheck roachprod run ${CLUSTER}:$c 'nohup haproxy -f haproxy.cfg > /dev/null 2>&1 &'
 
 if ((i > 1)); then
 fn_failcheck roachprod run $CLUSTER:$c <<EOF
