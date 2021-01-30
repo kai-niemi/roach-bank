@@ -3,7 +3,6 @@ package io.roach.bank.client.command;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
@@ -64,7 +63,7 @@ public class Metadata extends RestCommandSupport {
     public void regionCurrencies() {
         Map result = traverson.fromRoot()
                 .follow(BankLinkRelations.withCurie(META_REL))
-                .follow(BankLinkRelations.withCurie(REGION_CURRENCY_REL))
+                .follow(BankLinkRelations.withCurie(REGION_CURRENCIES_REL))
                 .toObject(Map.class);
         result.forEach((k, v) -> console.info(" %s -> %s", k, v));
     }

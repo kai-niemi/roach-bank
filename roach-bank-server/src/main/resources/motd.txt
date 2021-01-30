@@ -6,4 +6,4 @@
 
 Active spring profiles: ${spring.profiles.active}
 Datasource URL: ${roachbank.datasource.url}
-Bank locality: ${roachbank.locality}
+Bank server locality: ${roachbank.locality}

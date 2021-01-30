@@ -92,4 +92,4 @@ roachbank:
   accountsPerRegionLimit: 10
   # Locality for bank instance for region filtering (should match partition name in a multi-region deployment)
   # Ex: eu_south, us_central, us_east
-  locality:
+  locality: all

@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -65,11 +66,6 @@ public class IndexController {
                 .withRel(BankLinkRelations.REPORTING_REL)
                 .withTitle("Reporting resource details")
         );
-//        index.add(linkTo(methodOn(AdminController.class)
-//                .index())
-//                .withRel(BankLinkRelations.ADMIN_REL)
-//                .withTitle("Admin resource details")
-//        );
         index.add(linkTo(methodOn(MetadataController.class)
                 .index())
                 .withRel(BankLinkRelations.META_REL)
@@ -88,6 +84,46 @@ public class IndexController {
                         .toUriString()
         ).withRel(BankLinkRelations.ACTUATOR_REL)
                 .withTitle("Spring boot actuators"));
+
+        Arrays.asList(
+                "bank.events.lost",
+                "bank.events.queued",
+                "bank.events.sent",
+                "bank.txn.abort",
+                "bank.txn.retry",
+                "bank.txn.success",
+                "hikaricp.connections",
+                "hikaricp.connections.acquire",
+                "hikaricp.connections.active",
+                "hikaricp.connections.idle",
+                "hikaricp.connections.max",
+                "hikaricp.connections.usage",
+                "http.server.requests",
+                "jdbc.connections.active",
+                "jdbc.connections.idle",
+                "jdbc.connections.max",
+                "jdbc.connections.min",
+                "jetty.threads.busy",
+                "jetty.threads.current",
+                "jetty.threads.idle",
+                "jvm.memory.max",
+                "jvm.memory.used",
+                "jvm.threads.live",
+                "jvm.threads.peak",
+                "process.cpu.usage",
+                "system.cpu.count",
+                "system.cpu.usage",
+                "system.load.average.1m")
+                .forEach(key -> {
+                    index.add(Link.of(
+                            ServletUriComponentsBuilder
+                                    .fromCurrentContextPath()
+                                    .pathSegment("actuator", "metrics", key)
+                                    .buildAndExpand()
+                                    .toUriString()
+                    ).withRel(BankLinkRelations.ACTUATOR_REL)
+                            .withTitle("Metrics endpoint"));
+                });
 
         return ResponseEntity.ok(index);
     }

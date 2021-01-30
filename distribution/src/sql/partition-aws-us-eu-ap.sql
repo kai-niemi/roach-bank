@@ -39,8 +39,8 @@ ALTER INDEX transaction_type@idx_ap CONFIGURE ZONE USING
 
 ALTER TABLE account PARTITION BY LIST (region) (
     PARTITION us VALUES IN ('seattle','san francisco','los angeles','phoenix','minneapolis','chicago','detroit','atlanta','new york','boston','washington dc','miami'),
-    PARTITION eu VALUES IN ('stockholm','helsinki','oslo','london','frankfurt','amsterdam','paris','milano','madrid','athens'),
-    PARTITION ap VALUES IN ('singapore','hong kong','sydney'),
+    PARTITION eu VALUES IN ('stockholm','helsinki','oslo','london','frankfurt','amsterdam','milano','madrid','athens','barcelona'),
+    PARTITION ap VALUES IN ('singapore','hong kong','sydney','tokyo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
 
@@ -71,8 +71,8 @@ CONFIGURE ZONE USING
 ---------------------------------------------------------------
 ALTER TABLE transaction PARTITION BY LIST (region) (
     PARTITION us VALUES IN ('seattle','san francisco','los angeles','phoenix','minneapolis','chicago','detroit','atlanta','new york','boston','washington dc','miami'),
-    PARTITION eu VALUES IN ('stockholm','helsinki','oslo','london','frankfurt','amsterdam','paris','milano','madrid','athens'),
-    PARTITION ap VALUES IN ('singapore','hong kong','sydney'),
+    PARTITION eu VALUES IN ('stockholm','helsinki','oslo','london','frankfurt','amsterdam','milano','madrid','athens','barcelona'),
+    PARTITION ap VALUES IN ('singapore','hong kong','sydney','tokyo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
 
@@ -103,8 +103,8 @@ CONFIGURE ZONE USING
 
 ALTER TABLE transaction_item PARTITION BY LIST (transaction_region) (
     PARTITION us VALUES IN ('seattle','san francisco','los angeles','phoenix','minneapolis','chicago','detroit','atlanta','new york','boston','washington dc','miami'),
-    PARTITION eu VALUES IN ('stockholm','helsinki','oslo','london','frankfurt','amsterdam','paris','milano','madrid','athens'),
-    PARTITION ap VALUES IN ('singapore','hong kong','sydney'),
+    PARTITION eu VALUES IN ('stockholm','helsinki','oslo','london','frankfurt','amsterdam','milano','madrid','athens','barcelona'),
+    PARTITION ap VALUES IN ('singapore','hong kong','sydney','tokyo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
 

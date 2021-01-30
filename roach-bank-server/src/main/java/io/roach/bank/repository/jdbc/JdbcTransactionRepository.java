@@ -156,7 +156,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
                         id.getAccountRegion()
                 },
                 (rs, rowNum) -> readTransactionItem(rs));
-        return DataAccessUtils.singleResult(list);
+        return DataAccessUtils.requiredSingleResult(list);
     }
 
     private TransactionItem readTransactionItem(ResultSet rs) throws SQLException {

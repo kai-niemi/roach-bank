@@ -223,11 +223,12 @@ BankDashboard.prototype = {
         account.find('.amount').text(this.formatMoney(balance, currency));
 
         var original_color = this.boxColor(region, currency, balance);
-        account.css("background-color", "black");
+        account.css("background-color", "red");
+        account.css("color", "yellow");
 
         setTimeout( function(){
             account.css("background-color", original_color);
-        }, 800);
+        }, 1200);
     },
 
     handleAccountSummaryUpdate: function (accountSummary) {

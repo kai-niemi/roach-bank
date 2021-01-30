@@ -31,12 +31,13 @@ public class GenerateSQL extends RestCommandSupport {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accountPlanSQL(
             @ShellOption(help = "output path", defaultValue = ".") String output,
-            @ShellOption(help = "inital account balance in regional currency", defaultValue = "1000.00") String balance,
-            @ShellOption(help = "number of accounts per region", defaultValue = "500") int accountsPerRegion,
+            @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00") String balance,
+            @ShellOption(help = "number of accounts per region", defaultValue = "50") int accountsPerRegion,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) throws IOException {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
+            console.warn("No matching regions");
             return;
         }
 
@@ -52,8 +53,7 @@ public class GenerateSQL extends RestCommandSupport {
 
         try (BufferedWriter writer = Files
                 .newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            writer.write("-- Auto-generated @ " + LocalDateTime.now().toString() + "\n");
-            writer.write("-- balance per region: " + balance + "\n");
+            writer.write("-- balance per account: " + balance + "\n");
             writer.write("-- accounts per region: " + accountsPerRegion + "\n");
             writer.write("-- accounts total: " + accountsPerRegion * regionMap.size() + "\n");
             writer.write("-- regions: " + regionMap.keySet() + "\n");

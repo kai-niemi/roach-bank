@@ -7,16 +7,17 @@
 
     <changeSet id="1" author="root" context="db-psql">
         <validCheckSum>ANY</validCheckSum>
-        <sqlFile path="db/create/create-psql.sql"/>
-        <sqlFile path="db/load/load-metadata.sql"/>
-        <sqlFile path="db/load/load-accounts.sql"/>
+        <sqlFile path="db/psql/create-psql.sql"/>
+        <sqlFile path="db/load-metadata.sql"/>
+        <sqlFile path="db/load-accounts.sql"/>
     </changeSet>
 
     <changeSet id="2" author="root" context="db-crdb">
         <validCheckSum>ANY</validCheckSum>
-        <sqlFile path="db/create/create-crdb.sql"/>
-        <sqlFile path="db/load/load-locations.sql"/>
-        <sqlFile path="db/load/load-metadata.sql"/>
-        <sqlFile path="db/load/load-accounts.sql"/>
+        <sqlFile path="db/crdb/create-crdb.sql"/>
+        <sqlFile path="db/load-metadata.sql"/>
+        <sqlFile path="db/load-accounts.sql"/>
+        <sqlFile path="db/crdb/load-locations.sql"/>
+        <sqlFile path="db/crdb/cluster-settings.sql"/>
     </changeSet>
 </databaseChangeLog>

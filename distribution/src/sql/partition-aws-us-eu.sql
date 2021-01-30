@@ -34,7 +34,7 @@ ALTER INDEX transaction_type@idx_eu CONFIGURE ZONE USING
 ALTER TABLE account PARTITION BY LIST (region) (
     PARTITION us_west VALUES IN ('seattle','san francisco','los angeles','phoenix','minneapolis'),
     PARTITION us_east VALUES IN ('chicago','detroit','atlanta','new york','boston','washington dc','miami'),
-    PARTITION eu VALUES IN ('london','frankfurt','amsterdam','paris','milano','madrid','athens','stockholm','helsinki','oslo'),
+    PARTITION eu VALUES IN ('london','frankfurt','amsterdam','milano','madrid','athens','barcelona','stockholm','helsinki','oslo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
 
@@ -66,7 +66,7 @@ CONFIGURE ZONE USING
 ALTER TABLE transaction PARTITION BY LIST (region) (
     PARTITION us_west VALUES IN ('seattle','san francisco','los angeles','phoenix','minneapolis'),
     PARTITION us_east VALUES IN ('chicago','detroit','atlanta','new york','boston','washington dc','miami'),
-    PARTITION eu VALUES IN ('london','frankfurt','amsterdam','paris','milano','madrid','athens','stockholm','helsinki','oslo'),
+    PARTITION eu VALUES IN ('london','frankfurt','amsterdam','milano','madrid','athens','barcelona','stockholm','helsinki','oslo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
 
@@ -98,7 +98,7 @@ CONFIGURE ZONE USING
 ALTER TABLE transaction_item PARTITION BY LIST (transaction_region) (
     PARTITION us_west VALUES IN ('seattle','san francisco','los angeles','phoenix','minneapolis'),
     PARTITION us_east VALUES IN ('chicago','detroit','atlanta','new york','boston','washington dc','miami'),
-    PARTITION eu VALUES IN ('london','frankfurt','amsterdam','paris','milano','madrid','athens','stockholm','helsinki','oslo'),
+    PARTITION eu VALUES IN ('london','frankfurt','amsterdam','milano','madrid','athens','barcelona','stockholm','helsinki','oslo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
 

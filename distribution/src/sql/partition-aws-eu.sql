@@ -1,5 +1,6 @@
 -- Geo-partitioning schema configuration for:
 -- region1="eu-central-1"
+-- region2="eu-west-1"
 -- region2="eu-west-2"
 -- region3="eu-west-3"
 
@@ -32,8 +33,8 @@ ALTER INDEX transaction_type@idx_eu_south CONFIGURE ZONE USING
 ---------------------------------------------------------------
 
 ALTER TABLE account PARTITION BY LIST (region) (
-    PARTITION eu_west VALUES IN ('london','amsterdam'),
-    PARTITION eu_south VALUES IN ('paris','milano','madrid','athens'),
+    PARTITION eu_west VALUES IN ('london','amsterdam','manchester','paris'),
+    PARTITION eu_south VALUES IN ('milano','madrid','athens','barcelona'),
     PARTITION eu_central VALUES IN ('frankfurt','stockholm','helsinki','oslo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
@@ -64,8 +65,8 @@ CONFIGURE ZONE USING
 -- TRANSACTION
 ---------------------------------------------------------------
 ALTER TABLE transaction PARTITION BY LIST (region) (
-    PARTITION eu_west VALUES IN ('london','amsterdam'),
-    PARTITION eu_south VALUES IN ('paris','milano','madrid','athens'),
+    PARTITION eu_west VALUES IN ('london','amsterdam','manchester','paris'),
+    PARTITION eu_south VALUES IN ('milano','madrid','athens','barcelona'),
     PARTITION eu_central VALUES IN ('frankfurt','stockholm','helsinki','oslo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );
@@ -96,8 +97,8 @@ CONFIGURE ZONE USING
 ---------------------------------------------------------------
 
 ALTER TABLE transaction_item PARTITION BY LIST (transaction_region) (
-    PARTITION eu_west VALUES IN ('london','amsterdam'),
-    PARTITION eu_south VALUES IN ('paris','milano','madrid','athens'),
+    PARTITION eu_west VALUES IN ('london','amsterdam','manchester','paris'),
+    PARTITION eu_south VALUES IN ('milano','madrid','athens','barcelona'),
     PARTITION eu_central VALUES IN ('frankfurt','stockholm','helsinki','oslo'),
     PARTITION DEFAULT VALUES IN (DEFAULT)
     );

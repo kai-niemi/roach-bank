@@ -60,7 +60,7 @@ public abstract class RestCommandSupport {
 
         Objects.requireNonNull(traverson.fromRoot()
                 .follow(withCurie(META_REL))
-                .follow(withCurie(REGION_CURRENCY_REL))
+                .follow(withCurie(REGION_CURRENCIES_REL))
                 .withTemplateParameters(parameters)
                 .toObject(Map.class))
                 .forEach((k, v) -> result.put(

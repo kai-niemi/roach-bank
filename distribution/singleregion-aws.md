@@ -135,7 +135,7 @@ Optionally wait for other services to start:
 
 ## Generate load
 
-See [Data Import](../docs/import.md) for larger data volumes.
+See [Data Import](import.md) for larger data volumes.
 
 Transfer money across US accounts on first client:
 

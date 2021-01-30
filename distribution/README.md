@@ -22,7 +22,7 @@ Run the appropriate script, for instance:
 
     ./multiregion-aws-eu.sh
 
-See separate [README](src/script/README.md) for how to start the server and client if needed.
+See separate [README](src/README.md) for how to start the server and client if needed.
 
 ## Manual Setup
 

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
@@ -55,10 +54,7 @@ public class AccountController {
     private int queryTimeout = 60;
 
     @Value("${roachbank.accountsPerRegionLimit}")
-    private int accountsPerRegionLimit = 1000;
-
-    @Value("${roachbank.locality}")
-    private String locality;
+    private int accountsPerRegionLimit;
 
     @Autowired
     private AccountController selfProxy;
@@ -82,25 +78,20 @@ public class AccountController {
         index.add(linkTo(methodOn(AccountController.class)
                 .index()).withSelfRel());
 
-        index.add(Link.of(UriTemplate.of(linkTo(AccountController.class)
-                        .toUriComponentsBuilder().path(
-                        "/list/{?page,size,regions}")  // RFC-6570 template
-                        .build().toUriString()),
-                BankLinkRelations.ACCOUNT_LIST_REL
-        ).withTitle("Collection page of accounts"));
+        index.add(linkTo(methodOn(AccountController.class)
+                .listAccountsPerRegion(null, null, null))
+                .withRel(BankLinkRelations.ACCOUNT_LIST_REL
+                ).withTitle("Collection of accounts by page"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listAccountsPerRegion(Collections.emptyList(),
-                        PageRequest.of(0, 5, Sort.Direction.DESC, "id")))
+                .listAccountsPerRegion(Collections.emptyList(), 0, 5))
                 .withRel(BankLinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("First collection page of accounts"));
 
-        index.add(Link.of(UriTemplate.of(linkTo(AccountController.class)
-                        .toUriComponentsBuilder().path(
-                        "/top/{?regions,limit}")  // RFC-6570 template
-                        .build().toUriString()),
-                BankLinkRelations.ACCOUNT_TOP
-        ).withTitle("Collection of top accounts grouped by region"));
+        index.add(linkTo(methodOn(AccountController.class)
+                .listTopAccountsPerRegion(null, null))
+                .withRel(BankLinkRelations.ACCOUNT_TOP
+                ).withTitle("Collection of top accounts grouped by region"));
 
         index.add(linkTo(methodOn(AccountFormController.class)
                 .getAccountForm())
@@ -112,7 +103,7 @@ public class AccountController {
                         "/batch/{?region,prefix,batchSize}")  // RFC-6570 template
                         .build().toUriString()),
                 BankLinkRelations.ACCOUNT_BATCH_REL
-        ).withTitle("Account batch (POST)"));
+        ).withTitle("Account creation batch"));
 
         return index;
     }
@@ -121,25 +112,20 @@ public class AccountController {
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
     public PagedModel<AccountModel> listAccountsPerRegion(
             @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
-            @PageableDefault(size = 5, direction = Sort.Direction.ASC) Pageable page) {
-        if (regions.isEmpty()) {
-            regions = metadataRepository.getLocalRegions();
-        }
-
+            @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
+            @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
+//            @PageableDefault(size = 5, direction = Sort.Direction.ASC) Pageable page) {
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         Set<String> resolvedRegions = metadataRepository.resolveRegions(regions).keySet();
-        if (resolvedRegions.isEmpty()) {
-            throw new MetadataException("No matching regions: " + regions);
-        }
-
         return pagedResourcesAssembler
-                .toModel(accountRepository.findAccountPage(resolvedRegions, page), accountResourceAssembler);
+                .toModel(accountRepository.findAccountPage(resolvedRegions, pageable), accountResourceAssembler);
     }
 
     @GetMapping(value = "/top")
     @TransactionNotSupported
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccountsPerRegion(
             @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
-            @RequestParam(value = "limit", defaultValue = "-1", required = false) int limit
+            @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
         final int limitFinal = limit <= 0 ? this.accountsPerRegionLimit : limit;
 
@@ -164,16 +150,7 @@ public class AccountController {
 
     @TransactionBoundary(readOnly = true)
     public Set<String> resolveRegions(List<String> regions) {
-        if (regions.isEmpty()) {
-            regions = metadataRepository.getLocalRegions();
-        }
-
-        Set<String> resolvedRegions = metadataRepository.resolveRegions(regions).keySet();
-        if (resolvedRegions.isEmpty()) {
-            throw new MetadataException("No regions resolved: " + regions);
-        }
-
-        return resolvedRegions;
+        return metadataRepository.resolveRegions(regions).keySet();
     }
 
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))

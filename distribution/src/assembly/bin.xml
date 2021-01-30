@@ -20,6 +20,13 @@
     </dependencySets>
     <fileSets>
         <fileSet>
+            <directory>${project.basedir}/src</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>*.md</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>${project.basedir}/src/script</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
@@ -28,14 +35,8 @@
             <fileMode>0775</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${maven.multiModuleProjectDirectory}/roach-bank-server/src/main/resources/db/partition</directory>
-            <outputDirectory>sql/</outputDirectory>
-            <includes>
-                <include>**</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${maven.multiModuleProjectDirectory}/roach-bank-server/src/main/resources/db/import</directory>
+            <directory>${project.basedir}/src/sql</directory>
+<!--            <directory>${maven.multiModuleProjectDirectory}/roach-bank-server/src/main/resources/db/partition</directory>-->
             <outputDirectory>sql/</outputDirectory>
             <includes>
                 <include>**</include>

@@ -8,9 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.UriTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,9 +29,6 @@ public class MetadataController {
     @Autowired
     private MetadataRepository metadataRepository;
 
-    @Value("${roachbank.locality}")
-    private String locality;
-
     @GetMapping
     public MessageModel index() {
         MessageModel index = new MessageModel();
@@ -44,12 +38,10 @@ public class MetadataController {
                 .withRel(BankLinkRelations.REGION_GROUPS_REL)
                 .withTitle("Region group aliases"));
 
-        index.add(Link.of(UriTemplate.of(linkTo(MetadataController.class)
-                        .toUriComponentsBuilder().path(
-                        "/region-currency/{?regions}")  // RFC-6570 template
-                        .build().toUriString()),
-                BankLinkRelations.REGION_CURRENCY_REL
-        ).withTitle("Region currency"));
+        index.add(linkTo(methodOn(getClass())
+                .regionCurrency(null))
+                .withRel(BankLinkRelations.REGION_CURRENCIES_REL)
+                .withTitle("Region currencies"));
 
         index.add(linkTo(methodOn(getClass())
                 .allCurrencies())
@@ -79,9 +71,6 @@ public class MetadataController {
     @TransactionBoundary(readOnly = true)
     public Map<String, Currency> regionCurrency(
             @RequestParam(name = "regions", required = false, defaultValue = "") List<String> regions) {
-        if (regions.isEmpty()) {
-            regions = metadataRepository.getLocalRegions();
-        }
         return metadataRepository.resolveRegions(regions);
     }
 

@@ -43,7 +43,7 @@ public abstract class BankLinkRelations {
 
     public static final String REGION_GROUPS_REL = "region-groups";
 
-    public static final String REGION_CURRENCY_REL = "region-currency";
+    public static final String REGION_CURRENCIES_REL = "region-currency";
 
     public static final String REGIONS_REL = "regions";
 

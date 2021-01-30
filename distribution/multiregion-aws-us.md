@@ -171,7 +171,7 @@ If you later want to remove the partitions, execute:
 After this stage, there will be 3 clients and 3 servers producing transactions concurrently from
 different parts of the US.
 
-See [Data Import](../docs/import.md) for larger data volumes.
+See [Data Import](import.md) for larger data volumes.
 
 ## Generating load
 

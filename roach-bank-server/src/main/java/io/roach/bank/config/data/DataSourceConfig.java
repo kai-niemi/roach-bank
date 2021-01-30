@@ -1,7 +1,5 @@
 package io.roach.bank.config.data;
 
-import java.util.concurrent.TimeUnit;
-
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -34,7 +32,8 @@ public class DataSourceConfig {
     @Bean
     @ConfigurationProperties("roachbank.datasource.configuration")
     public HikariDataSource primaryDataSource() {
-        return dataSourceProperties().initializeDataSourceBuilder().type(HikariDataSource.class).build();
+        return dataSourceProperties().initializeDataSourceBuilder()
+                .type(HikariDataSource.class).build();
     }
 
     @Bean
@@ -42,6 +41,9 @@ public class DataSourceConfig {
     @ConfigurationProperties("roachbank.datasource")
     public DataSource proxiedDataSource(HikariDataSource dataSource) {
         logger.info("Connection pool max size: {}", dataSource.getMaximumPoolSize());
+        logger.info("Connection pool idle timeout: {}", dataSource.getIdleTimeout());
+        logger.info("Connection pool max lifetime: {}", dataSource.getMaxLifetime());
+        logger.info("Connection pool validation timeout: {}", dataSource.getValidationTimeout());
 
         if (logger.isDebugEnabled()) {
             ChainListener listener = new ChainListener();

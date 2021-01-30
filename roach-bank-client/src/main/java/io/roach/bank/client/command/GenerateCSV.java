@@ -46,15 +46,16 @@ public class GenerateCSV extends RestCommandSupport {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accountPlanCSV(
             @ShellOption(help = "file destination path", defaultValue = ".") String destination,
-            @ShellOption(help = "inital account balance in regional currency", defaultValue = "1000.00") String initialBalance,
+            @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00") String initialBalance,
             @ShellOption(help = "number of CSV files per table", defaultValue = "8") int numFiles,
-            @ShellOption(help = "number of accounts per region", defaultValue = "1000") int accountsPerRegion,
+            @ShellOption(help = "number of accounts per region", defaultValue = "500") int accountsPerRegion,
             @ShellOption(help = "number of transactions per account", defaultValue = "1") int transactionsPerAccount,
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2") int legsPerTransaction,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) throws IOException {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
+            console.warn("No matching regions");
             return;
         }
 

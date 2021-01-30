@@ -99,17 +99,12 @@ public class AccountFormController {
     @PostMapping(value = "/batch")
     @TransactionBoundary
     public HttpEntity<Void> submitAccountBatch(
-            @RequestParam(value = "region") String region,
+            @RequestParam(value = "region", defaultValue = "") String region,
             @RequestParam(value = "prefix", defaultValue = "gen") String prefix,
-            @RequestParam(value = "batchSize", defaultValue = "250") int batchSize
+            @RequestParam(value = "batchSize", defaultValue = "250") Integer batchSize
     ) {
         Currency currency = metadataRepository.getRegionCurrency(region);
-        if (currency == null) {
-            throw new MetadataException("No matching region: " + region);
-        }
-
         accountRepository.createAccountBatch(region, currency, sequence -> (prefix + "-" + sequence), batchSize);
-
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

@@ -56,7 +56,7 @@ public class AccountChangePublisher {
         eventsSent = meterRegistry.counter("bank.events.sent");
 
         // Outbound rate limiter
-        final RateLimiter rateLimiter = RateLimiter.create(4);
+        final RateLimiter rateLimiter = RateLimiter.create(2);
 
         // Drain events and push in batches
         taskScheduler.execute(() -> {

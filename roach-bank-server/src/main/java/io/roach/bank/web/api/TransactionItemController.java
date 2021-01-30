@@ -42,9 +42,8 @@ public class TransactionItemController {
             @PageableDefault(size = 5) Pageable page) {
         Page<TransactionItem> entities = transactionService.findItemsByTransactionId(
                 Transaction.Id.of(transactionId, region), page);
-        PagedModel<TransactionItemModel> resources = transactionItemPagedResourcesAssembler
+        return transactionItemPagedResourcesAssembler
                 .toModel(entities, transactionItemResourceAssembler);
-        return resources;
     }
 
     @GetMapping(value = "/{transactionId}/{transactionRegion}/{accountId}/{accountRegion}")
@@ -57,10 +56,6 @@ public class TransactionItemController {
         TransactionItem.Id id = TransactionItem.Id.of(
                 Account.Id.of(accountId, accountRegion),
                 Transaction.Id.of(transactionId, transactionRegion));
-        TransactionItem entity = transactionService.getItemById(id);
-        if (entity == null) {
-            throw new IllegalArgumentException("Transaction item not found: " + id);
-        }
-        return transactionItemResourceAssembler.toModel(entity);
+        return transactionItemResourceAssembler.toModel(transactionService.getItemById(id));
     }
 }

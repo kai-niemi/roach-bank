@@ -151,7 +151,7 @@ public class SavepointTransactionalAspect {
                                           ProceedingJoinPoint pjp, AtomicLong backoffMillis) {
         if (logger.isWarnEnabled()) {
             logger.warn("Transient data access exception (" + numAttempts + " of max " + totalAttempts + ") "
-                    + "detected (retry in " + backoffMillis + " ms) "
+                    + " (retry in " + backoffMillis + " ms) "
                     + "in method '" + pjp.getSignature().toShortString() + "': " + ex.getMessage());
         }
         if (backoffMillis.get() >= 0) {

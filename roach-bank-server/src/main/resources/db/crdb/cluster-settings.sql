@@ -1,4 +1,5 @@
-SET CLUSTER SETTING kv.rangefeed.enabled = true;
+SET CLUSTER SETTING kv.rangefeed.enabled = false;
+SET CLUSTER SETTING kv.range_merge.queue_enabled = false;
 SET CLUSTER SETTING kv.snapshot_rebalance.max_rate = '128 MiB';
 SET CLUSTER SETTING sql.defaults.vectorize_row_count_threshold = 100;
 SET CLUSTER SETTING sql.metrics.statement_details.plan_collection.period = '1m';

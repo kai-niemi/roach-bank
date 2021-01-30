@@ -37,18 +37,14 @@ import io.roach.bank.api.support.LocalDateTimeSerializer;
         KafkaAutoConfiguration.class,
         ErrorMvcAutoConfiguration.class
 })
-@EnableJpaRepositories(basePackages = {"io.roach"})
-@EnableAsync
-@EnableScheduling
 @EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableJpaRepositories(basePackages = {"io.roach"})
 @ComponentScan(basePackages = "io.roach")
 @ServletComponentScan
 public class Application {
     @Bean
     public Module module() {
         SimpleModule module = new SimpleModule("RoachBankModule", new Version(1, 0, 0, null, null, null));
-//        module.addSerializer(Money.class, new MoneySerializer());
-//        module.addDeserializer(Money.class, new MoneyDeserializer());
         module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
         module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
         module.addSerializer(LocalDate.class, new LocalDateSerializer());

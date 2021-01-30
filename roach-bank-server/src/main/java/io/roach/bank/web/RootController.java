@@ -35,10 +35,10 @@ public class RootController {
     @GetMapping
     public String homePage(Model model) {
         model.addAttribute("randomFact", CockroachFacts.nextFact());
-        if (StringUtils.hasLength(locality)) {
-            model.addAttribute("title", "Roach Bank (" + locality + ")");
-        } else {
+        if ("".equals(locality) || "all".equals(locality)) {
             model.addAttribute("title", "Roach Bank");
+        } else {
+            model.addAttribute("title", "Roach Bank (" + locality + ")");
         }
         return "home";
     }

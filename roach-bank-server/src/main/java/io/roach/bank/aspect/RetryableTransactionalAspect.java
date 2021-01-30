@@ -124,7 +124,7 @@ public class RetryableTransactionalAspect {
         try {
             long backoffMillis = Math.min((long) (Math.pow(2, numCalls) + Math.random() * 1000), maxBackoff);
             if (numCalls <= 1 && logger.isWarnEnabled()) {
-                logger.warn("Transient error detected (backoff {}ms) in call {} to '{}': {}",
+                logger.warn("Transient error (backoff {}ms) in call {} to '{}': {}",
                         backoffMillis, numCalls, method, ex.getMessage());
             }
             Thread.sleep(backoffMillis);

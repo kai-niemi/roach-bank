@@ -119,10 +119,10 @@ public class ThrottledExecutor {
                         if (logger.isWarnEnabled()) {
                             if (e instanceof HttpStatusCodeException) {
                                 HttpStatus status = ((HttpStatusCodeException) e).getStatusCode();
-                                logger.warn("HTTP status {} detected (backoff {}ms) in call #{} to '{}': {}",
+                                logger.warn("HTTP status {} (backoff {}ms) in call #{} to '{}': {}",
                                         status, backoffMillis, callCount, groupName, e.getMessage());
                             } else {
-                                logger.warn("HTTP resource exception detected (backoff {}ms) in call #{} to '{}': {}",
+                                logger.warn("HTTP resource exception (backoff {}ms) in call #{} to '{}': {}",
                                         backoffMillis, callCount, groupName, e.getMessage());
                             }
                         }

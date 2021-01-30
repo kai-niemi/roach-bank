@@ -18,7 +18,7 @@ localities=('eu-central-1' 'eu-central-1' 'eu-central-1')
 # Array of regions localities (must match zone names)
 regions=('eu-central-1' 'eu-central-1' 'eu-central-1')
 # AWS/GCE cloud (aws|gce)
-cloud="gce"
+cloud="aws"
 # AWS/GCE region zones (must align with nodes size)
 zones="\
 eu-central-1a,\
@@ -34,7 +34,7 @@ eu-central-1a,\
 eu-central-1b,\
 eu-central-1c"
 # AWS/GCE machine types
-machinetypes="c5d.9xlarge"
+machinetypes="c5d.4xlarge"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################

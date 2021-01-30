@@ -63,7 +63,7 @@ do
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-8-jre-headless'
 
   fn_failcheck roachprod put ${CLUSTER}:$c roach-bank.tar.gz
-  fn_failcheck roachprod run ${CLUSTER}:$c 'tar xvf roach-bank.tar.gz'
+  fn_failcheck roachprod run ${CLUSTER}:$c "tar xvfz roach-bank.tar.gz --exclude='*.sh'"
 done
 
 #################################################

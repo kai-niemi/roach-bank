@@ -173,7 +173,7 @@ If you later want to remove the partitions, execute:
 After this stage, there will be 3 clients and 3 servers producing transactions concurrently from
 different continents across the world.
 
-See [Data Import](../docs/import.md) for larger data volumes.
+See [Data Import](import.md) for larger data volumes.
 
 ### Generate money transfer across US accounts: 
 

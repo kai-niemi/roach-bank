@@ -24,16 +24,13 @@ roachbank:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: root
-    hikari:
-      register-mbeans: false
-      initialization-fail-timeout: 30
+    configuration:
       pool-name: roach-bank
       connection-init-sql: SELECT 1
       connection-timeout: 30000
-      validation-timeout: 10000
-      # 36vcpu x 9 baseline, 1 client
-      maximum-pool-size: 1300
-      # should be same as maximum-pool-size
-      minimum-idle: 1300
+      validation-timeout: 20000
+      # 36vcpu x 9 nodes x 4 / 3 instances
+      maximum-pool-size: 430
+      minimum-idle: 110
       # Required for PSQL
       transaction-isolation: TRANSACTION_SERIALIZABLE
