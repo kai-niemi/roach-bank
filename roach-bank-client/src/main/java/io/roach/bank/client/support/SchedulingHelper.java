@@ -16,8 +16,7 @@ public class SchedulingHelper {
 
     @PostConstruct
     public void init() {
-        this.scheduledExecutorService = Executors
-                .newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @PreDestroy

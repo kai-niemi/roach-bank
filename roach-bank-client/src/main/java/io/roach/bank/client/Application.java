@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import org.jline.reader.History;
 import org.jline.reader.LineReader;
@@ -32,7 +31,6 @@ import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.shell.jline.PromptProvider;
 import org.springframework.util.StringUtils;
 
-import io.roach.bank.client.command.Constants;
 import io.roach.bank.client.support.ConnectionUpdatedEvent;
 
 @SpringBootApplication
@@ -64,9 +62,7 @@ public class Application implements PromptProvider {
     @Bean
     @Lazy
     public History history(LineReader lineReader, @Value("${roachbank.history.file}") String historyPath) {
-        if (!Constants.DISABLED.equals(historyPath)) {
-            lineReader.setVariable(LineReader.HISTORY_FILE, Paths.get(historyPath));
-        }
+        lineReader.setVariable(LineReader.HISTORY_FILE, Paths.get(historyPath));
         return new DefaultHistory(lineReader);
     }
 
