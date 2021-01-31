@@ -1,6 +1,6 @@
 logging:
   file:
-    name: roach-bank-client.log
+    name: client.log
   max-history: 3
 spring:
   output:
@@ -8,7 +8,7 @@ spring:
       enabled: always
 roachbank:
   history:
-    file: roach-bank-history.log
+    file: .clienthistory
   http:
     # Total concurrent http connections
     maxTotal: -1

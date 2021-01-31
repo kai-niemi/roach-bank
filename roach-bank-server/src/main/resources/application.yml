@@ -37,7 +37,7 @@ spring:
 #############################
 logging:
   file:
-    name: roach-bank-server.log
+    name: server.log
   logback:
     rollingpolicy:
       max-history: 3

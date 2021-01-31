@@ -29,8 +29,8 @@ public class GenerateSQL extends RestCommandSupport {
 
     @ShellMethod(value = "Generate account plan in SQL format", key = {"gen-sql"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void accountPlanSQL(
-            @ShellOption(help = "output path", defaultValue = ".") String output,
+    public void generateSQL(
+            @ShellOption(help = "output path", defaultValue = ".data") String output,
             @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00") String balance,
             @ShellOption(help = "number of accounts per region", defaultValue = "50") int accountsPerRegion,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
