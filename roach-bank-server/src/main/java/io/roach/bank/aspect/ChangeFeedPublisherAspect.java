@@ -34,7 +34,7 @@ public class ChangeFeedPublisherAspect {
 
     @PostConstruct
     public void init() {
-        logger.info("Bootstrapping AOP change feed publisher.");
+        logger.info("Bootstrapping AOP change feed publisher");
     }
 
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")

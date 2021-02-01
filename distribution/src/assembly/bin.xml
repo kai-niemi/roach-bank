@@ -20,13 +20,6 @@
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/src</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>*.md</include>
-            </includes>
-        </fileSet>
-        <fileSet>
             <directory>${project.basedir}/src/script</directory>
             <outputDirectory>/</outputDirectory>
             <includes>

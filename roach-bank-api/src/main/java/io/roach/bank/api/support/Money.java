@@ -7,9 +7,6 @@ import java.util.Currency;
 
 import javax.persistence.Embeddable;
 
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.roach.bank.api.CurrencyMismatchException;
@@ -54,10 +51,14 @@ public class Money implements Serializable, Comparable<Money> {
             throw new NullPointerException("currency is null");
         }
         if (amount.scale() != currency.getDefaultFractionDigits()) {
-            throw new IllegalArgumentException("Wrong number of fraction digits for currency: "
-                    + currency.getCurrencyCode() + "(" + currency.getDisplayName() + "): "
-                    + amount.scale()
-                    + " != " + currency.getDefaultFractionDigits() + " for " + amount);
+            if (currency.getDefaultFractionDigits() == 0) {
+                amount = amount.setScale(0, RoundingMode.DOWN);
+            } else {
+                throw new IllegalArgumentException("Wrong number of fraction digits for currency: "
+                        + currency.getCurrencyCode() + "(" + currency.getDisplayName() + "): "
+                        + amount.scale()
+                        + " != " + currency.getDefaultFractionDigits() + " for " + amount);
+            }
         }
         this.amount = amount;
         this.currency = currency;

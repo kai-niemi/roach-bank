@@ -27,7 +27,7 @@ import static io.roach.bank.api.BankLinkRelations.*;
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class CreateAccounts extends RestCommandSupport {
-    @ShellMethod(value = "Create accounts", key = {"create-accounts"})
+    @ShellMethod(value = "Create accounts", key = {"create"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void createAccounts(
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,

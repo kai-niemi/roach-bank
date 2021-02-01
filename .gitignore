@@ -6,6 +6,7 @@ target/
 *.iws
 .DS_Store
 .DS_Store?
+.clienthistory
 Thumbs.db
 *.csv
 *.log

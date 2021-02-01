@@ -49,9 +49,9 @@ public class TransactionHintsAspect {
         enterpriseLicenseFound = StringUtils.hasLength(license);
 
         if (enterpriseLicenseFound) {
-            logger.info("Bootstrapping transaction hints aspect. Enterprise License found [{}]", license);
+            logger.info("Bootstrapping Transaction Hints (enterprise license: {})", license);
         } else {
-            logger.info("Bootstrapping transaction hints aspect. No Enterprise License found");
+            logger.info("Bootstrapping Transaction Hints (no enterprise license)");
         }
     }
 

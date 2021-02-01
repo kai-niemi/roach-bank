@@ -31,7 +31,7 @@ public class KafkaChangeFeedConsumer {
 
     @PostConstruct
     public void init() {
-        logger.info("Bootstrapping Kafka CDC-sink change feed publisher.");
+        logger.info("Bootstrapping Kafka CDC-sink change feed publisher");
     }
 
     @KafkaListener(topics = TOPIC_ACCOUNTS, containerFactory = "accountListenerContainerFactory")

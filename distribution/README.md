@@ -20,25 +20,79 @@ Clone, build and unpack:
 
 Run the appropriate script, for instance:
 
-    ./multiregion-aws-eu.sh
-
-See separate [README](src/README.md) for how to start the server and client if needed.
+    ./aws-multiregion-eu.sh
 
 ## Manual Setup
-
+    
 Pick your poison:
 
-- [Single-Region Setup (EU)](singleregion-aws.md) - Setting up a cluster in single region in EU
-- [Multi-Region Setup (US-EU-APAC)](multiregion-aws-eu-us-ap.md) - Setting up a world-wide cluster spanning 3 regions (US, EU and APAC)   
-- [Multi-Region Setup  (US)](multiregion-aws-us.md) - Setting up a cluster spanning 3 regions in US  
+- [AWS Single-Region Setup (EU)](aws-singleregion.md) - Setting up a cluster in single region in EU
+- [AWS Multi-Region Setup (US-EU-APAC)](aws-multiregion-eu-us-ap.md) - Setting up a world-wide cluster spanning 3 regions (US, EU and APAC)   
+- [AWS Multi-Region Setup  (US)](aws-multiregion-us.md) - Setting up a cluster spanning 3 regions in US  
 
-## Appendix
+## Demo Instructions
+
+Commands to run on client VMs.
+
+### Starting the Server
+
+    ./roach-bank-server.jar
+
+With custom params:
+
+    ./roach-bank-server.jar
+    --spring.datasource.hikari.maximum-pool-size=300
+    --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable
+    --spring.datasource.username=root
+    --spring.datasource.password=..
+    --spring.liquibase.enabled=true
+    --spring.profiles.active=db-crdb,retry-backoff,cdc-aop
+    --server.port=8090
+
+### Starting the Client
+
+    ./roach-bank-client.jar
+
+Connect to localhost:
+
+    connect
+
+Command examples:
+
+    help
+    transfer --regions us_west
+    transfer --regions us_east,eu_west --amount-range 5.00-15:00 --duration 90m
+    balance --duration 15m30s --follower-reads
+
+### Global Workload
+
+In a multi-region setup, try to target the regions that are local to each client:
+
+    roachprod run cluster-name:10
+    ./roach-bank-client.jar connect
+    transfer
+
+Corresponding for EU:
+
+    roachprod run cluster-name:11
+    ./roach-bank-client.jar connect
+    transfer
+
+APAC:
+
+    roachprod run cluster-name:12
+    ./roach-bank-client.jar connect
+    transfer
+
+Type `help` for additional guidance.
+
+# Appendix
 
 Common high-level deployment view of single-region deployments.
 
-![](diagram_singleregion.png)
+![](singleregion.png)
 
 Common high-level deployment view of multi-region deployments.
 
-![](diagram_multiregion.png)
+![](multiregion.png)
 
