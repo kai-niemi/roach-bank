@@ -52,7 +52,7 @@ fn_print_info "Extracting pom.xml project version"
 # The current version
 pomVersion=$(echo 'VERSION=${project.version}' | mvn help:evaluate | grep '^VERSION=' | sed 's/^VERSION=//g')
 # The version to be released
-releaseVersion="$(fn_filter_version ${pomVersion}).RELEASE"
+releaseVersion="$(fn_filter_version ${pomVersion})"
 # The next development version
 developmentVersion="$(fn_advance_version ${pomVersion}).BUILD-SNAPSHOT"
 
