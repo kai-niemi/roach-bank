@@ -1,10 +1,7 @@
 spring:
   main:
     banner-mode: off
-  liquibase:
-    contexts: db-crdb
-    default-schema:
-    drop-first: false
+  flyway:
     enabled: true
 
   datasource:

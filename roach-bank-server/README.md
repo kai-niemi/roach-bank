@@ -76,8 +76,6 @@ CockroachDB example:
     --roachbank.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.liquibase.enabled=true \
-    --spring.liquibase.drop-first=false \
     --spring.profiles.active=db-crdb,retry-backoff,cdc-kafka  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8080
@@ -88,8 +86,6 @@ PostgreSQL example:
     --roachbank.datasource.url=jdbc:postgresql://localhost:5432/roach_bank \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.liquibase.enabled=true \
-    --spring.liquibase.drop-first=false \
     --spring.profiles.active=db-psql,retry-backoff,cdc-kafka  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8080

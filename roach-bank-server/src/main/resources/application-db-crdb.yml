@@ -7,14 +7,11 @@ spring:
     open-in-view: false
   main:
     allow-bean-definition-overriding: true
-  liquibase:
-    contexts: db-crdb
-    default-schema:
-    drop-first: false
+  flyway:
+    connect-retries: 50
     enabled: true
-    change-log: classpath:db/changelog-master.xml
-    database-change-log-table: db_changelog
-    database-change-log-lock-table: db_changelog_lock
+    locations: classpath:db/migration/crdb,classpath:db/migration/common
+    clean-on-validation-error: true
 #############################
 roachbank:
   health:

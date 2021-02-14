@@ -55,7 +55,7 @@ management:
     enabled-by-default: true
     web:
       exposure:
-        include: conditions,env,info,health,metrics,threaddump,liquibase,prometheus
+        include: env,info,health,metrics,threaddump,flyway,prometheus
   endpoint:
     health:
       show-details: always

@@ -79,7 +79,7 @@ A regionally scoped load balancer also sits between the service and CockroachDB 
 ![architecture](diagram_architecture.png)
 
 Roach Bank is based on a fairly common [Spring Boot](https://spring.io/projects/spring-boot) microservice 
-stack using frameworks like Spring Data, Spring Hateoas, HikariCP, Liquibase and more. 
+stack using frameworks like Spring Data, Spring Hateoas, HikariCP, Flyway and more. 
 
 See the [Design Notes](DESIGN.md) for a complete overview of the different architectural 
 mechanisms used.
@@ -108,7 +108,7 @@ OpenJDK installation on Ubuntu:
 
 Both CockroachDB 20.2+ and PostgreSQL 9.1+ are supported. The database type can be selected 
 at start-up time by activating the appropriate profile (see below). Table schema and
-initial data (account plan) creation is automatic through Liquibase. 
+initial data (account plan) creation is automatic through Flyway. 
 
 #### CockroachDB Notes
 

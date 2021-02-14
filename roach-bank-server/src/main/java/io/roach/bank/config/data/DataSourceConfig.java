@@ -9,6 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
 import com.zaxxer.hikari.HikariDataSource;
@@ -38,8 +40,14 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
-    @ConfigurationProperties("roachbank.datasource")
+//    @ConfigurationProperties("roachbank.datasource")
     public DataSource proxiedDataSource(HikariDataSource dataSource) {
+        try {
+            String version = new JdbcTemplate(dataSource).queryForObject("select version()", String.class);
+            logger.info("Database version: {}", version);
+        } catch (DataAccessException e) {
+        }
+
         logger.info("Connection pool max size: {}", dataSource.getMaximumPoolSize());
         logger.info("Connection pool idle timeout: {}", dataSource.getIdleTimeout());
         logger.info("Connection pool max lifetime: {}", dataSource.getMaxLifetime());

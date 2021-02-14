@@ -84,7 +84,7 @@ do
 
 if ((i > 1)); then
 fn_failcheck roachprod run $CLUSTER:$c <<EOF
-nohup ./roach-bank-server.jar --roachbank.locality=$locality --spring.liquibase.enabled=false > /dev/null 2>&1 &
+nohup ./roach-bank-server.jar --roachbank.locality=$locality --spring.flyway.enabled=false > /dev/null 2>&1 &
 EOF
 else
 fn_failcheck roachprod run $CLUSTER:$c <<EOF

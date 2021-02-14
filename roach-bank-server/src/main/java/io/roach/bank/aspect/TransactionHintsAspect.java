@@ -44,14 +44,13 @@ public class TransactionHintsAspect {
 
     @PostConstruct
     public void init() {
+        logger.info("Bootstrapping Transaction Hints");
+
         String license = jdbcTemplate.queryForObject("SHOW CLUSTER SETTING enterprise.license", String.class);
 
-        enterpriseLicenseFound = StringUtils.hasLength(license);
-
-        if (enterpriseLicenseFound) {
-            logger.info("Bootstrapping Transaction Hints (enterprise license: {})", license);
-        } else {
-            logger.info("Bootstrapping Transaction Hints (no enterprise license)");
+        if (StringUtils.hasLength(license)) {
+            String org = jdbcTemplate.queryForObject("SHOW CLUSTER SETTING cluster.organization", String.class);
+            logger.info("Found CockroachDB Enterprise Licence for {}", org);
         }
     }
 

@@ -16,7 +16,7 @@ Key architectural mechanisms and realizations:
     - Plain JDBC via Spring Data JDBC
     - Pagination (limit/offset based)
     - Schema Versioning
-        - Liquibase
+        - Flyway
 - Transaction Management
     - Local transactions only (no JTA/XA transactions)
     - Serializable isolation (SSI in PSQL)
@@ -66,7 +66,7 @@ The system uses the following entity model for double-entry bookkeeping of monet
 
 ### Main SQL files
 
-Liquibase is used to setup the DB schema and account plan during startup time. The schema is not geo-partitioned 
+Flyway is used to setup the DB schema and account plan during startup time. The schema is not geo-partitioned 
 by default.
 
 - [SQL files](roach-bank-server/src/main/resources/db) 

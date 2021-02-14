@@ -7,14 +7,12 @@ spring:
     open-in-view: false
   main:
     allow-bean-definition-overriding: true
-  liquibase:
-    contexts: db-psql
-    default-schema: public
-    drop-first: false
+  flyway:
+    connect-retries: 5
     enabled: true
-    change-log: classpath:db/changelog-master.xml
-    database-change-log-table: db_changelog
-    database-change-log-lock-table: db_changelog_lock
+    locations: classpath:db/migration/psql,classpath:db/migration/common
+    clean-on-validation-error: true
+#    schemas: public
 #############################
 roachbank:
   health:

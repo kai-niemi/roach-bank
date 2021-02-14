@@ -45,7 +45,7 @@ With custom params:
     --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable
     --spring.datasource.username=root
     --spring.datasource.password=..
-    --spring.liquibase.enabled=true
+    --spring.flyway.enabled=true
     --spring.profiles.active=db-crdb,retry-backoff,cdc-aop
     --server.port=8090
 

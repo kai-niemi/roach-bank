@@ -135,9 +135,9 @@ Wait for the service to start:
     
 Now start second and third instance:
 
-_(disabling liquibase since schema is already created)_
+_(disabling flyway since schema is already created)_
 
-    roachprod run ${CLUSTER}:11-12 'nohup ./roach-bank-server.jar --spring.liquibase.enabled=false --spring.datasource.hikari.maximum-pool-size=500 > /dev/null 2>&1 &'
+    roachprod run ${CLUSTER}:11-12 'nohup ./roach-bank-server.jar --spring.flyway.enabled=false --spring.datasource.hikari.maximum-pool-size=500 > /dev/null 2>&1 &'
 
 Optionally wait for other services to start:
 
