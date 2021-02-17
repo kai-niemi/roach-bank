@@ -51,7 +51,7 @@ public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Value("${roachbank.reportQueryTimeout}")
-    private int queryTimeout = 60;
+    private int queryTimeout;
 
     @Value("${roachbank.accountsPerRegionLimit}")
     private int accountsPerRegionLimit;

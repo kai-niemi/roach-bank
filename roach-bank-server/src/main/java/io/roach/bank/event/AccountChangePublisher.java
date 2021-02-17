@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.hateoas.Link;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -32,6 +33,9 @@ public class AccountChangePublisher {
     private final BlockingQueue<AccountChangeEvent> buffer = new ArrayBlockingQueue<>(BATCH_SIZE);
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Value("${roachbank.pushPermitsPerSec}")
+    private double permitsPerSec;
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
@@ -56,7 +60,7 @@ public class AccountChangePublisher {
         eventsSent = meterRegistry.counter("bank.events.sent");
 
         // Outbound rate limiter
-        final RateLimiter rateLimiter = RateLimiter.create(2);
+        final RateLimiter rateLimiter = RateLimiter.create(permitsPerSec);
 
         // Drain events and push in batches
         taskScheduler.execute(() -> {

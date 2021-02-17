@@ -35,7 +35,7 @@ import static io.roach.bank.api.support.RandomData.selectRandom;
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class Transfer extends RestCommandSupport {
-    protected final Logger logger = LoggerFactory.getLogger("io.roach.TX_LOG");
+    protected final Logger transactionLogger = LoggerFactory.getLogger("io.roach.TX_LOG");
 
     @Autowired
     private SchedulingHelper scheduler;
@@ -132,7 +132,7 @@ public class Transfer extends RestCommandSupport {
                 Money copy = restTemplate.getForObject(selfLink.toUri(), Money.class);
                 accountModel.setBalance(copy);
             } catch (RestClientException e) {
-                logger.trace("Error retrieving account balance snapshot: {}", e.toString());
+                transactionLogger.trace("Error retrieving account balance snapshot: {}", e.toString());
             }
         }));
     }
@@ -187,7 +187,7 @@ public class Transfer extends RestCommandSupport {
 
         URI location = response.getHeaders().getLocation();
 
-        if (enableLogging && logger.isDebugEnabled()) {
+        if (enableLogging && transactionLogger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             AtomicInteger legC = new AtomicInteger();
 
@@ -199,12 +199,12 @@ public class Transfer extends RestCommandSupport {
             });
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                logger.debug("{} {} {}",
+                transactionLogger.debug("{} {} {}",
                         response.getStatusCode().toString(),
                         location,
                         sb.toString());
             } else {
-                logger.debug("{} {} {}",
+                transactionLogger.debug("{} {} {}",
                         response.getStatusCode().toString(),
                         location,
                         sb.toString());

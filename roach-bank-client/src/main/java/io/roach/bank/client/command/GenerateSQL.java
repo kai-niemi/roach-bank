@@ -32,7 +32,7 @@ public class GenerateSQL extends RestCommandSupport {
     public void generateSQL(
             @ShellOption(help = "output path", defaultValue = ".data") String output,
             @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00") String balance,
-            @ShellOption(help = "number of accounts per region", defaultValue = "50") int accountsPerRegion,
+            @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) throws IOException {
         final Map<String, Currency> regionMap = lookupRegions(regions);
@@ -49,7 +49,7 @@ public class GenerateSQL extends RestCommandSupport {
             }
         }
 
-        path = path.resolve("load-accounts.sql");
+        path = path.resolve("load_accounts.sql");
 
         try (BufferedWriter writer = Files
                 .newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {

@@ -47,10 +47,13 @@ public class TransactionHintsAspect {
         logger.info("Bootstrapping Transaction Hints");
 
         String license = jdbcTemplate.queryForObject("SHOW CLUSTER SETTING enterprise.license", String.class);
+        this.enterpriseLicenseFound = StringUtils.hasLength(license);
 
-        if (StringUtils.hasLength(license)) {
+        if (this.enterpriseLicenseFound) {
             String org = jdbcTemplate.queryForObject("SHOW CLUSTER SETTING cluster.organization", String.class);
-            logger.info("Found CockroachDB Enterprise Licence for {}", org);
+            logger.info("Found CockroachDB Licence for {}", org);
+        } else {
+            logger.info("No CockroachDB Licence - disabling use of enterprise features");
         }
     }
 

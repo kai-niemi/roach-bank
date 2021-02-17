@@ -17,7 +17,7 @@ create table region_config
     group_name string    not null,
 
     constraint fk_region_group foreign key (group_name) references region_group (name),
-    primary key (name, currency)
+    primary key (name, currency, group_name)
 );
 
 ----------------------

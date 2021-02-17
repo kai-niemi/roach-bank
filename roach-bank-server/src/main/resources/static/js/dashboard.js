@@ -202,18 +202,10 @@ BankDashboard.prototype = {
                 var event = JSON.parse(account.body); // batch
 
                 event.map(function (item) {
-                    var elementExists = document.getElementById(item.id);
-                    if (!elementExists) {
-                        var containerDiv = document.getElementById('dashboard-container');
-                        var count = containerDiv.getElementsByTagName('div').length;
-                        if (count > 200) {
-                            var ch = containerDiv.getElementsByTagName('div').item(0);
-                            ch.parentElement.removeChild(ch);
-                        }
-                        account = _this.createAccountElement(item);
-                    }
                     var accountElt = _this.getElement(item.id);
-                    _this.handleAccountBalanceUpdate(accountElt, item.region, item.currency, item.balance);
+                    if (accountElt) {
+                        _this.handleAccountBalanceUpdate(accountElt, item.region, item.currency, item.balance);
+                    }
                 });
             });
         });
@@ -223,12 +215,12 @@ BankDashboard.prototype = {
         account.find('.amount').text(this.formatMoney(balance, currency));
 
         var original_color = this.boxColor(region, currency, balance);
-        account.css("background-color", "red");
-        account.css("color", "yellow");
+        account.css("background-color", "white");
+        // account.css("color", "yellow");
 
         setTimeout( function(){
             account.css("background-color", original_color);
-        }, 1200);
+        }, 1500);
     },
 
     handleAccountSummaryUpdate: function (accountSummary) {
@@ -263,14 +255,6 @@ BankDashboard.prototype = {
 
     boxSize: function (region, currency, amount) {
         var size = 45;
-
-        // var maxBalance = sessionStorage.getItem("account-summary-" + currency);
-        // if (maxBalance > 0) {
-        //     size = amount / maxBalance * 150;
-        //     if (size < 45) size = 45;
-        //     console.log("amt: " + amount + "| max: " + maxBalance + "| curr: " + currency + "|size: " + size);
-        // }
-
         return {
             width: size + 'px',
             height: size + 'px',
@@ -379,11 +363,16 @@ document.addEventListener('DOMContentLoaded', function () {
             'athens': '#28b9ed',
             'singapore': '#9036df',
             'hong kong': '#67b5db',
-            'sydney': '#2aaf77'
+            'sydney': '#ba8412',
+            'tokyo': '#2f8d65',
+            'barcelona': '#854231',
+            'manchester': '#8a0615'
         },
 
         regionCountry: {
             'generic': 'GEN',
+            'tokyo': 'JPN',
+            'barcelona': 'ESP',
             'seattle': 'USA',
             'san francisco': 'USA',
             'los angeles': 'USA',
@@ -400,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'helsinki': 'FIN',
             'oslo': 'NOR',
             'london': 'GBR',
+            'manchester': 'GBR',
             'frankfurt': 'DEU',
             'amsterdam': 'NLD',
             'paris': 'FRA',

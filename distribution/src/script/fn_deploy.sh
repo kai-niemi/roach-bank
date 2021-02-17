@@ -115,5 +115,11 @@ fn_echo_info_nl "Skipping table partitions"
 fi
 
 fn_echo_info_nl "Done!"
+fn_echo_info_nl "Command hints:"
+for c in "${clients[@]}"
+do
+fn_echo_info_nl "roachprod run $CLUSTER:$c"
+fn_echo_info_nl "roachprod adminurl $CLUSTER:$c"
+done
 
 exit 0

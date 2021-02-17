@@ -12,4 +12,4 @@ roachbank:
       validation-timeout: 20000
       max-lifetime: 60000
       maximum-pool-size: 32
-      minimum-idle: 110
+      minimum-idle: 32

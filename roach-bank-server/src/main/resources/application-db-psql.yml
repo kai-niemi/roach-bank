@@ -8,11 +8,10 @@ spring:
   main:
     allow-bean-definition-overriding: true
   flyway:
-    connect-retries: 5
+    connect-retries: 50
     enabled: true
     locations: classpath:db/migration/psql,classpath:db/migration/common
     clean-on-validation-error: true
-#    schemas: public
 #############################
 roachbank:
   health:
@@ -23,12 +22,15 @@ roachbank:
     username: postgres
     password: root
     configuration:
+      transaction-isolation: TRANSACTION_SERIALIZABLE
+      testOnBorrow: true
       pool-name: roach-bank
       connection-init-sql: SELECT 1
       connection-timeout: 30000
       validation-timeout: 20000
-      # 36vcpu x 9 nodes x 4 / 3 instances
-      maximum-pool-size: 430
-      minimum-idle: 110
-      # Required for PSQL
-      transaction-isolation: TRANSACTION_SERIALIZABLE
+      max-lifetime: 60000
+      # 36vcpu x 9 nodes x 4 = 1300 total
+      # Per client 36*2 threads ~= 80
+      maximum-pool-size: 80
+      # max size / 2
+      minimum-idle: 40

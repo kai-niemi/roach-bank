@@ -28,13 +28,11 @@ public abstract class Constants {
 
     public static final String ACCOUNT_LIMIT_HELP = "max number of accounts per region to query (negative value means default)";
 
-    public static final String DEFAULT_ACCOUNT_LIMIT = "500";
+    public static final String DEFAULT_ACCOUNT_LIMIT = "-1";
 
     public static final ParameterizedTypeReference<PagedModel<AccountModel>> ACCOUNT_MODEL_PTR
             = new ParameterizedTypeReference<PagedModel<AccountModel>>() {
     };
-
-    public final static String DISABLED = "disabled";
 
     private Constants() {
     }

@@ -22,7 +22,7 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Configuration
 public class DataSourceConfig {
-    protected final Logger logger = LoggerFactory.getLogger("io.roach.sql_trace");
+    protected final Logger logger = LoggerFactory.getLogger("io.roach.SQL_TRACE");
 
     @Bean
     @Primary
