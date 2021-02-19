@@ -26,7 +26,7 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
     private Transaction.Id id = new Transaction.Id();
 
     @Column(name = "transaction_type")
-    private String transferType;
+    private String transactionType;
 
     @Column(name = "transfer_date", nullable = false, updatable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -48,12 +48,12 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
     }
 
     protected Transaction(Id id,
-                          String transferType,
+                          String transactionType,
                           LocalDate bookingDate,
                           LocalDate transferDate,
                           List<TransactionItem> items) {
         this.id = id;
-        this.transferType = transferType;
+        this.transactionType = transactionType;
         this.bookingDate = bookingDate;
         this.transferDate = transferDate;
         this.items = items;
@@ -91,8 +91,8 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
         return id.getRegion();
     }
 
-    public String getTransferType() {
-        return transferType;
+    public String getTransactionType() {
+        return transactionType;
     }
 
     public LocalDate getTransferDate() {
@@ -111,7 +111,7 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
     public String toString() {
         return "Transaction{" +
                 "id=" + id +
-                ", transferType='" + transferType + '\'' +
+                ", transactionType='" + transactionType + '\'' +
                 ", transferDate=" + transferDate +
                 ", bookingDate=" + bookingDate +
                 ", items=<..>" +
@@ -123,7 +123,7 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
 
         private Transaction.Id transactionId;
 
-        private String transferType;
+        private String transactionType;
 
         private LocalDate bookingDate;
 
@@ -134,8 +134,8 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
             return this;
         }
 
-        public Builder withTransferType(String transferType) {
-            this.transferType = transferType;
+        public Builder withTransactionType(String transactionType) {
+            this.transactionType = transactionType;
             return this;
         }
 
@@ -154,7 +154,7 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
         }
 
         public Transaction build() {
-            return new Transaction(transactionId, transferType, bookingDate, transferDate, items);
+            return new Transaction(transactionId, transactionType, bookingDate, transferDate, items);
         }
     }
 

@@ -11,6 +11,10 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
 public interface AccountRepository {
+    interface NamingStrategy {
+        String accountName(int sequence);
+    }
+
     void createAccountBatch(String region, Currency currency, NamingStrategy namingStrategy, int batchSize);
 
     Account createAccount(Account account);
@@ -30,8 +34,4 @@ public interface AccountRepository {
     List<Account> findAccountsByRegion(String region, int limit);
 
     List<Account> findAccountsForUpdate(Set<Account.Id> ids);
-
-    interface NamingStrategy {
-        String accountName(int sequence);
-    }
 }

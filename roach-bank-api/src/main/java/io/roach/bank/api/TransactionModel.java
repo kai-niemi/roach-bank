@@ -1,14 +1,12 @@
 package io.roach.bank.api;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -31,7 +29,7 @@ public class TransactionModel extends RepresentationModel<TransactionModel> {
 
     private String region;
 
-    private String transferType;
+    private String transactionType;
 
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -43,12 +41,12 @@ public class TransactionModel extends RepresentationModel<TransactionModel> {
 
     private CollectionModel<TransactionItemModel> transactionItems;
 
-    public String getTransferType() {
-        return transferType;
+    public String getTransactionType() {
+        return transactionType;
     }
 
-    public void setTransferType(String transferType) {
-        this.transferType = transferType;
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
     }
 
     public String getRegion() {

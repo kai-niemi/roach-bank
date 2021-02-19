@@ -37,19 +37,11 @@ create table account
     allow_negative integer        not null default 0,
     updated        timestamptz    not null default clock_timestamp(),
 
-    family         update_often(balance, updated),
-    family         update_never(currency, name, description, type, closed, allow_negative),
-
     primary key (region, id)
 );
-
-create table transaction_type
-(
-    id   string(3) not null,
-    name string    not null,
-
-    primary key (id)
-);
+-- Column families disabled to enable CDC
+-- family         update_often(balance, updated),
+-- family         update_never(currency, name, description, type, closed, allow_negative),
 
 create table transaction
 (
@@ -76,32 +68,12 @@ create table transaction_item
     primary key (transaction_region, transaction_id, account_region, account_id)
 );
 
---interleave in parent transaction (transaction_region, transaction_id);
-
-------------------------------------------------
--- Constraints on account
-------------------------------------------------
-
 alter table account
     add constraint check_account_type check (type in ('A', 'L', 'E', 'R', 'C'));
 alter table account
     add constraint check_account_allow_negative check (allow_negative between 0 and 1);
 alter table account
     add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
-
-------------------------------------------------
--- Constraints on transaction
-------------------------------------------------
-
--- create index idx_transaction_type on transaction (transaction_type);
--- alter table transaction
---     add constraint fk_transaction_type_reftype
---         foreign key (transaction_type)
---             references transaction_type;
-
-------------------------------------------------
--- Constraints on transaction_item
-------------------------------------------------
 
 -- alter table transaction_item
 --     add constraint fk_region_ref_transaction

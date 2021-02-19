@@ -28,7 +28,7 @@ public class TransactionResourceAssembler
 
         resource.setTransactionId(entity.getUUID());
         resource.setRegion(entity.getRegion());
-        resource.setTransferType(entity.getTransferType());
+        resource.setTransactionType(entity.getTransactionType());
         resource.setBookingDate(entity.getBookingDate());
         resource.setTransactionDate(entity.getTransferDate());
 

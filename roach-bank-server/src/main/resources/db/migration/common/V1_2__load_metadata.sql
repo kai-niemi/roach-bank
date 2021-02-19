@@ -2,15 +2,8 @@
 -- Metadata used for bank transactions and client account selection
 --
 
--- TRUNCATE TABLE transaction_type CASCADE;
 -- TRUNCATE TABLE region_group CASCADE;
 -- TRUNCATE TABLE region_config CASCADE;
-
-INSERT INTO transaction_type (id, name)
-VALUES ('GEN', 'Generic'),
-       ('DPO', 'Deposit'),
-       ('PYO', 'Payout')
-;
 
 INSERT INTO region_group
 VALUES ('us_west'),

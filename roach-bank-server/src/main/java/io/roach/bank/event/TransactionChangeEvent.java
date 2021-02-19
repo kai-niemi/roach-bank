@@ -11,7 +11,7 @@ public class TransactionChangeEvent extends AbstractChangeEvent {
     private UUID transactionId;
 
     @JsonProperty("transaction_type")
-    private String transferType;
+    private String transactionType;
 
     @JsonProperty("transfer_date")
     private String transferDate;
@@ -31,12 +31,12 @@ public class TransactionChangeEvent extends AbstractChangeEvent {
         this.transactionId = transactionId;
     }
 
-    public String getTransferType() {
-        return transferType;
+    public String getTransactionType() {
+        return transactionType;
     }
 
-    public void setTransferType(String transferType) {
-        this.transferType = transferType;
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
     }
 
     public String getTransferDate() {
@@ -51,7 +51,7 @@ public class TransactionChangeEvent extends AbstractChangeEvent {
     public String toString() {
         return "TransactionChangeEvent{" +
                 "transactionId" + transactionId +
-                ", transferType='" + transferType + '\'' +
+                ", transactionType='" + transactionType + '\'' +
                 ", transferDate='" + transferDate + '\'' +
                 ", items=" + items +
                 "} " + super.toString();

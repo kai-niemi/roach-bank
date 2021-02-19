@@ -105,23 +105,25 @@ public class MethodStats {
 
         // Aggregate
 
-        int keys = methodStats.size();
         double avgProgress = methodStats.values().stream().mapToDouble(MethodStats::executionProgress).average()
                 .orElse(0);
         double avgTime = methodStats.values().stream().mapToDouble(MethodStats::executionTimeSeconds).average()
                 .orElse(0);
+
         double opsPerSec = methodStats.values().stream().mapToDouble(MethodStats::opPerSec).sum();
         double opsPerMin = methodStats.values().stream().mapToDouble(MethodStats::opPerMin).sum();
+
         double p50 = methodStats.values().stream().mapToDouble(MethodStats::p50).average().orElse(0);
         double p90 = methodStats.values().stream().mapToDouble(MethodStats::p90).average().orElse(0);
         double p99 = methodStats.values().stream().mapToDouble(MethodStats::p99).average().orElse(0);
+
         int callCount = methodStats.values().stream().mapToInt(MethodStats::callsTotal).sum();
         int callSuccessful = methodStats.values().stream().mapToInt(MethodStats::callsSuccess).sum();
         int callFailed = methodStats.values().stream().mapToInt(MethodStats::callsFail).sum();
 
         pw.printf(Locale.US,
                 "%-30s %8.1f%% %7.0f %c%7.1f %10.1f %10.2f %10.2f %10.2f %9d %9d %9d",
-                "SUM (" + keys + ")",
+                "SUM (" + methodStats.size() + ")",
                 avgProgress,
                 avgTime,
                 opsPerSec >= FRAME_SIZE ? '>' : ' ',

@@ -53,7 +53,7 @@ public class GenerateCSV extends RestCommandSupport {
             @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00")
                     String initialBalance,
             @ShellOption(help = "number of CSV files per table", defaultValue = "10") int numFiles,
-            @ShellOption(help = "number of accounts in total", defaultValue = "5000") String accounts,
+            @ShellOption(help = "number of accounts in total", defaultValue = "1_000_000") String accounts,
             @ShellOption(help = "number of transactions per account", defaultValue = "0") int transactionsPerAccount,
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2")
                     int legsPerTransaction,

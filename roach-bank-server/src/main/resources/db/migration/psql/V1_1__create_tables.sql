@@ -51,15 +51,6 @@ alter table account
     add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
 
 ------------------------------------------------
-create table transaction_type
-(
-    id   varchar(3)              not null,
-    name varchar(255) default '' not null,
-
-    primary key (id)
-);
-
-------------------------------------------------
 create table transaction
 (
     id               uuid         not null,
@@ -71,10 +62,6 @@ create table transaction
 
     primary key (region, id)
 );
-
-alter table transaction
-    add constraint fk_transaction_type
-        foreign key (transaction_type) references transaction_type;
 
 ------------------------------------------------
 create table transaction_item

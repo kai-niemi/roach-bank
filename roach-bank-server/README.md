@@ -33,7 +33,7 @@ and have the same name but suffixed with `.conf` rather than `.jar`.
 
 Example:    
 
-    RUN_ARGS=--roachbank.datasource.url=jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable
+    RUN_ARGS="--roachbank.datasource.url=jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable --server.port=8088"
     PID_FOLDER=/tmp
 
 ## Configuration

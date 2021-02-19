@@ -53,7 +53,7 @@ public class DefaultTransactionService implements TransactionService {
 
         final Transaction.Builder transactionBuilder = Transaction.builder()
                 .withId(id)
-                .withTransferType(request.getTransactionType())
+                .withTransactionType(request.getTransactionType())
                 .withBookingDate(request.getBookingDate())
                 .withTransferDate(request.getTransferDate());
 

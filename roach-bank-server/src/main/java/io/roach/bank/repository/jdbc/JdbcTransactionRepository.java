@@ -50,7 +50,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
                 transaction.getRegion(),
                 bookingDate != null ? bookingDate : LocalDate.now(),
                 transferDate != null ? transferDate : LocalDate.now(),
-                transaction.getTransferType()
+                transaction.getTransactionType()
         );
 
         final List<TransactionItem> items = transaction.getItems();
@@ -93,12 +93,12 @@ public class JdbcTransactionRepository implements TransactionRepository {
     private Transaction mapToTransaction(ResultSet rs) throws SQLException {
         UUID transactionId = (UUID) rs.getObject("id");
         String region = rs.getString("region");
-        String transferType = rs.getString("transaction_type");
+        String transactionType = rs.getString("transaction_type");
         LocalDate bookingDate = rs.getDate("booking_date").toLocalDate();
         LocalDate transferDate = rs.getDate("transfer_date").toLocalDate();
         return Transaction.builder()
                 .withId(Transaction.Id.of(transactionId, region))
-                .withTransferType(transferType)
+                .withTransactionType(transactionType)
                 .withBookingDate(bookingDate)
                 .withTransferDate(transferDate)
                 .build();
@@ -127,8 +127,9 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
         List<TransactionItem> content = this.jdbcTemplate.query(
                 "SELECT * FROM transaction_item WHERE transaction_id=? and transaction_region=?",
-                new Object[] {transactionId.getUUID(), transactionId.getRegion()},
-                (rs, rowNum) -> readTransactionItem(rs));
+                (rs, rowNum) -> readTransactionItem(rs),
+                transactionId.getUUID(), transactionId.getRegion()
+        );
 
         return new PageImpl<>(content, pageable, count);
     }
@@ -137,8 +138,9 @@ public class JdbcTransactionRepository implements TransactionRepository {
         List<Long> results =
                 this.jdbcTemplate.query(
                         "SELECT count(transaction_id) FROM transaction_item WHERE transaction_id=? and transaction_region=?",
-                        new Object[] {id.getUUID(), id.getRegion()},
-                        (rs, rowNum) -> rs.getLong(1));
+                        (rs, rowNum) -> rs.getLong(1),
+                        id.getUUID(), id.getRegion()
+                );
         return DataAccessUtils.singleResult(results);
     }
 
