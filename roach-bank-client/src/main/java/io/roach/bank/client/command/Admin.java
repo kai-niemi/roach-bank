@@ -26,7 +26,7 @@ import org.springframework.shell.standard.commands.Quit;
 import org.springframework.util.FileCopyUtils;
 
 import io.roach.bank.client.support.Console;
-import io.roach.bank.client.util.MethodStats;
+import io.roach.bank.client.util.CallStats;
 import io.roach.bank.client.support.SchedulingHelper;
 import io.roach.bank.client.support.ThrottledExecutor;
 
@@ -55,7 +55,7 @@ public class Admin implements Quit.Command {
 
     @PostConstruct
     protected void init() {
-        this.statsFuture = scheduler.scheduleAtFixedRate(MethodStats::printStdOut, PRINT_INTERVAL, PRINT_INTERVAL);
+        this.statsFuture = scheduler.scheduleAtFixedRate(CallStats::printStdOut, PRINT_INTERVAL, PRINT_INTERVAL);
     }
 
     @ShellMethod(value = "Exit the shell", key = {"quit", "exit", "q"})
@@ -97,7 +97,7 @@ public class Admin implements Quit.Command {
             @ShellOption(help = "printing interval (<=0 toggles)", defaultValue = "0") int interval) {
         if (interval <= 0) {
             if (statsFuture.isDone()) {
-                this.statsFuture = scheduler.scheduleAtFixedRate(MethodStats::printStdOut, 1, PRINT_INTERVAL);
+                this.statsFuture = scheduler.scheduleAtFixedRate(CallStats::printStdOut, 1, PRINT_INTERVAL);
                 console.info("Metrics printing started with %ds interval", PRINT_INTERVAL);
             } else {
                 this.statsFuture.cancel(true);
@@ -109,7 +109,7 @@ public class Admin implements Quit.Command {
                 console.info("Metrics printing stopped");
             }
             PRINT_INTERVAL = interval;
-            this.statsFuture = scheduler.scheduleAtFixedRate(MethodStats::printStdOut, 1, PRINT_INTERVAL);
+            this.statsFuture = scheduler.scheduleAtFixedRate(CallStats::printStdOut, 1, PRINT_INTERVAL);
             console.info("Metrics printing started with %ds interval", PRINT_INTERVAL);
         }
     }

@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import io.roach.bank.annotation.TransactionMandatory;
+import io.roach.bank.annotation.TransactionControlService;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -27,7 +27,7 @@ import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.TransactionRepository;
 
 @Service
-@TransactionMandatory
+@TransactionControlService
 public class DefaultTransactionService implements TransactionService {
     @Autowired
     private AccountRepository accountRepository;

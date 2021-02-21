@@ -14,29 +14,29 @@ crdbnodes="1-9"
 # Array of client nodes (must match size of regions)
 clients=(10 11 12)
 # Array of client localities (must match partition names)
-localities=('us_west' 'us_central' 'us_east')
+localities=('us_east1' 'us_central' 'us_east4')
 # Array of regions localities (must match zone names)
-regions=('us-west-2' 'us-east-2' 'us-east-1')
+regions=('us-east1' 'us-central1' 'us-east4')
 # AWS/GCE cloud (aws|gce)
-cloud="aws"
+cloud="gce"
 # AWS/GCE region zones (must align with nodes count)
 zones="\
-us-west-2a,\
-us-west-2b,\
-us-west-2c,\
-us-east-2a,\
-us-east-2b,\
-us-east-2c,\
-us-east-1a,\
-us-east-1b,\
-us-east-1c,\
-us-west-2a,\
-us-east-2a,\
-us-east-1a"
+us-east1-b,\
+us-east1-c,\
+us-east1-d,\
+us-central1-a,\
+us-central1-b,\
+us-central1-c,\
+us-east4-a,\
+us-east4-b,\
+us-east4-c,\
+us-east1-b,\
+us-central1-a,\
+us-east4-a"
 # AWS/GCE machine types
-machinetypes="c5d.4xlarge"
+machinetypes="n2-standard-16"
 # SQL file for geo-partitioning
-partitionsqlfile="sql/partition-aws-us.sql"
+partitionsqlfile="sql/partition-gce-us.sql"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################

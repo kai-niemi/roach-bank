@@ -53,21 +53,23 @@ do
   region=${regions[$i]}
   i=($i+1)
 
-  fn_echo_info_nl "Deploying binaries to $region.."
-
+  fn_echo_info_nl "Installing haproxy in ${CLUSTER}:$c"
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq update'
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y haproxy'
   fn_failcheck roachprod run ${CLUSTER}:$c "./cockroach gen haproxy --insecure --host $(roachprod ip $CLUSTER:1 --external) --locality=region=$region"
   fn_failcheck roachprod run ${CLUSTER}:$c 'nohup haproxy -f haproxy.cfg > /dev/null 2>&1 &'
 
+  fn_echo_info_nl "Installing OpenJDK in ${CLUSTER}:$c"
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-8-jre-headless'
+
+  fn_echo_info_nl "Deploying app binaries to ${CLUSTER}:$c"
 
   fn_failcheck roachprod put ${CLUSTER}:$c roach-bank.tar.gz
   fn_failcheck roachprod run ${CLUSTER}:$c "tar xvfz roach-bank.tar.gz --exclude='*.sh'"
 done
 
 #################################################
-fn_echo_info_nl "Creating database"
+fn_echo_info_nl "Creating database roach_bank"
 fn_failcheck roachprod run $CLUSTER:$client1 <<EOF
 ./cockroach sql --insecure --host=`roachprod ip $CLUSTER:1` -e "CREATE DATABASE roach_bank"
 EOF
@@ -115,11 +117,18 @@ fn_echo_info_nl "Skipping table partitions"
 fi
 
 fn_echo_info_nl "Done!"
+
 fn_echo_info_nl "Command hints:"
 for c in "${clients[@]}"
 do
 fn_echo_info_nl "roachprod run $CLUSTER:$c"
-fn_echo_info_nl "roachprod adminurl $CLUSTER:$c"
+fn_echo_info_nl "./roach-bank-client.jar connect"
+done
+
+fn_echo_info_nl "Admin URLs:"
+for c in "${clients[@]}"
+do
+roachprod adminurl $CLUSTER:$c
 done
 
 exit 0

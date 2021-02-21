@@ -54,19 +54,21 @@ public class CreateAccounts extends RestCommandSupport {
                     .asTemplatedLink();
 
             IntStream.range(0, concurrencyLevel).forEach(i -> throttledExecutor.submit(() -> {
-                String region = RandomData.selectRandom(regionMap.keySet());
-                Currency currency = regionMap.get(region);
+                        String region = RandomData.selectRandom(regionMap.keySet());
+                        Currency currency = regionMap.get(region);
 
-                AccountForm form = new AccountForm();
-                form.setUuid("auto");
-                form.setRegion(region);
-                form.setName(RandomData.randomString(12));
-                form.setDescription(CockroachFacts.nextFact(256));
-                form.setCurrencyCode(currency.getCurrencyCode());
-                form.setAccountType(AccountType.EXPENSE);
+                        AccountForm form = new AccountForm();
+                        form.setUuid("auto");
+                        form.setRegion(region);
+                        form.setName(RandomData.randomString(12));
+                        form.setDescription(CockroachFacts.nextFact(256));
+                        form.setCurrencyCode(currency.getCurrencyCode());
+                        form.setAccountType(AccountType.EXPENSE);
 
-                return restTemplate.postForLocation(submitLink.getTemplate().expand(), form);
-            }, TimeFormat.parseDuration(duration), "create-accounts"));
+                        return restTemplate.postForLocation(submitLink.getTemplate().expand(), form);
+                    }, TimeFormat.parseDuration(duration),
+                    "create-accounts-singleton"
+            ));
         } else {
             Link submitLink = traverson.fromRoot()
                     .follow(withCurie(ACCOUNT_REL))
@@ -76,22 +78,24 @@ public class CreateAccounts extends RestCommandSupport {
             final AtomicInteger batchNumber = new AtomicInteger();
 
             IntStream.range(0, concurrencyLevel).forEach(i -> throttledExecutor.submit(() -> {
-                String region = RandomData.selectRandom(regionMap.keySet());
+                        String region = RandomData.selectRandom(regionMap.keySet());
 
-                UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-                        .queryParam("region", region)
-                        .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
-                        .queryParam("batchSize", batchSize);
+                        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
+                                .queryParam("region", region)
+                                .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
+                                .queryParam("batchSize", batchSize);
 
-                ResponseEntity<String> response =
-                        restTemplate.exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
-                                String.class);
+                        ResponseEntity<String> response =
+                                restTemplate.exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
+                                        String.class);
 
-                if (!response.getStatusCode().is2xxSuccessful()) {
-                    console.warn("Unexpected HTTP status: %s", response.toString());
-                }
-                return null;
-            }, TimeFormat.parseDuration(duration), "create-accounts-batch"));
+                        if (!response.getStatusCode().is2xxSuccessful()) {
+                            console.warn("Unexpected HTTP status: %s", response.toString());
+                        }
+                        return null;
+                    }, TimeFormat.parseDuration(duration),
+                    "create-accounts-batch"
+            ));
         }
     }
 }

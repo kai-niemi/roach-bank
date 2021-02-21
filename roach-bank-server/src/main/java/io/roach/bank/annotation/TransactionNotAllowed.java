@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Indicates that the annotated class or method must execute in a new transaction context, suspending any existing one.
+ * Indicates that the annotated class or method must not execute within a transaction context.
  */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-@Transactional(propagation = Propagation.REQUIRES_NEW)
-public @interface TransactionRequiresNew {
+@Transactional(propagation = Propagation.NOT_SUPPORTED, readOnly = true)
+public @interface TransactionNotAllowed {
 }

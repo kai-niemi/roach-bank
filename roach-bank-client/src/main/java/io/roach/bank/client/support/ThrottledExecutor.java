@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 
-import io.roach.bank.client.util.MethodStats;
+import io.roach.bank.client.util.CallStats;
 
 @Component
 public class ThrottledExecutor {
@@ -83,7 +83,7 @@ public class ThrottledExecutor {
         // Exponential backoff mutex at group level
         locks.computeIfAbsent(groupName, k -> new ReentrantLock());
 
-        final MethodStats methodStats = MethodStats.of(groupName, displayNameCallback, duration);
+        final CallStats callStats = CallStats.of(groupName, displayNameCallback, duration);
 
         final Future<String> future = executor.submit(() -> {
             final long startTime = System.currentTimeMillis();
@@ -91,7 +91,8 @@ public class ThrottledExecutor {
             long callCount = 0;
 
             do {
-                ReentrantLock lock = locks.get(groupName);
+                final ReentrantLock lock = locks.get(groupName);
+                final long begin = callStats.now();
 
                 try {
                     if (lock.isLocked()) {
@@ -99,16 +100,15 @@ public class ThrottledExecutor {
                             lock.unlock();
                         }
                     } else {
-                        methodStats.beforeMethod();
                         callCount++;
 
                         callable.call();
 
-                        methodStats.afterMethod(null);
+                        callStats.mark(begin, null);
                         callCount = 0;
                     }
                 } catch (HttpStatusCodeException | ResourceAccessException e) { // Retry on all HTTP errors
-                    methodStats.afterMethod(e);
+                    callStats.mark(begin, e);
 
                     boolean locked = false;
                     try {
@@ -172,7 +172,7 @@ public class ThrottledExecutor {
                     }
                 }
                 workers.remove(groupName);
-                MethodStats.remove(groupName);
+                CallStats.remove(groupName);
             });
         } else {
             futures.add(future);

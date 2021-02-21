@@ -38,7 +38,7 @@ spring:
 logging:
   pattern:
     console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr([%logger{39}]){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
-    file: "%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:%5p} [%t] %logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+    file: "%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:%5p} [%t] %logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
   file:
     name: server.log
   logback:
@@ -91,7 +91,7 @@ roachbank:
   # Report query timeout (millis)
   reportQueryTimeout: 60000
   # Default number of accounts per region for random selection in client workloads (lower number = more conflicts)
-  accountsPerRegionLimit: 10
+  accountsPerRegionLimit: 100
   # Locality for bank instance for region filtering (should match partition name in a multi-region deployment)
   # Ex: eu_south, us_central, us_east
   locality: all

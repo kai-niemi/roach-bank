@@ -24,14 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionNotSupported;
+import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.event.AccountChangeEvent;
 import io.roach.bank.event.AccountChangePublisher;
 
 @RestController
 @RequestMapping(value = "/api/changefeed")
 @Profile(ProfileNames.CDC_HTTP)
-@TransactionNotSupported
+@TransactionNotAllowed
 public class ChangeFeedController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

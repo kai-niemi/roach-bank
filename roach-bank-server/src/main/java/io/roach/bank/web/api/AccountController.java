@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.roach.bank.annotation.TimeTravel;
 import io.roach.bank.annotation.TimeTravelMode;
 import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.annotation.TransactionNotSupported;
+import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
 import io.roach.bank.api.support.Money;
@@ -114,7 +114,6 @@ public class AccountController {
             @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
-//            @PageableDefault(size = 5, direction = Sort.Direction.ASC) Pageable page) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         Set<String> resolvedRegions = metadataRepository.resolveRegions(regions).keySet();
         return pagedResourcesAssembler
@@ -122,7 +121,7 @@ public class AccountController {
     }
 
     @GetMapping(value = "/top")
-    @TransactionNotSupported
+    @TransactionNotAllowed
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccountsPerRegion(
             @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
@@ -176,11 +175,11 @@ public class AccountController {
     }
 
     @GetMapping(value = "/{id}/{region}/balance-snapshot")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    @TransactionNotAllowed // Implicit
     public Money getAccountBalanceSnapshot(
             @PathVariable("id") UUID id,
             @PathVariable(value = "region", required = false) String region) {
-        return accountRepository.getBalance(Account.Id.of(id, region));
+        return accountRepository.getBalanceSnapshot(Account.Id.of(id, region));
     }
 
     @PutMapping(value = "/{id}/{region}/open")

@@ -35,7 +35,8 @@ public class Head extends RestCommandSupport {
             IntStream.range(0, concurrency).forEach(i -> throttledExecutor.submit(() -> {
                 restTemplate.headForHeaders(baseUri);
                 return null;
-            }, TimeFormat.parseDuration(duration), group));
+            }, TimeFormat.parseDuration(duration),
+                    group));
         }
     }
 }

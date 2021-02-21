@@ -1,5 +1,6 @@
 package io.roach.bank.repository.jpa;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -17,14 +19,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionMandatory;
+import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
 
 @Service
-@TransactionMandatory
+@TransactionControlService
 @Profile(ProfileNames.JPA)
 public class JpaAccountRepository implements AccountRepository {
     @Autowired
@@ -83,6 +86,15 @@ public class JpaAccountRepository implements AccountRepository {
     @Override
     public Money getBalance(Account.Id id) {
         return accountRepository.findBalanceById(id);
+    }
+
+    @Override
+    @TransactionNotAllowed
+    public Money getBalanceSnapshot(Account.Id id) {
+        Tuple tuple = accountRepository.findBalanceSnapshot(id.getUUID().toString(), id.getRegion());
+        return Money.of(
+                tuple.get(1, BigDecimal.class).toPlainString(),
+                tuple.get(0, String.class));
     }
 
     @Override

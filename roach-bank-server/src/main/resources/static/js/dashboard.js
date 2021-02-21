@@ -212,11 +212,13 @@ BankDashboard.prototype = {
     },
 
     handleAccountBalanceUpdate: function (account, region, currency, balance) {
-        account.find('.amount').text(this.formatMoney(balance, currency));
+        var _this = this;
 
-        var original_color = this.boxColor(region, currency, balance);
+        var original_color = _this.boxColor(region, currency, balance);
         account.css("background-color", "white");
-        // account.css("color", "yellow");
+
+        var m = _this.formatMoney(balance, currency);
+        account.find('.amount').text(m);
 
         setTimeout( function(){
             account.css("background-color", original_color);

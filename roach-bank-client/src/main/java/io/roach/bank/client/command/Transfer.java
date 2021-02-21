@@ -1,8 +1,13 @@
 package io.roach.bank.client.command;
 
-import java.net.URI;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -17,7 +22,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.util.Assert;
 import org.springframework.web.client.RestClientException;
 
 import io.roach.bank.api.AccountModel;
@@ -48,16 +52,20 @@ public class Transfer extends RestCommandSupport {
             "Cockroaches can run up to three miles in an hour"
     );
 
-    @ShellMethod(value = "Transfer funds between accounts", key = {"tf","transfer"})
+    @ShellMethod(value = "Transfer funds between accounts", key = {"tf", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.25-5.00") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
-            @ShellOption(help = "transfer funds across regions using multi-currency transactions", defaultValue = "false") final boolean crossRegion,
-            @ShellOption(help = "account balance refresh interval for weighted distribution", defaultValue = "60s") final String refreshInterval,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) final int accountLimit,
+            @ShellOption(help = "transfer funds across regions using multi-currency transactions", defaultValue = "false")
+            final boolean crossRegion,
+            @ShellOption(help = "account balance refresh interval for weighted distribution", defaultValue = "60s")
+            final String refreshInterval,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
+            final int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
-            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) final String duration,
+            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION)
+            final String duration,
             @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency,
             @ShellOption(help = "enable verbose logging", defaultValue = "false") boolean enableLogging
     ) {
@@ -92,8 +100,6 @@ public class Transfer extends RestCommandSupport {
                             final Map<String, List<AccountModel>> subjectAccountMap = new HashMap<>();
 
                             if (crossRegion) {
-                                Assert.isTrue(accountMap.size() >= legs, "Not enough accounts");
-
                                 IntStream.range(0, legs).forEach(value -> {
                                     while (true) {
                                         String k = RandomData.selectRandom(accountMap.keySet());
@@ -111,7 +117,7 @@ public class Transfer extends RestCommandSupport {
                                     enableLogging);
                         },
                         TimeFormat.parseDuration(duration),
-                        regionKey, // region name
+                        regionKey + " transfer", // region name
                         groupName -> balanceUpdater.ifPresent(future -> future.cancel(true)))
                 ));
 
@@ -138,11 +144,11 @@ public class Transfer extends RestCommandSupport {
     }
 
     private TransactionModel executeOneTransfer(Link transferLink,
-                                      String region,
-                                      Map<String, List<AccountModel>> accountMap,
-                                      String[] amountParts,
-                                      int legs,
-                                      boolean enableLogging) {
+                                                String region,
+                                                Map<String, List<AccountModel>> accountMap,
+                                                String[] amountParts,
+                                                int legs,
+                                                boolean enableLogging) {
         TransactionForm.Builder formBuilder = TransactionForm.builder()
                 .withUUID("auto")
                 .withRegion(region)
@@ -181,11 +187,14 @@ public class Transfer extends RestCommandSupport {
 
         final TransactionForm transactionForm = formBuilder.build();
 
+        long startTime = System.currentTimeMillis();
+
         ResponseEntity<TransactionModel> response = restTemplate.postForEntity(
                 transferLink.getTemplate().expand(),
-                transactionForm, TransactionModel.class);
+                transactionForm,
+                TransactionModel.class);
 
-        URI location = response.getHeaders().getLocation();
+        final long rtt = System.currentTimeMillis() - startTime;
 
         if (enableLogging && transactionLogger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
@@ -198,17 +207,12 @@ public class Transfer extends RestCommandSupport {
                         leg.getAmount()));
             });
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                transactionLogger.debug("{} {} {}",
-                        response.getStatusCode().toString(),
-                        location,
-                        sb.toString());
-            } else {
-                transactionLogger.debug("{} {} {}",
-                        response.getStatusCode().toString(),
-                        location,
-                        sb.toString());
-            }
+            transactionLogger.debug("{}: transaction ID: {}, region: {}, rtt {}ms {}",
+                    response.getStatusCode().toString(),
+                    transactionForm.getUuid(),
+                    transactionForm.getRegion(),
+                    rtt,
+                    sb.toString());
         }
 
         return response.getBody();

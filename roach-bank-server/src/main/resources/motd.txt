@@ -1,13 +1,12 @@
-         (o o)      (/   Active spring profiles: ${spring.profiles.active}
-         /'v'     ,-'    Datasource URL: ${roachbank.datasource.url}
- ,------/ >< \---'       Locality: ${roachbank.locality}
+         (o o)      (/   Spring profiles: ${spring.profiles.active}
+         /'v'     ,-'     Datasource URL: ${roachbank.datasource.url}
+ ,------/ >< \---'              Locality: ${roachbank.locality}
 /)     ;  --  :
    ,---| ---- |--.
 
 Cockroach Bank Simulator - ${application.formatted-version}
 Copyright (c) 1989 - No Rights Reserved
 
-GREETINGS USER!
-Welcome to Roach Bank.
+Welcome to Roach Bank!
 Your are in a cold, dark indoor lobby.
 Type help for commands.

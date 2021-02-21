@@ -14,12 +14,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import io.roach.bank.annotation.TransactionMandatory;
+import io.roach.bank.annotation.TransactionControlService;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.web.api.MetadataException;
 
 @Repository
-@TransactionMandatory
+@TransactionControlService
 public class JdbcMetadataRepository implements MetadataRepository {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

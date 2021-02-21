@@ -24,5 +24,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Transactional(propagation = Propagation.MANDATORY)
-public @interface TransactionMandatory {
+public @interface TransactionControlService {
 }

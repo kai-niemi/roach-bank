@@ -13,7 +13,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionNotSupported;
+import io.roach.bank.annotation.TransactionNotAllowed;
 
 @Service
 @Profile(ProfileNames.CDC_KAFKA)
@@ -35,7 +35,7 @@ public class KafkaChangeFeedConsumer {
     }
 
     @KafkaListener(topics = TOPIC_ACCOUNTS, containerFactory = "accountListenerContainerFactory")
-    @TransactionNotSupported
+    @TransactionNotAllowed
     public void accountChanged(@Payload AccountChangeEvent event,
                                @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
                                @Header(KafkaHeaders.OFFSET) int offset) {
@@ -43,14 +43,14 @@ public class KafkaChangeFeedConsumer {
     }
 
     @KafkaListener(topics = TOPIC_TRANSACTIONS, containerFactory = "transactionListenerContainerFactory")
-    @TransactionNotSupported
+    @TransactionNotAllowed
     public void transactionCreated(@Payload TransactionChangeEvent event,
                                    @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
                                    @Header(KafkaHeaders.OFFSET) int offset) {
     }
 
     @KafkaListener(topics = TOPIC_TRANSACTION_LEGS, containerFactory = "transactionLegListenerContainerFactory")
-    @TransactionNotSupported
+    @TransactionNotAllowed
     public void transactionLegCreated(@Payload TransactionItemChangeEvent event,
                                       @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
                                       @Header(KafkaHeaders.OFFSET) int offset) {

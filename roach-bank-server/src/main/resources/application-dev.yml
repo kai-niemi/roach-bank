@@ -1,9 +1,10 @@
 roachbank:
   datasource:
     url: jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable&reWriteBatchedInserts=true
+#    url: jdbc:postgresql://192.168.1.99:5432/roach_bank?reWriteBatchedInserts=true
     driver-class-name: org.postgresql.Driver
     username: root
-    password:
+    password: root
     configuration:
       pool-name: roach-bank
       testOnBorrow: true

@@ -17,11 +17,12 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import io.roach.bank.annotation.TransactionMandatory;
+import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
-@TransactionMandatory
+@TransactionControlService
 public interface AccountJpaRepository extends JpaRepository<Account, Account.Id>,
         JpaSpecificationExecutor<Account> {
 
@@ -29,6 +30,13 @@ public interface AccountJpaRepository extends JpaRepository<Account, Account.Id>
             + "from Account a "
             + "where a.id = ?1")
     Money findBalanceById(Account.Id id);
+
+    @Query(value = "select a.currency,a.balance "
+            + "from account a "
+            + "as of system time experimental_follower_read_timestamp() "
+            + "where a.id = ?1 and a.region = ?2", nativeQuery = true)
+    @TransactionNotAllowed
+    Tuple findBalanceSnapshot(String id, String region);
 
     @Query(value = "select "
             + "count (a.id.uuid), "

@@ -29,7 +29,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionMandatory;
+import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
@@ -38,7 +39,7 @@ import io.roach.bank.domain.NoSuchAccountException;
 import io.roach.bank.repository.AccountRepository;
 
 @Repository
-@TransactionMandatory
+@TransactionControlService
 @Profile(ProfileNames.NOT_JPA)
 public class JdbcAccountRepository implements AccountRepository {
     private JdbcTemplate jdbcTemplate;
@@ -241,9 +242,22 @@ public class JdbcAccountRepository implements AccountRepository {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency "
                         + "FROM account a "
-                        + "WHERE id=? AND a.region=?",
-                new Object[] {id.getUUID(), id.getRegion()},
-                (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2))
+                        + "WHERE a.id=? AND a.region=?",
+                (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
+                id.getUUID(), id.getRegion()
+        );
+    }
+
+    @Override
+    @TransactionNotAllowed
+    public Money getBalanceSnapshot(Account.Id id) {
+        return this.jdbcTemplate.queryForObject(
+                "SELECT balance,currency "
+                        + "FROM account a "
+                        + "AS OF SYSTEM TIME experimental_follower_read_timestamp() "
+                        + "WHERE a.id=? AND a.region=?",
+                (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
+                id.getUUID(), id.getRegion()
         );
     }
 

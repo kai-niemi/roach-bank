@@ -40,12 +40,13 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
-//    @ConfigurationProperties("roachbank.datasource")
-    public DataSource proxiedDataSource(HikariDataSource dataSource) {
+    public DataSource dataSource() {
+        HikariDataSource dataSource = primaryDataSource();
         try {
             String version = new JdbcTemplate(dataSource).queryForObject("select version()", String.class);
             logger.info("Database version: {}", version);
         } catch (DataAccessException e) {
+            logger.warn("", e);
         }
 
         logger.info("Connection pool max size: {}", dataSource.getMaximumPoolSize());
@@ -54,19 +55,19 @@ public class DataSourceConfig {
         logger.info("Connection pool validation timeout: {}", dataSource.getValidationTimeout());
 
         if (logger.isDebugEnabled()) {
+            logger.warn("Wrapping data source in trace logging proxy");
             ChainListener listener = new ChainListener();
             listener.addListener(new DataSourceQueryCountListener());
-
-            return ProxyDataSourceBuilder
-                    .create(new LazyConnectionDataSourceProxy(dataSource))
+            return new LazyConnectionDataSourceProxy(ProxyDataSourceBuilder
+                    .create(dataSource)
                     .name("SQL-Trace")
                     .listener(listener)
                     .asJson()
                     .countQuery()
-                    .logQueryBySlf4j(SLF4JLogLevel.DEBUG, "io.roach.sql_trace")
+                    .logQueryBySlf4j(SLF4JLogLevel.DEBUG, "io.roach.SQL_TRACE")
 //                    .logSlowQueryBySlf4j(50, TimeUnit.MILLISECONDS)
                     .multiline()
-                    .build();
+                    .build());
         }
 
         return new LazyConnectionDataSourceProxy(dataSource);

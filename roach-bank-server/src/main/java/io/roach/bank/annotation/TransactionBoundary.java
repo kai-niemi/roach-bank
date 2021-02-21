@@ -7,6 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * Indicates the annotated class or method is a transactional service boundary. It's architectural role is to
  * delegate to control services or repositories to perform actual business logic processing in
@@ -20,7 +23,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-@TransactionRequiresNew
+@Transactional(propagation = Propagation.REQUIRES_NEW)
 public @interface TransactionBoundary {
     /**
      * (Optional) Indicates that the annotated class or method can read from a

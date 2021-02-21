@@ -61,7 +61,7 @@ public class Balance extends RestCommandSupport {
         accountMap.forEach((key, value) -> IntStream.range(0, concurrencyLevel)
                 .forEach(i -> throttledExecutor.submit(() -> randomRead(links),
                         TimeFormat.parseDuration(duration),
-                        key)
+                        key+ " balance")
                 ));
 
         console.info("Account regions: %s", regionMap.keySet());

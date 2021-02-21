@@ -23,6 +23,8 @@ public interface AccountRepository {
 
     Money getBalance(Account.Id id);
 
+    Money getBalanceSnapshot(Account.Id id);
+
     void closeAccount(Account.Id id);
 
     void openAccount(Account.Id id);
