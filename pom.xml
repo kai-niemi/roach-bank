@@ -13,7 +13,7 @@
 
     <groupId>io.roach.bank</groupId>
     <artifactId>roach-bank-parent</artifactId>
-    <version>1.0.1.BUILD-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
