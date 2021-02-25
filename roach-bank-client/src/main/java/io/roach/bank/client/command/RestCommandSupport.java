@@ -70,19 +70,25 @@ public abstract class RestCommandSupport {
 
         if (result.isEmpty()) {
             console.warn("No matching regions for: %s ", regions);
+        } else {
+            console.info("Regions:");
+            result.forEach((s, currency) -> {
+                console.info("   %s (%s)", s, currency);
+            });
         }
 
         return result;
     }
 
     protected Map<String, List<AccountModel>> lookupAccounts(Set<String> regions, int limit) {
-        console.debug("Looking up top %d accounts in regions %s", limit, regions);
-
         final Map<String, List<AccountModel>> accountMap = new HashMap<>();
-
         final Map<String, Object> parameters = new HashMap<>();
+
         parameters.put("limit", limit);
         parameters.put("regions", StringUtils.collectionToCommaDelimitedString(regions));
+
+        console.info("Looking up top accounts in %s (limit %d)",
+                StringUtils.collectionToCommaDelimitedString(regions), limit);
 
         // Get top accounts, filter client-side based on region
         for (AccountModel account : Objects.requireNonNull(traverson.fromRoot()
@@ -96,6 +102,11 @@ public abstract class RestCommandSupport {
 
         if (accountMap.isEmpty()) {
             console.warn("No accounts in regions %s ", regions);
+        } else {
+            console.info("Accounts found in regions %s", regions);
+            accountMap.forEach((r, accountModels) -> {
+                console.info("   %s (%d accounts)", r, accountModels.size());
+            });
         }
 
         return accountMap;

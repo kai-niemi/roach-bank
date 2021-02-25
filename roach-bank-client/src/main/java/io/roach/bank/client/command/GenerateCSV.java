@@ -61,7 +61,6 @@ public class GenerateCSV extends RestCommandSupport {
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
-            console.warn("No matching regions");
             return;
         }
 
@@ -83,8 +82,9 @@ public class GenerateCSV extends RestCommandSupport {
         final String finalSuffix;
         if (StringUtils.hasLength(suffix) && !suffix.startsWith("-")) {
             finalSuffix = "-" + suffix;
-        } else
-            finalSuffix= suffix;
+        } else {
+            finalSuffix = suffix;
+        }
 
         IntStream.rangeClosed(1, numFiles).forEach(value -> writers.add(WriterGroup.of(
                 path.resolve("account-" + value + finalSuffix + ".csv"),

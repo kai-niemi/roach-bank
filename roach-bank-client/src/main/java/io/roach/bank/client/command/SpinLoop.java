@@ -14,7 +14,8 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.support.ThrottledExecutor;
-import io.roach.bank.client.util.TimeFormat;
+import io.roach.bank.client.support.TimeDuration;
+import io.roach.bank.client.util.DurationFormat;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -58,7 +59,7 @@ public class SpinLoop {
                     throw new HttpServerErrorException(HttpStatus.CONFLICT, "Fake disturbance!");
                 }
                 return null;
-            }, TimeFormat.parseDuration(duration), g));
+            }, TimeDuration.of(DurationFormat.parseDuration(duration)), g));
         }
     }
 }

@@ -39,7 +39,7 @@ public class Connect {
         return connected;
     }
 
-    @ShellMethod(value = "Connect to API endpoint", key = {"connect","c"})
+    @ShellMethod(value = "Connect to API endpoint", key = {"connect", "c"})
     public void connect(@ShellOption(value = {"--url", "-u"},
             help = "REST API base URI", defaultValue = DEFAULT_URL) String baseUrl) {
 

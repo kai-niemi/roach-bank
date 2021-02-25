@@ -19,18 +19,21 @@ import org.springframework.shell.standard.ShellOption;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.util.TimeFormat;
+import io.roach.bank.client.support.TaskDuration;
+import io.roach.bank.client.support.TimeDuration;
+import io.roach.bank.client.util.DurationFormat;
 
 import static io.roach.bank.api.BankLinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class Balance extends RestCommandSupport {
-    @ShellMethod(value = "Query account balances", key = {"b","balance"})
+    @ShellMethod(value = "Query account balances", key = {"b", "balance"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void balance(
             @ShellOption(help = "use non-authoritative follower reads", defaultValue = "false") boolean followerReads,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int accountLimit,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
+                    int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency
@@ -39,6 +42,7 @@ public class Balance extends RestCommandSupport {
         if (regionMap.isEmpty()) {
             return;
         }
+
         final Map<String, List<AccountModel>> accountMap = lookupAccounts(regionMap.keySet(), accountLimit);
         if (accountMap.isEmpty()) {
             return;
@@ -58,13 +62,15 @@ public class Balance extends RestCommandSupport {
             });
         });
 
+        final TaskDuration taskDuration =
+                TimeDuration.of(DurationFormat.parseDuration(duration));
+
         accountMap.forEach((key, value) -> IntStream.range(0, concurrencyLevel)
                 .forEach(i -> throttledExecutor.submit(() -> randomRead(links),
-                        TimeFormat.parseDuration(duration),
-                        key+ " balance")
+                        taskDuration,
+                        key + " balance")
                 ));
 
-        console.info("Account regions: %s", regionMap.keySet());
         console.info("Max accounts per region: %d", accountLimit);
         console.info("Use follower reads: %s", followerReads);
         console.info("Concurrency level per region: %d", concurrencyLevel);

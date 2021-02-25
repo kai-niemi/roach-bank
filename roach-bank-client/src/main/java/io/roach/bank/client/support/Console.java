@@ -21,7 +21,7 @@ public class Console {
     }
 
     public void debug(String format, Object... args) {
-        custom(Color.MAGENTA, format, args);
+        custom(Color.GREEN, format, args);
     }
 
     public void info(String format, Object... args) {

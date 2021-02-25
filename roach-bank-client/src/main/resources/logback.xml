@@ -12,7 +12,10 @@
         <appender-ref ref="FILE" />
     </appender>
 
-    <logger name="io.roach" level="DEBUG"/>
+    <logger name="io.roach" level="DEBUG">
+        <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
 
     <logger name="io.roach.TX_LOG" level="DEBUG" additivity="false">
         <appender-ref ref="ASYNC_FILE"/>

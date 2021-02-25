@@ -5,10 +5,10 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class TimeFormat {
+public abstract class DurationFormat {
     private static final Pattern DURATION_PATTERN = Pattern.compile("([0-9]+)([smhdw])");
 
-    private TimeFormat() {
+    private DurationFormat() {
     }
 
     public static Duration parseDuration(String duration) {

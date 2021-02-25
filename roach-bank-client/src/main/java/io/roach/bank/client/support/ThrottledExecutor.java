@@ -1,6 +1,5 @@
 package io.roach.bank.client.support;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -13,26 +12,20 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 
-import io.roach.bank.client.util.CallStats;
-
 @Component
 public class ThrottledExecutor {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     private final Map<String, LinkedList<Future<String>>> workers
             = Collections.synchronizedMap(new LinkedHashMap<>());
 
@@ -47,6 +40,9 @@ public class ThrottledExecutor {
     @Value("${roachbank.threadPool.blockingCoef}")
     private int blockingCoef;
 
+    @Autowired
+    private Console console;
+
     @PostConstruct
     public void init() {
         int corePoolSize = poolSize > 0 ? poolSize
@@ -55,7 +51,7 @@ public class ThrottledExecutor {
         this.executor = new ThreadPoolExecutor(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS,
                 new LinkedBlockingDeque<>(corePoolSize * 2));
 
-        logger.info("Bootstrap ThrottledExecutor with core pool size: {} available vcpus: {}",
+        console.info("Bootstrap ThrottledExecutor with core pool size: %d available vcpus: %d",
                 corePoolSize, Runtime.getRuntime().availableProcessors());
     }
 
@@ -70,13 +66,7 @@ public class ThrottledExecutor {
         }
     }
 
-    public <V> Future<String> submit(Callable<V> callable, Duration duration, String groupName) {
-        return submit(callable, duration, groupName, s -> {
-        });
-    }
-
-    public <V> Future<String> submit(Callable<V> callable, Duration duration, String groupName,
-                                     Consumer<String> completionCallback) {
+    public <V> Future<String> submit(Callable<V> callable, TaskDuration duration, String groupName) {
         final Supplier<String> displayNameCallback =
                 () -> groupName + " (" + (workers.getOrDefault(groupName, new LinkedList<>()).size()) + ")";
 
@@ -116,15 +106,13 @@ public class ThrottledExecutor {
                         locked = lock.tryLock();
 
                         long backoffMillis = Math.min((long) (Math.pow(2, callCount) + Math.random() * 1000), 15000);
-                        if (logger.isWarnEnabled()) {
-                            if (e instanceof HttpStatusCodeException) {
-                                HttpStatus status = ((HttpStatusCodeException) e).getStatusCode();
-                                logger.warn("HTTP status {} (backoff {}ms) in call #{} to '{}': {}",
-                                        status, backoffMillis, callCount, groupName, e.getMessage());
-                            } else {
-                                logger.warn("HTTP resource exception (backoff {}ms) in call #{} to '{}': {}",
-                                        backoffMillis, callCount, groupName, e.getMessage());
-                            }
+                        if (e instanceof HttpStatusCodeException) {
+                            HttpStatus status = ((HttpStatusCodeException) e).getStatusCode();
+                            console.warn("HTTP status %s (backoff %dms) in call #%s to '%s': %s",
+                                    status, backoffMillis, callCount, groupName, e.getMessage());
+                        } else {
+                            console.warn("HTTP resource exception (backoff %dms) in call #%s to '%s': %s",
+                                    backoffMillis, callCount, groupName, e.getMessage());
                         }
                         Thread.sleep(backoffMillis);
                     } finally {
@@ -134,13 +122,13 @@ public class ThrottledExecutor {
                     }
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    logger.trace("Thread interrupted - aborting worker for {} prematurely", groupName);
+                    console.warn("Thread interrupted - aborting worker for %s prematurely", groupName);
                     break;
                 } catch (Throwable e) {
-                    logger.error("Uncategorized error - aborting worker prematurely", e);
+                    console.error("Uncategorized error - aborting worker prematurely", e);
                     break;
                 }
-            } while (System.currentTimeMillis() - startTime < duration.toMillis()
+            } while (duration.progress()
                     && !executor.isTerminating()
                     && !executor.isShutdown()
                     && !Thread.interrupted()
@@ -159,16 +147,15 @@ public class ThrottledExecutor {
                     Future<String> f = futures.peek();
                     try {
                         f.get();
-                        logger.info("Worker group '{}' finished", groupName);
+                        console.info("Worker group '%s' finished", groupName);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     } catch (ExecutionException e) {
-                        logger.warn("Worker group '" + groupName + "' error", e);
+                        console.warn("Worker group '" + groupName + "' error", e);
                     } catch (CancellationException e) {
-                        logger.debug("Worker group '{}' cancelled", groupName);
+                        console.debug("Worker group '%s' cancelled", groupName);
                     } finally {
                         futures.remove(f);
-                        completionCallback.accept(groupName);
                     }
                 }
                 workers.remove(groupName);
@@ -176,7 +163,7 @@ public class ThrottledExecutor {
             });
         } else {
             futures.add(future);
-            logger.debug("Adding worker for group '{}'", groupName);
+            console.debug("Adding worker for group '%s'", groupName);
         }
 
         return future;
@@ -203,18 +190,18 @@ public class ThrottledExecutor {
     }
 
     public void printStatus() {
-        logger.debug(">> Executor Stats");
-        logger.debug("activeCount: {}", executor.getActiveCount());
-        logger.debug("taskCount: {}", executor.getTaskCount());
-        logger.debug("completedTaskCount: {}", executor.getCompletedTaskCount());
-        logger.debug("corePoolSize: {}", executor.getCorePoolSize());
-        logger.debug("poolSize: {}", executor.getPoolSize());
-        logger.debug("largestPoolSize: {}", executor.getLargestPoolSize());
-        logger.debug("maximumPoolSize: {}", executor.getMaximumPoolSize());
-        logger.debug("isShutdown: {}", executor.isShutdown());
-        logger.debug("isTerminated: {}", executor.isTerminated());
-        logger.debug("isTerminating: {}", executor.isTerminating());
-        logger.debug("queue: {}:", executor.getQueue().size());
-        logger.debug("workerCount: {}:", workers.size());
+        console.debug("Executor Stats:");
+        console.debug("activeCount: %d", executor.getActiveCount());
+        console.debug("taskCount: %d", executor.getTaskCount());
+        console.debug("completedTaskCount: %d", executor.getCompletedTaskCount());
+        console.debug("corePoolSize: %d", executor.getCorePoolSize());
+        console.debug("poolSize: %d", executor.getPoolSize());
+        console.debug("largestPoolSize: %d", executor.getLargestPoolSize());
+        console.debug("maximumPoolSize: %d", executor.getMaximumPoolSize());
+        console.debug("isShutdown: %d", executor.isShutdown());
+        console.debug("isTerminated: %d", executor.isTerminated());
+        console.debug("isTerminating: %d", executor.isTerminating());
+        console.debug("queue: %d:", executor.getQueue().size());
+        console.debug("workerCount: %d:", workers.size());
     }
 }

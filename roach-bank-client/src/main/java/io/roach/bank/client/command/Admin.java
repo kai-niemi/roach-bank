@@ -14,6 +14,8 @@ import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
@@ -25,8 +27,8 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.standard.commands.Quit;
 import org.springframework.util.FileCopyUtils;
 
+import io.roach.bank.client.support.CallStats;
 import io.roach.bank.client.support.Console;
-import io.roach.bank.client.util.CallStats;
 import io.roach.bank.client.support.SchedulingHelper;
 import io.roach.bank.client.support.ThrottledExecutor;
 
@@ -58,9 +60,14 @@ public class Admin implements Quit.Command {
         this.statsFuture = scheduler.scheduleAtFixedRate(CallStats::printStdOut, PRINT_INTERVAL, PRINT_INTERVAL);
     }
 
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     @ShellMethod(value = "Exit the shell", key = {"quit", "exit", "q"})
     public void quit() {
-        console.info("Have a nice day!");
+//        logger.debug("debug");
+//        logger.info("info");
+//        logger.warn("warn");
+//        logger.error("error");
         applicationContext.close();
         throw new ExitRequest();
     }
@@ -87,7 +94,7 @@ public class Admin implements Quit.Command {
         }
     }
 
-    @ShellMethod(value = "Print worker pool status", key = {"print-stats","ps"})
+    @ShellMethod(value = "Print worker pool status", key = {"print-stats", "ps"})
     public void printStats() {
         throttledExecutor.printStatus();
     }
@@ -117,18 +124,18 @@ public class Admin implements Quit.Command {
     @ShellMethod(value = "Print local system information")
     public void printInfo() {
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-        console.custom(Console.Color.YELLOW,  ">> OS");
+        console.custom(Console.Color.YELLOW, ">> OS");
         console.info(" Arch: %s | OS: %s | Version: %s", os.getArch(), os.getName(), os.getVersion());
         console.info(" Available processors: %d", os.getAvailableProcessors());
         console.info(" Load avg: %f", os.getSystemLoadAverage());
 
         RuntimeMXBean r = ManagementFactory.getRuntimeMXBean();
-        console.custom(Console.Color.YELLOW,">> Runtime");
+        console.custom(Console.Color.YELLOW, ">> Runtime");
         console.info(" Uptime: %s", r.getUptime());
         console.info(" VM name: %s | Vendor: %s | Version: %s", r.getVmName(), r.getVmVendor(), r.getVmVersion());
 
         ThreadMXBean t = ManagementFactory.getThreadMXBean();
-        console.custom(Console.Color.YELLOW,">> Runtime");
+        console.custom(Console.Color.YELLOW, ">> Runtime");
         console.info(" Peak threads: %d", t.getPeakThreadCount());
         console.info(" Thread #: %d", t.getThreadCount());
         console.info(" Total started threads: %d", t.getTotalStartedThreadCount());
@@ -141,7 +148,7 @@ public class Admin implements Quit.Command {
         });
 
         MemoryMXBean m = ManagementFactory.getMemoryMXBean();
-        console.custom(Console.Color.YELLOW,">> Memory");
+        console.custom(Console.Color.YELLOW, ">> Memory");
         console.info(" Heap: %s", m.getHeapMemoryUsage().toString());
         console.info(" Non-heap: %s", m.getNonHeapMemoryUsage().toString());
         console.info(" Pending GC: %s", m.getObjectPendingFinalizationCount());

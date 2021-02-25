@@ -1,4 +1,4 @@
-package io.roach.bank.client.util;
+package io.roach.bank.client.support;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -45,10 +45,10 @@ public class CallStats {
     public static final int FRAME_SIZE = 50000;
 
     public static CallStats of(String key, Supplier<String> displayName) {
-        return of(key, displayName, Duration.ZERO);
+        return of(key, displayName, TimeDuration.of(Duration.ZERO));
     }
 
-    public static CallStats of(String key, Supplier<String> displayName, Duration duration) {
+    public static CallStats of(String key, Supplier<String> displayName, TaskDuration duration) {
         return all.computeIfAbsent(key, k -> new CallStats(displayName, duration));
     }
 
@@ -145,9 +145,7 @@ public class CallStats {
 
     private final Supplier<String> labelCallback;
 
-    private final Duration duration;
-
-    private final long startTime;
+    private final TaskDuration duration;
 
     private final AtomicInteger callCount = new AtomicInteger();
 
@@ -157,10 +155,9 @@ public class CallStats {
 
     private final List<Snapshot> frames = Collections.synchronizedList(new LinkedList<>());
 
-    private CallStats(Supplier<String> labelCallback, Duration duration) {
+    private CallStats(Supplier<String> labelCallback, TaskDuration duration) {
         this.labelCallback = labelCallback;
         this.duration = duration;
-        this.startTime = System.nanoTime();
     }
 
     public long now() {
@@ -182,11 +179,11 @@ public class CallStats {
     }
 
     private double executionTimeSeconds() {
-        return Duration.ofNanos(System.nanoTime() - startTime).toMillis() / 1000.0;
+        return duration.executionTimeSeconds();
     }
 
     private double executionProgress() {
-        return Math.min(1.0, executionTimeSeconds() / (double) duration.getSeconds()) * 100.0;
+        return duration.executionProgress();
     }
 
     private String formatStats() {

@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.Map;
 
@@ -18,8 +17,8 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.support.Money;
-import io.roach.bank.client.util.ByteFormat;
 import io.roach.bank.client.support.Console;
+import io.roach.bank.client.util.ByteFormat;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -31,13 +30,13 @@ public class GenerateSQL extends RestCommandSupport {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void generateSQL(
             @ShellOption(help = "output path", defaultValue = ".data") String output,
-            @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00") String balance,
+            @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00")
+                    String balance,
             @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) throws IOException {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
-            console.warn("No matching regions");
             return;
         }
 

@@ -12,13 +12,21 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
+import io.roach.bank.client.support.CallStats;
+import io.roach.bank.client.support.TaskDuration;
+import io.roach.bank.client.support.TimeDuration;
+
 public class CallStatsTest {
     @Test
     public void whenRunningConcurrentTasks_thenPrintLatencyPercentiles_andStuff() {
         Executors.newSingleThreadScheduledExecutor()
                 .scheduleAtFixedRate(CallStats::printStdOut, 3, 3, TimeUnit.SECONDS);
 
-        Duration duration = Duration.ofSeconds(30);
+
+        final TaskDuration taskDuration =
+//                new CountDuration(100_000);
+                TimeDuration.of(Duration.ofSeconds(30));
+
         long now = System.currentTimeMillis();
         int tasks = 5;
         int threads = 5;
@@ -34,9 +42,9 @@ public class CallStatsTest {
 
             IntStream.rangeClosed(1, threads).forEach(thread -> {
                 Future<?> f = executorService.submit(() -> {
-                    CallStats callStats = CallStats.of(name, () -> name, duration);
+                    CallStats callStats = CallStats.of(name, () -> name, taskDuration);
 
-                    while (System.currentTimeMillis() - now < duration.toMillis()) {
+                    while (taskDuration.progress()) {
                         long begin = callStats.now();
                         try {
                             long d = (long) (minDelay + Math.random() * (maxDelay - minDelay));

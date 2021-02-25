@@ -7,14 +7,11 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellCommandGroup;
@@ -22,7 +19,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.web.client.RestClientException;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
@@ -30,19 +26,19 @@ import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.support.SchedulingHelper;
-import io.roach.bank.client.util.TimeFormat;
+import io.roach.bank.client.support.CountDuration;
+import io.roach.bank.client.support.TaskDuration;
+import io.roach.bank.client.support.TimeDuration;
+import io.roach.bank.client.util.DurationFormat;
 
-import static io.roach.bank.api.BankLinkRelations.*;
+import static io.roach.bank.api.BankLinkRelations.TRANSACTION_FORM_REL;
+import static io.roach.bank.api.BankLinkRelations.TRANSACTION_REL;
 import static io.roach.bank.api.support.RandomData.selectRandom;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class Transfer extends RestCommandSupport {
     protected final Logger transactionLogger = LoggerFactory.getLogger("io.roach.TX_LOG");
-
-    @Autowired
-    private SchedulingHelper scheduler;
 
     // 64 chars
     private static final List<String> QUOTES = Arrays.asList(
@@ -52,22 +48,19 @@ public class Transfer extends RestCommandSupport {
             "Cockroaches can run up to three miles in an hour"
     );
 
-    @ShellMethod(value = "Transfer funds between accounts", key = {"tf", "transfer"})
+    @ShellMethod(value = "Transfer funds between accounts", key = {"t", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.25-5.00") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
-            @ShellOption(help = "transfer funds across regions using multi-currency transactions", defaultValue = "false")
-            final boolean crossRegion,
-            @ShellOption(help = "account balance refresh interval for weighted distribution", defaultValue = "60s")
-            final String refreshInterval,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
-            final int accountLimit,
+            @ShellOption(help = "transfer funds across regions", defaultValue = "false") final boolean crossRegion,
+            @ShellOption(help = "account balance refresh interval", defaultValue = "30m") final String refreshInterval,
+            @ShellOption(help = "number of transactions rather than duration (if > 0)", defaultValue = "-1") int transactions,
+            @ShellOption(help = "enable verbose logging", defaultValue = "false") boolean enableLogging,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
-            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION)
-            final String duration,
-            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency,
-            @ShellOption(help = "enable verbose logging", defaultValue = "false") boolean enableLogging
+            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
+            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
@@ -81,12 +74,7 @@ public class Transfer extends RestCommandSupport {
         final int concurrencyLevel = concurrency > 0 ? concurrency :
                 Math.max(1, Runtime.getRuntime().availableProcessors() * 2 / regionMap.size());
 
-        final long refreshIntervalSec = TimeFormat.parseDuration(refreshInterval).getSeconds();
-
-        final Optional<ScheduledFuture<?>> balanceUpdater = refreshIntervalSec > 0
-                ? Optional.of(scheduler.scheduleAtFixedRate(() ->
-                updateBalanceSnapshots(accountMap), refreshIntervalSec, refreshIntervalSec))
-                : Optional.empty();
+        final long refreshIntervalSec = DurationFormat.parseDuration(refreshInterval).getSeconds();
 
         final Link transferLink = traverson.fromRoot()
                 .follow(BankLinkRelations.withCurie(TRANSACTION_REL))
@@ -94,6 +82,10 @@ public class Transfer extends RestCommandSupport {
                 .asTemplatedLink();
 
         final String[] amountParts = amount.split("-");
+
+        final TaskDuration taskDuration = transactions > 0
+                ? CountDuration.of(transactions)
+                : TimeDuration.of(DurationFormat.parseDuration(duration));
 
         accountMap.keySet().forEach((regionKey) -> IntStream.range(0, concurrencyLevel)
                 .forEach(i -> throttledExecutor.submit(() -> {
@@ -116,12 +108,10 @@ public class Transfer extends RestCommandSupport {
                             return executeOneTransfer(transferLink, regionKey, subjectAccountMap, amountParts, legs,
                                     enableLogging);
                         },
-                        TimeFormat.parseDuration(duration),
-                        regionKey + " transfer", // region name
-                        groupName -> balanceUpdater.ifPresent(future -> future.cancel(true)))
+                        taskDuration,
+                        regionKey + " transfer")
                 ));
 
-        console.info("Account regions: %s", regionMap.keySet());
         console.info("Multi-region: %s", crossRegion);
         console.info("Amount range per transaction: %s", amount);
         console.info("Legs per transaction: %s", legs);
@@ -129,18 +119,6 @@ public class Transfer extends RestCommandSupport {
         console.info("Refresh balance interval: %ds", refreshIntervalSec);
         console.info("Concurrency level per region: %d", concurrencyLevel);
         console.info("Execution duration: %s", duration);
-    }
-
-    private void updateBalanceSnapshots(Map<String, List<AccountModel>> accounts) {
-        accounts.forEach((region, accountModels) -> accountModels.forEach(accountModel -> {
-            try {
-                Link selfLink = accountModel.getLink(withCurie(ACCOUNT_BALANCE_SNAPSHOT_REL)).get();
-                Money copy = restTemplate.getForObject(selfLink.toUri(), Money.class);
-                accountModel.setBalance(copy);
-            } catch (RestClientException e) {
-                transactionLogger.trace("Error retrieving account balance snapshot: {}", e.toString());
-            }
-        }));
     }
 
     private TransactionModel executeOneTransfer(Link transferLink,

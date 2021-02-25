@@ -10,8 +10,6 @@ public abstract class Constants {
 
     public static final String API_REPORTING_COMMANDS = "Reporting Commands";
 
-    public static final String API_META_COMMANDS = "Metadata Commands";
-
     public static final String ADMIN_COMMANDS = "Admin Commands";
 
     public static final String DEFAULT_DURATION = "60m";
@@ -26,7 +24,7 @@ public abstract class Constants {
 
     public static final String CONC_HELP = "number of concurrent workers per region";
 
-    public static final String ACCOUNT_LIMIT_HELP = "max number of accounts per region to query (negative value means default)";
+    public static final String ACCOUNT_LIMIT_HELP = "max number of accounts per region to query (negative value means server default)";
 
     public static final String DEFAULT_ACCOUNT_LIMIT = "-1";
 
