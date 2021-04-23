@@ -82,7 +82,7 @@ public class ThrottledExecutor {
 
             do {
                 final ReentrantLock lock = locks.get(groupName);
-                final long begin = callStats.now();
+                final long beginTime = callStats.now();
 
                 try {
                     if (lock.isLocked()) {
@@ -94,11 +94,16 @@ public class ThrottledExecutor {
 
                         callable.call();
 
-                        callStats.mark(begin, null);
+                        callStats.mark(beginTime, null);
+
+                        if (callCount > 1) {
+                            console.info("Recovered after %s transient errors in call to '%s'", callCount, groupName);
+                        }
+
                         callCount = 0;
                     }
                 } catch (HttpStatusCodeException | ResourceAccessException e) { // Retry on all HTTP errors
-                    callStats.mark(begin, e);
+                    callStats.mark(beginTime, e);
 
                     boolean locked = false;
                     try {

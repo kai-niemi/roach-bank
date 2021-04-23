@@ -48,8 +48,9 @@
                         <a class="dropdown-item" th:href="@{/api/account}">Accounts</a>
                         <a class="dropdown-item" th:href="@{/api/transaction}">Transactions</a>
                         <a class="dropdown-item" th:href="@{/api/report}">Reports</a>
-                        <a class="dropdown-item" th:href="@{/api/metadata}">Metadata</a>
                         <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" th:href="@{/api/metadata}">Metadata</a>
+                        <a class="dropdown-item" th:href="@{/api/admin}">Admin</a>
                         <a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a>
                     </div>
                 </li>
@@ -94,7 +95,7 @@
         </table>
 
         <button type="submit" class="btn btn-sm btn-dark" data-toggle="tooltip" data-placement="right" id="refresh-button"
-                title="Refresh account and transaction history (expensive operations)" onclick="refreshReport()">Refresh Now
+                title="Refresh account and transaction history (runs every 30s by default)" onclick="refreshReport()">Refresh Now
         </button>
 
     </div>

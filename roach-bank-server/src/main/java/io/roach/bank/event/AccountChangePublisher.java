@@ -1,6 +1,8 @@
 package io.roach.bank.event;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -70,8 +72,13 @@ public class AccountChangePublisher {
 
                     final AccountChangeEvent changeEvent = buffer.poll(1000, TimeUnit.MILLISECONDS);
                     if (changeEvent != null) {
-                        simpMessagingTemplate.convertAndSend("/topic/accounts", Collections.singletonList(changeEvent));
-                        eventsSent.increment();
+                        List<AccountChangeEvent> batch = new ArrayList<>();
+                        batch.add(changeEvent);
+
+                        buffer.drainTo(batch, BATCH_SIZE / 2);
+
+                        simpMessagingTemplate.convertAndSend("/topic/accounts", batch);
+                        eventsSent.increment(batch.size());
 
                         if (logger.isTraceEnabled()) {
                             logger.trace("Events ({} sent, {} queued, {} lost)",

@@ -36,4 +36,6 @@ public interface AccountRepository {
     List<Account> findAccountsByRegion(String region, int limit);
 
     List<Account> findAccountsForUpdate(Set<Account.Id> ids);
+
+    void deleteAll();
 }

@@ -28,7 +28,7 @@ import io.roach.bank.repository.TransactionRepository;
 
 @Service
 @TransactionControlService
-public class DefaultTransactionService implements TransactionService {
+public class DefaultBankService implements BankService {
     @Autowired
     private AccountRepository accountRepository;
 
@@ -126,5 +126,11 @@ public class DefaultTransactionService implements TransactionService {
     @Override
     public Page<TransactionItem> findItemsByTransactionId(Transaction.Id transactionId, Pageable page) {
         return transactionRepository.findItems(transactionId, page);
+    }
+
+    @Override
+    public void deleteAll() {
+        transactionRepository.deleteAll();
+        accountRepository.deleteAll();
     }
 }

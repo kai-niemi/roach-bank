@@ -31,7 +31,7 @@ import static io.roach.bank.api.BankLinkRelations.withCurie;
 public class CreateAccounts extends RestCommandSupport {
     @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void createAccounts(
+    public void accounts(
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency,

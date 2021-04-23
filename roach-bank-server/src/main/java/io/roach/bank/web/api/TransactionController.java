@@ -27,7 +27,7 @@ import io.roach.bank.api.TransactionModel;
 import io.roach.bank.domain.NoSuchTransactionException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
-import io.roach.bank.service.TransactionService;
+import io.roach.bank.service.BankService;
 import io.roach.bank.web.support.MessageModel;
 import io.roach.bank.web.support.ZoomExpression;
 
@@ -42,7 +42,7 @@ public class TransactionController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private TransactionService transactionService;
+    private BankService bankService;
 
     @Autowired
     private TransactionResourceAssembler transactionResourceAssembler;
@@ -89,7 +89,7 @@ public class TransactionController {
     public PagedModel<TransactionModel> listTransactions(
             @PageableDefault(size = 5) Pageable page) {
         return pagedTransactionResourceAssembler
-                .toModel(transactionService.find(page), transactionResourceAssembler);
+                .toModel(bankService.find(page), transactionResourceAssembler);
     }
 
     @GetMapping(value = "/{id}/{region}")
@@ -99,7 +99,7 @@ public class TransactionController {
             @PathVariable(value = "region", required = false) String region) {
         Transaction.Id txId = Transaction.Id.of(id, region);
 
-        Transaction entity = transactionService.findById(txId);
+        Transaction entity = bankService.findById(txId);
         if (entity == null) {
             throw new NoSuchTransactionException(txId.toString());
         }
@@ -107,7 +107,7 @@ public class TransactionController {
         TransactionModel resource = transactionResourceAssembler.toModel(entity);
 
         if (ZoomExpression.ofCurrentRequest().containsRel(withCurie(TRANSACTION_ITEMS_REL))) {
-            Page<TransactionItem> entities = transactionService.findItemsByTransactionId(txId, PageRequest.of(0, 10));
+            Page<TransactionItem> entities = bankService.findItemsByTransactionId(txId, PageRequest.of(0, 10));
             resource.setTransactionItems(transactionItemResourceAssembler.toCollectionModel(entities.getContent()));
         }
 

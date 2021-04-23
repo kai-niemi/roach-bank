@@ -33,8 +33,10 @@ client1=${clients[0]}
 #################################################
 if [ "${cloud}" = "aws" ]; then
   fn_failcheck roachprod create $CLUSTER --clouds=aws --aws-machine-type-ssd=${machinetypes} --geo --local-ssd --nodes=${nodes} --aws-zones=${zones}
-else
+elif [ "${cloud}" = "gce" ]; then
   fn_failcheck roachprod create $CLUSTER --clouds=gce --gce-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --gce-zones=${zones}
+else
+  fn_failcheck roachprod create $CLUSTER --clouds=azure --azure-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --azure-locations=${zones}
 fi
 
 #################################################
@@ -53,23 +55,18 @@ do
   region=${regions[$i]}
   i=($i+1)
 
-  fn_echo_info_nl "Installing haproxy in ${CLUSTER}:$c"
   fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq update'
-  fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y haproxy'
+  fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-8-jre-headless htop dstat haproxy'
   fn_failcheck roachprod run ${CLUSTER}:$c "./cockroach gen haproxy --insecure --host $(roachprod ip $CLUSTER:1 --external) --locality=region=$region"
   fn_failcheck roachprod run ${CLUSTER}:$c 'nohup haproxy -f haproxy.cfg > /dev/null 2>&1 &'
 
-  fn_echo_info_nl "Installing OpenJDK in ${CLUSTER}:$c"
-  fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-8-jre-headless'
-
   fn_echo_info_nl "Deploying app binaries to ${CLUSTER}:$c"
-
   fn_failcheck roachprod put ${CLUSTER}:$c roach-bank.tar.gz
   fn_failcheck roachprod run ${CLUSTER}:$c "tar xvfz roach-bank.tar.gz --exclude='*.sh'"
 done
 
 #################################################
-fn_echo_info_nl "Creating database roach_bank"
+fn_echo_info_nl "Creating database roach_bank via $CLUSTER:$client1"
 fn_failcheck roachprod run $CLUSTER:$client1 <<EOF
 ./cockroach sql --insecure --host=`roachprod ip $CLUSTER:1` -e "CREATE DATABASE roach_bank"
 EOF
@@ -122,8 +119,8 @@ fn_echo_info_nl "Command hints:"
 for c in "${clients[@]}"
 do
 fn_echo_info_nl "roachprod run $CLUSTER:$c"
-fn_echo_info_nl "./roach-bank-client.jar connect"
 done
+fn_echo_info_nl "./roach-bank-client.jar connect transfer balance --follower-reads"
 
 fn_echo_info_nl "Admin URLs:"
 for c in "${clients[@]}"

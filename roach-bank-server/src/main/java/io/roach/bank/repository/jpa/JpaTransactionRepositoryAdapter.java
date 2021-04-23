@@ -47,4 +47,10 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
     public Page<TransactionItem> findItems(Transaction.Id id, Pageable pageable) {
         return itemRepository.findById(id.getUUID(), pageable);
     }
+
+    @Override
+    public void deleteAll() {
+        itemRepository.deleteAllInBatch();
+        transactionRepository.deleteAllInBatch();
+    }
 }

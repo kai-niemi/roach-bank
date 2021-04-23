@@ -94,13 +94,23 @@ public class TransactionHintsAspect {
             jdbcTemplate.execute("SET vectorize='" + transactionBoundary.vectorize().name() + "'");
         }
 
-        if (transactionBoundary.timeout() > 0) {
-            jdbcTemplate.update("SET statement_timeout=?", transactionBoundary.timeout() * 1000);
+        if (transactionBoundary.statementTimeout() > 0) {
+            jdbcTemplate.update("SET statement_timeout=?", transactionBoundary.statementTimeout() * 1000);
         }
 
-//        if (transactionBoundary.readOnly()) {
-//            jdbcTemplate.execute("SET transaction_read_only=true");
-//        }
+        if (transactionBoundary.idleInSessionTimeout() > 0) {
+            jdbcTemplate.update("SET idle_in_session_timeout=?", transactionBoundary.idleInSessionTimeout() * 1000);
+        }
+
+        if (transactionBoundary.idleInTransactionSessionTimeout() > 0) {
+            jdbcTemplate
+                    .update("SET idle_in_transaction_session_timeout=?",
+                            transactionBoundary.idleInTransactionSessionTimeout() * 1000);
+        }
+
+        if (transactionBoundary.readOnly()) {
+            jdbcTemplate.execute("SET transaction_read_only=true");
+        }
 
         TimeTravel timeTravel = transactionBoundary.timeTravel();
 

@@ -172,10 +172,10 @@ public class JdbcAccountRepository implements AccountRepository {
     @Override
     public Page<Account> findAccountPage(Set<String> regions, Pageable pageable) {
         String sql =
-                "SELECT a.* "
-                        + "FROM account a "
+                "SELECT * "
+                        + "FROM account "
                         + "WHERE region IN (:regions) "
-                        + "ORDER BY a.id, a.region "
+                        + "ORDER BY id, region "
                         + "LIMIT :limit OFFSET :offset ";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource()
@@ -212,25 +212,26 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public List<Account> findAccountsByRegion(String region, int limit) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("region", region);
-        parameters.addValue("limit", limit);
         return this.namedParameterJdbcTemplate.query(
                 "SELECT * FROM account WHERE region=:region "
                         + "AND name LIKE 'user:%' "
-                        + "ORDER BY name LIMIT (:limit)",
-                parameters, (rs, rowNum) -> readAccount(rs));
+                        + "ORDER BY name "
+                        + "LIMIT (:limit)",
+                new MapSqlParameterSource()
+                        .addValue("region", region)
+                        .addValue("limit", limit),
+                (rs, rowNum) -> readAccount(rs));
     }
 
     @Override
     public Account getAccountById(Account.Id id) {
         try {
             return this.jdbcTemplate.queryForObject(
-                    "SELECT a.* "
-                            + "FROM account a "
-                            + "WHERE a.id=? AND a.region=?",
-                    new Object[] {id.getUUID(), id.getRegion()},
-                    (rs, rowNum) -> readAccount(rs)
+                    "SELECT * "
+                            + "FROM account "
+                            + "WHERE id=? AND region=?",
+                    (rs, rowNum) -> readAccount(rs),
+                    id.getUUID(), id.getRegion()
             );
         } catch (EmptyResultDataAccessException e) {
             throw new NoSuchAccountException(id.toString());
@@ -241,8 +242,8 @@ public class JdbcAccountRepository implements AccountRepository {
     public Money getBalance(Account.Id id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency "
-                        + "FROM account a "
-                        + "WHERE a.id=? AND a.region=?",
+                        + "FROM account "
+                        + "WHERE id=? AND region=?",
                 (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
                 id.getUUID(), id.getRegion()
         );
@@ -253,9 +254,9 @@ public class JdbcAccountRepository implements AccountRepository {
     public Money getBalanceSnapshot(Account.Id id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency "
-                        + "FROM account a "
+                        + "FROM account "
                         + "AS OF SYSTEM TIME experimental_follower_read_timestamp() "
-                        + "WHERE a.id=? AND a.region=?",
+                        + "WHERE id=? AND region=?",
                 (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
                 id.getUUID(), id.getRegion()
         );
@@ -272,5 +273,10 @@ public class JdbcAccountRepository implements AccountRepository {
                 .withAllowNegative(rs.getInt("allow_negative") > 0)
                 .withUpdated(rs.getTimestamp("updated").toLocalDateTime())
                 .build();
+    }
+
+    @Override
+    public void deleteAll() {
+        jdbcTemplate.execute("TRUNCATE TABLE account");
     }
 }

@@ -49,13 +49,27 @@ public @interface TransactionBoundary {
     boolean readOnly() default false;
 
     /**
-     * @return session/transaction timeout in seconds. Negative value use default timeout.
+     * The amount of time a statement can run before being stopped.
+     * https://www.cockroachlabs.com/docs/v20.2/set-vars
+     *
+     * @return statement timeout in seconds. Negative value use default timeout.
      */
-    int timeout() default -1;
+    int statementTimeout() default -1;
 
     /**
-     * See https://www.cockroachlabs.com/docs/v19.2/set-transaction.html#set-priority
+     * Automatically terminates sessions that idle past the specified threshold.
+     * @return When set to 0, the session will not timeout. Negative value use default timeout.
+     */
+    int idleInSessionTimeout() default -1;
+
+    /**
+     * Automatically terminates sessions that are idle in a transaction past the specified threshold.
      *
+     * @return When set to 0, the session will not timeout. Negative value use default timeout.
+     */
+    int idleInTransactionSessionTimeout() default -1;
+
+    /**
      * @return sets the transaction priority
      */
     Priority priority() default Priority.normal;

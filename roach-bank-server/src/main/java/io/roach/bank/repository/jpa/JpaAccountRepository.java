@@ -117,4 +117,9 @@ public class JpaAccountRepository implements AccountRepository {
                 .setMaxResults(limit)
                 .getResultList();
     }
+
+    @Override
+    public void deleteAll() {
+        accountRepository.deleteAllInBatch();
+    }
 }

@@ -1,5 +1,7 @@
 package io.roach.bank.config.data;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -9,8 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
 import com.zaxxer.hikari.HikariDataSource;
@@ -42,20 +42,8 @@ public class DataSourceConfig {
     @Primary
     public DataSource dataSource() {
         HikariDataSource dataSource = primaryDataSource();
-        try {
-            String version = new JdbcTemplate(dataSource).queryForObject("select version()", String.class);
-            logger.info("Database version: {}", version);
-        } catch (DataAccessException e) {
-            logger.warn("", e);
-        }
-
-        logger.info("Connection pool max size: {}", dataSource.getMaximumPoolSize());
-        logger.info("Connection pool idle timeout: {}", dataSource.getIdleTimeout());
-        logger.info("Connection pool max lifetime: {}", dataSource.getMaxLifetime());
-        logger.info("Connection pool validation timeout: {}", dataSource.getValidationTimeout());
 
         if (logger.isDebugEnabled()) {
-            logger.warn("Wrapping data source in trace logging proxy");
             ChainListener listener = new ChainListener();
             listener.addListener(new DataSourceQueryCountListener());
             return new LazyConnectionDataSourceProxy(ProxyDataSourceBuilder
@@ -65,7 +53,7 @@ public class DataSourceConfig {
                     .asJson()
                     .countQuery()
                     .logQueryBySlf4j(SLF4JLogLevel.DEBUG, "io.roach.SQL_TRACE")
-//                    .logSlowQueryBySlf4j(50, TimeUnit.MILLISECONDS)
+                    .logSlowQueryBySlf4j(150, TimeUnit.MILLISECONDS)
                     .multiline()
                     .build());
         }

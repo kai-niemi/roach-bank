@@ -4,9 +4,6 @@
 /)     ;  --  :
    ,---| ---- |--.
 
-Cockroach Bank Simulator - ${application.formatted-version}
-Copyright (c) 1989 - No Rights Reserved
-
 Welcome to Roach Bank!
 Your are in a cold, dark indoor lobby.
 Type help for commands.

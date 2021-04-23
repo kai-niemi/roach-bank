@@ -20,13 +20,13 @@ import io.roach.bank.api.TransactionItemModel;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
-import io.roach.bank.service.TransactionService;
+import io.roach.bank.service.BankService;
 
 @RestController
 @RequestMapping(value = "/api/transactionitem")
 public class TransactionItemController {
     @Autowired
-    private TransactionService transactionService;
+    private BankService bankService;
 
     @Autowired
     private TransactionItemResourceAssembler transactionItemResourceAssembler;
@@ -40,7 +40,7 @@ public class TransactionItemController {
             @PathVariable("transactionId") UUID transactionId,
             @PathVariable(value = "region", required = false) String region,
             @PageableDefault(size = 5) Pageable page) {
-        Page<TransactionItem> entities = transactionService.findItemsByTransactionId(
+        Page<TransactionItem> entities = bankService.findItemsByTransactionId(
                 Transaction.Id.of(transactionId, region), page);
         return transactionItemPagedResourcesAssembler
                 .toModel(entities, transactionItemResourceAssembler);
@@ -56,6 +56,6 @@ public class TransactionItemController {
         TransactionItem.Id id = TransactionItem.Id.of(
                 Account.Id.of(accountId, accountRegion),
                 Transaction.Id.of(transactionId, transactionRegion));
-        return transactionItemResourceAssembler.toModel(transactionService.getItemById(id));
+        return transactionItemResourceAssembler.toModel(bankService.getItemById(id));
     }
 }

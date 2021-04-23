@@ -127,7 +127,7 @@ First instance creates DB schema and loads initial account plan:
 
 _(reducing pool size since there are 3 servers in total)_
 
-    roachprod run ${CLUSTER}:10 'nohup ./roach-bank-server.jar --spring.datasource.hikari.maximum-pool-size=500 > /dev/null 2>&1 &'
+    roachprod run ${CLUSTER}:10 'nohup ./roach-bank-server.jar --spring.datasource.configuration.maximum-pool-size=500 > /dev/null 2>&1 &'
 
 Wait for the service to start:
 
@@ -137,7 +137,7 @@ Now start second and third instance:
 
 _(disabling flyway since schema is already created)_
 
-    roachprod run ${CLUSTER}:11-12 'nohup ./roach-bank-server.jar --spring.flyway.enabled=false --spring.datasource.hikari.maximum-pool-size=500 > /dev/null 2>&1 &'
+    roachprod run ${CLUSTER}:11-12 'nohup ./roach-bank-server.jar --spring.flyway.enabled=false --spring.datasource.configuration.maximum-pool-size=500 > /dev/null 2>&1 &'
 
 Optionally wait for other services to start:
 

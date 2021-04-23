@@ -16,11 +16,11 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.service.TransactionService;
+import io.roach.bank.service.BankService;
 
-public class TransactionServiceIntegrationTest extends AbstractIntegrationTest {
+public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
-    private TransactionService transactionService;
+    private BankService bankService;
 
     @Autowired
     private AccountRepository accountService;
@@ -30,7 +30,7 @@ public class TransactionServiceIntegrationTest extends AbstractIntegrationTest {
     public void testDummyLookup() {
         Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 
-        transactionService.findById(Transaction.Id.of(UUID.randomUUID(), "stockholm"));
+        bankService.findById(Transaction.Id.of(UUID.randomUUID(), "stockholm"));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class TransactionServiceIntegrationTest extends AbstractIntegrationTest {
                 .then()
                 .build();
 
-        Transaction.Id transaction = transactionService.createTransaction(
+        Transaction.Id transaction = bankService.createTransaction(
                 Transaction.Id.of(UUID.randomUUID(), accountFrom1.getRegion()), request)
                 .getId();
 
@@ -120,7 +120,7 @@ public class TransactionServiceIntegrationTest extends AbstractIntegrationTest {
                 .then()
                 .build();
 
-        Transaction t = transactionService.createTransaction(Transaction.Id.of("USA"), request);
+        Transaction t = bankService.createTransaction(Transaction.Id.of("USA"), request);
         Assertions.assertNotNull(t);
 
         logger.info("Created {}", t.getId());

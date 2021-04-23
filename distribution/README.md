@@ -41,7 +41,7 @@ Commands to run on client VMs.
 With custom params:
 
     ./roach-bank-server.jar
-    --roachbank.datasource.hikari.maximum-pool-size=300
+    --roachbank.datasource.configuration.maximum-pool-size=30
     --roachbank.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable
     --roachbank.datasource.username=root
     --roachbank.datasource.password=..

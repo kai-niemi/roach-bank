@@ -16,4 +16,6 @@ public interface TransactionRepository {
     Page<Transaction> findAll(Pageable pageable);
 
     Page<TransactionItem> findItems(Transaction.Id transactionId, Pageable pageable);
+
+    void deleteAll();
 }

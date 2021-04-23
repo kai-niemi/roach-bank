@@ -182,4 +182,10 @@ public class JdbcTransactionRepository implements TransactionRepository {
                 .getItems()
                 .get(0);
     }
+
+    @Override
+    public void deleteAll() {
+        jdbcTemplate.execute("TRUNCATE TABLE transaction_item");
+        jdbcTemplate.execute("TRUNCATE TABLE transaction");
+    }
 }

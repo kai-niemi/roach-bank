@@ -39,7 +39,7 @@ import io.roach.bank.domain.BadRequestException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.MetadataRepository;
-import io.roach.bank.service.TransactionService;
+import io.roach.bank.service.BankService;
 import io.roach.bank.web.support.FollowLocation;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
@@ -52,7 +52,7 @@ public class TransactionFormController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private TransactionService transactionService;
+    private BankService bankService;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -134,7 +134,7 @@ public class TransactionFormController {
                 .withSelfRel();
 
         try {
-            Transaction entity = transactionService.createTransaction(id, form);
+            Transaction entity = bankService.createTransaction(id, form);
             if (FollowLocation.ofCurrentRequest()) {
                 return ResponseEntity.created(selfLink.toUri()).body(transactionResourceAssembler.toModel(entity));
             }

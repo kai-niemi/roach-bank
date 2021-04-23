@@ -89,7 +89,7 @@ roachbank:
   # Interval of pushing cached balance reports (millis)
   reportPushInterval: 10000
   # Report query timeout (millis)
-  reportQueryTimeout: 60000
+  reportQueryTimeout: 30000
   # Default number of accounts per region for random selection in client workloads (lower number = more conflicts)
   accountsPerRegionLimit: 100
   # Locality for bank instance for region filtering (should match partition name in a multi-region deployment)

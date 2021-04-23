@@ -37,7 +37,7 @@ public class ChangeFeedPublisherAspect {
         logger.info("Bootstrapping AOP change feed publisher");
     }
 
-    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")
+    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultBankService.createTransaction(..))", returning = "transaction")
     public void doAfterTransaction(Transaction transaction) {
         transaction.getItems().forEach(item -> {
             AccountChangeEvent.Fields fields = new AccountChangeEvent.Fields();

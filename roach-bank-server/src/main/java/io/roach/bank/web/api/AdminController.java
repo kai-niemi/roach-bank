@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 
 import javax.sql.DataSource;
 
@@ -18,12 +19,16 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.service.BankService;
 import io.roach.bank.web.support.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -37,9 +42,17 @@ public class AdminController {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private BankService bankService;
+
     @GetMapping
     public ResponseEntity<MessageModel> index() {
         MessageModel index = new MessageModel();
+
+        index.add(linkTo(methodOn(getClass())
+                .clearAll())
+                .withRel("clear")
+                .withTitle("Clear all accounts and transactions"));
 
         index.add(linkTo(methodOn(getClass())
                 .databaseMetadata())
@@ -136,5 +149,15 @@ public class AdminController {
         } catch (DataAccessException e) {
             return "unknown";
         }
+    }
+
+    @PostMapping(value = "/clear")
+    @TransactionBoundary(priority = TransactionBoundary.Priority.low)
+    @Async
+    public CompletableFuture<Void> clearAll() {
+        logger.warn("Deleting all data");
+        bankService.deleteAll();
+        logger.info("Deleting all data - done");
+        return CompletableFuture.completedFuture(null);
     }
 }
