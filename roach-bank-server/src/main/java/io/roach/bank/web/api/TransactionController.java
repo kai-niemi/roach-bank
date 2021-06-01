@@ -24,7 +24,7 @@ import io.roach.bank.annotation.TimeTravelMode;
 import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.BankLinkRelations;
 import io.roach.bank.api.TransactionModel;
-import io.roach.bank.domain.NoSuchTransactionException;
+import io.roach.bank.service.NoSuchTransactionException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.BankService;

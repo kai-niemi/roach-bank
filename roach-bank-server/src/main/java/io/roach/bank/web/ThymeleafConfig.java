@@ -1,4 +1,4 @@
-package io.roach.bank.config.web;
+package io.roach.bank.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties;

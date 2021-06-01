@@ -35,7 +35,7 @@ import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
-import io.roach.bank.domain.NoSuchAccountException;
+import io.roach.bank.service.NoSuchAccountException;
 import io.roach.bank.repository.AccountRepository;
 
 @Repository

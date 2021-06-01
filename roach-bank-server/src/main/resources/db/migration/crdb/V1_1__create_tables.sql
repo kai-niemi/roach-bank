@@ -82,3 +82,16 @@ alter table account
 -- alter table transaction_item
 --     add constraint fk_region_ref_account
 --         foreign key (account_region, account_id) references account (region, id);
+
+create table outbox
+(
+    id               uuid      not null default gen_random_uuid(),
+    create_time      timestamptz  not null default clock_timestamp(),
+    aggregate_type   string    not null,
+    aggregate_id     string    not null,
+    event_type       string    not null,
+    payload          jsonb     not null,
+
+    primary key (id)
+);
+

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.config.CacheConfig;
-import io.roach.bank.event.ReportPublisher;
+import io.roach.bank.push.ReportWebSocketPublisher;
 
 @Controller
 @RequestMapping("/")
@@ -23,7 +23,7 @@ public class RootController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private ReportPublisher reportPublisher;
+    private ReportWebSocketPublisher reportPublisher;
 
     @Autowired
     private CacheManager cacheManager;

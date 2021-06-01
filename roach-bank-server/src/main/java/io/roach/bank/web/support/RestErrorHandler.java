@@ -36,7 +36,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.web.util.WebUtils;
 
 import io.roach.bank.api.CurrencyMismatchException;
-import io.roach.bank.domain.BusinessException;
+import io.roach.bank.service.BusinessException;
 
 /**
  * Centralized REST error handler. All HTTP exceptions should be routed to this handler
@@ -48,11 +48,6 @@ import io.roach.bank.domain.BusinessException;
 @RestControllerAdvice
 @Controller
 public class RestErrorHandler extends ResponseEntityExceptionHandler implements ErrorController {
-    @Override
-    public String getErrorPath() {
-        return "/error";
-    }
-
     @RequestMapping("/error")
     public String handleError(HttpServletRequest request) {
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);

@@ -1,4 +1,4 @@
-package io.roach.bank.domain;
+package io.roach.bank.service;
 
 /**
  * Base type for unrecoverable business exceptions.

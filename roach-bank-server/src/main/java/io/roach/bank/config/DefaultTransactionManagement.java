@@ -1,4 +1,4 @@
-package io.roach.bank.config.data;
+package io.roach.bank.config;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;

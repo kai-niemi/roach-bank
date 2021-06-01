@@ -1,7 +1,6 @@
-package io.roach.bank.event;
+package io.roach.bank.push;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -29,7 +28,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
-public class AccountChangePublisher {
+public class AccountChangeWebSocketPublisher {
     private static final int BATCH_SIZE = 20;
 
     private final BlockingQueue<AccountChangeEvent> buffer = new ArrayBlockingQueue<>(BATCH_SIZE);

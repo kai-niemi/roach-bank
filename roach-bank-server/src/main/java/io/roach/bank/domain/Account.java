@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
+import io.roach.bank.service.NegativeBalanceException;
 
 /**
  * Represents a monetary account like asset, liability, expense, capital accounts and so forth.

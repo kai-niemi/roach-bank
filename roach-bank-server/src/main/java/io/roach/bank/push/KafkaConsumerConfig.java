@@ -1,4 +1,4 @@
-package io.roach.bank.config;
+package io.roach.bank.push;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +26,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.event.AccountChangeEvent;
-import io.roach.bank.event.TransactionChangeEvent;
-import io.roach.bank.event.TransactionItemChangeEvent;
+import io.roach.bank.push.AccountChangeEvent;
+import io.roach.bank.push.TransactionChangeEvent;
+import io.roach.bank.push.TransactionItemChangeEvent;
 
 @EnableKafka
 @EnableConfigurationProperties(KafkaProperties.class)

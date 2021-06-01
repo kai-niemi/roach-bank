@@ -35,7 +35,7 @@ import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.domain.Account;
-import io.roach.bank.domain.BadRequestException;
+import io.roach.bank.service.BadRequestException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.MetadataRepository;
@@ -123,17 +123,15 @@ public class TransactionFormController {
     }
 
     @PostMapping(value = "/form")
-    @TransactionBoundary(priority = TransactionBoundary.Priority.normal)
+    @TransactionBoundary
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
         UUID uuid = "auto".equals(form.getUuid()) ? UUID.randomUUID() : UUID.fromString(form.getUuid());
-
         Transaction.Id id = Transaction.Id.of(uuid, form.getRegion());
 
-        Link selfLink = linkTo(methodOn(TransactionController.class)
-                .getTransaction(id.getUUID(), id.getRegion()))
-                .withSelfRel();
-
         try {
+            Link selfLink = linkTo(methodOn(TransactionController.class)
+                    .getTransaction(id.getUUID(), id.getRegion()))
+                    .withSelfRel();
             Transaction entity = bankService.createTransaction(id, form);
             if (FollowLocation.ofCurrentRequest()) {
                 return ResponseEntity.created(selfLink.toUri()).body(transactionResourceAssembler.toModel(entity));

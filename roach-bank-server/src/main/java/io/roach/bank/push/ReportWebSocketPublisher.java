@@ -1,4 +1,4 @@
-package io.roach.bank.event;
+package io.roach.bank.push;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +35,7 @@ import io.roach.bank.repository.ReportingRepository;
 import io.roach.bank.util.TimeBoundExecution;
 
 @Service
-public class ReportPublisher {
+public class ReportWebSocketPublisher {
     public static final String TOPIC_ACCOUNT_SUMMARY = "/topic/account-summary";
 
     public static final String TOPIC_TRANSACTION_SUMMARY = "/topic/transaction-summary";
@@ -49,7 +49,7 @@ public class ReportPublisher {
 
     @Autowired
     @Lazy
-    private ReportPublisher selfProxy;
+    private ReportWebSocketPublisher selfProxy;
 
     @Autowired
     private ReportingRepository reportingRepository;

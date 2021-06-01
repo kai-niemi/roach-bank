@@ -1,4 +1,4 @@
-package io.roach.bank.event;
+package io.roach.bank.push;
 
 public abstract class AbstractChangeEvent {
     private String updated;

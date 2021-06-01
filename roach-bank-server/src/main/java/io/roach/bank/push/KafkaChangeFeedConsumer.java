@@ -1,4 +1,4 @@
-package io.roach.bank.event;
+package io.roach.bank.push;
 
 import javax.annotation.PostConstruct;
 
@@ -27,7 +27,7 @@ public class KafkaChangeFeedConsumer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private AccountChangePublisher changeFeedPublisher;
+    private AccountChangeWebSocketPublisher changeFeedPublisher;
 
     @PostConstruct
     public void init() {
@@ -44,6 +44,7 @@ public class KafkaChangeFeedConsumer {
 
     @KafkaListener(topics = TOPIC_TRANSACTIONS, containerFactory = "transactionListenerContainerFactory")
     @TransactionNotAllowed
+    @Deprecated
     public void transactionCreated(@Payload TransactionChangeEvent event,
                                    @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
                                    @Header(KafkaHeaders.OFFSET) int offset) {
@@ -51,6 +52,7 @@ public class KafkaChangeFeedConsumer {
 
     @KafkaListener(topics = TOPIC_TRANSACTION_LEGS, containerFactory = "transactionLegListenerContainerFactory")
     @TransactionNotAllowed
+    @Deprecated
     public void transactionLegCreated(@Payload TransactionItemChangeEvent event,
                                       @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
                                       @Header(KafkaHeaders.OFFSET) int offset) {

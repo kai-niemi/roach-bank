@@ -48,6 +48,11 @@ public abstract class ProfileNames {
     public static final String CDC_AOP = "cdc-aop";
 
     /**
+     * Enable transactional outbox pattern
+     */
+    public static final String OUTBOX = "outbox";
+
+    /**
      * Use filesystem paths for Thymeleaf templates.
      */
     public static final String DEV = "dev";

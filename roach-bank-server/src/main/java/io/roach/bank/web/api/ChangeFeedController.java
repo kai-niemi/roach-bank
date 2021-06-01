@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
 import io.roach.bank.annotation.TransactionNotAllowed;
-import io.roach.bank.event.AccountChangeEvent;
-import io.roach.bank.event.AccountChangePublisher;
+import io.roach.bank.push.AccountChangeEvent;
+import io.roach.bank.push.AccountChangeWebSocketPublisher;
 
 @RestController
 @RequestMapping(value = "/api/changefeed")
@@ -41,7 +41,7 @@ public class ChangeFeedController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private AccountChangePublisher changeFeedPublisher;
+    private AccountChangeWebSocketPublisher changeFeedPublisher;
 
     @PostConstruct
     public void init() {
@@ -90,6 +90,7 @@ public class ChangeFeedController {
     }
 
     @PutMapping(value = "/transaction/{date}/{id}", consumes = {MediaType.ALL_VALUE})
+    @Deprecated
     public ResponseEntity<Void> transactionChangeEvent(
             @PathVariable(value = "date", required = false) String date,
             @PathVariable(value = "id", required = false) String id,
@@ -102,6 +103,7 @@ public class ChangeFeedController {
     }
 
     @PutMapping(value = "/transaction_item/{date}/{id}", consumes = {MediaType.ALL_VALUE})
+    @Deprecated
     public ResponseEntity<Void> transactionItemChangeEvent(
             @PathVariable(value = "date", required = false) String date,
             @PathVariable(value = "id", required = false) String id,

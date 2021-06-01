@@ -1,4 +1,4 @@
-package io.roach.bank.event;
+package io.roach.bank.push;
 
 import java.util.HashSet;
 import java.util.Set;

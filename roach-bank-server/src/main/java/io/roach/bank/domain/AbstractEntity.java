@@ -8,11 +8,14 @@ import javax.persistence.Transient;
 
 import org.springframework.data.domain.Persistable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public abstract class AbstractEntity<T extends Serializable> implements Persistable<T> {
     @Transient
     private boolean isNew = true;
 
     @Override
+    @JsonIgnore
     public boolean isNew() {
         return isNew;
     }

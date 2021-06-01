@@ -1,4 +1,4 @@
-package io.roach.bank.aspect;
+package io.roach.bank.push;
 
 import javax.annotation.PostConstruct;
 
@@ -12,9 +12,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import io.roach.bank.ProfileNames;
+import io.roach.bank.aspect.AdvisorOrder;
 import io.roach.bank.domain.Transaction;
-import io.roach.bank.event.AccountChangeEvent;
-import io.roach.bank.event.AccountChangePublisher;
 
 /**
  * Synthetic change feed publisher that mimics the end-to-end flow via CDC->Kafka->Websockets. Activated only if
@@ -26,15 +25,15 @@ import io.roach.bank.event.AccountChangePublisher;
 @Component
 @Order(AdvisorOrder.CHANGE_FEED_ADVISOR)
 @Profile(ProfileNames.CDC_AOP)
-public class ChangeFeedPublisherAspect {
+public class FakeChangeFeedAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private AccountChangePublisher changeFeedPublisher;
+    private AccountChangeWebSocketPublisher changeFeedPublisher;
 
     @PostConstruct
     public void init() {
-        logger.info("Bootstrapping AOP change feed publisher");
+        logger.info("Bootstrapping AOP-driven (fake) change feed publisher");
     }
 
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultBankService.createTransaction(..))", returning = "transaction")

@@ -1,4 +1,4 @@
-package io.roach.bank.config.web;
+package io.roach.bank.web;
 
 import java.util.Currency;
 import java.util.List;
