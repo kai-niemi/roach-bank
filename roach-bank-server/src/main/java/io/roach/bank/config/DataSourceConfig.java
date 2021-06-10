@@ -26,13 +26,13 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
-    @ConfigurationProperties("roachbank.datasource")
+    @ConfigurationProperties("spring.datasource")
     public DataSourceProperties dataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
-    @ConfigurationProperties("roachbank.datasource.configuration")
+    @ConfigurationProperties("spring.datasource.hikari")
     public HikariDataSource primaryDataSource() {
         return dataSourceProperties().initializeDataSourceBuilder()
                 .type(HikariDataSource.class).build();

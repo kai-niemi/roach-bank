@@ -1,5 +1,5 @@
          (o o)      (/   Spring profiles: ${spring.profiles.active}
-         /'v'     ,-'     Datasource URL: ${roachbank.datasource.url}
+         /'v'     ,-'     Datasource URL: ${spring.datasource.url}
  ,------/ >< \---'              Locality: ${roachbank.locality}
 /)     ;  --  :
    ,---| ---- |--.

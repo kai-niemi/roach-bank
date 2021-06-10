@@ -54,7 +54,6 @@ public class Transfer extends RestCommandSupport {
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.25-5.00") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
             @ShellOption(help = "transfer funds across regions", defaultValue = "false") final boolean crossRegion,
-            @ShellOption(help = "account balance refresh interval", defaultValue = "30m") final String refreshInterval,
             @ShellOption(help = "number of transactions rather than duration (if > 0)", defaultValue = "-1") int transactions,
             @ShellOption(help = "enable verbose logging", defaultValue = "false") boolean enableLogging,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int accountLimit,
@@ -73,8 +72,6 @@ public class Transfer extends RestCommandSupport {
 
         final int concurrencyLevel = concurrency > 0 ? concurrency :
                 Math.max(1, Runtime.getRuntime().availableProcessors() * 2 / regionMap.size());
-
-        final long refreshIntervalSec = DurationFormat.parseDuration(refreshInterval).getSeconds();
 
         final Link transferLink = traverson.fromRoot()
                 .follow(BankLinkRelations.withCurie(TRANSACTION_REL))
@@ -112,11 +109,10 @@ public class Transfer extends RestCommandSupport {
                         regionKey + " transfer")
                 ));
 
-        console.info("Multi-region: %s", crossRegion);
         console.info("Amount range per transaction: %s", amount);
         console.info("Legs per transaction: %s", legs);
         console.info("Max accounts per region: %d", accountLimit);
-        console.info("Refresh balance interval: %ds", refreshIntervalSec);
+        console.info("Cross-region: %s", crossRegion);
         console.info("Concurrency level per region: %d", concurrencyLevel);
         console.info("Execution duration: %s", duration);
     }

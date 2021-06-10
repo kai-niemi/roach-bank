@@ -24,7 +24,7 @@
         <non-jta-data-source>none</non-jta-data-source>
         <properties>
             <property name="cache.use_second_level_cache" value="false"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL9Dialect"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.CockroachDB201Dialect"/>
             <property name="hibernate.connection.username" value="root"/>
             <property name="hibernate.connection.password" value=""/>
             <property name="hibernate.connection.url" value="jdbc:postgresql://localhost:26257/roach_bank"/>

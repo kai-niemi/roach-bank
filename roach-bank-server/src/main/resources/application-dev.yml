@@ -1,13 +1,13 @@
-roachbank:
+spring:
   datasource:
-    url: jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable&reWriteBatchedInserts
+    url: jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable&reWriteBatchedInserts
+#    url: jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable&reWriteBatchedInserts
 #    url: jdbc:postgresql://192.168.1.99:5432/roach_bank?reWriteBatchedInserts=true
     driver-class-name: org.postgresql.Driver
     username: root
     password: root
-    configuration:
+    hikari:
       pool-name: roach-bank
-      testOnBorrow: true
       connection-init-sql: SELECT 1
       connection-timeout: 30000
       validation-timeout: 20000

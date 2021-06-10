@@ -18,6 +18,8 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 delete from account where id='18955dc6-400d-4bb9-96c0-125bbe95e4ab';
 COMMIT;
 
+
+
 CANCEL JOBS (SELECT job_id FROM [SHOW JOBS] where job_type='CHANGEFEED');
 
 CREATE CHANGEFEED FOR TABLE outbox INTO 'kafka://localhost:9092' with updated, resolved='5s';

@@ -13,18 +13,13 @@ spring:
     locations: classpath:db/migration/psql,classpath:db/migration/common
     clean-on-validation-error: true
     baseline-on-migrate: true
-#############################
-roachbank:
-  health:
-    validation-query: select 1
   datasource:
     url: jdbc:postgresql://localhost:5432/roach_bank
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: root
-    configuration:
+    hikari:
       transaction-isolation: TRANSACTION_SERIALIZABLE
-      testOnBorrow: true
       pool-name: roach-bank
       connection-init-sql: SELECT 1
       connection-timeout: 30000
@@ -35,3 +30,7 @@ roachbank:
       maximum-pool-size: 80
       # max size / 2
       minimum-idle: 40
+#############################
+roachbank:
+  health:
+    validation-query: select 1

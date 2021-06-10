@@ -63,7 +63,7 @@ public class OutboxAspect {
                     ps -> {
                         ps.setString(1, "transaction");
                         ps.setString(2, transaction.getId().toString());
-                        ps.setString(3, "MonetaryTransactionCreated");
+                        ps.setString(3, "TransactionCreated");
                         ps.setObject(4, payload);
                     });
         } catch (JsonProcessingException e) {

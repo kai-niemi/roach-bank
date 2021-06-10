@@ -41,10 +41,10 @@ Commands to run on client VMs.
 With custom params:
 
     ./roach-bank-server.jar
-    --roachbank.datasource.configuration.maximum-pool-size=30
-    --roachbank.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable
-    --roachbank.datasource.username=root
-    --roachbank.datasource.password=..
+    --spring.datasource.hikari.maximum-pool-size=30
+    --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable
+    --spring.datasource.username=root
+    --spring.datasource.password=..
     --spring.flyway.enabled=true
     --spring.profiles.active=db-crdb,retry-backoff,cdc-aop
     --server.port=8090
