@@ -1,3 +1,5 @@
+# Roch Bank
+
 Roach Bank represents a full-stack, financial accounting ledger demo running on [CockroachDB](https://www.cockroachlabs.com/). 
 It's designed to demonstrate the safety and liveness properties of a globally deployed, system-of-record type 
 of workload.
@@ -8,7 +10,7 @@ Each Roach Bank instance provides a single page that displays the top accounts i
 by currency and region (city) represented by colored rectangles. In a multi-region deployment, the 
 displayed cities are filtered by region.
 
-![frontend](diagram_frontend.png)
+![frontend](docs/diagram_frontend.png)
                 
 The demo concept is to move funds between accounts using balanced, multi-legged transactions at a high
 frequency. As a financial ledger, it needs to conserve money at all times and also provide an audit trail 
@@ -51,7 +53,10 @@ and a negative value decreasing value (debit). A transaction is balanced when th
 the same currency equals zero.
 
 ## Deployment
-         
+
+See the [Deployment Guide](deploy/README.md) on how to deploy it to a single
+or multi-region AWS or GCE cluster.
+
 Roach Bank can run anywhere, but it's intended to be globally deployed across multiple 
 regions in a single cloud, multi-cloud or on-prem. 
 
@@ -61,10 +66,10 @@ geo-partitioned replicas topology (SQL scripts are provided). It will provide bo
 local read and write latencies and also for one entire region to be brought down without 
 affecting forward progress in any of the other regions.
 
-See [Deployment Tutorial](distribution/README.md) on how to deploy it to a single 
-or multi-region AWS or GCE cluster.
-
 ## Implementation
+
+See the [Design Notes](docs/DESIGN.md) for a complete overview of the different architectural
+mechanisms used.
 
 Roach Bank provides a backend service with a single page web front-end, and a Hypermedia API 
 for workload-generating clients. The clients issue transfer requests to the service API, 
@@ -76,13 +81,10 @@ and drives the frontend updates. Push events are regionally scoped.
 
 A regionally scoped load balancer also sits between the service and CockroachDB nodes.
 
-![architecture](diagram_architecture.png)
+![architecture](docs/diagram_architecture.png)
 
 Roach Bank is based on a fairly common [Spring Boot](https://spring.io/projects/spring-boot) microservice 
 stack using frameworks like Spring Data, Spring Hateoas, HikariCP, Flyway and more. 
-
-See the [Design Notes](DESIGN.md) for a complete overview of the different architectural 
-mechanisms used.
 
 ## Project Setup
 
@@ -90,10 +92,9 @@ How to build the service.
 
 ### Subprojects
 
-- [bank-api](roach-bank-api/README.md) - API artifacts and message models
-- [bank-client](roach-bank-client/README.md) - Interactive shell client for generating load
-- [bank-server](roach-bank-server/README.md) - Main service implementation
-- [distribution](distribution/README.md) - Deployment packaging (JARs, SQL and bash scripts)
+- [api](bank-api/README.md) - API artifacts and message models
+- [client](bank-client/README.md) - Interactive service endpoint shell client for generating load
+- [server](bank-server/README.md) - Main service implementation
 
 ### Prerequisites
 
@@ -142,15 +143,13 @@ To build and deploy to your local Maven repo, execute:
 
     ./mvnw clean install
 
-### Start the server
+### Starting locally
 
-    ./roach-bank-server/target/roach-bank-server.jar 
-        
-See [server](roach-bank-server/README.md) for more details.
+See [server](bank-server/README.md) and [client](bank-client/README.md) for details.
 
-### Start the client
+Quick start:
 
-    ./roach-bank-client/target/roach-bank-client.jar 
-
-See [client](roach-bank-client/README.md) for more details.
-
+    chmod +x server.sh
+    chmod +x client.sh
+    ./server.sh
+    ./client.sh

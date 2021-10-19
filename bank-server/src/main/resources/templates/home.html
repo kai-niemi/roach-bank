@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Roach Bank</title>
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+
+    <link href="/webjars/bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/main.css" rel="stylesheet" th:href="@{/css/main.css}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" rel="stylesheet"/>
+    <link href="../static/images/logo_mark_white.png" rel="icon" th:href="@{/images/logo_mark_white.png}" type="image/png"/>
+</head>
+
+<!-- Let it snow wintertime -->
+<div id="snowflake-container">
+    <p class="snowflake">*</p>
+</div>
+
+<body>
+<a class="github-fork-ribbon right-top fixed" href="https://github.com/kai-niemi/roach-bank"
+   data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+<header>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark shadow-sm site-header">
+        <a class="navbar-brand" href="#">
+            <img class="d-inline-block align-content-center"
+                 height="32"
+                 src="../static/images/logo_white-32px.png"
+                 th:text="${title}"
+                 th:src="@{/images/logo_mark_white.png}">
+        </a>
+
+        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                       href="#" id="navbar1Dropdown" role="button">
+                        API
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" th:href="@{/api}">Root</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" th:href="@{/api/account}">Accounts</a>
+                        <a class="dropdown-item" th:href="@{/api/transaction}">Transactions</a>
+                        <a class="dropdown-item" th:href="@{/api/report}">Reports</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" th:href="@{/api/metadata}">Metadata</a>
+                        <a class="dropdown-item" th:href="@{/api/admin}">Admin</a>
+                        <a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<main class="container-fluid" role="main">
+    <div class="alert alert-success" role="alert">
+        <button aria-label="Close" class="close" data-dismiss="alert" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+
+        <h4 class="alert-heading">Did you know?</h4>
+
+        <p th:text="${randomFact}"></p>
+    </div>
+
+    <div class="alert alert-success" role="alert">
+        <button aria-label="Close" class="close" data-dismiss="alert" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+
+        <h4 class="alert-heading">Summary</h4>
+
+        <table class="table table-striped table-dark table-sm">
+            <thead>
+            <tr>
+                <th data-toggle="tooltip" scope="col" title="Account stats are grouped by ISO-4217 currency codes">Currency</th>
+                <th data-toggle="tooltip" scope="col" title="Number of regions/countries per currency">Regions</th>
+                <th data-toggle="tooltip" scope="col" title="Number of accounts per currency">Accounts</th>
+                <th data-toggle="tooltip" scope="col" title="Number of monetary transactions per currency">Transactions</th>
+                <th data-toggle="tooltip" scope="col" title="Number of monetary transaction legs per currency">Legs</th>
+                <th data-toggle="tooltip" scope="col" title="Total balance for all accounts per currency">Balance</th>
+                <th data-toggle="tooltip" scope="col" title="Total exchange of funds per currency">Turnover</th>
+                <th data-toggle="tooltip" scope="col" title="Transaction leg checksum per currency (must be zero)">Checksum</th>
+            </tr>
+            </thead>
+            <tbody data-toggle="tooltip" id="report-container" title="Aggregated stats for all accounts">
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-sm btn-dark" data-toggle="tooltip" data-placement="right" id="refresh-button"
+                title="Refresh account and transaction history (runs every 30s by default)" onclick="refreshReport()">Refresh Now
+        </button>
+
+    </div>
+</main>
+
+<div id="dashboard-container">
+    <div id="account-spinner" class="d-flex justify-content-center">
+        <p class="lead">
+            Receiving accounts...
+        </p>
+        <div class="spinner-grow spinner-grow-sm text-dark" role="status">
+            <span class="sr-only">Waiting</span>
+        </div>
+    </div>
+</div>
+
+<hr class="col-xs-12"/>
+
+<footer class="container py-2">
+    <div class="row">
+        <div class="col-12 col-md">
+            <img class="d-inline-block align-content-center"
+                 width="48" height="48" src="../static/images/logo_mark_black.png"
+                 th:src="@{/images/logo_mark_black.png}"
+            ></a>
+            <small class="d-block mb-3 text-muted">Financial accounting ledger using the double-entry bookkeeping principle</small>
+        </div>
+        <div class="col-6 col-md">
+            <h5>Get Started</h5>
+            <ul class="list-unstyled text-small">
+                <li><a class="text-muted" href="https://university.cockroachlabs.com/catalog">Online Training</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html">Install CockroachDB</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html">Start a Local Cluster</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html">Learn CockroachDB SQL</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/build-an-app-with-cockroachdb.html">Hello, World!</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html">Explore Capabilities</a></li>
+            </ul>
+        </div>
+        <div class="col-6 col-md">
+            <h5>Develop</h5>
+            <ul class="list-unstyled text-small">
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-client-drivers.html">Client Drivers</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/connection-parameters.html">Connection Parameters</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/performance-best-practices-overview.html">SQL Best Practices</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-statements.html">SQL Statements</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/data-types.html">SQL Data Types</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-tuning-with-explain.html">SQL Tuning</a></li>
+            </ul>
+        </div>
+        <div class="col-6 col-md">
+            <h5>Deployment</h5>
+            <ul class="list-unstyled text-small">
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/recommended-production-settings.html">Production Checklist</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/topology-patterns.html">Topology Patterns</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/manual-deployment.html">Manual Deployment</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/orchestration.html">Orchestration</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/performance.html">Performance</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/upgrade-cockroach-version.html">Rolling Upgrade</a></li>
+            </ul>
+        </div>
+        <div class="col-6 col-md">
+            <h5>FAQs</h5>
+            <ul class="list-unstyled text-small">
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/frequently-asked-questions.html">Product FAQs</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-faqs.html">SQL FAQs</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Operational FAQs</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Availability FAQs</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/licensing-faqs.html">Licensing FAQs</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+<hr class="col-xs-12"/>
+
+<div class="container py-2">
+    <div class="row">
+        <div class="col">
+            <a href="https://spring.io/projects/spring-boot">
+                <img class="img-fluid" th:src="@{/images/logo_springboot.png}"></a>
+        </div>
+        <div class="col">
+            <a href="https://spring.io/projects/spring-data">
+                <img class="img-fluid" th:src="@{/images/logo_spring_data.png}"></a>
+        </div>
+        <div class="col">
+            <a href="https://spring.io/projects/spring-hateoas">
+                <img class="img-fluid" th:src="@{/images/logo_spring_rest.png}"></a>
+        </div>
+        <div class="col">
+            <a href="https://hibernate.org/">
+                <img class="img-fluid" th:src="@{/images/logo_hibernate.png}"></a>
+        </div>
+        <div class="col">
+            <a href="https://maven.apache.org/">
+                <img class="img-fluid" th:src="@{/images/logo_maven.png}"></a>
+        </div>
+        <div class="col">
+            <a href="https://www.java.com/">
+                <img class="img-fluid" th:src="@{/images/logo_java.png}"></a>
+        </div>
+        <div class="col">
+            <a href="https://openjdk.java.net/">
+                <img class="img-fluid" th:src="@{/images/logo_open_jdk.png}"></a>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/color/jquery.color-2.1.2.js" integrity="sha256-1Cn7TdfHiMcEbTuku97ZRSGt2b3SvZftEIn68UMgHC8=" crossorigin="anonymous"></script>
+<script src="/webjars/sockjs-client/1.1.1/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
+<script src="/webjars/bootstrap/4.5.3/js/bootstrap.min.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/snow.js"></script>
+
+<script>
+    function refreshReport() {
+        $("#refresh-button").prop("disabled", true);
+        $("#refresh-button").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`);
+        $(this).load("/refresh-report");
+    }
+</script>
+</body>
+</html>

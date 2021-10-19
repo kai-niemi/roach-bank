@@ -5,21 +5,21 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.0</version>
+        <version>2.5.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <packaging>pom</packaging>
 
     <groupId>io.roach.bank</groupId>
-    <artifactId>roach-bank-parent</artifactId>
+    <artifactId>bank-parent</artifactId>
     <version>1.0.2.BUILD-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.scm.id>github.com</project.scm.id>
-        <spring.boot.version>2.5.0</spring.boot.version>
+        <spring.boot.version>2.5.5</spring.boot.version>
     </properties>
 
     <scm>
@@ -29,10 +29,9 @@
     </scm>
 
     <modules>
-        <module>roach-bank-api</module>
-        <module>roach-bank-client</module>
-        <module>roach-bank-server</module>
-        <module>distribution</module>
+        <module>bank-api</module>
+        <module>bank-client</module>
+        <module>bank-server</module>
     </modules>
 
     <build>
