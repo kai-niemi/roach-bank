@@ -7,8 +7,8 @@ single or multi-region topology.
 
 - JDK8+ with 1.8 language level
 - [Roachprod](https://github.com/cockroachdb/cockroach/tree/master/pkg/cmd/roachprod) - a Cockroach Labs internal
-  tool for ramping AWS/GCE VM clusters 
-    - You will need the AWS/GCE client SDK and an account
+  tool for ramping AWS/GCE/Azure VM clusters 
+    - You will need the AWS/GCE/AZ client SDK, and an account
 
 ## Create Cluster
 

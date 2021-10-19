@@ -2,7 +2,7 @@
 
 Provides the main microservice implemented with Spring Boot and packaged as a self-contained, executable jar.
 
-See the [Deployment Guide](../docs/deploy.md) on how to deploy it to a single
+See the [Deployment Guide](../deploy/README.md) on how to deploy it to a single
 or multi-region AWS or GCE cluster.
 
 # Local deployment guide

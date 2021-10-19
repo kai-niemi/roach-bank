@@ -149,7 +149,7 @@ See [server](bank-server/README.md) and [client](bank-client/README.md) for deta
 
 Quick start:
 
-    chmod +x server.sh
-    chmod +x client.sh
-    ./server.sh
-    ./client.sh
+    chmod +x bank-server.sh
+    chmod +x bank-client.sh
+    ./bank-server.sh
+    ./bank-client.sh
