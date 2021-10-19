@@ -14,7 +14,7 @@ fn_start_server(){
 
 if ((i > 1)); then
 fn_failcheck roachprod run $CLUSTER:$c <<EOF
-nohup ./bank-server.jar --roachbank.locality=$locality --spring.flyway.enabled=false > /dev/null 2>&1 &
+xxnohup ./bank-server.jar --roachbank.locality=$locality --spring.flyway.enabled=false > /dev/null 2>&1 &
 EOF
 else
 fn_failcheck roachprod run $CLUSTER:$c <<EOF

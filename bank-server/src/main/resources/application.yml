@@ -1,0 +1,97 @@
+##############################################
+# Spring boot properties
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+#
+# See README.md for available Spring Profiles
+##############################################
+
+spring:
+  application:
+    name: roach-bank
+  profiles:
+    active: db-crdb,retry-backoff,cdc-aop
+  output:
+    ansi:
+      enabled: ALWAYS
+  jackson:
+    serialization:
+      indent_output: true
+      write_dates_as_timestamps: false
+    deserialization:
+      fail_on_unknown_properties: false
+      fail_on_ignored_properties: false
+    default-property-inclusion: non_null
+    locale: en_US
+  mvc:
+    throw-exception-if-no-handler-found: true
+  thymeleaf:
+    cache: false
+    mode: HTML
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 0
+          no-cache: true
+          no-store: true
+#############################
+logging:
+  pattern:
+    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr([%logger{39}]){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    file: "%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:%5p} [%t] %logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+  file:
+    name: bank-server.log
+  logback:
+    rollingpolicy:
+      max-history: 3
+#############################
+info:
+  build:
+    artifact: io.roach.bank.server
+    name: Roach Bank
+    description: Accounting ledger based on Spring Boot and CockroachDB
+    version: 1.0.0
+    app-label: Roach Bank
+#############################
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: env,info,health,metrics,threaddump,flyway,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: false
+  metrics:
+    tags:
+      application: ${spring.application.name}
+#############################
+server:
+  port: 8090
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: always
+#############################
+roachbank:
+  health:
+    # Admin UI endpoint base URL
+    admin-endpoint: http://localhost:8080
+    # Validation query for datasource health check
+    validation-query: select 1
+  # WS push permits per second rate limit
+  pushPermitsPerSec: 4.0
+  # Interval of pushing cached balance reports (millis)
+  reportPushInterval: 10000
+  # Report query timeout (millis)
+  reportQueryTimeout: 30000
+  # Default number of accounts per region for random selection in client workloads (lower number = more conflicts)
+  accountsPerRegionLimit: 100
+  # Locality for bank instance for region filtering (should match partition name in a multi-region deployment)
+  # Ex: eu_south, us_central, us_east
+  locality: all
