@@ -17,8 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class TraversonHelper {
-    public static final List<MediaType> ACCEPT_TYPES = Arrays
-            .asList(MediaTypes.HAL_JSON/*, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN*/);
+    public static final List<MediaType> ACCEPT_TYPES = Arrays.asList(MediaTypes.HAL_JSON);
 
     private URI baseUri;
 

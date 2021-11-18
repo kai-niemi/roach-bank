@@ -39,7 +39,7 @@ machinetypes="c5d.2xlarge"
 # DO NOT EDIT BELOW THIS LINE
 #############################
 
-functionsdir="../common/functions"
+functionsdir="../common"
 
 source "${functionsdir}/core_functions.sh"
 

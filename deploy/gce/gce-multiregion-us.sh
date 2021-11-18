@@ -39,7 +39,7 @@ machinetypes="n2-standard-16"
 # DO NOT EDIT BELOW THIS LINE
 #############################
 
-functionsdir="../common/functions"
+functionsdir="../common"
 
 source "${functionsdir}/core_functions.sh"
 

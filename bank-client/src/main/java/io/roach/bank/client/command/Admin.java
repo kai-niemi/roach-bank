@@ -14,25 +14,34 @@ import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.hateoas.Link;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.shell.ExitRequest;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.standard.commands.Quit;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.client.support.CallStats;
 import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.SchedulingHelper;
 import io.roach.bank.client.support.ThrottledExecutor;
+import io.roach.bank.client.support.TraversonHelper;
 
+import static io.roach.bank.api.BankLinkRelations.ACCOUNT_BATCH_REL;
+import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
+import static io.roach.bank.api.BankLinkRelations.ADMIN_REL;
+import static io.roach.bank.api.BankLinkRelations.POOL_REL;
+import static io.roach.bank.api.BankLinkRelations.withCurie;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ShellComponent
@@ -60,8 +69,6 @@ public class Admin implements Quit.Command {
     protected void init() {
         this.statsFuture = scheduler.scheduleAtFixedRate(CallStats::printStdOut, PRINT_INTERVAL, PRINT_INTERVAL);
     }
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @ShellMethod(value = "Exit the shell", key = {"quit", "exit", "q"})
     public void quit() {
@@ -113,7 +120,7 @@ public class Admin implements Quit.Command {
         }
     }
 
-    @ShellMethod(value = "Print thread pool status", key = {"get-pool-stats", "gps"})
+    @ShellMethod(value = "Print thread pool status", key = {"pool-stats", "ps"})
     public void getPoolSize() {
         throttledExecutor.printStatus(executorService -> {
             console.debug("Executor Stats:");
@@ -131,7 +138,7 @@ public class Admin implements Quit.Command {
         });
     }
 
-    @ShellMethod(value = "Configure thread pool size", key = {"set-pool-size", "sps"})
+    @ShellMethod(value = "Configure thread pool size", key = {"thread-pool-size", "tps"})
     public void setPoolSize(
             @ShellOption(help = "core thread pool size (guide: 2x vCPUs of host)") int size,
             @ShellOption(help = "thread queue size (guide: 2x pool size)", defaultValue = "-1") int queueSize) {
@@ -143,6 +150,36 @@ public class Admin implements Quit.Command {
         }
         console.info("Setting thread pool size to %d queue size %d\n", size, queueSize);
         throttledExecutor.cancelAndRestart(size, queueSize);
+    }
+
+    @Autowired
+    private TraversonHelper traverson;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @ShellMethod(value = "Configure connection pool size", key = {"conn-pool-size", "cps"})
+    public void setConnPoolSize(
+            @ShellOption(help = "max and min idle pool size", defaultValue = "50") int size) {
+        console.info("Setting conn pool size to %d\n", size);
+
+        Link submitLink = traverson.fromRoot()
+                .follow(withCurie(ADMIN_REL))
+                .follow(withCurie(POOL_REL))
+                .asLink();
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
+                .replaceQueryParam("size", size);
+
+        String uri = builder.build().toUriString();
+
+        ResponseEntity<String> response =
+                restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity<>(null),
+                        String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            console.warn("Unexpected HTTP status: %s", response.toString());
+        }
     }
 
     @ShellMethod(value = "Print system information", key = {"system-info", "si"})

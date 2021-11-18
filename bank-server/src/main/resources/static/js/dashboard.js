@@ -361,7 +361,10 @@ document.addEventListener('DOMContentLoaded', function () {
             'sydney': '#ba8412',
             'tokyo': '#2f8d65',
             'barcelona': '#854231',
-            'manchester': '#8a0615'
+            'manchester': '#8a0615',
+            'sao paulo': '#5f7b51',
+            'rio de janeiro': '#443287',
+            'salvador': '#89218e'
         },
 
         regionCountry: {
@@ -393,7 +396,10 @@ document.addEventListener('DOMContentLoaded', function () {
             'athens': 'GRC',
             'singapore': 'SGP',
             'hong kong': 'HKG',
-            'sydney': 'AUS'
+            'sydney': 'AUS',
+            'sao paulo': 'BRL',
+            'rio de janeiro': 'BRL',
+            'salvador': 'BRL'
         }
     });
 });

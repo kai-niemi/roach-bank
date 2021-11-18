@@ -23,8 +23,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.zaxxer.hikari.HikariDataSource;
 
 import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.BankLinkRelations;
@@ -58,6 +61,11 @@ public class AdminController {
                 .databaseMetadata())
                 .withRel("database-info")
                 .withTitle("Database and JDBC driver metadata"));
+
+        index.add(linkTo(methodOn(getClass())
+                .updateConnectionPoolSize(50))
+                .withRel("pool-size")
+                .withTitle("Connection pool size"));
 
         index.add(Link.of(
                 ServletUriComponentsBuilder
@@ -159,5 +167,17 @@ public class AdminController {
         bankService.deleteAll();
         logger.info("Deleting all data - done");
         return CompletableFuture.completedFuture(null);
+    }
+
+    @Autowired
+    private HikariDataSource hikariDataSource;
+
+    @PostMapping(value = "/pool-size")
+    public ResponseEntity<MessageModel> updateConnectionPoolSize(
+            @RequestParam(value = "size", defaultValue = "50") int size) {
+        hikariDataSource.setMaximumPoolSize(size);
+        hikariDataSource.setMinimumIdle(size);
+        logger.info("Setting max and min idle pool size to {}", size);
+        return ResponseEntity.ok(new MessageModel("ok"));
     }
 }

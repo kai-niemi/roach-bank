@@ -14,7 +14,8 @@ VALUES ('us_west'),
        ('eu_central'),
        ('eu_south'),
        ('eu'),
-       ('apac')
+       ('apac'),
+       ('sa')
 ;
 
 INSERT INTO region_config
@@ -75,5 +76,9 @@ VALUES ('seattle', 'USD', 'us_west'),
        ('singapore', 'SGD', 'apac'),
        ('hong kong', 'HKD', 'apac'),
        ('sydney', 'AUD', 'apac'),
-       ('tokyo', 'JPY', 'apac')
+       ('tokyo', 'JPY', 'apac'),
+
+       ('sao paulo', 'BRL', 'sa'),
+       ('rio de janeiro', 'BRL', 'sa'),
+       ('salvador', 'BRL', 'sa')
 ;

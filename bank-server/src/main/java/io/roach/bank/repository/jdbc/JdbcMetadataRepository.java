@@ -120,9 +120,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
         if ("".equals(locality) || "all".equals(locality)) {
             listValues = this.jdbcTemplate.query(
                     "SELECT distinct(name),list_value FROM crdb_internal.partitions where name <> 'default'",
-                    (resultSet, i) -> {
-                        return resultSet.getString(2);
-                    });
+                    (resultSet, i) -> resultSet.getString(2));
         } else {
             listValues = this.jdbcTemplate.query(
                     "SELECT list_value FROM crdb_internal.partitions WHERE name=?",

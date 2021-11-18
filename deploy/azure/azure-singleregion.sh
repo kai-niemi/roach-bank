@@ -33,7 +33,7 @@ machinetypes="Standard_D8_v4"
 # DO NOT EDIT BELOW THIS LINE
 #############################
 
-functionsdir="../common/functions"
+functionsdir="../common"
 
 source "${functionsdir}/core_functions.sh"
 

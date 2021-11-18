@@ -25,10 +25,7 @@ spring:
       connection-timeout: 30000
       validation-timeout: 20000
       max-lifetime: 60000
-      # 36vcpu x 9 nodes x 4 = 1300 total
-      # Per client 36*2 threads ~= 80
       maximum-pool-size: 80
-      # max size / 2
       minimum-idle: 40
 #############################
 roachbank:

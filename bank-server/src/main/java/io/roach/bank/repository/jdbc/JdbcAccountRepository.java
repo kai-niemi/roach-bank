@@ -214,8 +214,7 @@ public class JdbcAccountRepository implements AccountRepository {
     public List<Account> findAccountsByRegion(String region, int limit) {
         return this.namedParameterJdbcTemplate.query(
                 "SELECT * FROM account WHERE region=:region "
-                        + "AND name LIKE 'user:%' "
-                        + "ORDER BY name "
+                        + "ORDER BY region,id "
                         + "LIMIT (:limit)",
                 new MapSqlParameterSource()
                         .addValue("region", region)
