@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +28,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.zaxxer.hikari.HikariConfigMXBean;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
 
 import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.BankLinkRelations;
@@ -67,52 +70,57 @@ public class AdminController {
                 .withRel("pool-size")
                 .withTitle("Connection pool size"));
 
+        index.add(linkTo(methodOn(getClass())
+                .connectionPoolInfo())
+                .withRel("pool-info")
+                .withTitle("Connection pool info"));
+
         index.add(Link.of(
-                ServletUriComponentsBuilder
-                        .fromCurrentContextPath()
-                        .pathSegment("actuator")
-                        .buildAndExpand()
-                        .toUriString()
-        ).withRel(BankLinkRelations.ACTUATOR_REL)
+                        ServletUriComponentsBuilder
+                                .fromCurrentContextPath()
+                                .pathSegment("actuator")
+                                .buildAndExpand()
+                                .toUriString()
+                ).withRel(BankLinkRelations.ACTUATOR_REL)
                 .withTitle("Spring boot actuators"));
 
         Arrays.asList(
-                "bank.events.lost",
-                "bank.events.queued",
-                "bank.events.sent",
-                "bank.txn.abort",
-                "bank.txn.retry",
-                "bank.txn.success",
-                "hikaricp.connections",
-                "hikaricp.connections.acquire",
-                "hikaricp.connections.active",
-                "hikaricp.connections.idle",
-                "hikaricp.connections.max",
-                "hikaricp.connections.usage",
-                "http.server.requests",
-                "jdbc.connections.active",
-                "jdbc.connections.idle",
-                "jdbc.connections.max",
-                "jdbc.connections.min",
-                "jetty.threads.busy",
-                "jetty.threads.current",
-                "jetty.threads.idle",
-                "jvm.memory.max",
-                "jvm.memory.used",
-                "jvm.threads.live",
-                "jvm.threads.peak",
-                "process.cpu.usage",
-                "system.cpu.count",
-                "system.cpu.usage",
-                "system.load.average.1m")
+//                "bank.events.lost",
+//                "bank.events.queued",
+//                "bank.events.sent",
+//                "bank.txn.abort",
+//                "bank.txn.retry",
+//                "bank.txn.success",
+                        "hikaricp.connections",
+                        "hikaricp.connections.acquire",
+                        "hikaricp.connections.active",
+                        "hikaricp.connections.idle",
+                        "hikaricp.connections.max",
+                        "hikaricp.connections.usage",
+                        "http.server.requests",
+                        "jdbc.connections.active",
+                        "jdbc.connections.idle",
+                        "jdbc.connections.max",
+                        "jdbc.connections.min",
+//                "jetty.threads.busy",
+//                "jetty.threads.current",
+//                "jetty.threads.idle",
+//                "jvm.memory.max",
+//                "jvm.memory.used",
+                        "jvm.threads.live",
+                        "jvm.threads.peak",
+                        "process.cpu.usage",
+                        "system.cpu.count",
+                        "system.cpu.usage",
+                        "system.load.average.1m")
                 .forEach(key -> {
                     index.add(Link.of(
-                            ServletUriComponentsBuilder
-                                    .fromCurrentContextPath()
-                                    .pathSegment("actuator", "metrics", key)
-                                    .buildAndExpand()
-                                    .toUriString()
-                    ).withRel(BankLinkRelations.ACTUATOR_REL)
+                                    ServletUriComponentsBuilder
+                                            .fromCurrentContextPath()
+                                            .pathSegment("actuator", "metrics", key)
+                                            .buildAndExpand()
+                                            .toUriString()
+                            ).withRel(BankLinkRelations.ACTUATOR_REL)
                             .withTitle("Metrics endpoint"));
                 });
 
@@ -121,7 +129,7 @@ public class AdminController {
 
     @GetMapping(value = "/database-info")
     public ResponseEntity<Map<String, Object>> databaseMetadata() {
-        final Map<String, Object> properties = new TreeMap<>();
+        final Map<String, Object> properties = new LinkedHashMap<>();
         properties.put("databaseVersion", databaseVersion());
 
         Connection connection = null;
@@ -171,6 +179,30 @@ public class AdminController {
 
     @Autowired
     private HikariDataSource hikariDataSource;
+
+    @GetMapping(value = "/pool-info")
+    public ResponseEntity<Map<String, Object>> connectionPoolInfo() {
+        final Map<String, Object> properties = new LinkedHashMap<>();
+
+        HikariPoolMXBean mxBean = hikariDataSource.getHikariPoolMXBean();
+
+        properties.put("activeConnections", mxBean.getActiveConnections());
+        properties.put("idleConnections", mxBean.getIdleConnections());
+        properties.put("threadsAwaitingConnection", mxBean.getThreadsAwaitingConnection());
+        properties.put("totalConnections", mxBean.getTotalConnections());
+
+        HikariConfigMXBean mxConfigBean = hikariDataSource.getHikariConfigMXBean();
+        properties.put("config.connectionTimeout", mxConfigBean.getConnectionTimeout());
+        properties.put("config.poolName", mxConfigBean.getPoolName());
+        properties.put("config.idleTimeout", mxConfigBean.getIdleTimeout());
+        properties.put("config.leakDetectionThreshold", mxConfigBean.getLeakDetectionThreshold());
+        properties.put("config.maximumPoolSize", mxConfigBean.getMaximumPoolSize());
+        properties.put("config.maxLifetime", mxConfigBean.getMaxLifetime());
+        properties.put("config.minimumIdle", mxConfigBean.getMinimumIdle());
+        properties.put("config.validationTimeout", mxConfigBean.getValidationTimeout());
+
+        return ResponseEntity.ok(properties);
+    }
 
     @PostMapping(value = "/pool-size")
     public ResponseEntity<MessageModel> updateConnectionPoolSize(

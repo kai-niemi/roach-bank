@@ -6,11 +6,15 @@ import org.springframework.hateoas.PagedModel;
 import io.roach.bank.api.AccountModel;
 
 public abstract class Constants {
-    public static final String API_MAIN_COMMANDS = "Main Commands";
+    public static final String ADMIN_COMMANDS = "1. Admin Commands";
 
-    public static final String API_REPORTING_COMMANDS = "Reporting Commands";
+    public static final String CONFIG_COMMANDS = "2. Config Commands";
 
-    public static final String ADMIN_COMMANDS = "Admin Commands";
+    public static final String WORKLOAD_COMMANDS = "3. Workload Commands";
+
+    public static final String API_REPORTING_COMMANDS = "4. Reporting Commands";
+
+    public static final String API_MAIN_COMMANDS = "5. Main Commands";
 
     public static final String DEFAULT_DURATION = "60m";
 

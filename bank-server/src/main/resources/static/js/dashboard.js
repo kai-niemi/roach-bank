@@ -279,7 +279,7 @@ BankDashboard.prototype = {
             c = '0x' + c.join('');
             var a;
             if (maxAmount > 0) {
-                a = Math.max(0.2, amount / maxAmount);
+                a = Math.max(0.5, amount / maxAmount);
             } else {
                 a = 1;
             }

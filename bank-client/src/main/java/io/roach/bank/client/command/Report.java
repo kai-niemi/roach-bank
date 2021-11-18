@@ -16,7 +16,7 @@ import static io.roach.bank.api.BankLinkRelations.*;
 @ShellComponent
 @ShellCommandGroup(Constants.API_REPORTING_COMMANDS)
 public class Report extends RestCommandSupport {
-    @ShellMethod(value = "Region mappings", key = {"r", "regions"})
+    @ShellMethod(value = "List region mappings", key = {"lr", "list-regions"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void reportRegions() {
         Map result = traverson.fromRoot()
@@ -33,7 +33,7 @@ public class Report extends RestCommandSupport {
         console.info("Local region:\n%s", entity.getBody());
     }
 
-    @ShellMethod(value = "Account summary report", key = {"rs", "report-accounts"})
+    @ShellMethod(value = "Report account summary", key = {"rs", "report-accounts"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void reportAccounts() {
         ResponseEntity<List> accountSummary = traverson.fromRoot()
@@ -44,7 +44,7 @@ public class Report extends RestCommandSupport {
         accountSummary.getBody().forEach(item -> console.debug("%s", item));
     }
 
-    @ShellMethod(value = "Transaction summary report", key = {"rx", "report-txn"})
+    @ShellMethod(value = "Report transaction summary", key = {"rx", "report-txn"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void reportTransactions() {
         ResponseEntity<List> transactionSummary = traverson.fromRoot()

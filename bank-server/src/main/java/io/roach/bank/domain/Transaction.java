@@ -37,7 +37,7 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    private LocalDate transferDate;
+    private LocalDate transferDate;                                                                                 
 
     @Column(name = "booking_date", nullable = false, updatable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
