@@ -1,9 +1,9 @@
 package io.roach.bank.client.command;
 
+import java.time.Duration;
 import java.util.Currency;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
@@ -17,10 +17,7 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.support.CountDuration;
-import io.roach.bank.client.support.TaskDuration;
-import io.roach.bank.client.support.TimeDuration;
-import io.roach.bank.client.util.DurationFormat;
+import io.roach.bank.client.support.DurationFormat;
 
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_BATCH_REL;
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
@@ -34,8 +31,6 @@ public class CreateAccounts extends RestCommandSupport {
     public void accounts(
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency,
-            @ShellOption(help = "number of accounts rather than duration (if > 0)", defaultValue = "-1") int count,
             @ShellOption(help = "batch size", defaultValue = "128") int batchSize
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
@@ -43,20 +38,7 @@ public class CreateAccounts extends RestCommandSupport {
             return;
         }
 
-        final int concurrencyLevel = concurrency > 0 ? concurrency :
-                Math.max(1, Runtime.getRuntime().availableProcessors() * 2 / regionMap.size());
-
-        TaskDuration taskDuration;
-
-        if (count > 0) {
-            console.info("Creating %,d accounts in %,d batches of %,d", count, count/batchSize, batchSize);
-            taskDuration = CountDuration.of(count / Math.max(batchSize, 1));
-        } else {
-            console.info("Creating accounts for %s in batches of %,d", duration, batchSize);
-            taskDuration = TimeDuration.of(DurationFormat.parseDuration(duration));
-        }
-
-        console.info("Concurrency level per region: %d", concurrencyLevel);
+        Duration runtimeDuration = DurationFormat.parseDuration(duration);
 
         Link submitLink = traverson.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
@@ -65,25 +47,25 @@ public class CreateAccounts extends RestCommandSupport {
 
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        IntStream.range(0, concurrencyLevel)
-                .forEach(i -> throttledExecutor.submit(() -> {
-                    String region = RandomData.selectRandom(regionMap.keySet());
+//        concurrencyHelper.submitForDuration(() -> {
+//                    String region = RandomData.selectRandom(regionMap.keySet());
+//
+//                    UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
+//                            .queryParam("region", region)
+//                            .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
+//                            .queryParam("batchSize", batchSize);
+//
+//                    ResponseEntity<String> response =
+//                            restTemplate
+//                                    .exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
+//                                            String.class);
+//
+//                    if (!response.getStatusCode().is2xxSuccessful()) {
+//                        logger.warn("Unexpected HTTP status: {}", response.toString());
+//                    }
+//                    return null;
+//                },
+//                "create-accounts", runtimeDuration);
 
-                    UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-                            .queryParam("region", region)
-                            .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
-                            .queryParam("batchSize", batchSize);
-
-                    ResponseEntity<String> response =
-                            restTemplate.exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
-                                    String.class);
-
-                    if (!response.getStatusCode().is2xxSuccessful()) {
-                        console.warn("Unexpected HTTP status: %s", response.toString());
-                    }
-                    return null;
-                }, taskDuration,
-                "create-accounts"
-        ));
     }
 }

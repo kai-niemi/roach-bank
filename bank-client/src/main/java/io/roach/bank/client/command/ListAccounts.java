@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
@@ -17,7 +18,7 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.client.support.Console;
 
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_LIST_REL;
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
@@ -27,6 +28,9 @@ import static io.roach.bank.client.command.Constants.ACCOUNT_MODEL_PTR;
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class ListAccounts extends RestCommandSupport {
+    @Autowired
+    private Console console;
+
     @ShellMethod(value = "List accounts using pagination", key = {"list", "l"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listAccounts(@ShellOption(help = "page number", defaultValue = "0") int page,
@@ -51,29 +55,26 @@ public class ListAccounts extends RestCommandSupport {
 
         outer_loop:
         for (; ; ) {
-            console.warn(">> Page %s", Objects.requireNonNull(accountPage).getMetadata());
+            console.cyan(">> Page %s\n", Objects.requireNonNull(accountPage).getMetadata());
 
-            console.info("%15s|%10s|%8s|%15s|%10s|%10s|%s | %s",
+            console.yellow("%15s|%10s|%8s|%15s|%10s|%10s| %s\n",
                     "Name",
                     "Desc",
                     "Type",
                     "Balance",
                     "Status",
                     "Weight",
-                    "Self",
-                    "Transactions");
+                    "Link");
 
             for (AccountModel accountModel : accountPage) {
-                console.info("%15s|%10s|%8s|%15s|%10s|%10s|%s | %s",
+                console.yellow("%15s|%10s|%8s|%15s|%10s|%10s| %s\n",
                         accountModel.getName(),
                         accountModel.getDescription(),
                         accountModel.getAccountType(),
                         accountModel.getBalance(),
                         accountModel.getStatus(),
                         accountModel.getWeight(),
-                        accountModel.getLink(IanaLinkRelations.SELF).orElse(Link.of("n/a")).getHref(),
-                        accountModel.getLink(withCurie(BankLinkRelations.TRANSACTION_LIST_REL)).orElse(Link.of("n/a"))
-                                .getHref());
+                        accountModel.getLink(IanaLinkRelations.SELF).orElse(Link.of("n/a")).getHref());
             }
 
             StringBuilder sb = new StringBuilder("Continue to");
@@ -85,7 +86,7 @@ public class ListAccounts extends RestCommandSupport {
 
             innner_loop:
             for (; ; ) {
-                console.info(sb.toString());
+                console.cyan("%s\n", sb.toString());
                 Scanner s = new Scanner(System.in);
                 if (s.hasNext()) {
                     switch (s.next()) {
@@ -111,10 +112,8 @@ public class ListAccounts extends RestCommandSupport {
                             break innner_loop;
                         case "C":
                         case "c":
-                            console.info("Cancelling");
                             break outer_loop;
                         default:
-                            console.info("What?");
                             break;
                     }
                 }

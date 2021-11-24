@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.shell.Availability;
@@ -18,16 +20,18 @@ import org.springframework.web.client.RestTemplate;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.client.support.ExecutorTemplate;
 import io.roach.bank.client.support.ConnectionUpdatedEvent;
-import io.roach.bank.client.support.Console;
-import io.roach.bank.client.support.ThrottledExecutor;
 import io.roach.bank.client.support.TraversonHelper;
 
-import static io.roach.bank.api.BankLinkRelations.*;
+import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
+import static io.roach.bank.api.BankLinkRelations.ACCOUNT_TOP;
+import static io.roach.bank.api.BankLinkRelations.META_REL;
+import static io.roach.bank.api.BankLinkRelations.REGION_CURRENCIES_REL;
+import static io.roach.bank.api.BankLinkRelations.withCurie;
 
 public abstract class RestCommandSupport {
-    @Autowired
-    protected Console console;
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     protected TraversonHelper traverson;
@@ -36,7 +40,7 @@ public abstract class RestCommandSupport {
     protected RestTemplate restTemplate;
 
     @Autowired
-    protected ThrottledExecutor throttledExecutor;
+    protected ExecutorTemplate executorTemplate;
 
     protected URI baseUri;
 
@@ -69,12 +73,9 @@ public abstract class RestCommandSupport {
 
 
         if (result.isEmpty()) {
-            console.warn("No matching regions for: %s ", regions);
+            logger.warn("No matching regions: {}", regions);
         } else {
-            console.info("Regions:");
-            result.forEach((s, currency) -> {
-                console.info("   %s (%s)", s, currency);
-            });
+            logger.info("Region currencies: {}", result);
         }
 
         return result;
@@ -87,7 +88,7 @@ public abstract class RestCommandSupport {
         parameters.put("limit", limit);
         parameters.put("regions", StringUtils.collectionToCommaDelimitedString(regions));
 
-        console.info("Looking up top accounts in %s (limit %d)",
+        logger.info("Looking up top accounts in {} (limit {})",
                 StringUtils.collectionToCommaDelimitedString(regions), limit);
 
         // Get top accounts, filter client-side based on region
@@ -101,11 +102,11 @@ public abstract class RestCommandSupport {
         }
 
         if (accountMap.isEmpty()) {
-            console.warn("No accounts in regions %s ", regions);
+            logger.warn("No accounts in regions [{}]", regions);
         } else {
-            console.info("Accounts found in regions %s", regions);
+            logger.info("Accounts in regions [{}]", regions);
             accountMap.forEach((r, accountModels) -> {
-                console.info("   %s (%d accounts)", r, accountModels.size());
+                logger.info("{} ({} accounts)", r, accountModels.size());
             });
         }
 

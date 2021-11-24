@@ -1,4 +1,4 @@
-package io.roach.bank.client.support;
+package io.roach.bank.client.config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,8 +27,10 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.roach.bank.client.support.TraversonHelper;
+
 @Configuration
-public class RestTemplateConfig {
+public class RestConfig {
     @Value("${roachbank.http.maxTotal}")
     private int maxTotal;
 

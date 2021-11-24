@@ -11,7 +11,14 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Currency;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -20,7 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -30,8 +37,7 @@ import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.support.Console;
-import io.roach.bank.client.util.ByteFormat;
+import io.roach.bank.client.support.ByteFormat;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -41,9 +47,6 @@ public class GenerateCSV extends RestCommandSupport {
     private static void tick(String prefix) {
         System.out.printf(Locale.US, "\r%30s (%s)", prefix, "|/-\\".toCharArray()[spinner++ % 4]);
     }
-
-    @Autowired
-    private Console console;
 
     @ShellMethod(value = "Generate account import files in CSV format", key = {"gen-csv"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
@@ -67,13 +70,13 @@ public class GenerateCSV extends RestCommandSupport {
         Path path = Paths.get(destination);
         if (!path.toFile().isDirectory()) {
             if (!path.toFile().mkdirs()) {
-                console.error("Unable to create destination dir: " + destination);
+                logger.warn("Unable to create destination dir: {}", destination);
                 return;
             }
         }
 
         if (transactionsPerAccount > 0 && legsPerTransaction % 2 != 0) {
-            console.error("Transaction legs must be multiple of two: " + legsPerTransaction);
+            logger.warn("Transaction legs must be multiple of two, not: {}", legsPerTransaction);
             return;
         }
 
@@ -98,12 +101,12 @@ public class GenerateCSV extends RestCommandSupport {
             final int nAccounts = Integer.parseInt(accounts.replace("_", ""));
             final int accountsPerRegion = nAccounts / regionMap.size();
 
-            console.info(">> Generating CSV import files");
-            console.info("%d regions: %s", regionMap.size(), regionMap.keySet());
-            console.info("%,d accounts total ", nAccounts);
-            console.info("%,d accounts per region ", accountsPerRegion);
-            console.info("%,d transactions total", nAccounts * transactionsPerAccount);
-            console.info("%,d transaction legs total", nAccounts * transactionsPerAccount * legsPerTransaction);
+            logger.info(">> Generating CSV import files");
+            logger.info("{} regions: {}", regionMap.size(), regionMap.keySet());
+            logger.info("{} accounts total", nAccounts);
+            logger.info("{} accounts per region", accountsPerRegion);
+            logger.info("{} transactions total", nAccounts * transactionsPerAccount);
+            logger.info("{} transaction legs total", nAccounts * transactionsPerAccount * legsPerTransaction);
 
             CsvGenerator generator = new CsvGenerator();
             generator.writers = writers;
@@ -118,17 +121,17 @@ public class GenerateCSV extends RestCommandSupport {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
-            console.error("fatal: " + e.getCause());
+            logger.error("", e.getCause());
             e.getCause().printStackTrace();
 
-            writers.forEach(w -> w.wipe(console));
+            writers.forEach(w -> w.wipe(logger));
         } finally {
             executor.shutdownNow();
 
             writers.forEach(w -> {
                 try {
                     w.close();
-                    w.printSummary(console);
+                    w.printSummary(logger);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -167,7 +170,7 @@ public class GenerateCSV extends RestCommandSupport {
             });
         }
 
-        public void wipe(Console console) {
+        public void wipe(Logger logger) {
             try {
                 close();
             } catch (IOException e) {
@@ -176,7 +179,7 @@ public class GenerateCSV extends RestCommandSupport {
 
             paths.forEach(p -> {
                 if (p != null && p.toFile().isFile()) {
-                    console.info("Deleting %s", p.toAbsolutePath());
+                    logger.info("Deleting {}", p.toAbsolutePath());
                     if (!p.toFile().delete()) {
                         p.toFile().deleteOnExit();
                     }
@@ -184,11 +187,11 @@ public class GenerateCSV extends RestCommandSupport {
             });
         }
 
-        public void printSummary(Console console) {
+        public void printSummary(Logger logger) {
             paths.forEach(p -> {
                 if (p != null && p.toFile().isFile()) {
                     try {
-                        console.info("Created %s (%s)", p.toAbsolutePath(),
+                        logger.info("Created {} ({})", p.toAbsolutePath(),
                                 ByteFormat.byteCountToDisplaySize(Files.size(p)));
                     } catch (IOException e) {
                         e.printStackTrace();

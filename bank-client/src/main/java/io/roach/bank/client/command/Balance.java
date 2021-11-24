@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
@@ -19,9 +18,7 @@ import org.springframework.shell.standard.ShellOption;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.support.TaskDuration;
-import io.roach.bank.client.support.TimeDuration;
-import io.roach.bank.client.util.DurationFormat;
+import io.roach.bank.client.support.DurationFormat;
 
 import static io.roach.bank.api.BankLinkRelations.withCurie;
 
@@ -48,9 +45,6 @@ public class Balance extends RestCommandSupport {
             return;
         }
 
-        final int concurrencyLevel = concurrency > 0 ? concurrency :
-                Math.max(1, Runtime.getRuntime().availableProcessors() * 2 / regionMap.size());
-
         final List<Link> links = new ArrayList<>();
 
         accountMap.forEach((key, value) -> {
@@ -62,19 +56,10 @@ public class Balance extends RestCommandSupport {
             });
         });
 
-        final TaskDuration taskDuration =
-                TimeDuration.of(DurationFormat.parseDuration(duration));
-
-        accountMap.forEach((key, value) -> IntStream.range(0, concurrencyLevel)
-                .forEach(i -> throttledExecutor.submit(() -> randomRead(links),
-                        taskDuration,
-                        key + " balance")
-                ));
-
-        console.info("Max accounts per region: %d", accountLimit);
-        console.info("Use follower reads: %s", followerReads);
-        console.info("Concurrency level per region: %d", concurrencyLevel);
-        console.info("Execution duration: %s", duration);
+        executorTemplate.runConcurrently(boundedExecutor -> {
+            accountMap.keySet().forEach(regionKey ->
+                    boundedExecutor.submit(() -> randomRead(links), "["+ regionKey + "] balance", concurrency));
+        }, DurationFormat.parseDuration(duration));
     }
 
     private String randomRead(List<Link> links) {

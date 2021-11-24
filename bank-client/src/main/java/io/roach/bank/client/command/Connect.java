@@ -2,6 +2,8 @@ package io.roach.bank.client.command;
 
 import java.net.URI;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.hateoas.client.Traverson;
@@ -17,7 +19,6 @@ import org.springframework.web.client.RestTemplate;
 import com.jayway.jsonpath.JsonPath;
 
 import io.roach.bank.client.support.ConnectionUpdatedEvent;
-import io.roach.bank.client.support.Console;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
@@ -26,11 +27,10 @@ public class Connect {
 
     private static boolean connected;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private Console console;
+    private RestTemplate restTemplate;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -43,7 +43,7 @@ public class Connect {
     public void connect(@ShellOption(value = {"--url", "-u"},
             help = "REST API base URI", defaultValue = DEFAULT_URL) String baseUrl) {
 
-        console.debug("Connecting to %s..", baseUrl);
+        logger.info("Connecting to {}..", baseUrl);
 
         ResponseEntity<String> entity = restTemplate.getForEntity(baseUrl, String.class);
 
@@ -56,7 +56,7 @@ public class Connect {
             String name = response.getHeaders().toSingleValueMap().get("X-Application-Context");
             if ("Roach Bank".equals(name)) {
                 String message = JsonPath.parse(response.getBody()).read("$.message", String.class);
-                console.info(message);
+                logger.info("\n{}", message);
 
                 applicationEventPublisher.publishEvent(
                         new ConnectionUpdatedEvent(this,
@@ -64,11 +64,11 @@ public class Connect {
                                 entity.getStatusCode()
                         ));
             } else {
-                console.warn("This doesnt look like Roach Bank API - please check URL!");
-                console.info(response.getBody());
+                logger.warn("This doesnt look like Roach Bank API - please check URL!");
+                logger.warn(response.getBody());
             }
         } else {
-            console.error("Connection failed (%s)", entity.getStatusCode().getReasonPhrase());
+            logger.error("Connection failed: {}", entity.getStatusCode().getReasonPhrase());
         }
     }
 }

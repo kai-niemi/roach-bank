@@ -15,10 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextClosedEvent;
@@ -33,9 +34,10 @@ import org.springframework.util.StringUtils;
 
 import io.roach.bank.client.support.ConnectionUpdatedEvent;
 
-@SpringBootApplication
 @Configuration
+@EnableAutoConfiguration
 @EnableConfigurationProperties
+@ComponentScan(basePackages = "io.roach.bank.client")
 public class Application implements PromptProvider {
     public static void main(String[] args) {
         new SpringApplicationBuilder(Application.class)

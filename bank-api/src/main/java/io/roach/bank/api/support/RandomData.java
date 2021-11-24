@@ -2,9 +2,10 @@ package io.roach.bank.api.support;
 
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class RandomData {
-    private static final Random random = new SecureRandom(UUID.randomUUID().toString().getBytes());
+    private static final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     private static final char[] VOWELS = "aeiou".toCharArray();
 

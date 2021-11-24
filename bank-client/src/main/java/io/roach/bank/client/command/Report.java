@@ -11,7 +11,12 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 
 import io.roach.bank.api.BankLinkRelations;
 
-import static io.roach.bank.api.BankLinkRelations.*;
+import static io.roach.bank.api.BankLinkRelations.ACCOUNT_SUMMARY_REL;
+import static io.roach.bank.api.BankLinkRelations.LOCAL_REGIONS_REL;
+import static io.roach.bank.api.BankLinkRelations.META_REL;
+import static io.roach.bank.api.BankLinkRelations.REGION_GROUPS_REL;
+import static io.roach.bank.api.BankLinkRelations.REPORTING_REL;
+import static io.roach.bank.api.BankLinkRelations.TRANSACTION_SUMMARY_REL;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_REPORTING_COMMANDS)
@@ -23,14 +28,14 @@ public class Report extends RestCommandSupport {
                 .follow(BankLinkRelations.withCurie(META_REL))
                 .follow(BankLinkRelations.withCurie(REGION_GROUPS_REL))
                 .toObject(Map.class);
-        console.info("Region mappings (%d)", result.size());
-        result.forEach((k, v) -> console.info(" %s -> %s", k, v));
+
+        result.forEach((k, v) -> logger.info("{} -> {}", k, v));
 
         ResponseEntity<List> entity = traverson.fromRoot()
                 .follow(BankLinkRelations.withCurie(META_REL))
                 .follow(BankLinkRelations.withCurie(LOCAL_REGIONS_REL))
                 .toEntity(List.class);
-        console.info("Local region:\n%s", entity.getBody());
+        logger.info("Local region: {}", entity.getBody());
     }
 
     @ShellMethod(value = "Report account summary", key = {"rs", "report-accounts"})
@@ -41,7 +46,7 @@ public class Report extends RestCommandSupport {
                 .follow(BankLinkRelations.withCurie(ACCOUNT_SUMMARY_REL))
                 .toEntity(List.class);
 
-        accountSummary.getBody().forEach(item -> console.debug("%s", item));
+        accountSummary.getBody().forEach(item -> logger.info("{}", item));
     }
 
     @ShellMethod(value = "Report transaction summary", key = {"rx", "report-txn"})
@@ -52,6 +57,6 @@ public class Report extends RestCommandSupport {
                 .follow(BankLinkRelations.withCurie(TRANSACTION_SUMMARY_REL))
                 .toEntity(List.class);
 
-        transactionSummary.getBody().forEach(item -> console.debug("%s", item));
+        transactionSummary.getBody().forEach(item -> logger.info("{}", item));
     }
 }

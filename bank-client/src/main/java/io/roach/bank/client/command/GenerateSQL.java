@@ -9,7 +9,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Currency;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -17,20 +16,17 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.support.Money;
-import io.roach.bank.client.support.Console;
-import io.roach.bank.client.util.ByteFormat;
+import io.roach.bank.client.support.ByteFormat;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
 public class GenerateSQL extends RestCommandSupport {
-    @Autowired
-    protected Console console;
-
     @ShellMethod(value = "Generate account plan in SQL format", key = {"gen-sql"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void generateSQL(
             @ShellOption(help = "output path", defaultValue = ".data") String output,
-            @ShellOption(help = "initial account balance in regional currency", defaultValue = "100000.00") String balance,
+            @ShellOption(help = "initial account balance in regional currency", defaultValue = "100000.00")
+                    String balance,
             @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) throws IOException {
@@ -42,7 +38,7 @@ public class GenerateSQL extends RestCommandSupport {
         Path path = Paths.get(output);
         if (!path.toFile().isDirectory()) {
             if (!path.toFile().mkdirs()) {
-                console.error("Unable to create destination dir: " + output);
+                logger.warn("Unable to create destination dir: {}", output);
                 return;
             }
         }
@@ -86,6 +82,6 @@ public class GenerateSQL extends RestCommandSupport {
 
             writer.newLine();
         }
-        console.info("Created %s (%s)", path, ByteFormat.byteCountToDisplaySize(Files.size(path)));
+        logger.info("Created {} ({})", path, ByteFormat.byteCountToDisplaySize(Files.size(path)));
     }
 }

@@ -5,5 +5,5 @@
    ,---| ---- |--.
 
 Welcome to Roach Bank!
-Your are in a cold, dark indoor lobby.
+Your are in a cold, pitch dark indoor lobby.
 Type help for commands.

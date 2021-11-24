@@ -1,5 +1,8 @@
 package io.roach.bank.client.support;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.jline.terminal.Terminal;
@@ -20,31 +23,66 @@ public class Console {
         this.terminal = terminal;
     }
 
-    public void debug(String format, Object... args) {
-        custom(Color.GREEN, format, args);
+    private String ansiColor(Color color, String message) {
+        return ansiColor(AttributedStyle.DEFAULT.foreground(color.code()).backgroundOff(), message);
     }
 
-    public void info(String format, Object... args) {
+    private String ansiColor(AttributedStyle style, String message) {
+        return new AttributedStringBuilder()
+                .append(message, style)
+                .toAnsi();
+    }
+
+    public void magenta(String format, Object... args) {
+        custom(Color.MAGENTA, format, args);
+    }
+
+    public void cyan(String format, Object... args) {
         custom(Color.CYAN, format, args);
     }
 
-    public void warn(String format, Object... args) {
+    public void yellow(String format, Object... args) {
         custom(Color.YELLOW, format, args);
     }
 
-    public void error(String format, Object... args) {
+    public void red(String format, Object... args) {
         custom(Color.RED, format, args);
     }
 
+    public void bright(String format, Object... args) {
+        custom(Color.BRIGHT, format, args);
+    }
+
+    public void white(String format, Object... args) {
+        custom(Color.WHITE, format, args);
+    }
+
+    public void blue(String format, Object... args) {
+        custom(Color.BLUE, format, args);
+    }
+
+    public void green(String format, Object... args) {
+        custom(Color.GREEN, format, args);
+    }
+
     public void custom(Color color, String format, Object... args) {
-        terminal.writer().println(color(color, String.format(Locale.US, format, args)));
+        terminal.writer().print(ansiColor(color, String.format(Locale.US, format, args)));
         terminal.writer().flush();
     }
 
-    private String color(Color color, String message) {
-        return new AttributedStringBuilder()
-                .append(message, AttributedStyle.DEFAULT.foreground(color.code()).backgroundOff())
-                .toAnsi();
+    public void sample() {
+        Arrays.stream(Color.values()).sequential().forEach(color -> custom(color, "This is %s\n", color.name()));
+
+        List<AttributedStyle> styles = new ArrayList<>();
+
+        Arrays.stream(Color.values()).sequential().forEach(color -> {
+            styles.add(AttributedStyle.DEFAULT.foreground(color.code()).inverse());
+        });
+
+        styles.forEach(style -> {
+            terminal.writer().println(ansiColor(style, "This is " + style.toString()));
+            terminal.writer().flush();
+        });
     }
 
     public enum Color {

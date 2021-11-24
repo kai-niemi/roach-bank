@@ -1,16 +1,16 @@
-logging:
-  file:
-    name: bank-client.log
-  pattern:
-    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr([%logger{39}]){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
-    file: "%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:%5p} [%t] %logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
-  logback:
-    rollingpolicy:
-      max-history: 3
 spring:
   output:
     ansi:
       enabled: always
+logging:
+  file:
+    name: bank-client.log
+  pattern:
+    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr([%logger{39}]){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    file: "%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:%5p} [%t] %logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+  logback:
+    rollingpolicy:
+      max-history: 5
 roachbank:
   history:
     file: .clienthistory
@@ -19,8 +19,3 @@ roachbank:
     maxTotal: -1
     # Total concurrent http connections per route (endpoint)
     defaultMaxPerRoute: -1
-  # Total core thread pool size, e.g. the number of threads to keep in the pool even if they are idle. The thread
-  # pool will prefer to start new threads up to this size rather than queue workers.
-  # A negative value denotes the following formula:
-  #   Runtime.getRuntime().availableProcessors() * 2
-  threadPoolSize: -1
