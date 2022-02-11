@@ -24,6 +24,11 @@ public @interface TimeTravel {
     TimeTravelMode mode() default TimeTravelMode.NONE;
 
     /**
+     * @return use time bounded or exact staleness (default) on follower reads
+     */
+    String followerReadStaleness() default "(exact)";
+
+    /**
      * See https://www.cockroachlabs.com/docs/stable/interval.html
      *
      * @return interval expression (ignored if FOLLOWER_READ mode is used)

@@ -16,11 +16,11 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.service.BankService;
+import io.roach.bank.service.TransactionService;
 
 public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
-    private BankService bankService;
+    private TransactionService bankService;
 
     @Autowired
     private AccountRepository accountService;

@@ -6,7 +6,7 @@
 
 title="CockroachDB single region deployment (GCE)"
 # CRDB release version
-releaseversion="v21.1.10"
+releaseversion="v21.2.5"
 # Number of node instances in total including clients
 nodes="12"
 # Nodes hosting CRDB

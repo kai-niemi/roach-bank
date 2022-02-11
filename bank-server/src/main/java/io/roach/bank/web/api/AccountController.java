@@ -29,16 +29,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
-import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.service.AccountService;
 import io.roach.bank.util.TimeBoundExecution;
 import io.roach.bank.web.support.MessageModel;
 
@@ -47,6 +44,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/api/account")
+@TransactionNotAllowed
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -57,10 +55,7 @@ public class AccountController {
     private int accountsPerRegionLimit;
 
     @Autowired
-    private AccountController selfProxy;
-
-    @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Autowired
     private AccountResourceAssembler accountResourceAssembler;
@@ -89,7 +84,7 @@ public class AccountController {
                 ).withTitle("First collection page of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listTopAccountsPerRegion(null, null))
+                .listTopAccountsPerRegion(null, 10))
                 .withRel(BankLinkRelations.ACCOUNT_TOP
                 ).withTitle("Collection of top accounts grouped by region"));
 
@@ -100,7 +95,7 @@ public class AccountController {
 
         index.add(Link.of(UriTemplate.of(linkTo(AccountFormController.class)
                         .toUriComponentsBuilder().path(
-                        "/batch/{?region,prefix,batchSize}")  // RFC-6570 template
+                                "/batch/{?region,prefix,numAccounts,batchSize}")  // RFC-6570 template
                         .build().toUriString()),
                 BankLinkRelations.ACCOUNT_BATCH_REL
         ).withTitle("Account creation batch"));
@@ -109,34 +104,31 @@ public class AccountController {
     }
 
     @GetMapping(value = "/list")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
     public PagedModel<AccountModel> listAccountsPerRegion(
             @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
-        Set<String> resolvedRegions = metadataRepository.resolveRegions(regions).keySet();
         return pagedResourcesAssembler
-                .toModel(accountRepository.findAccountPage(resolvedRegions, pageable), accountResourceAssembler);
+                .toModel(accountService.findAccountPage(regions, pageable), accountResourceAssembler);
     }
 
     @GetMapping(value = "/top")
-    @TransactionNotAllowed
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccountsPerRegion(
             @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
-            @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
+            @RequestParam(value = "limit", defaultValue = "-1", required = false) int limit
     ) {
         final int limitFinal = limit <= 0 ? this.accountsPerRegionLimit : limit;
 
         // Potentially all accounts in specified regions (some regions may timeout due to outages)
         List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
 
-        Set<String> resolvedRegions = selfProxy.resolveRegions(regions);
+        Set<String> resolvedRegions = accountService.resolveRegions(regions);
 
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
         resolvedRegions.forEach(r -> tasks.add(() -> {
-            accounts.addAll(selfProxy.findAccountsByRegion(r, limitFinal));
+            accounts.addAll(accountService.findAccountsByRegion(r, limitFinal));
             return null;
         }));
 
@@ -147,61 +139,44 @@ public class AccountController {
                 .body(CollectionModel.of(accountResourceAssembler.toCollectionModel(accounts)));
     }
 
-    @TransactionBoundary(readOnly = true)
-    public Set<String> resolveRegions(List<String> regions) {
-        return metadataRepository.resolveRegions(regions).keySet();
-    }
-
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public List<Account> findAccountsByRegion(String region, int limit) {
-        return accountRepository.findAccountsByRegion(region, limit);
-    }
-
     @GetMapping(value = "/{id}/{region}")
-    @TransactionBoundary(readOnly = true)
     public AccountModel getAccount(
             @PathVariable("id") UUID id,
             @PathVariable(value = "region", required = false) String region) {
         return accountResourceAssembler.toModel(
-                accountRepository.getAccountById(Account.Id.of(id, region)));
+                accountService.getAccountById(Account.Id.of(id, region)));
     }
 
     @GetMapping(value = "/{id}/{region}/balance")
-    @TransactionBoundary(readOnly = true)
     public Money getAccountBalance(
             @PathVariable("id") UUID id,
             @PathVariable(value = "region", required = false) String region) {
-        return accountRepository.getBalance(Account.Id.of(id, region));
+        return accountService.getBalance(Account.Id.of(id, region));
     }
 
     @GetMapping(value = "/{id}/{region}/balance-snapshot")
-    @TransactionNotAllowed // Implicit
     public Money getAccountBalanceSnapshot(
             @PathVariable("id") UUID id,
             @PathVariable(value = "region", required = false) String region) {
-        return accountRepository.getBalanceSnapshot(Account.Id.of(id, region));
+        return accountService.getBalanceSnapshot(Account.Id.of(id, region));
     }
 
     @PutMapping(value = "/{id}/{region}/open")
-    @TransactionBoundary
     public AccountModel openAccount(
             @PathVariable("id") UUID id,
             @PathVariable(value = "region", required = false) String region) {
         Account.Id accountId = Account.Id.of(id, region);
-        accountRepository.openAccount(accountId);
         return accountResourceAssembler.toModel(
-                accountRepository.getAccountById(accountId));
+                accountService.openAccount(accountId));
     }
 
     @PutMapping(value = "/{id}/{region}/close")
-    @TransactionBoundary
     public AccountModel closeAccount(
             @PathVariable("id") UUID id,
             @PathVariable(value = "region", required = false) String region) {
         Account.Id accountId = Account.Id.of(id, region);
-        accountRepository.closeAccount(accountId);
         return accountResourceAssembler.toModel(
-                accountRepository.getAccountById(accountId));
+                accountService.closeAccount(accountId));
     }
 }
 

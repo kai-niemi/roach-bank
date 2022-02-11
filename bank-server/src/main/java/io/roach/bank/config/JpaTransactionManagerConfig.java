@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.hibernate.cache.internal.NoCachingRegionFactory;
 import org.hibernate.cfg.Environment;
+import org.hibernate.dialect.CockroachDB201Dialect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,15 +49,16 @@ public class JpaTransactionManagerConfig {
     private Properties jpaVendorProperties() {
         return new Properties() {
             {
+                setProperty(Environment.STATEMENT_BATCH_SIZE, "64");
+                setProperty(Environment.ORDER_INSERTS, "true");
+                setProperty(Environment.ORDER_UPDATES, "true");
+                setProperty(Environment.BATCH_VERSIONED_DATA, "true");
+
                 setProperty(Environment.GENERATE_STATISTICS, Boolean.TRUE.toString());
                 setProperty(Environment.LOG_SESSION_METRICS, Boolean.FALSE.toString());
                 setProperty(Environment.USE_MINIMAL_PUTS, Boolean.TRUE.toString());
                 setProperty(Environment.USE_SECOND_LEVEL_CACHE, "false");
                 setProperty(Environment.CACHE_REGION_FACTORY, NoCachingRegionFactory.class.getName());
-                setProperty(Environment.STATEMENT_BATCH_SIZE, "64");
-                setProperty(Environment.ORDER_INSERTS, "true");
-                setProperty(Environment.ORDER_UPDATES, "true");
-                setProperty(Environment.BATCH_VERSIONED_DATA, "true");
                 setProperty(Environment.FORMAT_SQL, "false");
             }
         };
@@ -66,7 +68,7 @@ public class JpaTransactionManagerConfig {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setGenerateDdl(false);
         vendorAdapter.setShowSql(false);
-//        vendorAdapter.setDatabasePlatform("io.roach.bank.repository.jpa.CockroachDBDialect");
+        vendorAdapter.setDatabasePlatform(CockroachDB201Dialect.class.getName());
         vendorAdapter.setDatabase(Database.POSTGRESQL);
         return vendorAdapter;
     }

@@ -1,8 +1,8 @@
 package io.roach.bank.web.api;
 
 import java.time.LocalDateTime;
-import java.util.Currency;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.validation.Valid;
 
@@ -60,7 +60,7 @@ public class AccountFormController {
         form.setAccountType(AccountType.ASSET);
 
         Link link = Affordances.of(linkTo(methodOn(getClass()).getAccountForm()).withSelfRel()
-                .andAffordance(afford(methodOn(getClass()).submitAccountForm(null))))
+                        .andAffordance(afford(methodOn(getClass()).submitAccountForm(null))))
                 .toLink();
         form.add(link);
 
@@ -101,10 +101,20 @@ public class AccountFormController {
     public HttpEntity<Void> submitAccountBatch(
             @RequestParam(value = "region", defaultValue = "") String region,
             @RequestParam(value = "prefix", defaultValue = "gen") String prefix,
-            @RequestParam(value = "batchSize", defaultValue = "250") Integer batchSize
+            @RequestParam(value = "numAccounts", defaultValue = "320") Integer numAccounts,
+            @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
     ) {
-        Currency currency = metadataRepository.getRegionCurrency(region);
-        accountRepository.createAccountBatch(region, currency, sequence -> (prefix + "-" + sequence), batchSize);
+        final Money balance = Money.of("0.00", metadataRepository.getRegionCurrency(region));
+        final AtomicInteger sequence = new AtomicInteger(1);
+
+        accountRepository.createAccountBatch(() -> Account.builder()
+                        .withId(UUID.randomUUID(), region)
+                        .withName(prefix + "-" + sequence.incrementAndGet())
+                        .withBalance(balance)
+                        .withAccountType(AccountType.ASSET)
+                        .build(),
+                numAccounts, batchSize);
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

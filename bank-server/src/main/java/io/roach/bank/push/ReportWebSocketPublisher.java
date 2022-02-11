@@ -45,7 +45,7 @@ public class ReportWebSocketPublisher {
     private final ReentrantLock lock = new ReentrantLock();
 
     @Value("${roachbank.reportQueryTimeout}")
-    private int queryTimeout = 60_000;
+    private int queryTimeout = 120_000;
 
     @Autowired
     @Lazy

@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -24,8 +24,7 @@ import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.TransactionRepository;
 
 @Service
-@TransactionControlService
-public class DefaultBankService implements BankService {
+public class DefaultTransactionService implements TransactionService {
     @Autowired
     private AccountRepository accountRepository;
 
@@ -33,6 +32,7 @@ public class DefaultBankService implements BankService {
     private TransactionRepository transactionRepository;
 
     @Override
+    @TransactionMandatory
     public Transaction createTransaction(Transaction.Id id, TransactionForm request) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new IllegalStateException("No transaction context - check Spring profile settings");
@@ -106,28 +106,32 @@ public class DefaultBankService implements BankService {
     }
 
     @Override
+    @TransactionMandatory
     public Page<Transaction> find(Pageable page) {
         return transactionRepository.findAll(page);
     }
 
     @Override
+    @TransactionMandatory
     public Transaction findById(Transaction.Id id) {
         return transactionRepository.findById(id);
     }
 
     @Override
+    @TransactionMandatory
     public TransactionItem getItemById(TransactionItem.Id id) {
         return transactionRepository.getItemById(id);
     }
 
     @Override
+    @TransactionMandatory
     public Page<TransactionItem> findItemsByTransactionId(Transaction.Id transactionId, Pageable page) {
         return transactionRepository.findItems(transactionId, page);
     }
 
     @Override
+    @TransactionMandatory
     public void deleteAll() {
         transactionRepository.deleteAll();
-        accountRepository.deleteAll();
     }
 }

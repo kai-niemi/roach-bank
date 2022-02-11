@@ -1,5 +1,6 @@
 package io.roach.bank.repository;
 
+import java.util.Collection;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
@@ -19,5 +20,5 @@ public interface MetadataRepository {
 
     Map<Currency, List<String>> getCurrencyRegions();
 
-    Map<String, Currency> resolveRegions(List<String> regions);
+    Map<String, Currency> resolveRegions(Collection<String> regions);
 }

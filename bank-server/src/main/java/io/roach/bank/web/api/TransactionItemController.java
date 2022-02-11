@@ -20,13 +20,13 @@ import io.roach.bank.api.TransactionItemModel;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
-import io.roach.bank.service.BankService;
+import io.roach.bank.service.TransactionService;
 
 @RestController
 @RequestMapping(value = "/api/transactionitem")
 public class TransactionItemController {
     @Autowired
-    private BankService bankService;
+    private TransactionService bankService;
 
     @Autowired
     private TransactionItemResourceAssembler transactionItemResourceAssembler;

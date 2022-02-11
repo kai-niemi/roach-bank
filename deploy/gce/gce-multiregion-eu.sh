@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script for setting up a single-region Roach Bank cluster using roachprod in either AWS or GCE.
+# Script for setting up a multi-region Roach Bank cluster using roachprod in either AWS or GCE.
 
 # Configuration
 ########################
 
-title="CockroachDB single region deployment (AWS)"
+title="CockroachDB 3-region EU deployment"
 # CRDB release version
 releaseversion="v21.2.5"
 # Number of node instances in total including clients
@@ -14,27 +14,27 @@ crdbnodes="1-9"
 # Array of client nodes (must match size of regions)
 clients=(10 11 12)
 # Array of client localities (must match partition names)
-localities=('eu-central-1' 'eu-central-1' 'eu-central-1')
+localities=('us_east1' 'us_central' 'us_east4')
 # Array of regions localities (must match zone names)
-regions=('eu-central-1' 'eu-central-1' 'eu-central-1')
+regions=('europe-west1' 'europe-west2' 'europe-west3')
 # AWS/GCE cloud (aws|gce)
-cloud="aws"
-# AWS/GCE region zones (must align with nodes size)
+cloud="gce"
+# AWS/GCE region zones (must align with nodes count)
 zones="\
-eu-central-1a,\
-eu-central-1a,\
-eu-central-1a,\
-eu-central-1b,\
-eu-central-1b,\
-eu-central-1b,\
-eu-central-1c,\
-eu-central-1c,\
-eu-central-1c,\
-eu-central-1a,\
-eu-central-1b,\
-eu-central-1c"
+europe-west1-b,\
+europe-west1-c,\
+europe-west1-d,\
+europe-west2-a,\
+europe-west2-b,\
+europe-west2-c,\
+europe-west3-a,\
+europe-west3-b,\
+europe-west3-c,\
+europe-west1-b,\
+europe-west2-a,\
+europe-west3-a"
 # AWS/GCE machine types
-machinetypes="c5d.2xlarge"
+machinetypes="n2-standard-16"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################

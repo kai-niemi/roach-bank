@@ -3,7 +3,7 @@ spring:
     url: jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable
     driver-class-name: org.postgresql.Driver
     username: root
-    password: root
+    password: 
     hikari:
       pool-name: roach-bank
       connection-init-sql: SELECT 1
@@ -12,3 +12,6 @@ spring:
       max-lifetime: 60000
       maximum-pool-size: 32
       minimum-idle: 32
+roachbank:
+  health:
+    admin-endpoint: http://192.168.1.99:7070

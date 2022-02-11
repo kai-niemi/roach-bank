@@ -16,14 +16,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.ReportingRepository;
 
 @Repository
-@TransactionControlService
+@TransactionMandatory
 public class JdbcReportingRepository implements ReportingRepository {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

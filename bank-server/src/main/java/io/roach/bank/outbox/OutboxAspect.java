@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.aspect.AdvisorOrder;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.service.InfrastructureException;
@@ -49,8 +49,8 @@ public class OutboxAspect {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultBankService.createTransaction(..))", returning = "transaction")
-    @TransactionControlService
+    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")
+    @TransactionMandatory
     public void doAfterTransaction(Transaction transaction) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new IllegalStateException("No transaction context - check Spring profile settings");

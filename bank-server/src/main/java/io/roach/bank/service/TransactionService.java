@@ -7,7 +7,7 @@ import io.roach.bank.api.TransactionForm;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 
-public interface BankService {
+public interface TransactionService {
     Transaction createTransaction(Transaction.Id id, TransactionForm transactionRequest);
 
     Transaction findById(Transaction.Id id);

@@ -12,20 +12,25 @@
         <appender-ref ref="FILE" />
     </appender>
 
-    <logger name="io.roach.SQL_TRACE" level="INFO" additivity="false">
-        <appender-ref ref="ASYNC_FILE" />
-    </logger>
-
     <logger name="org.eclipse.jetty" level="WARN"/>
+
     <logger name="org.springframework" level="INFO"/>
-    <logger name="org.springframework.transaction" level="WARN"/>
-    <logger name="org.springframework.transaction.support" level="WARN"/>
-    <logger name="org.springframework.transaction.interceptor" level="WARN"/>
+    <logger name="org.springframework.transaction" level="INFO"/>
     <logger name="org.springframework.web" level="WARN"/>
+<!--    <logger name="org.springframework.transaction.support" level="DEBUG"/>-->
+<!--    <logger name="org.springframework.transaction.interceptor" level="DEBUG"/>-->
 <!--    <logger name="org.springframework.jdbc.core" level="DEBUG"/>-->
 <!--    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>-->
     
     <logger name="io.roach" level="DEBUG"/>
+
+    <!-- Use TRACE level to enable SQL trace logging -->
+    <logger name="io.roach.SQL_TRACE" level="DEBUG"/>
+    <!--
+        <logger name="io.roach.SQL_TRACE" level="INFO" additivity="false">
+            <appender-ref ref="ASYNC_FILE" />
+        </logger>
+    -->
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

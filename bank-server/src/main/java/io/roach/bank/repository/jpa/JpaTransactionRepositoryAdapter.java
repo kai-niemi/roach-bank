@@ -7,13 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.repository.TransactionRepository;
 
 @Repository
-@TransactionControlService
+@TransactionMandatory
 @Profile(ProfileNames.JPA)
 public class JpaTransactionRepositoryAdapter implements TransactionRepository {
     @Autowired

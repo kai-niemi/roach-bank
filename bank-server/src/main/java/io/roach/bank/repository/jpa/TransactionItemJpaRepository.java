@@ -9,10 +9,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.domain.TransactionItem;
 
-@TransactionControlService
+@TransactionMandatory
 public interface TransactionItemJpaRepository extends JpaRepository<TransactionItem, TransactionItem.Id>,
         JpaSpecificationExecutor<TransactionItem> {
 

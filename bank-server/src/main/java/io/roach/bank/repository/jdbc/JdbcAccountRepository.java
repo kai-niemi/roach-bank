@@ -7,11 +7,12 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Currency;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.sql.DataSource;
 
@@ -29,17 +30,17 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
-import io.roach.bank.service.NoSuchAccountException;
 import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.service.NoSuchAccountException;
 
 @Repository
-@TransactionControlService
+@TransactionMandatory
 @Profile(ProfileNames.NOT_JPA)
 public class JdbcAccountRepository implements AccountRepository {
     private JdbcTemplate jdbcTemplate;
@@ -72,24 +73,24 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void createAccountBatch(String region, Currency currency, NamingStrategy namingStrategy, int batchSize) {
-        final Money initialBalance = Money.of("0.00", currency);
-
-        jdbcTemplate.batchUpdate(
+    public void createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize) {
+        IntStream.rangeClosed(1, numAccounts / batchSize)
+                .forEach(batch -> jdbcTemplate.batchUpdate(
                 "INSERT INTO account "
                         + "(id, region, balance, currency, name, description, type, closed, allow_negative, updated) "
-                        + "VALUES(?,?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() { // RETURNING NOTHING
+                        + "VALUES(?,?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setObject(1, UUID.randomUUID());
-                        ps.setString(2, region);
-                        ps.setBigDecimal(3, initialBalance.getAmount());
-                        ps.setString(4, initialBalance.getCurrency().getCurrencyCode());
-                        ps.setString(5, namingStrategy.accountName(i));
+                        Account account = factory.get();
+                        ps.setObject(1, account.getUUID());
+                        ps.setString(2, account.getRegion());
+                        ps.setBigDecimal(3, account.getBalance().getAmount());
+                        ps.setString(4, account.getBalance().getCurrency().getCurrencyCode());
+                        ps.setString(5, account.getName());
                         ps.setString(6, CockroachFacts.nextFact(256));
-                        ps.setString(7, AccountType.ASSET.getCode());
-                        ps.setBoolean(8, false);
-                        ps.setInt(9, 0);
+                        ps.setString(7, account.getAccountType().getCode());
+                        ps.setBoolean(8, account.isClosed());
+                        ps.setInt(9, account.getAllowNegative());
                         ps.setTimestamp(10, Timestamp.from(Instant.now()));
                     }
 
@@ -97,7 +98,7 @@ public class JdbcAccountRepository implements AccountRepository {
                     public int getBatchSize() {
                         return batchSize;
                     }
-                });
+                }));
     }
 
     @Override
@@ -254,7 +255,7 @@ public class JdbcAccountRepository implements AccountRepository {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency "
                         + "FROM account "
-                        + "AS OF SYSTEM TIME experimental_follower_read_timestamp() "
+                        + "AS OF SYSTEM TIME follower_read_timestamp() "
                         + "WHERE id=? AND region=?",
                 (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
                 id.getUUID(), id.getRegion()

@@ -115,7 +115,14 @@ public class TransactionHintsAspect {
         TimeTravel timeTravel = transactionBoundary.timeTravel();
 
         if (timeTravel.mode().equals(TimeTravelMode.FOLLOWER_READ) && enterpriseLicenseFound) {
-            jdbcTemplate.execute("SET TRANSACTION AS OF SYSTEM TIME experimental_follower_read_timestamp()");
+            if ("(exact)".equals(timeTravel.followerReadStaleness())) {
+                jdbcTemplate.execute(
+                        "SET TRANSACTION AS OF SYSTEM TIME follower_read_timestamp()");
+            } else {
+                jdbcTemplate.execute(
+                        "SET TRANSACTION AS OF SYSTEM TIME with_max_staleness('"
+                                + timeTravel.followerReadStaleness() + "')");
+            }
         } else if (timeTravel.mode().equals(TimeTravelMode.SNAPSHOT_READ)) {
             jdbcTemplate.update("SET TRANSACTION AS OF SYSTEM TIME INTERVAL '"
                     + timeTravel.interval() + "'");

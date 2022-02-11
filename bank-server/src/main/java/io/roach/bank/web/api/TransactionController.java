@@ -27,7 +27,7 @@ import io.roach.bank.api.TransactionModel;
 import io.roach.bank.service.NoSuchTransactionException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
-import io.roach.bank.service.BankService;
+import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.MessageModel;
 import io.roach.bank.web.support.ZoomExpression;
 
@@ -42,7 +42,7 @@ public class TransactionController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private BankService bankService;
+    private TransactionService bankService;
 
     @Autowired
     private TransactionResourceAssembler transactionResourceAssembler;

@@ -14,12 +14,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.web.api.MetadataException;
 
 @Repository
-@TransactionControlService
+@TransactionMandatory
 public class JdbcMetadataRepository implements MetadataRepository {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -84,7 +84,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public Map<String, Currency> resolveRegions(List<String> names) {
+    public Map<String, Currency> resolveRegions(Collection<String> names) {
         if (names.isEmpty()) {
             names = getLocalRegions();
         }
@@ -113,9 +113,20 @@ public class JdbcMetadataRepository implements MetadataRepository {
         return result;
     }
 
+    private boolean tableExists(String tableName) {
+        return jdbcTemplate.queryForObject("SELECT count(*) "
+                + "FROM information_schema.tables "
+                + "WHERE table_name = ? "
+                + "LIMIT 1", Integer.class, tableName) != 0;
+    }
+
     @Override
     public List<String> getLocalRegions() {
         List<String> listValues;
+
+        if (!tableExists("crdb_internal.partitions")) {
+            return getRegions();
+        }
 
         if ("".equals(locality) || "all".equals(locality)) {
             listValues = this.jdbcTemplate.query(
@@ -132,7 +143,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
         listValues.forEach(s -> {
             List<String> p = Arrays.stream(
-                    s.split(",")).map(x -> x.trim().replaceAll("^\\('|'\\)$", ""))
+                            s.split(",")).map(x -> x.trim().replaceAll("^\\('|'\\)$", ""))
                     .collect(Collectors.toList());
             filteredValues.addAll(p);
         });

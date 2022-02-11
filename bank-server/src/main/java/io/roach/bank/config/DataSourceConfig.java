@@ -22,7 +22,7 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Configuration
 public class DataSourceConfig {
-    protected final Logger logger = LoggerFactory.getLogger("io.roach.SQL_TRACE");
+    protected final Logger traceLogger = LoggerFactory.getLogger("io.roach.SQL_TRACE");
 
     @Bean
     @Primary
@@ -45,7 +45,7 @@ public class DataSourceConfig {
     public DataSource dataSource() {
         HikariDataSource dataSource = primaryDataSource();
 
-        if (logger.isDebugEnabled()) {
+        if (traceLogger.isTraceEnabled()) {
             ChainListener listener = new ChainListener();
             listener.addListener(new DataSourceQueryCountListener());
             return new LazyConnectionDataSourceProxy(ProxyDataSourceBuilder
@@ -54,9 +54,9 @@ public class DataSourceConfig {
                     .listener(listener)
                     .asJson()
                     .countQuery()
-                    .logQueryBySlf4j(SLF4JLogLevel.DEBUG, "io.roach.SQL_TRACE")
-                    .logSlowQueryBySlf4j(150, TimeUnit.MILLISECONDS)
-                    .multiline()
+                    .logQueryBySlf4j(SLF4JLogLevel.TRACE, "io.roach.SQL_TRACE")
+//                    .logSlowQueryBySlf4j(150, TimeUnit.MILLISECONDS)
+//                    .multiline()
                     .build());
         }
 

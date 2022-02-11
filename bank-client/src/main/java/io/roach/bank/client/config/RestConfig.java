@@ -31,6 +31,12 @@ import io.roach.bank.client.support.TraversonHelper;
 
 @Configuration
 public class RestConfig {
+    private static final int ONE_SECOND = 1000;
+
+    private static final int ONE_MINUTE = ONE_SECOND * 60;
+
+    private static final int FIVE_MINUTES = ONE_MINUTE * 5;
+
     @Value("${roachbank.http.maxTotal}")
     private int maxTotal;
 
@@ -77,8 +83,7 @@ public class RestConfig {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
         factory.setHttpClient(httpClient);
         factory.setBufferRequestBody(true);
-        factory.setReadTimeout(30_000);
-
+        factory.setReadTimeout(FIVE_MINUTES);
         return new RestTemplate(factory);
     }
 
@@ -87,7 +92,7 @@ public class RestConfig {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
         factory.setHttpClient(httpClient);
         factory.setBufferRequestBody(true);
-        factory.setReadTimeout(30_000);
+        factory.setReadTimeout(FIVE_MINUTES);
 
         RestTemplate template = new RestTemplate(factory);
         template.setMessageConverters(getHttpMessageConverters());

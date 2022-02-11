@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 
 import javax.sql.DataSource;
@@ -32,9 +31,9 @@ import com.zaxxer.hikari.HikariConfigMXBean;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
-import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.BankLinkRelations;
-import io.roach.bank.service.BankService;
+import io.roach.bank.service.AccountService;
+import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -49,7 +48,10 @@ public class AdminController {
     private DataSource dataSource;
 
     @Autowired
-    private BankService bankService;
+    private TransactionService transactionService;
+
+    @Autowired
+    private AccountService accountService;
 
     @GetMapping
     public ResponseEntity<MessageModel> index() {
@@ -168,12 +170,12 @@ public class AdminController {
     }
 
     @PostMapping(value = "/clear")
-    @TransactionBoundary(priority = TransactionBoundary.Priority.low)
     @Async
     public CompletableFuture<Void> clearAll() {
-        logger.warn("Deleting all data");
-        bankService.deleteAll();
-        logger.info("Deleting all data - done");
+        logger.warn("Deleting transactions");
+        transactionService.deleteAll();
+        logger.warn("Deleting accounts");
+        accountService.deleteAll();
         return CompletableFuture.completedFuture(null);
     }
 

@@ -39,7 +39,7 @@ import io.roach.bank.service.BadRequestException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.MetadataRepository;
-import io.roach.bank.service.BankService;
+import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.FollowLocation;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
@@ -52,7 +52,7 @@ public class TransactionFormController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private BankService bankService;
+    private TransactionService bankService;
 
     @Autowired
     private AccountRepository accountRepository;

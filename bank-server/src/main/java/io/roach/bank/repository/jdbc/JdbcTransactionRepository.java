@@ -20,7 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
@@ -28,7 +28,7 @@ import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.repository.TransactionRepository;
 
 @Repository
-@TransactionControlService
+@TransactionMandatory
 @Profile(ProfileNames.NOT_JPA)
 public class JdbcTransactionRepository implements TransactionRepository {
     private JdbcTemplate jdbcTemplate;

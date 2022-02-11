@@ -8,6 +8,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -52,8 +53,8 @@ public class CockroachDBHealthIndicator extends AbstractHealthIndicator {
             } else {
                 builder.down().withDetail("error", response.getBody());
             }
-        } catch (RestClientException e) {
-            builder.unknown().withException(e);
+        } catch (ResourceAccessException e) {
+            builder.outOfService().withException(e);
         }
     }
 }

@@ -14,13 +14,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionControlService;
+import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.repository.ReportingRepository;
 
 @Profile(ProfileNames.JPA)
-@TransactionControlService
+@TransactionMandatory
 public class JpaReportingRepository implements ReportingRepository {
     @Autowired
     private AccountJpaRepository accountRepository;

@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-circular-references: true
   output:
     ansi:
       enabled: always

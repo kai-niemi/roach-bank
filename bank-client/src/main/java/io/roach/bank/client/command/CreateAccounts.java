@@ -5,6 +5,7 @@ import java.util.Currency;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -16,8 +17,8 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.support.DurationFormat;
+import io.roach.bank.client.support.ExecutorTemplate;
 
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_BATCH_REL;
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
@@ -26,46 +27,49 @@ import static io.roach.bank.api.BankLinkRelations.withCurie;
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
 public class CreateAccounts extends RestCommandSupport {
+    @Autowired
+    protected ExecutorTemplate executorTemplate;
+
     @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = "batch size", defaultValue = "128") int batchSize
+            @ShellOption(help = "number of accounts per request", defaultValue = "320") int numAccounts,
+            @ShellOption(help = "batch size per request", defaultValue = "32") int batchSize,
+            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
             return;
         }
 
-        Duration runtimeDuration = DurationFormat.parseDuration(duration);
-
-        Link submitLink = traverson.fromRoot()
+        final Link submitLink = traverson.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_BATCH_REL))
                 .asLink();
-
+        final Duration runtimeDuration = DurationFormat.parseDuration(duration);
         final AtomicInteger batchNumber = new AtomicInteger();
 
-//        concurrencyHelper.submitForDuration(() -> {
-//                    String region = RandomData.selectRandom(regionMap.keySet());
-//
-//                    UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-//                            .queryParam("region", region)
-//                            .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
-//                            .queryParam("batchSize", batchSize);
-//
-//                    ResponseEntity<String> response =
-//                            restTemplate
-//                                    .exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
-//                                            String.class);
-//
-//                    if (!response.getStatusCode().is2xxSuccessful()) {
-//                        logger.warn("Unexpected HTTP status: {}", response.toString());
-//                    }
-//                    return null;
-//                },
-//                "create-accounts", runtimeDuration);
+        executorTemplate.runConcurrently(boundedExecutor -> {
+            regionMap.keySet().forEach(regionKey ->
+                    boundedExecutor.submit(() -> {
+                        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
+                                .queryParam("region", regionKey)
+                                .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
+                                .queryParam("numAccounts", numAccounts)
+                                .queryParam("batchSize", batchSize);
 
+                        ResponseEntity<String> response =
+                                restTemplate
+                                        .exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
+                                                String.class);
+
+                        if (!response.getStatusCode().is2xxSuccessful()) {
+                            logger.warn("Unexpected HTTP status: {}", response);
+                        }
+                        return batchSize;
+                    }, "[" + regionKey + "] create-accounts", concurrency));
+        }, runtimeDuration);
     }
 }
