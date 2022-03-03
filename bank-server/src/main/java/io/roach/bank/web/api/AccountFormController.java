@@ -101,16 +101,17 @@ public class AccountFormController {
     public HttpEntity<Void> submitAccountBatch(
             @RequestParam(value = "region", defaultValue = "") String region,
             @RequestParam(value = "prefix", defaultValue = "gen") String prefix,
+            @RequestParam(value = "balance", defaultValue = "100000.00") String balance,
             @RequestParam(value = "numAccounts", defaultValue = "320") Integer numAccounts,
             @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
     ) {
-        final Money balance = Money.of("0.00", metadataRepository.getRegionCurrency(region));
+        final Money balanceM = Money.of(balance, metadataRepository.getRegionCurrency(region));
         final AtomicInteger sequence = new AtomicInteger(1);
 
         accountRepository.createAccountBatch(() -> Account.builder()
                         .withId(UUID.randomUUID(), region)
                         .withName(prefix + "-" + sequence.incrementAndGet())
-                        .withBalance(balance)
+                        .withBalance(balanceM)
                         .withAccountType(AccountType.ASSET)
                         .build(),
                 numAccounts, batchSize);

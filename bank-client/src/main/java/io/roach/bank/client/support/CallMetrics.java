@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class CallMetric {
+public class CallMetrics {
     private static String separator(int len) {
         return new String(new char[len]).replace('\0', '-');
     }

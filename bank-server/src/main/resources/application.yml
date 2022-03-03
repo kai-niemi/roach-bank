@@ -91,7 +91,7 @@ roachbank:
   # Report query timeout (millis)
   reportQueryTimeout: 30000
   # Default number of accounts per region for random selection in client workloads (lower number = more conflicts)
-  accountsPerRegionLimit: 100
+  accountsPerRegionLimit: 10
   # Locality for bank instance for region filtering (should match partition name in a multi-region deployment)
   # Ex: eu_south, us_central, us_east
   locality: all

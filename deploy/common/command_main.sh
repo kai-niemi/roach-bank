@@ -26,7 +26,7 @@ fn_echo_header
 	echo -e "${lightblue}Cloud:\t\t${default}$cloud"
 	echo -e "${lightblue}Machine types:\t\t${default}$machinetypes"
 	echo -e "${lightblue}Zones:\t\t${default}$zones"
-	echo -e "${lightblue}Partition SQL:\t\t${default}${partitionsqlfile}"
+	echo -e "${lightblue}Partition SQL file (if exist):\t\t${default}${partitionsqlfile}"
 } | column -s $'\t' -t
 
 if [ -z "${CLUSTER}" ]; then

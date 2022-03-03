@@ -38,7 +38,7 @@ public class Report extends RestCommandSupport {
         logger.info("Local region: {}", entity.getBody());
     }
 
-    @ShellMethod(value = "Report account summary", key = {"rs", "report-accounts"})
+    @ShellMethod(value = "Report account summary", key = {"rta", "report-accounts"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void reportAccounts() {
         ResponseEntity<List> accountSummary = traverson.fromRoot()
@@ -49,7 +49,7 @@ public class Report extends RestCommandSupport {
         accountSummary.getBody().forEach(item -> logger.info("{}", item));
     }
 
-    @ShellMethod(value = "Report transaction summary", key = {"rx", "report-txn"})
+    @ShellMethod(value = "Report transaction summary", key = {"rtx", "report-txn"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void reportTransactions() {
         ResponseEntity<List> transactionSummary = traverson.fromRoot()

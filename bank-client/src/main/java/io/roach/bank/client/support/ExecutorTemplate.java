@@ -17,7 +17,7 @@ public class ExecutorTemplate {
     private BoundedExecutor boundedExecutor;
 
     @Async
-    public void runConcurrently(Callback callback, Duration duration) {
+    public void runForDuration(Callback callback, Duration duration) {
         final long startTime = System.currentTimeMillis();
 
         do {

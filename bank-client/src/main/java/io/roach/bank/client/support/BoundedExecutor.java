@@ -24,7 +24,7 @@ public class BoundedExecutor {
 
     private final Map<String, Semaphore> throttle = new ConcurrentHashMap<>();
 
-    private final CallMetric callMetric;
+    private final CallMetrics callMetrics;
 
     private int corePoolSize;
 
@@ -32,11 +32,12 @@ public class BoundedExecutor {
 
     public BoundedExecutor(int corePoolSize) {
         this.corePoolSize = corePoolSize;
-        this.callMetric = new CallMetric();
+        this.callMetrics = new CallMetrics();
         this.executorService = createExecutorService(corePoolSize);
     }
 
     private ExecutorService createExecutorService(int poolSize) {
+        logger.debug("Setting executor pool size {}", poolSize);
         return new ThreadPoolExecutor(poolSize,
                 Integer.MAX_VALUE,
                 0,
@@ -44,43 +45,46 @@ public class BoundedExecutor {
                 new LinkedBlockingDeque<>());
     }
 
-    public CallMetric getCallMetric() {
-        return callMetric;
+    public CallMetrics getCallMetrics() {
+        return callMetrics;
     }
 
     public ExecutorService getExecutorService() {
         return executorService;
     }
 
-    public <V> Future<V> submit(final Callable<V> task, final String groupName, int queueSize) {
-        Semaphore semaphore = throttle.computeIfAbsent(groupName,
-                s -> new Semaphore(queueSize <= 0 ? Runtime.getRuntime().availableProcessors() : queueSize));
+    public <V> Future<V> submitTask(final Callable<V> task, final String groupName, int queueSize) {
+        if (queueSize <= 0) {
+            throw new IllegalArgumentException("queueSize <= 0");
+        }
+
+        final Semaphore semaphore = throttle.computeIfAbsent(groupName, s -> new Semaphore(queueSize));
 
         try {
             semaphore.acquire();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Unable to acquire semaphore", e);
+            return null;
         }
 
         try {
             return executorService.submit(() -> {
-                AtomicInteger concurrency = workers.computeIfAbsent(groupName, i -> new AtomicInteger());
-                concurrency.incrementAndGet();
+                AtomicInteger activeWorkers = workers.computeIfAbsent(groupName, i -> new AtomicInteger());
+                activeWorkers.incrementAndGet();
 
-                CallMetric.Context metric = callMetric.of(groupName, concurrency::get);
+                CallMetrics.Context context = callMetrics.of(groupName, activeWorkers::get);
 
-                final long startTime = metric.enter();
+                final long startTime = context.enter();
                 try {
                     V v = task.call();
-                    metric.exit(startTime, null);
+                    context.exit(startTime, null);
                     return v;
                 } catch (Exception e) {
-                    metric.exit(startTime, e);
+                    context.exit(startTime, e);
                     logger.error("Execution error", e);
                     throw new UndeclaredThrowableException(e);
                 } finally {
-                    concurrency.decrementAndGet();
+                    activeWorkers.decrementAndGet();
                     semaphore.release();
                 }
             });
@@ -109,21 +113,20 @@ public class BoundedExecutor {
         this.executorService.shutdownNow();
 
         try {
+            logger.info("Cancelling active workers ({})", activeWorkers());
+
             while (!this.executorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                if (activeWorkers() > 0) {
-                    logger.info("Cancelling {} active workers - awaiting completion", activeWorkers());
-                }
+                logger.info("Cancelling active workers ({})", activeWorkers());
             }
 
             if (!this.executorService.isTerminated()) {
                 throw new IllegalStateException();
             }
 
+            logger.info("Active workers finished");
+
             this.workers.clear();
-            this.callMetric.clear();
-
-            logger.info("Creating new thread pool with size {}", corePoolSize);
-
+            this.callMetrics.clear();
             this.throttle.clear();
             this.executorService = createExecutorService(corePoolSize);
         } catch (InterruptedException e) {

@@ -45,24 +45,32 @@ public class Balance extends RestCommandSupport {
             return;
         }
 
-        final List<Link> links = new ArrayList<>();
+        final int concurrencyFinal = concurrency <= 0 ?
+                Math.max(2, regionMap.size() / Runtime.getRuntime().availableProcessors()) : concurrency;
 
-        accountMap.forEach((key, value) -> {
-            value.forEach(accountModel -> {
+        logger.info("Using concurrency level {}", concurrencyFinal);
+
+        accountMap.forEach((regionKey, accountModels) -> {
+            final List<Link> links = new ArrayList<>();
+
+            accountModels.forEach(accountModel -> {
                 links.add(accountModel.getLink(followerReads
                         ? withCurie(BankLinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
                         : withCurie(BankLinkRelations.ACCOUNT_BALANCE_REL))
                         .get());
             });
+
+            executorTemplate.runForDuration(boundedExecutor -> {
+                boundedExecutor
+                        .submitTask(() -> readAccountBalance(links),
+                                regionKey + " - balance", concurrencyFinal);
+            }, DurationFormat.parseDuration(duration));
         });
 
-        executorTemplate.runConcurrently(boundedExecutor -> {
-            accountMap.keySet().forEach(regionKey ->
-                    boundedExecutor.submit(() -> randomRead(links), "["+ regionKey + "] balance", concurrency));
-        }, DurationFormat.parseDuration(duration));
+        logger.info("All {} workers queued", accountMap.size());
     }
 
-    private String randomRead(List<Link> links) {
+    private String readAccountBalance(List<Link> links) {
         Link link = RandomData.selectRandom(links);
 
         ResponseEntity<String> response = restTemplate.exchange(link.toUri(), HttpMethod.GET,

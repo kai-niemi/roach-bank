@@ -48,8 +48,10 @@ public class Transfer extends RestCommandSupport {
                     int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency
+            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency,
+            @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
+
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
             return;
@@ -60,18 +62,47 @@ public class Transfer extends RestCommandSupport {
             return;
         }
 
-        final Link transferLink = traverson.fromRoot()
-                .follow(BankLinkRelations.withCurie(TRANSACTION_REL))
-                .follow(BankLinkRelations.withCurie(TRANSACTION_FORM_REL))
-                .asTemplatedLink();
+        final int concurrencyFinal = concurrency <= 0 ?
+                Math.max(2, regionMap.size() / Runtime.getRuntime().availableProcessors()) : concurrency;
 
-        executorTemplate.runConcurrently(boundedExecutor -> {
+        logger.info("Using concurrency level {}", concurrencyFinal);
+
+        if (fake) {
             accountMap.forEach((regionKey, accountModels) -> {
-                boundedExecutor.submit(() ->
-                                transferFunds(transferLink, regionKey, accountModels, amount, legs),
-                        "[" + regionKey + "] transfer", concurrency);
+                executorTemplate.runForDuration(boundedExecutor -> {
+                    boundedExecutor.submitTask(() -> transferFake(regionKey),
+                            regionKey + " - fake", concurrencyFinal);
+                }, DurationFormat.parseDuration(duration));
             });
-        }, DurationFormat.parseDuration(duration));
+        } else {
+            final Link transferLink = traverson.fromRoot()
+                    .follow(BankLinkRelations.withCurie(TRANSACTION_REL))
+                    .follow(BankLinkRelations.withCurie(TRANSACTION_FORM_REL))
+                    .asTemplatedLink();
+
+            accountMap.forEach((regionKey, accountModels) -> {
+                executorTemplate.runForDuration(boundedExecutor -> {
+                    boundedExecutor
+                            .submitTask(() -> transferFunds(transferLink, regionKey, accountModels, amount, legs),
+                                    regionKey + " - transfer", concurrencyFinal);
+                }, DurationFormat.parseDuration(duration));
+            });
+        }
+
+        logger.info("All {} workers queued", accountMap.size());
+    }
+
+    private TransactionModel transferFake(String regionKey) {
+        try {
+            if (Math.random() > 0.7) {
+                Thread.sleep(10_000);
+            } else {
+                Thread.sleep(5);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private TransactionModel transferFunds(Link transferLink,

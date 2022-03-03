@@ -1,6 +1,14 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -113,18 +121,17 @@ public class JdbcMetadataRepository implements MetadataRepository {
         return result;
     }
 
-    private boolean tableExists(String tableName) {
-        return jdbcTemplate.queryForObject("SELECT count(*) "
-                + "FROM information_schema.tables "
-                + "WHERE table_name = ? "
-                + "LIMIT 1", Integer.class, tableName) != 0;
+    private boolean partitionTableExists() {
+        return jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM information_schema.tables WHERE table_schema='crdb_internal' and table_name = 'partitions' LIMIT 1",
+                Integer.class) != 0;
     }
 
     @Override
     public List<String> getLocalRegions() {
         List<String> listValues;
 
-        if (!tableExists("crdb_internal.partitions")) {
+        if (!partitionTableExists()) {
             return getRegions();
         }
 
@@ -143,7 +150,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
         listValues.forEach(s -> {
             List<String> p = Arrays.stream(
-                            s.split(",")).map(x -> x.trim().replaceAll("^\\('|'\\)$", ""))
+                    s.split(",")).map(x -> x.trim().replaceAll("^\\('|'\\)$", ""))
                     .collect(Collectors.toList());
             filteredValues.addAll(p);
         });

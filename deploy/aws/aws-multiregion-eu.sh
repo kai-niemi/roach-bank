@@ -6,7 +6,7 @@
 
 title="CockroachDB 3-region EU deployment"
 # CRDB release version
-releaseversion="v21.2.5"
+releaseversion="v21.2.6"
 # Number of node instances in total including clients
 nodes="12"
 # Nodes hosting CRDB
@@ -14,24 +14,24 @@ crdbnodes="1-9"
 # Array of client nodes (must match size of regions)
 clients=(10 11 12)
 # Array of client localities (must match partition names)
-localities=('eu_west' 'eu_south' 'eu_central')
+localities=('eu_west_1' 'eu_west_2' 'eu_central_1')
 # Array of regions localities (must match zone names)
-regions=('eu-west-2' 'eu-west-3' 'eu-central-1')
+regions=('eu-west-1' 'eu-west-2' 'eu-central-1')
 # AWS/GCE cloud (aws|gce)
 cloud="aws"
 # AWS/GCE region zones (must align with nodes count)
 zones="\
+eu-west-1a,\
+eu-west-1b,\
+eu-west-1c,\
 eu-west-2a,\
-eu-west-2a,\
-eu-west-2a,\
-eu-west-3a,\
-eu-west-3a,\
-eu-west-3a,\
+eu-west-2b,\
+eu-west-2c,\
 eu-central-1a,\
-eu-central-1a,\
-eu-central-1a,\
+eu-central-1b,\
+eu-central-1c,\
+eu-west-1a,\
 eu-west-2a,\
-eu-west-3a,\
 eu-central-1a"
 # AWS/GCE machine types
 machinetypes="c5d.2xlarge"

@@ -1,6 +1,5 @@
 package io.roach.bank.client.command;
 
-import java.time.Duration;
 import java.util.Currency;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,6 +34,7 @@ public class CreateAccounts extends RestCommandSupport {
     public void accounts(
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
+            @ShellOption(help = "initial balance per account", defaultValue = "100000.00") String balance,
             @ShellOption(help = "number of accounts per request", defaultValue = "320") int numAccounts,
             @ShellOption(help = "batch size per request", defaultValue = "32") int batchSize,
             @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency
@@ -48,28 +48,36 @@ public class CreateAccounts extends RestCommandSupport {
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_BATCH_REL))
                 .asLink();
-        final Duration runtimeDuration = DurationFormat.parseDuration(duration);
+
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        executorTemplate.runConcurrently(boundedExecutor -> {
-            regionMap.keySet().forEach(regionKey ->
-                    boundedExecutor.submit(() -> {
-                        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-                                .queryParam("region", regionKey)
-                                .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
-                                .queryParam("numAccounts", numAccounts)
-                                .queryParam("batchSize", batchSize);
+        final int concurrencyFinal = concurrency <= 0 ?
+                Math.max(2, regionMap.size() / Runtime.getRuntime().availableProcessors()) : concurrency;
 
-                        ResponseEntity<String> response =
-                                restTemplate
-                                        .exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
-                                                String.class);
+        logger.info("Using concurrency level {}", concurrencyFinal);
 
-                        if (!response.getStatusCode().is2xxSuccessful()) {
-                            logger.warn("Unexpected HTTP status: {}", response);
-                        }
-                        return batchSize;
-                    }, "[" + regionKey + "] create-accounts", concurrency));
-        }, runtimeDuration);
+        regionMap.keySet().forEach(regionKey -> {
+            executorTemplate.runForDuration(boundedExecutor -> {
+                boundedExecutor.submitTask(() -> {
+                    UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
+                            .queryParam("region", regionKey)
+                            .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
+                            .queryParam("numAccounts", numAccounts)
+                            .queryParam("balance", balance)
+                            .queryParam("batchSize", batchSize);
+
+                    ResponseEntity<String> response =
+                            restTemplate
+                                    .exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
+                                            String.class);
+
+                    if (!response.getStatusCode().is2xxSuccessful()) {
+                        logger.warn("Unexpected HTTP status: {}", response);
+                    }
+                    return batchSize;
+                }, regionKey + " - create", concurrencyFinal);
+
+            }, DurationFormat.parseDuration(duration));
+        });
     }
 }

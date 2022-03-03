@@ -20,6 +20,9 @@ spring:
     hikari:
       pool-name: roach-bank
       connection-init-sql: SELECT 1
+      connection-timeout: 30000
+      validation-timeout: 20000
+      max-lifetime: 60000
       maximum-pool-size: 80
       minimum-idle: 80
 #############################

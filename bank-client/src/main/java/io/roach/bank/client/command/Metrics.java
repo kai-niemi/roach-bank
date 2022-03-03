@@ -24,7 +24,7 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 import io.roach.bank.client.support.BoundedExecutor;
-import io.roach.bank.client.support.CallMetric;
+import io.roach.bank.client.support.CallMetrics;
 import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.ThreadPoolStats;
 
@@ -56,18 +56,18 @@ public class Metrics {
 
     @PostConstruct
     public void init() {
-        scheduledExecutorService.scheduleAtFixedRate(poolMetricsSampler(), 5, 1, TimeUnit.SECONDS);
-//        scheduledExecutorService.scheduleAtFixedRate(poolMetricsPrinter(), 10, 30, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(poolMetricsSampler(), 5, 2, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(poolMetricsPrinter(), 10, 30, TimeUnit.SECONDS);
         scheduledExecutorService.scheduleAtFixedRate(callMetricsPrinter(), 5, 5, TimeUnit.SECONDS);
     }
 
     private Runnable callMetricsPrinter() {
         return () -> {
             if (printMetrics && boundedExecutor.hasActiveWorkers()) {
-                CallMetric callMetric = boundedExecutor.getCallMetric();
-                console.cyan("%s", callMetric.prettyPrintHeader());
-                console.white("%s", callMetric.prettyPrintBody());
-                console.green("%s", callMetric.prettyPrintFooter());
+                CallMetrics callMetrics = boundedExecutor.getCallMetrics();
+                console.cyan("%s", callMetrics.prettyPrintHeader());
+                console.white("%s", callMetrics.prettyPrintBody());
+                console.green("%s", callMetrics.prettyPrintFooter());
             }
         };
     }

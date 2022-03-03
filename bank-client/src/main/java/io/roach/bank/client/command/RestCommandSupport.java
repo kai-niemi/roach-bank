@@ -20,8 +20,8 @@ import org.springframework.web.client.RestTemplate;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
-import io.roach.bank.client.support.ExecutorTemplate;
 import io.roach.bank.client.support.ConnectionUpdatedEvent;
+import io.roach.bank.client.support.ExecutorTemplate;
 import io.roach.bank.client.support.TraversonHelper;
 
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
@@ -81,15 +81,15 @@ public abstract class RestCommandSupport {
         return result;
     }
 
-    protected Map<String, List<AccountModel>> lookupAccounts(Set<String> regions, int limit) {
+    protected Map<String, List<AccountModel>> lookupAccounts(Set<String> regions, int accountLimit) {
         final Map<String, List<AccountModel>> accountMap = new HashMap<>();
         final Map<String, Object> parameters = new HashMap<>();
 
-        parameters.put("limit", limit);
+        parameters.put("limit", accountLimit);
         parameters.put("regions", StringUtils.collectionToCommaDelimitedString(regions));
 
         logger.info("Looking up top accounts in {} (limit {})",
-                StringUtils.collectionToCommaDelimitedString(regions), limit);
+                StringUtils.collectionToCommaDelimitedString(regions), accountLimit);
 
         // Get top accounts, filter client-side based on region
         for (AccountModel account : Objects.requireNonNull(traverson.fromRoot()

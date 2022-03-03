@@ -72,7 +72,7 @@ public class Pool {
     @ShellMethodAvailability("noActiveWorkersCheck")
     public void threadPoolSet(
             @ShellOption(help = "core thread pool size (guide: 2x vCPUs of host)") int size) {
-        console.yellow("Setting thread pool size to %d with queue size %d\n", size);
+        console.yellow("Setting thread pool size to %d\n", size);
         boundedExecutor.cancelAndRestart(size);
     }
 
