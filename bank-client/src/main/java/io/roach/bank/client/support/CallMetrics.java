@@ -141,11 +141,11 @@ public class CallMetrics {
             this.concurrencyCallback = concurrencyCallback;
         }
 
-        public long enter() {
+        public long before() {
             return System.nanoTime();
         }
 
-        public void exit(long beginTime, Throwable t) {
+        public void after(long beginTime, Throwable t) {
             if (snapshots.size() > FRAME_SIZE) {
                 snapshots.remove(0);
             }

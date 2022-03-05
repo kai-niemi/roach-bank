@@ -5,16 +5,16 @@ import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import io.roach.bank.client.support.BoundedExecutor;
+import io.roach.bank.client.support.ExecutorTemplate;
 
 @ShellComponent
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class Cancel {
     @Autowired
-    private BoundedExecutor boundedExecutor;
+    private ExecutorTemplate executorTemplate;
 
-    @ShellMethod(value = "Cancel active workloads", key = {"cancel", "x"})
+    @ShellMethod(value = "Cancel all workloads", key = {"cancel", "x"})
     public void cancel() {
-        boundedExecutor.cancelAndRestart();
+        executorTemplate.cancelFutures();
     }
 }

@@ -48,7 +48,6 @@ public class Transfer extends RestCommandSupport {
                     int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
 
@@ -62,17 +61,10 @@ public class Transfer extends RestCommandSupport {
             return;
         }
 
-        final int concurrencyFinal = concurrency <= 0 ?
-                Math.max(2, regionMap.size() / Runtime.getRuntime().availableProcessors()) : concurrency;
-
-        logger.info("Using concurrency level {}", concurrencyFinal);
-
         if (fake) {
             accountMap.forEach((regionKey, accountModels) -> {
-                executorTemplate.runForDuration(boundedExecutor -> {
-                    boundedExecutor.submitTask(() -> transferFake(regionKey),
-                            regionKey + " - fake", concurrencyFinal);
-                }, DurationFormat.parseDuration(duration));
+                executorTemplate.runAsync("fake_transfer - " + regionKey,
+                        () -> transferFake(regionKey), DurationFormat.parseDuration(duration));
             });
         } else {
             final Link transferLink = traverson.fromRoot()
@@ -81,11 +73,9 @@ public class Transfer extends RestCommandSupport {
                     .asTemplatedLink();
 
             accountMap.forEach((regionKey, accountModels) -> {
-                executorTemplate.runForDuration(boundedExecutor -> {
-                    boundedExecutor
-                            .submitTask(() -> transferFunds(transferLink, regionKey, accountModels, amount, legs),
-                                    regionKey + " - transfer", concurrencyFinal);
-                }, DurationFormat.parseDuration(duration));
+                executorTemplate.runAsync("transfer - " + regionKey,
+                        () -> transferFunds(transferLink, regionKey, accountModels, amount, legs),
+                        DurationFormat.parseDuration(duration));
             });
         }
 
@@ -94,13 +84,12 @@ public class Transfer extends RestCommandSupport {
 
     private TransactionModel transferFake(String regionKey) {
         try {
-            if (Math.random() > 0.7) {
+            if (Math.random() > 0.9) {
                 Thread.sleep(10_000);
             } else {
                 Thread.sleep(5);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
         }
         return null;
     }

@@ -36,8 +36,7 @@ public class CreateAccounts extends RestCommandSupport {
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "initial balance per account", defaultValue = "100000.00") String balance,
             @ShellOption(help = "number of accounts per request", defaultValue = "320") int numAccounts,
-            @ShellOption(help = "batch size per request", defaultValue = "32") int batchSize,
-            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency
+            @ShellOption(help = "batch size per request", defaultValue = "32") int batchSize
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
@@ -51,32 +50,23 @@ public class CreateAccounts extends RestCommandSupport {
 
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        final int concurrencyFinal = concurrency <= 0 ?
-                Math.max(2, regionMap.size() / Runtime.getRuntime().availableProcessors()) : concurrency;
-
-        logger.info("Using concurrency level {}", concurrencyFinal);
-
         regionMap.keySet().forEach(regionKey -> {
-            executorTemplate.runForDuration(boundedExecutor -> {
-                boundedExecutor.submitTask(() -> {
-                    UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-                            .queryParam("region", regionKey)
-                            .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
-                            .queryParam("numAccounts", numAccounts)
-                            .queryParam("balance", balance)
-                            .queryParam("batchSize", batchSize);
+            executorTemplate.runAsync("create-accounts " + regionKey, () -> {
+                UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
+                        .queryParam("region", regionKey)
+                        .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
+                        .queryParam("numAccounts", numAccounts)
+                        .queryParam("balance", balance)
+                        .queryParam("batchSize", batchSize);
 
-                    ResponseEntity<String> response =
-                            restTemplate
-                                    .exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
-                                            String.class);
+                ResponseEntity<String> response =
+                        restTemplate
+                                .exchange(builder.build().toUri(), HttpMethod.POST, new HttpEntity<>(null),
+                                        String.class);
 
-                    if (!response.getStatusCode().is2xxSuccessful()) {
-                        logger.warn("Unexpected HTTP status: {}", response);
-                    }
-                    return batchSize;
-                }, regionKey + " - create", concurrencyFinal);
-
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    logger.warn("Unexpected HTTP status: {}", response);
+                }
             }, DurationFormat.parseDuration(duration));
         });
     }

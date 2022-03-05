@@ -1,29 +1,95 @@
 package io.roach.bank.client.support;
 
 import java.time.Duration;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.PreDestroy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
 public class ExecutorTemplate {
-    @FunctionalInterface
-    public interface Callback {
-        void call(BoundedExecutor boundedExecutor);
-    }
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolExecutor;
 
     @Autowired
-    private BoundedExecutor boundedExecutor;
+    private CallMetrics callMetrics;
 
-    @Async
-    public void runForDuration(Callback callback, Duration duration) {
-        final long startTime = System.currentTimeMillis();
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-        do {
-            callback.call(boundedExecutor);
-        } while (System.currentTimeMillis() - startTime < duration.toMillis()
-                && !Thread.interrupted()
-                && !boundedExecutor.isShutdown());
+    private final Map<String, AtomicInteger> workers = new ConcurrentHashMap<>();
+
+    private final LinkedList<ListenableFuture<Void>> futures = new LinkedList<>();
+
+    private volatile boolean cancelRequested;
+
+    public ListenableFuture<Void> runAsync(String id, Runnable runnable, Duration duration) {
+        ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
+            logger.info("Starting '{}' for duration {}", id, duration.toString());
+
+            final long startTime = System.currentTimeMillis();
+
+            AtomicInteger activeWorkers = workers.computeIfAbsent(id, i -> new AtomicInteger());
+            activeWorkers.incrementAndGet();
+
+            CallMetrics.Context context = callMetrics.of(id, activeWorkers::get);
+
+            do {
+                final long callTime = context.before();
+                try {
+                    runnable.run();
+                    context.after(callTime, null);
+                } catch (Exception e) {
+                    context.after(callTime, e);
+                    logger.error("Execution error", e);
+                    break;
+                }
+            } while (System.currentTimeMillis() - startTime < duration.toMillis()
+                    && !Thread.interrupted() && !cancelRequested);
+
+            activeWorkers.decrementAndGet();
+
+            logger.info("Finihed '{}'", id);
+
+            return null;
+        });
+        futures.add(future);
+        return future;
     }
+
+    @PreDestroy
+    public void shutdown() {
+        this.cancelRequested = true;
+    }
+
+    public void cancelFutures() {
+        logger.info("Cancelling {} futures", futures.size());
+        cancelRequested = true;
+        while (!futures.isEmpty()) {
+            ListenableFuture<Void> future = futures.pop();
+            future.cancel(true);
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (CancellationException e) {
+                //
+            } catch (ExecutionException e) {
+                logger.error("", e.getCause());
+            }
+        }
+        logger.info("All futures cancelled");
+        cancelRequested = false;
+    }
+
 }

@@ -32,8 +32,7 @@ public class Balance extends RestCommandSupport {
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
                     int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
-            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = Constants.CONC_HELP, defaultValue = "-1") int concurrency
+            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
         final Map<String, Currency> regionMap = lookupRegions(regions);
         if (regionMap.isEmpty()) {
@@ -45,11 +44,6 @@ public class Balance extends RestCommandSupport {
             return;
         }
 
-        final int concurrencyFinal = concurrency <= 0 ?
-                Math.max(2, regionMap.size() / Runtime.getRuntime().availableProcessors()) : concurrency;
-
-        logger.info("Using concurrency level {}", concurrencyFinal);
-
         accountMap.forEach((regionKey, accountModels) -> {
             final List<Link> links = new ArrayList<>();
 
@@ -60,22 +54,17 @@ public class Balance extends RestCommandSupport {
                         .get());
             });
 
-            executorTemplate.runForDuration(boundedExecutor -> {
-                boundedExecutor
-                        .submitTask(() -> readAccountBalance(links),
-                                regionKey + " - balance", concurrencyFinal);
-            }, DurationFormat.parseDuration(duration));
+            executorTemplate.runAsync("balance - " + regionKey,
+                    () -> readAccountBalance(RandomData.selectRandom(links)),
+                    DurationFormat.parseDuration(duration));
         });
 
         logger.info("All {} workers queued", accountMap.size());
     }
 
-    private String readAccountBalance(List<Link> links) {
-        Link link = RandomData.selectRandom(links);
-
+    private String readAccountBalance(Link link) {
         ResponseEntity<String> response = restTemplate.exchange(link.toUri(), HttpMethod.GET,
                 new HttpEntity<>(null), String.class);
-
         return response.getBody();
     }
 }

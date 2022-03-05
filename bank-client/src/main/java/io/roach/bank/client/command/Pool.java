@@ -9,6 +9,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -17,7 +18,6 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.client.support.BoundedExecutor;
 import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.ThreadPoolStats;
 import io.roach.bank.client.support.TraversonHelper;
@@ -30,7 +30,7 @@ import static io.roach.bank.api.BankLinkRelations.withCurie;
 @ShellCommandGroup(Constants.CONFIG_COMMANDS)
 public class Pool {
     @Autowired
-    private BoundedExecutor boundedExecutor;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
     private ScheduledExecutorService scheduledExecutorService;
@@ -73,13 +73,13 @@ public class Pool {
     public void threadPoolSet(
             @ShellOption(help = "core thread pool size (guide: 2x vCPUs of host)") int size) {
         console.yellow("Setting thread pool size to %d\n", size);
-        boundedExecutor.cancelAndRestart(size);
+        threadPoolTaskExecutor.setCorePoolSize(size);
     }
 
     @ShellMethod(value = "Print thread pool information", key = {"thread-pool-get", "tpg"})
     public void threadPoolGet(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
         Runnable r = () -> {
-            ThreadPoolStats stats = ThreadPoolStats.from(boundedExecutor);
+            ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);
             console.yellow("Thread pool status:\n");
             console.yellow("\tpoolSize: %s\n", stats.poolSize);
             console.yellow("\tmaximumPoolSize: %s\n", stats.maximumPoolSize);
