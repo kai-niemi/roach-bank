@@ -55,6 +55,8 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     @NotBlank
     private String transactionType;
 
+    private boolean selectForUpdate;
+
     @NotNull
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -94,6 +96,10 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
         return Collections.unmodifiableList(accountLegs);
     }
 
+    public boolean isSelectForUpdate() {
+        return selectForUpdate;
+    }
+
     public static class Builder {
         private final TransactionForm instance = new TransactionForm();
 
@@ -119,6 +125,10 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
 
         public Builder withTransferDate(LocalDate transferDate) {
             this.instance.transferDate = transferDate;
+            return this;
+        }
+        public Builder withSelectForUpdate() {
+            this.instance.selectForUpdate =true;
             return this;
         }
 

@@ -76,29 +76,29 @@ public class JdbcAccountRepository implements AccountRepository {
     public void createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize) {
         IntStream.rangeClosed(1, numAccounts / batchSize)
                 .forEach(batch -> jdbcTemplate.batchUpdate(
-                "INSERT INTO account "
-                        + "(id, region, balance, currency, name, description, type, closed, allow_negative, updated) "
-                        + "VALUES(?,?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Account account = factory.get();
-                        ps.setObject(1, account.getUUID());
-                        ps.setString(2, account.getRegion());
-                        ps.setBigDecimal(3, account.getBalance().getAmount());
-                        ps.setString(4, account.getBalance().getCurrency().getCurrencyCode());
-                        ps.setString(5, account.getName());
-                        ps.setString(6, CockroachFacts.nextFact(256));
-                        ps.setString(7, account.getAccountType().getCode());
-                        ps.setBoolean(8, account.isClosed());
-                        ps.setInt(9, account.getAllowNegative());
-                        ps.setTimestamp(10, Timestamp.from(Instant.now()));
-                    }
+                        "INSERT INTO account "
+                                + "(id, region, balance, currency, name, description, type, closed, allow_negative, updated) "
+                                + "VALUES(?,?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                            @Override
+                            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                                Account account = factory.get();
+                                ps.setObject(1, account.getUUID());
+                                ps.setString(2, account.getRegion());
+                                ps.setBigDecimal(3, account.getBalance().getAmount());
+                                ps.setString(4, account.getBalance().getCurrency().getCurrencyCode());
+                                ps.setString(5, account.getName());
+                                ps.setString(6, CockroachFacts.nextFact(256));
+                                ps.setString(7, account.getAccountType().getCode());
+                                ps.setBoolean(8, account.isClosed());
+                                ps.setInt(9, account.getAllowNegative());
+                                ps.setTimestamp(10, Timestamp.from(Instant.now()));
+                            }
 
-                    @Override
-                    public int getBatchSize() {
-                        return batchSize;
-                    }
-                }));
+                            @Override
+                            public int getBatchSize() {
+                                return batchSize;
+                            }
+                        }));
     }
 
     @Override
@@ -197,21 +197,6 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findAccountsForUpdate(Set<Account.Id> ids) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-
-        parameters.addValue("ids",
-                ids.stream().map(Account.Id::getUUID).collect(Collectors.toSet()));
-        parameters.addValue("regions",
-                ids.stream().map(Account.Id::getRegion).collect(Collectors.toSet()));
-
-        return this.namedParameterJdbcTemplate.query(
-                "SELECT * FROM account WHERE id in (:ids) AND region in (:regions) FOR UPDATE",
-                parameters,
-                (rs, rowNum) -> readAccount(rs));
-    }
-
-    @Override
     public List<Account> findAccountsByRegion(String region, int limit) {
         return this.namedParameterJdbcTemplate.query(
                 "SELECT * FROM account WHERE region=:region "
@@ -220,6 +205,22 @@ public class JdbcAccountRepository implements AccountRepository {
                 new MapSqlParameterSource()
                         .addValue("region", region)
                         .addValue("limit", limit),
+                (rs, rowNum) -> readAccount(rs));
+    }
+
+    @Override
+    public List<Account> findAccountsById(Set<Account.Id> ids, boolean sfu) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+        parameters.addValue("ids",
+                ids.stream().map(Account.Id::getUUID).collect(Collectors.toSet()));
+        parameters.addValue("regions",
+                ids.stream().map(Account.Id::getRegion).collect(Collectors.toSet()));
+
+        return this.namedParameterJdbcTemplate.query(
+                sfu ? "SELECT * FROM account WHERE id in (:ids) AND region in (:regions) FOR UPDATE"
+                        : "SELECT * FROM account WHERE id in (:ids) AND region in (:regions)",
+                parameters,
                 (rs, rowNum) -> readAccount(rs));
     }
 

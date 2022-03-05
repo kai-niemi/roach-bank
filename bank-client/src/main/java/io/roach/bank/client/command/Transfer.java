@@ -48,6 +48,7 @@ public class Transfer extends RestCommandSupport {
                     int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
+            @ShellOption(help = "use locking (select for update)", defaultValue = "false") boolean sfu,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
 
@@ -74,7 +75,7 @@ public class Transfer extends RestCommandSupport {
 
             accountMap.forEach((regionKey, accountModels) -> {
                 executorTemplate.runAsync("transfer - " + regionKey,
-                        () -> transferFunds(transferLink, regionKey, accountModels, amount, legs),
+                        () -> transferFunds(transferLink, regionKey, accountModels, amount, legs, sfu),
                         DurationFormat.parseDuration(duration));
             });
         }
@@ -98,7 +99,8 @@ public class Transfer extends RestCommandSupport {
                                            String regionKey,
                                            List<AccountModel> accounts,
                                            String amount,
-                                           int legs) {
+                                           int legs,
+                                           boolean sfu) {
         Currency currency = accounts.get(0).getBalance().getCurrency();
         String[] amountParts = amount.split("-");
         Money transferAmount = RandomData.randomMoneyBetween(amountParts[0], amountParts[1], currency);
@@ -109,6 +111,10 @@ public class Transfer extends RestCommandSupport {
                 .withTransactionType("GEN")
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
+
+        if (sfu) {
+            formBuilder.withSelectForUpdate();
+        }
 
         Set<UUID> trail = new HashSet<>();
 

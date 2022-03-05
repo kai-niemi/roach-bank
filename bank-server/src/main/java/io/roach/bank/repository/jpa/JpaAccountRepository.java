@@ -92,7 +92,12 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findAccountsForUpdate(Set<Account.Id> ids) {
+    public List<Account> findAccountsById(Set<Account.Id> ids, boolean sfu) {
+        if (sfu) {
+            return accountRepository.findAllWithLock(
+                    ids.stream().map(Account.Id::getUUID).collect(Collectors.toSet()),
+                    ids.stream().map(Account.Id::getRegion).collect(Collectors.toSet()));
+        }
         return accountRepository.findAll(
                 ids.stream().map(Account.Id::getUUID).collect(Collectors.toSet()),
                 ids.stream().map(Account.Id::getRegion).collect(Collectors.toSet()));
@@ -106,7 +111,7 @@ public class JpaAccountRepository implements AccountRepository {
     @Override
     public List<Account> findAccountsByRegion(String region, int limit) {
         return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.region=?1",
-                        Account.class)
+                Account.class)
                 .setParameter(1, region)
                 .setMaxResults(limit)
                 .getResultList();

@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -28,7 +27,7 @@ public class Balance extends RestCommandSupport {
     @ShellMethod(value = "Query account balances", key = {"b", "balance"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void balance(
-            @ShellOption(help = "use non-authoritative follower reads", defaultValue = "false") boolean followerReads,
+            @ShellOption(help = "use non-authoritative follower reads", defaultValue = "true") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
                     int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
@@ -62,9 +61,8 @@ public class Balance extends RestCommandSupport {
         logger.info("All {} workers queued", accountMap.size());
     }
 
-    private String readAccountBalance(Link link) {
-        ResponseEntity<String> response = restTemplate.exchange(link.toUri(), HttpMethod.GET,
+    private void readAccountBalance(Link link) {
+        restTemplate.exchange(link.toUri(), HttpMethod.GET,
                 new HttpEntity<>(null), String.class);
-        return response.getBody();
     }
 }
