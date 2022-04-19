@@ -54,7 +54,7 @@ public class CreateAccounts extends RestCommandSupport {
             executorTemplate.runAsync("create-accounts " + regionKey, () -> {
                 UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
                         .queryParam("region", regionKey)
-                        .queryParam("prefix", "batch-" + batchNumber.incrementAndGet())
+                        .queryParam("prefix", "" + batchNumber.incrementAndGet())
                         .queryParam("numAccounts", numAccounts)
                         .queryParam("balance", balance)
                         .queryParam("batchSize", batchSize);

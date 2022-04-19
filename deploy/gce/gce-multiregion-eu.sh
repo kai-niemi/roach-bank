@@ -34,7 +34,7 @@ europe-west1-b,\
 europe-west2-a,\
 europe-west3-a"
 # AWS/GCE machine types
-machinetypes="c2-standard-16"
+machinetypes="n2-standard-16"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################

@@ -58,6 +58,11 @@ public abstract class ProfileNames {
     public static final String DEV = "dev";
 
     /**
+     * Use CRDB dedicated.
+     */
+    public static final String CLOUD = "cloud";
+
+    /**
      * Enable JPA repositories over JDBC.
      */
     public static final String JPA = "jpa";

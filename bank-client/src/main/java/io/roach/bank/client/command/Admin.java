@@ -9,13 +9,22 @@ import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.hateoas.Link;
+import org.springframework.http.ResponseEntity;
 import org.springframework.shell.ExitRequest;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.standard.commands.Quit;
+import org.springframework.web.client.RestTemplate;
 
 import io.roach.bank.client.support.Console;
+import io.roach.bank.client.support.TraversonHelper;
+
+import static io.roach.bank.api.BankLinkRelations.ADMIN_REL;
+import static io.roach.bank.api.BankLinkRelations.POOL_SIZE_REL;
+import static io.roach.bank.api.BankLinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -64,4 +73,29 @@ public class Admin implements Quit.Command {
         console.green(" Non-heap: %s\n", m.getNonHeapMemoryUsage().toString());
         console.green(" Pending GC: %s\n", m.getObjectPendingFinalizationCount());
     }
+
+    @Autowired
+    private TraversonHelper traverson;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @ShellMethod(value = "Print database information (server)", key = {"db-info", "di"})
+    public void dbInfo(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
+
+        Link submitLink = traverson.fromRoot()
+                .follow(withCurie(ADMIN_REL))
+                .follow(withCurie(POOL_SIZE_REL))
+                .asLink();
+
+        ResponseEntity<String> response =
+                restTemplate.getForEntity(submitLink.toUri(), String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            console.yellow("Unexpected HTTP status: %s\n", response.toString());
+        } else {
+            console.yellow("Connection pool size: %s\n", response.getBody());
+        }
+    }
+
 }

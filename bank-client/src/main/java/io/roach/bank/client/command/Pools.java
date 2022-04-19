@@ -13,7 +13,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,12 +22,12 @@ import io.roach.bank.client.support.ThreadPoolStats;
 import io.roach.bank.client.support.TraversonHelper;
 
 import static io.roach.bank.api.BankLinkRelations.ADMIN_REL;
-import static io.roach.bank.api.BankLinkRelations.POOL_REL;
+import static io.roach.bank.api.BankLinkRelations.POOL_SIZE_REL;
 import static io.roach.bank.api.BankLinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.CONFIG_COMMANDS)
-public class Pool {
+public class Pools {
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
@@ -44,18 +43,24 @@ public class Pool {
     @Autowired
     private RestTemplate restTemplate;
 
-    @ShellMethod(value = "Set connection pool size (server side)", key = {"conn-pool-set", "cps"})
-    public void setConnPoolSize(
-            @ShellOption(help = "max and min idle pool size", defaultValue = "50") int size) {
-        console.yellow("Setting conn pool size to %d\n", size);
+    @ShellMethod(value = "Set thread and connection pool sizes", key = {"set-pool-size", "sps"})
+    public void setPoolSize(
+            @ShellOption(help = "thread pool size", defaultValue = "50") int threadPoolSize,
+            @ShellOption(help = "connection pool size", defaultValue = "50") int connPoolSize
+    ) {
+        console.yellow("Setting thread pool size to %d\n", threadPoolSize);
+
+        threadPoolTaskExecutor.setCorePoolSize(threadPoolSize);
+
+        console.yellow("Setting connection pool size to %d\n", connPoolSize);
 
         Link submitLink = traverson.fromRoot()
                 .follow(withCurie(ADMIN_REL))
-                .follow(withCurie(POOL_REL))
+                .follow(withCurie(POOL_SIZE_REL))
                 .asLink();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-                .replaceQueryParam("size", size);
+                .replaceQueryParam("size", connPoolSize);
 
         String uri = builder.build().toUriString();
 
@@ -68,16 +73,8 @@ public class Pool {
         }
     }
 
-    @ShellMethod(value = "Configure thread pool size", key = {"thread-pool-set", "tps"})
-    @ShellMethodAvailability("noActiveWorkersCheck")
-    public void threadPoolSet(
-            @ShellOption(help = "core thread pool size (guide: 2x vCPUs of host)") int size) {
-        console.yellow("Setting thread pool size to %d\n", size);
-        threadPoolTaskExecutor.setCorePoolSize(size);
-    }
-
-    @ShellMethod(value = "Print thread pool information", key = {"thread-pool-get", "tpg"})
-    public void threadPoolGet(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
+    @ShellMethod(value = "Print thread pool information", key = {"get-pool-size", "gps"})
+    public void getPoolSize(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
         Runnable r = () -> {
             ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);
             console.yellow("Thread pool status:\n");
@@ -88,6 +85,18 @@ public class Pool {
             console.yellow("\tcompletedTaskCount: %s\n", stats.completedTaskCount);
             console.yellow("\ttaskCount: %s\n", stats.taskCount);
             console.yellow("\tlargestPoolSize: %s\n", stats.largestPoolSize);
+
+
+            ResponseEntity<String> response = traverson.fromRoot()
+                    .follow(withCurie(ADMIN_REL))
+                    .follow(withCurie(POOL_SIZE_REL))
+                    .toEntity(String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                console.yellow("Connection pool size: %s\n", response.getBody());
+            } else {
+                console.red("Unexpected HTTP status: %s\n", response.toString());
+            }
         };
 
         if (repeatTime > 0) {

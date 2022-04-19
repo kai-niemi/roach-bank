@@ -61,7 +61,7 @@ public abstract class BankLinkRelations {
 
     public static final String ADMIN_REL = "admin";
 
-    public static final String POOL_REL = "pool-size";
+    public static final String POOL_SIZE_REL = "pool-size";
 
     public static final String META_REL = "meta";
 

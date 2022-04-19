@@ -9,7 +9,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.DocumentContext;
@@ -18,8 +17,8 @@ import com.jayway.jsonpath.JsonPath;
 import io.roach.bank.ProfileNames;
 import net.minidev.json.JSONArray;
 
-@Component
-@Profile(ProfileNames.DB_COCKROACH)
+//@Component
+//@Profile(ProfileNames.DB_COCKROACH)
 public class CockroachDBHealthIndicator extends AbstractHealthIndicator {
     private final RestTemplate restTemplate = new RestTemplate();
 

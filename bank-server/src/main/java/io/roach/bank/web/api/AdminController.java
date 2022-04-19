@@ -69,12 +69,12 @@ public class AdminController {
 
         index.add(linkTo(methodOn(getClass())
                 .updateConnectionPoolSize(50))
-                .withRel("pool-size")
+                .withRel(BankLinkRelations.POOL_SIZE_REL)
                 .withTitle("Connection pool size"));
 
         index.add(linkTo(methodOn(getClass())
                 .connectionPoolInfo())
-                .withRel("pool-info")
+                .withRel(BankLinkRelations.POOL_SIZE_REL)
                 .withTitle("Connection pool info"));
 
         index.add(Link.of(
