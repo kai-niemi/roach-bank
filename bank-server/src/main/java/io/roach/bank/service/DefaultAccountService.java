@@ -36,6 +36,7 @@ public class DefaultAccountService implements AccountService {
         return accountRepository.findAccountPage(resolvedRegions.keySet(), page);
     }
 
+    
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
