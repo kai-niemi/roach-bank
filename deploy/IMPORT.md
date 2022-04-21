@@ -7,7 +7,7 @@ To import, first connect to a client node:
 Then pick the appropriate t-shirt:
 
     -- 100K accounts
-    import into account(id,region,balance,currency,name,description,type,closed,allow_negative,updated)
+    import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
         CSV DATA (
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100k/account-1.csv',
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100k/account-2.csv',
@@ -22,7 +22,7 @@ Then pick the appropriate t-shirt:
         );
     
     -- 1M accounts
-    import into account(id,region,balance,currency,name,description,type,closed,allow_negative,updated)
+    import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
         CSV DATA (
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/1m/account-1.csv',
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/1m/account-2.csv',
@@ -38,7 +38,7 @@ Then pick the appropriate t-shirt:
     
     
     -- 100M accounts (about 10GiB)
-    import into account(id,region,balance,currency,name,description,type,closed,allow_negative,updated)
+    import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
         CSV DATA (
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100m/account-1.csv',
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100m/account-2.csv',
@@ -52,7 +52,7 @@ Then pick the appropriate t-shirt:
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100m/account-10.csv'
         );
     
-    import into account(id,region,balance,currency,name,description,type,closed,allow_negative,updated)
+    import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
         CSV DATA (
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/250m/account-1.csv',
         'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/250m/account-2.csv',
@@ -109,7 +109,7 @@ with these files.
 
 Then use following SQL:
 
-    import into account(id,region,balance,currency,name,description,type,closed,allow_negative,updated)
+    import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
     CSV DATA (
     'nodelocal://1/account-1.csv',
     'nodelocal://1/account-2.csv',

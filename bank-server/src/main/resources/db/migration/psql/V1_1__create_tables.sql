@@ -28,7 +28,7 @@ create table region_map
 create table account
 (
     id             uuid,
-    region         region_code    not null,
+    city           varchar(64)    not null,
     balance        numeric(19, 2) not null,
     currency       currency_code  not null,
     name           varchar(128)   not null,
@@ -41,14 +41,6 @@ create table account
     primary key (id)
 );
 
-alter table account
-    add constraint check_account_type check (type in ('A', 'L', 'E', 'R', 'C'));
-alter table account
-    add constraint check_account_allow_negative check (allow_negative between 0 and 1);
-alter table account
-    add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
-
-------------------------------------------------
 create table transaction
 (
     id               uuid             not null,
@@ -60,7 +52,6 @@ create table transaction
     primary key (id)
 );
 
-------------------------------------------------
 create table transaction_item
 (
     transaction_id   uuid           not null,

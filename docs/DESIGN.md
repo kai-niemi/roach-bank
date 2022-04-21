@@ -60,7 +60,6 @@ The system uses the following entity model for double-entry bookkeeping of monet
 - **account**  - Accounts with a derived balance from the sum of all transactions
 - **transaction**  - Balanced multi-legged monetary transactions
 - **transaction_item** - Association table between transaction and account representing a leg with a running account balance.
-- **region**  - Static information about region groups/aliases
 - **region_map**  - Static information about deployment regions and currencies
 
 ### Main SQL files
@@ -77,15 +76,15 @@ then creates a transaction (2) with legs (3) for each account update, and finall
 account (4). As an extra safety guarantee, a schema CHECK constraint will ensure balances don't end up negative, 
 unless allowed for that account.
 
-    (1) SELECT .. FROM account WHERE id IN (..) AND region IN (..) FOR UPDATE;
+    (1) SELECT .. FROM account WHERE id IN (..) AND city IN (..) FOR UPDATE;
     
-    (2) INSERT INTO transaction (id,region,balance,currency,name,..);
+    (2) INSERT INTO transaction (id,city,balance,currency,name,..);
     
     -- for each leg (batch)
-    (3) INSERT INTO transaction_item (transaction_region,transaction_id,account_region,..);
+    (3) INSERT INTO transaction_item (transaction_city,transaction_id,..);
     
     -- for each account (batch)
-    (4) UPDATE account SET balance=balance+? WHERE id=? AND region=? AND (balance+?)*abs(allow_negative-1)>=0;
+    (4) UPDATE account SET balance=balance+? WHERE id=? AND city=? AND (balance+?)*abs(allow_negative-1)>=0;
 
 ### Transaction Retry Strategy
 

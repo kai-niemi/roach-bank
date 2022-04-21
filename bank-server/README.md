@@ -1,9 +1,7 @@
 # Roach Bank Server
 
-Provides the main microservice implemented with Spring Boot and packaged as a self-contained, executable jar.
-
-See the [Deployment Guide](../deploy/README.md) on how to deploy it to a single
-or multi-region AWS or GCE cluster.
+Provides the main bank service implemented with Spring Boot and packaged as a self-contained, executable jar.
+See the [Deployment Guide](../deploy/README.md) on how to deploy it to a single or multi-region AWS or GCE cluster.
 
 # Local deployment guide
 
@@ -48,8 +46,8 @@ The config can be overridden at startup time through the command line and by act
 
 Database type, one of:
 
-   * db-crdb - Enables CockroachDB features and db schema (default)
-   * db-psql - Enables PostgreSQL features and db schema
+   * crdb - Enables CockroachDB features and db schema (default)
+   * psql - Enables PostgreSQL features and db schema
 
 Retry strategy, one of:
 
@@ -59,21 +57,22 @@ Retry strategy, one of:
 
 Change data capture and websocket push events, one of:
 
-   * cdc-aop - Enables synthetic CDC events (via AOP) for websocket push (default)
+   * cdc-none - Enables synthetic CDC events (via AOP) for websocket push (default)
    * cdc-kafka - Enables Kafka subscriptions of CDC events for websocket push (requires CRDB, CDC, Kafka)
    * cdc-http - Enables HTTP subscriptions of CDC events for websocket push (requires CRDB and CDC)
  
 Optional:
 
-   * jpa - Enables JPA repositories over JDBC (which is default)
-   * dev - Enables debug features for Thymeleaf and DB connection presets
+   * jpa - Enables JPA repositories over JDBC (default)
    * outbox - Enables writing transfer requests to a transactional outbox table
+   * crdb-dev - Enables debug features for Thymeleaf and DB connection presets
+   * crdb-cloud - Enables CockroachDB dedicated connection presets
    
-Note: CDC requires a CockroachDB enterprise license.
+Note: Some features including CDC requires a CockroachDB enterprise license (trial).
 
 Profiles are set during startup with following command line parameter:
 
-    --spring.profiles.active=db-crdb,retry-backoff,cdc-aop
+    --spring.profiles.active=db-crdb,retry-backoff,cdc-none
 
 CockroachDB example:
 
@@ -81,9 +80,9 @@ CockroachDB example:
     --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=db-crdb,retry-backoff,cdc-kafka  \
+    --spring.profiles.active=db-crdb,retry-backoff,cdc-none  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
-    --server.port=8080
+    --server.port=8090
 
 PostgreSQL example:
 
@@ -91,7 +90,7 @@ PostgreSQL example:
     --spring.datasource.url=jdbc:postgresql://localhost:5432/roach_bank \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=db-psql,retry-backoff,cdc-kafka  \
+    --spring.profiles.active=db-psql,retry-backoff,cdc-none  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
-    --server.port=8080
+    --server.port=8090
     

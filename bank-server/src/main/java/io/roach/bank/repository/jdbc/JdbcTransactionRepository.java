@@ -45,7 +45,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
         jdbcTemplate.update("INSERT INTO transaction "
                         + "(id,city,booking_date,transfer_date,transaction_type) "
-                        + "VALUES(?,?,?,?,?)",
+                        + "VALUES(?,?,?,?,?::transaction_type)",
                 transaction.getId(),
                 transaction.getCity(),
                 bookingDate != null ? bookingDate : LocalDate.now(),
@@ -58,7 +58,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
         jdbcTemplate.batchUpdate(
                 "INSERT INTO transaction_item "
                         + "(transaction_id, transaction_city, account_id, amount, currency, note, running_balance) "
-                        + "VALUES(?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                        + "VALUES(?,?,?,?,?::currency_code,?,?)", new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         TransactionItem item = items.get(i);

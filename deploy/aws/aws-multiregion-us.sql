@@ -1,63 +1,33 @@
----------------------------------------------------------------
--- ACCOUNT
----------------------------------------------------------------
+ALTER DATABASE roach_bank PRIMARY REGION "us_west";
+ALTER DATABASE roach_bank ADD REGION "us_central";
+ALTER DATABASE roach_bank ADD REGION "us_east";
 
-ALTER TABLE account PARTITION BY LIST (region) (
-    PARTITION us_west VALUES IN ('seattle','san francisco','los angeles','phoenix'),
-    PARTITION us_central VALUES IN ('minneapolis','chicago','detroit','atlanta'),
-    PARTITION us_east VALUES IN ('new york','boston','washington dc','miami'),
-    PARTITION DEFAULT VALUES IN (DEFAULT)
-    );
+ALTER TABLE account ADD COLUMN region crdb_internal_region AS (
+    CASE
+        WHEN city IN ('seattle','san francisco','los angeles','phoenix','stockholm','helsinki','oslo','london','paris','manchester') THEN 'us_west'
+        WHEN city IN ('minneapolis','chicago','detroit','atlanta','frankfurt','amsterdam','milano','madrid','athens','barcelona') THEN 'us_central'
+        WHEN city IN ('new york','boston','washington dc','miami','singapore','hong kong','sydney','tokyo','sao paulo','rio de janeiro','salvador') THEN 'us_east'
+        END
+    ) STORED NOT NULL;
 
--- Pin partitions to regions
-ALTER PARTITION us_west OF TABLE account CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-west-2]';
-ALTER PARTITION us_central OF TABLE account CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-east-2]';
-ALTER PARTITION us_east OF TABLE account CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-east-1]';
+ALTER TABLE account SET LOCALITY REGIONAL BY ROW AS region;
 
----------------------------------------------------------------
--- TRANSACTION
----------------------------------------------------------------
-ALTER TABLE transaction PARTITION BY LIST (region) (
-    PARTITION us_west VALUES IN ('seattle','san francisco','los angeles','phoenix'),
-    PARTITION us_central VALUES IN ('minneapolis','chicago','detroit','atlanta'),
-    PARTITION us_east VALUES IN ('new york','boston','washington dc','miami'),
-    PARTITION DEFAULT VALUES IN (DEFAULT)
-    );
+ALTER TABLE transaction ADD COLUMN region crdb_internal_region AS (
+    CASE
+        WHEN city IN ('seattle','san francisco','los angeles','phoenix','stockholm','helsinki','oslo','london','paris','manchester') THEN 'us_west'
+        WHEN city IN ('minneapolis','chicago','detroit','atlanta','frankfurt','amsterdam','milano','madrid','athens','barcelona') THEN 'us_central'
+        WHEN city IN ('new york','boston','washington dc','miami','singapore','hong kong','sydney','tokyo','sao paulo','rio de janeiro','salvador') THEN 'us_east'
+        END
+    ) STORED NOT NULL;
 
-ALTER PARTITION us_west OF TABLE transaction CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-west-2]';
-ALTER PARTITION us_central OF TABLE transaction CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-east-2]';
-ALTER PARTITION us_east OF TABLE transaction CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-east-1]';
+ALTER TABLE transaction SET LOCALITY REGIONAL BY ROW AS region;
 
----------------------------------------------------------------
--- TRANSACTION_ITEM
----------------------------------------------------------------
-ALTER TABLE transaction_item PARTITION BY LIST (transaction_region) (
-    PARTITION us_west VALUES IN ('seattle','san francisco','los angeles','phoenix'),
-    PARTITION us_central VALUES IN ('minneapolis','chicago','detroit','atlanta'),
-    PARTITION us_east VALUES IN ('new york','boston','washington dc','miami'),
-    PARTITION DEFAULT VALUES IN (DEFAULT)
-    );
+ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
+    CASE
+        WHEN transaction_city IN ('seattle','san francisco','los angeles','phoenix','stockholm','helsinki','oslo','london','paris','manchester') THEN 'us_west'
+        WHEN transaction_city IN ('minneapolis','chicago','detroit','atlanta','frankfurt','amsterdam','milano','madrid','athens','barcelona') THEN 'us_central'
+        WHEN transaction_city IN ('new york','boston','washington dc','miami','singapore','hong kong','sydney','tokyo','sao paulo','rio de janeiro','salvador') THEN 'us_east'
+        END
+    ) STORED NOT NULL;
 
-ALTER PARTITION us_west OF TABLE transaction_item CONFIGURE ZONE USING num_replicas=3,constraints='[+region=us-west-2]';
-ALTER PARTITION us_central OF TABLE transaction_item CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-east-2]';
-ALTER PARTITION us_east OF TABLE transaction_item CONFIGURE ZONE USING num_replicas=3, constraints='[+region=us-east-1]';
-
----------------------------------------------------------------
--- System ranges
----------------------------------------------------------------
-
-ALTER RANGE meta CONFIGURE ZONE USING
-    num_replicas = 7,
-    constraints = '{+region=us-east-1: 2, +region=us-east-2: 3, +region=us-west-1: 2}';
-
-ALTER RANGE liveness CONFIGURE ZONE USING
-    num_replicas = 7,
-    constraints = '{+region=us-east-1: 2, +region=us-east-2: 3, +region=us-west-1: 2}';
-
-ALTER RANGE system CONFIGURE ZONE USING
-    num_replicas = 7,
-    constraints = '{+region=us-east-1: 2, +region=us-east-2: 3, +region=us-west-1: 2}';
-
-ALTER DATABASE system CONFIGURE ZONE USING
-    num_replicas = 7,
-    constraints = '{+region=us-east-1: 2, +region=us-east-2: 3, +region=us-west-1: 2}';
+ALTER TABLE transaction_item SET LOCALITY REGIONAL BY ROW AS region;
