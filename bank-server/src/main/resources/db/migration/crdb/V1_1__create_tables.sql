@@ -4,6 +4,11 @@
 -- Types
 ----------------------
 
+drop type account_type;
+drop type transaction_type;
+drop type currency_code;
+drop type region_code;
+
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 create type transaction_type as enum ('GEN');
 create type currency_code as enum ('USD', 'SEK', 'EUR', 'NOK', 'GBP','SGD','HKD','AUD','JPY','BRL');
@@ -39,11 +44,12 @@ create table account
     allow_negative integer        not null default 0,
     updated        timestamptz    not null default clock_timestamp(),
 
-    family         update_often(balance, updated),
-    family         update_rarely(currency, name, description, type, closed, allow_negative),
-
     primary key (id)
 );
+
+-- Breaks CDC
+-- family         update_often(balance, updated),
+--     family         update_rarely(currency, name, description, type, closed, allow_negative),
 
 create table transaction
 (
@@ -93,11 +99,6 @@ alter table account
 alter table transaction_item
     add constraint fk_txn_item_ref_transaction
         foreign key (transaction_id) references transaction (id);
-
--- alter table transaction_item
---     add constraint fk_txn_item_ref_transaction_city
---         foreign key (transaction_city) references transaction (city);
-
 alter table transaction_item
     add constraint fk_txn_item_ref_account
         foreign key (account_id) references account (id);

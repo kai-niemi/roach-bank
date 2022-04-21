@@ -1,12 +1,13 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class AccountChangeEvent extends AbstractChangeEvent {
+public class AccountPayload extends AbstractPayload {
     @JsonProperty("after")
     private Fields after = new Fields();
 
@@ -50,7 +51,7 @@ public class AccountChangeEvent extends AbstractChangeEvent {
 
     @Override
     public String toString() {
-        return "AccountChangeEvent{" +
+        return "AccountPayload{" +
                 "id=" + after.id +
                 ", name='" + after.name + '\'' +
                 ", currency='" + after.currency + '\'' +

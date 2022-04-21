@@ -1,0 +1,7 @@
+SHOW ZONE CONFIGURATION FOR RANGE meta;
+SHOW ZONE CONFIGURATION FOR RANGE default;
+SHOW ZONE CONFIGURATION FOR PARTITION europe_west1 OF TABLE account;
+SHOW RANGES FROM TABLE account;
+SHOW RANGES from index account@primary;
+SELECT * FROM [SHOW RANGES FROM TABLE account] WHERE "start_key" NOT LIKE '%Prefix%';
+SELECT * FROM crdb_internal.ranges;

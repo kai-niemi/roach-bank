@@ -1,4 +1,4 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import java.util.ArrayList;
 import java.util.Collections;

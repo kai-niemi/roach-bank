@@ -72,11 +72,19 @@ management:
       application: ${spring.application.name}
 #############################
 server:
-  port: 8090
+  http:
+    port: 8090
+  port: 8443
   error:
     whitelabel:
       enabled: false
     include-stacktrace: always
+  ssl:
+    key-store: classpath:cert/bank.p12
+    key-store-password: secret
+    key-store-type: pkcs12
+    key-alias: bank
+    key-password: secret
 #############################
 roachbank:
   health:

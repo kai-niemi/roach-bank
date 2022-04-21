@@ -1,4 +1,4 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TransactionItemChangeEvent extends AbstractChangeEvent {
+public class TransactionItemChangeEvent extends AbstractPayload {
     @JsonProperty("account_id")
     private UUID accountId;
 

@@ -1,4 +1,4 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,17 +65,17 @@ public class KafkaConsumerConfig implements KafkaListenerConfigurer {
     }
 
     @Bean
-    public ConsumerFactory<String, AccountChangeEvent> accountConsumerFactory() {
+    public ConsumerFactory<String, AccountPayload> accountConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(
                 consumerConfigs(),
                 new StringDeserializer(),
-                new JsonDeserializer<>(AccountChangeEvent.class, lenientObjectMapper())
+                new JsonDeserializer<>(AccountPayload.class, lenientObjectMapper())
         );
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, AccountChangeEvent> accountListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, AccountChangeEvent> factory
+    public ConcurrentKafkaListenerContainerFactory<String, AccountPayload> accountListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, AccountPayload> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(accountConsumerFactory());
         return factory;

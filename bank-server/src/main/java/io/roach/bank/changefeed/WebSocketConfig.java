@@ -1,4 +1,4 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

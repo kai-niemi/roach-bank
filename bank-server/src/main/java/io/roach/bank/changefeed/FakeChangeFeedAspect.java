@@ -1,4 +1,4 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import javax.annotation.PostConstruct;
 
@@ -39,17 +39,16 @@ public class FakeChangeFeedAspect {
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")
     public void doAfterTransaction(Transaction transaction) {
         transaction.getItems().forEach(item -> {
-            AccountChangeEvent.Fields fields = new AccountChangeEvent.Fields();
+            AccountPayload.Fields fields = new AccountPayload.Fields();
             fields.setId(item.getId().getAccountId());
             fields.setCity(item.getAccount().getCity());
             fields.setName(item.getAccount().getName());
             fields.setBalance(item.getRunningBalance().getAmount());
             fields.setCurrency(item.getRunningBalance().getCurrency().getCurrencyCode());
 
-            AccountChangeEvent changeEvent = new AccountChangeEvent();
+            AccountPayload changeEvent = new AccountPayload();
             changeEvent.setAfter(fields);
-            changeEvent.setResolved(System.nanoTime() + ".0");
-            changeEvent.setUpdated(System.nanoTime() + ".0");
+//            changeEvent.setUpdated(System.nanoTime() + ".0");
 
             changeFeedPublisher.publish(changeEvent);
         });

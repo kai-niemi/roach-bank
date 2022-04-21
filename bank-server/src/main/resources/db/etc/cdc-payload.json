@@ -1,0 +1,23 @@
+{
+    "payload": [
+        {
+            "after": {
+                "allow_negative": 0,
+                "balance": 100000.00,
+                "city": "chicago",
+                "closed": false,
+                "currency": "USD",
+                "description": null,
+                "id": "ffd3ff16-aafc-4d9b-ac61-5feacec298f5",
+                "name": "user:0026",
+                "type": "A",
+                "updated": "2022-04-21T11:00:50.828986Z"
+            },
+            "key": [
+                "ffd3ff16-aafc-4d9b-ac61-5feacec298f5"
+            ],
+            "topic": "account",
+            "updated": "1650539947501709026.0000000000"
+        }
+    ]
+}

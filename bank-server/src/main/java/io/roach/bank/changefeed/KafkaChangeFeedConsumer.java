@@ -1,4 +1,4 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import javax.annotation.PostConstruct;
 
@@ -36,7 +36,7 @@ public class KafkaChangeFeedConsumer {
 
     @KafkaListener(topics = TOPIC_ACCOUNTS, containerFactory = "accountListenerContainerFactory")
     @TransactionNotAllowed
-    public void accountChanged(@Payload AccountChangeEvent event,
+    public void accountChanged(@Payload AccountPayload event,
                                @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
                                @Header(KafkaHeaders.OFFSET) int offset) {
         changeFeedPublisher.publish(event);

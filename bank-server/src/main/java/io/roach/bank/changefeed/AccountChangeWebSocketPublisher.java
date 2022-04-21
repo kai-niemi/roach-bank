@@ -1,4 +1,4 @@
-package io.roach.bank.push;
+package io.roach.bank.changefeed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AccountChangeWebSocketPublisher {
     private static final int BATCH_SIZE = 20;
 
-    private final BlockingQueue<AccountChangeEvent> buffer = new ArrayBlockingQueue<>(BATCH_SIZE);
+    private final BlockingQueue<AccountPayload> buffer = new ArrayBlockingQueue<>(BATCH_SIZE);
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -69,9 +69,9 @@ public class AccountChangeWebSocketPublisher {
                 while (!Thread.currentThread().isInterrupted()) {
                     rateLimiter.acquire();
 
-                    final AccountChangeEvent changeEvent = buffer.poll(1000, TimeUnit.MILLISECONDS);
+                    final AccountPayload changeEvent = buffer.poll(1000, TimeUnit.MILLISECONDS);
                     if (changeEvent != null) {
-                        List<AccountChangeEvent> batch = new ArrayList<>();
+                        List<AccountPayload> batch = new ArrayList<>();
                         batch.add(changeEvent);
 
                         buffer.drainTo(batch, BATCH_SIZE / 2);
@@ -91,14 +91,14 @@ public class AccountChangeWebSocketPublisher {
         });
     }
 
-    public void publish(AccountChangeEvent changeEvent) {
-        if (changeEvent.getId() != null) {
+    public void publish(AccountPayload accountPayload) {
+        if (accountPayload.getId() != null) {
             Link selfLink = linkTo(methodOn(AccountController.class)
-                    .getAccount(changeEvent.getId()))
+                    .getAccount(accountPayload.getId()))
                     .withSelfRel();
-            changeEvent.setHref(selfLink.getHref());
+            accountPayload.setHref(selfLink.getHref());
 
-            if (buffer.offer(changeEvent)) {
+            if (buffer.offer(accountPayload)) {
                 eventsQueued.increment();
             } else {
                 eventsLost.increment();

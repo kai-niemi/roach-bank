@@ -1,10 +1,6 @@
 package io.roach.bank.web.api;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
@@ -15,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,11 +21,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
 import io.roach.bank.annotation.TransactionNotAllowed;
-import io.roach.bank.push.AccountChangeEvent;
-import io.roach.bank.push.AccountChangeWebSocketPublisher;
+import io.roach.bank.changefeed.AccountChangeWebSocketPublisher;
+import io.roach.bank.changefeed.AccountPayload;
+import io.roach.bank.changefeed.ChangeFeedEvent;
 
 @RestController
-@RequestMapping(value = "/api/changefeed")
+@RequestMapping(value = "/api/cdc/webhook")
 @Profile(ProfileNames.CDC_HTTP)
 @TransactionNotAllowed
 public class ChangeFeedController {
@@ -45,73 +42,35 @@ public class ChangeFeedController {
 
     @PostConstruct
     public void init() {
-        logger.info("Bootstrapping HTTP CDC-sink change feed publisher");
+        logger.info("Bootstrapping webhook CDC-sink changefeed dispatcher");
     }
 
-    @PutMapping(value = "/account/{date}/{id}", consumes = {
-            MediaType.ALL_VALUE
-    })
-    public ResponseEntity<Void> accountChangeEvent(
-            @PathVariable(value = "date", required = false) String date,
-            @PathVariable(value = "id", required = false) String id,
-            @RequestBody String body) {
+    @PostMapping(value = "/account", consumes = {MediaType.ALL_VALUE})
+    public ResponseEntity<Void> accountChangeEvent(@RequestBody String body) {
+        logger.debug("accountChangeEvent ({}): {}", counter.incrementAndGet(), body);
+
         try {
-            List<AccountChangeEvent> changeEvents = new ArrayList<>();
-
-            try (BufferedReader r = new BufferedReader(new StringReader(body))) {
-                while (true) {
-                    String line = r.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    if (line.startsWith("{") && line.endsWith("}")) {
-                        AccountChangeEvent e = objectMapper.readerFor(AccountChangeEvent.class).readValue(line);
-                        if (e.getResolved() == null) {
-                            changeEvents.add(e);
-                        }
-                    }
-                }
-            }
-
-            if (!changeEvents.isEmpty()) {
-                logger.debug(
-                        "accountChangeEvent ({}) received: date: {} id: {} payload bytes: {} event count (listing first 10):\n{}",
-                        counter.incrementAndGet(), date, id, body.length(),
-                        changeEvents.stream().limit(10).toArray());
-                changeEvents.forEach(accountChangeEvent -> changeFeedPublisher.publish(accountChangeEvent));
+            ChangeFeedEvent<AccountPayload> event = objectMapper.readerFor(ChangeFeedEvent.class)
+                    .readValue(body);
+            if (!StringUtils.hasLength(event.getResolved())) {
+                event.getPayload().forEach(accountPayload -> changeFeedPublisher.publish(accountPayload));
             }
         } catch (IOException e) {
-            logger.warn("accountChangeEvent received: date: {} id: {} body: {} processing error: {}",
-                    date, id, body, e.getMessage());
             logger.warn("", e);
         }
 
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "/transaction/{date}/{id}", consumes = {MediaType.ALL_VALUE})
-    @Deprecated
-    public ResponseEntity<Void> transactionChangeEvent(
-            @PathVariable(value = "date", required = false) String date,
-            @PathVariable(value = "id", required = false) String id,
-            @RequestBody String body) {
-
-        logger.debug("transactionChangeEvent ({}) received: date: {} id: {} body: {}",
-                counter.incrementAndGet(), date, id, body);
-
+    @PostMapping(value = "/transaction", consumes = {MediaType.ALL_VALUE})
+    public ResponseEntity<Void> transactionChangeEvent(@RequestBody String body) {
+        logger.debug("transactionChangeEvent ({}): {}", counter.incrementAndGet(), body);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "/transaction_item/{date}/{id}", consumes = {MediaType.ALL_VALUE})
-    @Deprecated
-    public ResponseEntity<Void> transactionItemChangeEvent(
-            @PathVariable(value = "date", required = false) String date,
-            @PathVariable(value = "id", required = false) String id,
-            @RequestBody String body) {
-
-        logger.debug("transactionItemChangeEvent ({}) received: date: {} id: {} body: {}",
-                counter.incrementAndGet(), date, id, body);
-
+    @PostMapping(value = "/transaction_item", consumes = {MediaType.ALL_VALUE})
+    public ResponseEntity<Void> transactionItemChangeEvent(@RequestBody String body) {
+        logger.debug("transactionItemChangeEvent ({}): {}", counter.incrementAndGet(), body);
         return ResponseEntity.ok().build();
     }
 }

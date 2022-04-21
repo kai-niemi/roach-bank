@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.config.CacheConfig;
-import io.roach.bank.push.ReportWebSocketPublisher;
+import io.roach.bank.changefeed.ReportWebSocketPublisher;
 
 @Controller
 @RequestMapping("/")
