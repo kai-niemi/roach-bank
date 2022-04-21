@@ -24,16 +24,15 @@ public class TransactionResourceAssembler
     public TransactionModel toModel(Transaction entity) {
         TransactionModel resource = new TransactionModel();
         resource.add(linkTo(methodOn(TransactionController.class)
-                .getTransaction(entity.getUUID(), entity.getRegion())).withSelfRel());
+                .getTransaction(entity.getId())).withSelfRel());
 
-        resource.setTransactionId(entity.getUUID());
-        resource.setRegion(entity.getRegion());
+        resource.setTransactionId(entity.getId());
         resource.setTransactionType(entity.getTransactionType());
         resource.setBookingDate(entity.getBookingDate());
         resource.setTransactionDate(entity.getTransferDate());
 
         resource.add(linkTo(DummyInvocationUtils.methodOn(TransactionItemController.class)
-                .getTransactionItems(entity.getUUID(), entity.getRegion(),
+                .getTransactionItems(entity.getId(),
                         PageRequest.of(0, 5)))
                 .withRel(BankLinkRelations.TRANSACTION_ITEMS_REL)
                 .withTitle("Transaction legs"));

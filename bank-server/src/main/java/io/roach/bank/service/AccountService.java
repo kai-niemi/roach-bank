@@ -3,6 +3,7 @@ package io.roach.bank.service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,19 +14,19 @@ import io.roach.bank.domain.Account;
 public interface AccountService {
     Page<Account> findAccountPage(Collection<String> regions, Pageable page);
 
-    List<Account> findAccountsByRegion(String region, int limit);
+    List<Account> findAccountsByCity(String city, int limit);
 
-    Set<String> resolveRegions(Collection<String> regions);
+    Set<String> resolveCities(Collection<String> cities);
 
-    Account getAccountById(Account.Id id);
+    Account getAccountById(UUID id);
 
-    Money getBalance(Account.Id id);
+    Money getBalance(UUID id);
 
-    Money getBalanceSnapshot(Account.Id id);
+    Money getBalanceSnapshot(UUID id);
 
-    Account openAccount(Account.Id id);
+    Account openAccount(UUID id);
 
-    Account closeAccount(Account.Id id);
+    Account closeAccount(UUID id);
 
     void deleteAll();
 }

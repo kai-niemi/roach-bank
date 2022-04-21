@@ -24,9 +24,7 @@ public abstract class Constants {
 
     public static final String DURATION_HELP = "execution duration (expression)";
 
-    public static final String REGIONS_HELP = "comma separated list of regions or region groups";
-
-    public static final String CONC_HELP = "number of concurrent workers per region";
+    public static final String CITIES_HELP = "comma separated list of cities or regions";
 
     public static final String ACCOUNT_LIMIT_HELP = "max number of accounts per region to query (negative value means server default)";
 

@@ -1,5 +1,6 @@
 package io.roach.bank.web.api;
 
+import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
@@ -33,61 +34,76 @@ public class MetadataController {
         MessageModel index = new MessageModel();
 
         index.add(linkTo(methodOn(getClass())
-                .regionGroups())
-                .withRel(BankLinkRelations.REGION_GROUPS_REL)
-                .withTitle("Region group aliases"));
+                .regionCities())
+                .withRel(BankLinkRelations.REGION_CITIES_REL)
+                .withTitle("All cities grouped by region"));
 
         index.add(linkTo(methodOn(getClass())
-                .regionCurrency(null))
-                .withRel(BankLinkRelations.REGION_CURRENCIES_REL)
-                .withTitle("Region currencies"));
+                .citiesCurrency(Collections.emptyList()))
+                .withRel(BankLinkRelations.CITY_CURRENCY_REL)
+                .withTitle("Currencies by city or region"));
+        index.add(linkTo(methodOn(getClass())
+                .citiesCurrency(null))
+                .withRel(BankLinkRelations.CITY_CURRENCY_REL)
+                .withTitle("Currencies by city or region"));
 
         index.add(linkTo(methodOn(getClass())
-                .allCurrencies())
+                .listCurrencies())
                 .withRel(BankLinkRelations.CURRENCIES_REL)
                 .withTitle("All currencies"));
 
         index.add(linkTo(methodOn(getClass())
-                .allRegions())
-                .withRel(BankLinkRelations.REGIONS_REL)
-                .withTitle("All regions"));
+                .listCities())
+                .withRel(BankLinkRelations.CITIES_REL)
+                .withTitle("All city names"));
 
         index.add(linkTo(methodOn(getClass())
-                .localRegions())
-                .withRel(BankLinkRelations.LOCAL_REGIONS_REL)
-                .withTitle("Local regions"));
+                .listLocalCities())
+                .withRel(BankLinkRelations.LOCAL_CITIES_REL)
+                .withTitle("All local cities filtered by locality if available"));
+
+        index.add(linkTo(methodOn(getClass())
+                .listRegions())
+                .withRel(BankLinkRelations.REGIONS_REL)
+                .withTitle("All region names"));
 
         return index;
     }
 
-    @GetMapping(value = "/region-groups")
+    @GetMapping(value = "/region-cities")
     @TransactionBoundary(readOnly = true)
-    public Map<String, List<String>> regionGroups() {
-        return metadataRepository.getGroupRegions();
-    }
-
-    @GetMapping(value = "/region-currency")
-    @TransactionBoundary(readOnly = true)
-    public Map<String, Currency> regionCurrency(
-            @RequestParam(name = "regions", required = false, defaultValue = "") List<String> regions) {
-        return metadataRepository.resolveRegions(regions);
+    public Map<String, List<String>> regionCities() {
+        return metadataRepository.getRegionCities();
     }
 
     @GetMapping(value = "/currencies")
     @TransactionBoundary(readOnly = true)
-    public List<Currency> allCurrencies() {
+    public List<Currency> listCurrencies() {
         return metadataRepository.getCurrencies();
+    }
+
+    @GetMapping(value = "/cities-local")
+    @TransactionBoundary(readOnly = true)
+    public List<String> listLocalCities() {
+        return metadataRepository.getLocalCities();
+    }
+
+    @GetMapping(value = "/cities")
+    @TransactionBoundary(readOnly = true)
+    public List<String> listCities() {
+        return metadataRepository.getCities();
+    }
+
+    @GetMapping(value = "/cities-currency")
+    @TransactionBoundary(readOnly = true)
+    public Map<String, Currency> citiesCurrency(
+            @RequestParam(name = "cities", required = false, defaultValue = "") List<String> cities) {
+        return metadataRepository.getCityCurrency(cities);
     }
 
     @GetMapping(value = "/regions")
     @TransactionBoundary(readOnly = true)
-    public List<String> allRegions() {
+    public List<String> listRegions() {
         return metadataRepository.getRegions();
-    }
-
-    @GetMapping(value = "/local-regions")
-    @TransactionBoundary(readOnly = true)
-    public List<String> localRegions() {
-        return metadataRepository.getLocalRegions();
     }
 }

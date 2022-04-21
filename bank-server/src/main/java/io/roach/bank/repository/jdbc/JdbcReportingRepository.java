@@ -2,7 +2,6 @@ package io.roach.bank.repository.jdbc;
 
 import java.math.BigDecimal;
 import java.util.Currency;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -40,22 +39,21 @@ public class JdbcReportingRepository implements ReportingRepository {
 
     @Override
     @Cacheable(value = CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY)
-    public AccountSummary accountSummary(Currency currency, List<String> regions) {
+    public AccountSummary accountSummary(Currency currency) {
         assertInTransactionContext();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("currency", currency.getCurrencyCode());
-        parameters.addValue("regions", regions);
 
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT "
                         + "  count(a.id) tot_accounts, "
-                        + "  count(distinct a.region) tot_regions, "
+                        + "  count(distinct a.city) tot_cities, "
                         + "  sum(a.balance) tot_balance, "
                         + "  min(a.balance) min_balance, "
                         + "  max(a.balance) max_balance "
                         + "FROM account a "
-                        + "WHERE a.currency=:currency and a.region in (:regions)",
+                        + "WHERE a.currency = :currency::currency_code",
                 parameters,
                 (rs, rowNum) -> {
                     AccountSummary summary = new AccountSummary();
@@ -71,12 +69,11 @@ public class JdbcReportingRepository implements ReportingRepository {
 
     @Override
     @Cacheable(value = CacheConfig.CACHE_TRANSACTION_REPORT_SUMMARY)
-    public TransactionSummary transactionSummary(Currency currency, List<String> regions) {
+    public TransactionSummary transactionSummary(Currency currency) {
         assertInTransactionContext();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("currency", currency.getCurrencyCode());
-        parameters.addValue("regions", regions);
 
         // Break down per currency and use parallel queries
         return namedParameterJdbcTemplate.queryForObject(
@@ -87,9 +84,7 @@ public class JdbcReportingRepository implements ReportingRepository {
                         + "  sum(ti.amount) "
                         + "FROM transaction t "
                         + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
-                        + "WHERE ti.currency = :currency "
-                        + "and ti.transaction_region in (:regions) "
-                        + "and ti.transaction_region = t.region",
+                        + "WHERE ti.currency = :currency::currency_code",
                 parameters,
                 (rs, rowNum) -> {
                     TransactionSummary summary = new TransactionSummary();

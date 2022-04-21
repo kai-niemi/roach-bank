@@ -26,6 +26,9 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
     @EmbeddedId
     private Id id = new Id();
 
+    @Column(name = "transaction_city")
+    private String transactionCity;
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "amount",
@@ -52,8 +55,7 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
     @MapsId("id")
     @JoinColumns({
-            @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false),
-            @JoinColumn(name = "account_region", referencedColumnName = "region", nullable = false)
+            @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
     })
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
@@ -61,8 +63,7 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
     @MapsId("id")
     @JoinColumns({
-            @JoinColumn(name = "transaction_id", referencedColumnName = "id", nullable = false),
-            @JoinColumn(name = "transaction_region", referencedColumnName = "region", nullable = false)
+            @JoinColumn(name = "transaction_id", referencedColumnName = "id", nullable = false)
     })
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
@@ -80,8 +81,17 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
         return id;
     }
 
-    public void setId(Id id) {
-        this.id = id;
+    public TransactionItem link(Transaction transaction) {
+        this.transaction = transaction;
+        this.transactionCity = transaction.getCity();
+        this.id = new TransactionItem.Id(
+                Objects.requireNonNull(account.getId()),
+                Objects.requireNonNull(transaction.getId()));
+        return this;
+    }
+
+    public String getTransactionCity() {
+        return transactionCity;
     }
 
     public Money getAmount() {
@@ -122,6 +132,7 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+        this.transactionCity = transaction.getCity();
     }
 
     @Override
@@ -139,26 +150,18 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
         @Column(name = "account_id", updatable = false)
         private UUID accountId;
 
-        @Column(name = "account_region", updatable = false)
-        private String accountRegion;
-
         @Column(name = "transaction_id", updatable = false)
         private UUID transactionId;
-
-        @Column(name = "transaction_region", updatable = false)
-        private String transactionRegion;
 
         protected Id() {
         }
 
-        protected Id(Account.Id accountId, Transaction.Id transactionId) {
-            this.accountId = accountId.getUUID();
-            this.accountRegion = accountId.getRegion();
-            this.transactionId = transactionId.getUUID();
-            this.transactionRegion = transactionId.getRegion();
+        protected Id(UUID accountId, UUID transactionId) {
+            this.accountId = accountId;
+            this.transactionId = transactionId;
         }
 
-        public static Id of(Account.Id accountId, Transaction.Id transactionId) {
+        public static Id of(UUID accountId, UUID transactionId) {
             return new Id(accountId, transactionId);
         }
 
@@ -166,16 +169,8 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
             return accountId;
         }
 
-        public String getAccountRegion() {
-            return accountRegion;
-        }
-
         public UUID getTransactionId() {
             return transactionId;
-        }
-
-        public String getTransactionRegion() {
-            return transactionRegion;
         }
 
         @Override
@@ -188,22 +183,19 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
             }
             Id id = (Id) o;
             return Objects.equals(accountId, id.accountId) &&
-                    Objects.equals(transactionId, id.transactionId) &&
-                    Objects.equals(transactionRegion, id.transactionRegion);
+                    Objects.equals(transactionId, id.transactionId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(accountId, transactionId, transactionRegion);
+            return Objects.hash(accountId, transactionId);
         }
 
         @Override
         public String toString() {
             return "Id{" +
                     "accountId=" + accountId +
-                    ", accountRegion='" + accountRegion + '\'' +
                     ", transactionId=" + transactionId +
-                    ", transactionRegion='" + transactionRegion + '\'' +
                     '}';
         }
     }

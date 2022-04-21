@@ -18,10 +18,10 @@ public interface TransactionItemJpaRepository extends JpaRepository<TransactionI
 
     @Query(value
             = "select item from TransactionItem item "
-            + "where item.transaction.id.uuid = :transactionId",
+            + "where item.transaction.id = :transactionId",
             countQuery
                     = "select count(item.id.transactionId) from TransactionItem item "
-                    + "where item.transaction.id.uuid = :transactionId")
+                    + "where item.transaction.id = :transactionId")
     Page<TransactionItem> findById(
             @Param("transactionId") UUID transactionId,
             Pageable page);

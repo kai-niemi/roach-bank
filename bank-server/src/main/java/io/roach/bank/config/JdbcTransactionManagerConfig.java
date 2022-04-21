@@ -13,7 +13,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import io.roach.bank.ProfileNames;
 
 @Configuration
-@Profile(ProfileNames.NOT_JPA)
+@Profile(ProfileNames.JDBC)
 public class JdbcTransactionManagerConfig {
     @Autowired
     private DataSource dataSource;

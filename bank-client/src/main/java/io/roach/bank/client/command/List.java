@@ -35,9 +35,9 @@ public class List extends RestCommandSupport {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listAccounts(@ShellOption(help = "page number", defaultValue = "0") int page,
                              @ShellOption(help = "page size", defaultValue = "20") int pageSize,
-                             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY)
+                             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY)
                                      String regions) {
-        final Map<String, Currency> regionMap = lookupRegions(regions);
+        final Map<String, Currency> regionMap = findCityCurrency(regions);
         if (regionMap.isEmpty()) {
             return;
         }

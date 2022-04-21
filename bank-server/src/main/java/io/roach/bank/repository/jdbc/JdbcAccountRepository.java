@@ -8,10 +8,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.sql.DataSource;
@@ -37,11 +37,10 @@ import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.service.NoSuchAccountException;
 
 @Repository
 @TransactionMandatory
-@Profile(ProfileNames.NOT_JPA)
+@Profile(ProfileNames.JDBC)
 public class JdbcAccountRepository implements AccountRepository {
     private JdbcTemplate jdbcTemplate;
 
@@ -56,10 +55,10 @@ public class JdbcAccountRepository implements AccountRepository {
     @Override
     public Account createAccount(Account account) {
         jdbcTemplate.update("INSERT INTO account "
-                        + "(id, region, balance, currency, name, description, type, closed, allow_negative, updated) "
-                        + "VALUES(?,?,?,?,?,?,?,?,?,?)",
-                account.getUUID(),
-                account.getRegion(),
+                        + "(id, city, balance, currency, name, description, type, closed, allow_negative, updated) "
+                        + "VALUES(?,?,?,?::currency_code,?,?,?,?,?,?)",
+                account.getId(),
+                account.getCity(),
                 account.getBalance().getAmount(),
                 account.getBalance().getCurrency().getCurrencyCode(),
                 account.getName(),
@@ -77,13 +76,13 @@ public class JdbcAccountRepository implements AccountRepository {
         IntStream.rangeClosed(1, numAccounts / batchSize)
                 .forEach(batch -> jdbcTemplate.batchUpdate(
                         "INSERT INTO account "
-                                + "(id, region, balance, currency, name, description, type, closed, allow_negative, updated) "
-                                + "VALUES(?,?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                                + "(id, city, balance, currency, name, description, type, closed, allow_negative, updated) "
+                                + "VALUES(?,?,?,?::currency_code,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                             @Override
                             public void setValues(PreparedStatement ps, int i) throws SQLException {
                                 Account account = factory.get();
-                                ps.setObject(1, account.getUUID());
-                                ps.setString(2, account.getRegion());
+                                ps.setObject(1, account.getId());
+                                ps.setString(2, account.getCity());
                                 ps.setBigDecimal(3, account.getBalance().getAmount());
                                 ps.setString(4, account.getBalance().getCurrency().getCurrencyCode());
                                 ps.setString(5, account.getName());
@@ -109,9 +108,8 @@ public class JdbcAccountRepository implements AccountRepository {
                         + "   balance = ?,"
                         + "   updated=? "
                         + "WHERE id = ? "
-                        + "   AND region=? "
                         + "   AND closed=false "
-                        + "   AND currency=? "
+                        + "   AND currency = ?::currency_code "
                         + "   AND (?) * abs(allow_negative-1) >= 0", // RETURNING NOTHING
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -120,10 +118,9 @@ public class JdbcAccountRepository implements AccountRepository {
 
                         ps.setBigDecimal(1, account.getBalance().getAmount());
                         ps.setObject(2, LocalDateTime.now());
-                        ps.setObject(3, account.getUUID());
-                        ps.setString(4, account.getRegion());
-                        ps.setString(5, account.getBalance().getCurrency().getCurrencyCode());
-                        ps.setBigDecimal(6, account.getBalance().getAmount());
+                        ps.setObject(3, account.getId());
+                        ps.setString(4, account.getBalance().getCurrency().getCurrencyCode());
+                        ps.setBigDecimal(5, account.getBalance().getAmount());
                     }
 
                     @Override
@@ -139,14 +136,14 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void closeAccount(Account.Id id) {
+    public void closeAccount(UUID id) {
         int rowsAffected = jdbcTemplate.update(
                 connection -> {
                     PreparedStatement ps = connection.prepareStatement(
                             "UPDATE account "
                                     + "SET closed=true "
                                     + "WHERE id=?");
-                    ps.setObject(1, id.getUUID());
+                    ps.setObject(1, id);
                     return ps;
                 });
         if (rowsAffected != 1) {
@@ -155,14 +152,14 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void openAccount(Account.Id id) {
+    public void openAccount(UUID id) {
         int rowsAffected = jdbcTemplate.update(
                 connection -> {
                     PreparedStatement ps = connection.prepareStatement(
                             "UPDATE account "
                                     + "SET closed=false "
                                     + "WHERE id=?");
-                    ps.setObject(1, id.getUUID());
+                    ps.setObject(1, id);
                     return ps;
                 });
         if (rowsAffected != 1) {
@@ -171,16 +168,16 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Page<Account> findAccountPage(Set<String> regions, Pageable pageable) {
+    public Page<Account> findAccountPage(Set<String> cities, Pageable pageable) {
         String sql =
                 "SELECT * "
                         + "FROM account "
-                        + "WHERE region IN (:regions) "
-                        + "ORDER BY id, region "
+                        + "WHERE city IN (:cities) "
+                        + "ORDER BY id, city "
                         + "LIMIT :limit OFFSET :offset ";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("regions", regions)
+                .addValue("cities", cities)
                 .addValue("limit", pageable.getPageSize())
                 .addValue("offset", pageable.getOffset());
 
@@ -192,80 +189,73 @@ public class JdbcAccountRepository implements AccountRepository {
 
     private Long countAll(MapSqlParameterSource params) {
         return this.namedParameterJdbcTemplate.queryForObject(
-                "SELECT count(id) FROM account WHERE region IN (:regions)",
+                "SELECT count(id) FROM account WHERE city IN (:cities)",
                 params, Long.class);
     }
 
     @Override
-    public List<Account> findAccountsByRegion(String region, int limit) {
+    public List<Account> findAccountsByCity(String city, int limit) {
         return this.namedParameterJdbcTemplate.query(
-                "SELECT * FROM account WHERE region=:region "
-                        + "ORDER BY region,id "
+                "SELECT * FROM account WHERE city=:city "
+                        + "ORDER BY id,city "
                         + "LIMIT (:limit)",
                 new MapSqlParameterSource()
-                        .addValue("region", region)
+                        .addValue("city", city)
                         .addValue("limit", limit),
                 (rs, rowNum) -> readAccount(rs));
     }
 
     @Override
-    public List<Account> findAccountsById(Set<Account.Id> ids, boolean sfu) {
+    public List<Account> findAccountsById(Set<UUID> ids, boolean sfu) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-
-        parameters.addValue("ids",
-                ids.stream().map(Account.Id::getUUID).collect(Collectors.toSet()));
-        parameters.addValue("regions",
-                ids.stream().map(Account.Id::getRegion).collect(Collectors.toSet()));
+        parameters.addValue("ids", ids);
 
         return this.namedParameterJdbcTemplate.query(
-                sfu ? "SELECT * FROM account WHERE id in (:ids) AND region in (:regions) FOR UPDATE"
-                        : "SELECT * FROM account WHERE id in (:ids) AND region in (:regions)",
+                sfu ? "SELECT * FROM account WHERE id in (:ids) FOR UPDATE"
+                        : "SELECT * FROM account WHERE id in (:ids)",
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
     }
 
     @Override
-    public Account getAccountById(Account.Id id) {
+    public Optional<Account> getAccountById(UUID id) {
         try {
-            return this.jdbcTemplate.queryForObject(
-                    "SELECT * "
-                            + "FROM account "
-                            + "WHERE id=? AND region=?",
+            return Optional.ofNullable(this.jdbcTemplate.queryForObject(
+                    "SELECT * FROM account WHERE id=?",
                     (rs, rowNum) -> readAccount(rs),
-                    id.getUUID(), id.getRegion()
-            );
+                    id
+            ));
         } catch (EmptyResultDataAccessException e) {
-            throw new NoSuchAccountException(id.toString());
+            return Optional.empty();
         }
     }
 
     @Override
-    public Money getBalance(Account.Id id) {
+    public Money getAccountBalance(UUID id) {
         return this.jdbcTemplate.queryForObject(
-                "SELECT balance,currency "
-                        + "FROM account "
-                        + "WHERE id=? AND region=?",
+                "SELECT balance,currency FROM account WHERE id=?",
                 (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
-                id.getUUID(), id.getRegion()
+                id
         );
     }
 
     @Override
     @TransactionNotAllowed
-    public Money getBalanceSnapshot(Account.Id id) {
+    public Money getBalanceSnapshot(UUID id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency "
                         + "FROM account "
                         + "AS OF SYSTEM TIME follower_read_timestamp() "
-                        + "WHERE id=? AND region=?",
+                        + "WHERE id=?",
                 (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
-                id.getUUID(), id.getRegion()
+                id
         );
     }
 
     private Account readAccount(ResultSet rs) throws SQLException {
         return Account.builder()
-                .withId((UUID) rs.getObject("id"), rs.getString("region"))
+                .withId((UUID) rs.getObject("id"))
+                .withCity(rs.getString("city"))
                 .withName(rs.getString("name"))
                 .withBalance(Money.of(rs.getString("balance"), rs.getString("currency")))
                 .withAccountType(AccountType.of(rs.getString("type")))

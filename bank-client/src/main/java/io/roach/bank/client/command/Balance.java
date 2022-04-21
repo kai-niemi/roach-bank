@@ -30,15 +30,15 @@ public class Balance extends RestCommandSupport {
             @ShellOption(help = "use non-authoritative follower reads", defaultValue = "true") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
                     int accountLimit,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
+            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
-        final Map<String, Currency> regionMap = lookupRegions(regions);
-        if (regionMap.isEmpty()) {
+        final Map<String, Currency> cityMap = findCityCurrency(regions);
+        if (cityMap.isEmpty()) {
             return;
         }
 
-        final Map<String, List<AccountModel>> accountMap = lookupAccounts(regionMap.keySet(), accountLimit);
+        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cityMap.keySet(), accountLimit);
         if (accountMap.isEmpty()) {
             return;
         }

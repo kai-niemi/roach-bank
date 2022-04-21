@@ -1,8 +1,6 @@
 package io.roach.bank.domain;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.*;
@@ -20,12 +18,15 @@ import io.roach.bank.service.NegativeBalanceException;
  */
 @Entity
 @Table(name = "account")
-public class Account extends AbstractEntity<Account.Id> {
-    @EmbeddedId
-    private Account.Id id = new Account.Id();
+public class Account extends AbstractEntity<UUID> {
+    @Id
+    private UUID id;
 
     @Column
     private String name;
+
+    @Column
+    private String city;
 
     @Column
     @Basic(fetch = FetchType.LAZY)
@@ -66,25 +67,21 @@ public class Account extends AbstractEntity<Account.Id> {
         }
     }
 
-    @Override
-    public Account.Id getId() {
-        return id;
-    }
-
-    public UUID getUUID() {
-        return id.getUUID();
-    }
-
-    public String getRegion() {
-        return id.getRegion();
-    }
-
     public void addAmount(Money amount) {
         Money newBalance = getBalance().plus(amount);
         if (getAllowNegative() == 0 && newBalance.isNegative()) {
             throw new NegativeBalanceException(toDisplayString());
         }
         this.balance = newBalance;
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
+    }
+
+    public String getCity() {
+        return city;
     }
 
     public AccountType getAccountType() {
@@ -124,6 +121,7 @@ public class Account extends AbstractEntity<Account.Id> {
         return "Account{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", city='" + city + '\'' +
                 ", accountType=" + accountType +
                 ", balance=" + balance +
                 '}';
@@ -159,18 +157,23 @@ public class Account extends AbstractEntity<Account.Id> {
     public static final class Builder {
         private final Account instance = new Account();
 
-        public Builder withGeneratedId(String region) {
-            withId(UUID.randomUUID(), region);
+        public Builder withGeneratedId() {
+            withId(UUID.randomUUID());
             return this;
         }
 
-        public Builder withId(UUID accountId, String region) {
-            this.instance.id = Account.Id.of(accountId, region);
+        public Builder withId(UUID accountId) {
+            this.instance.id = accountId;
             return this;
         }
 
         public Builder withName(String name) {
             this.instance.name = name;
+            return this;
+        }
+
+        public Builder withCity(String city) {
+            this.instance.city = city;
             return this;
         }
 
@@ -207,68 +210,6 @@ public class Account extends AbstractEntity<Account.Id> {
         public Account build() {
             Assert.notNull(instance.id, "id is null");
             return instance;
-        }
-    }
-
-    @Embeddable
-    public static class Id implements Serializable, Comparable<Id> {
-        @Column(name = "id", updatable = false)
-        private UUID uuid;
-
-        @Column(name = "region", updatable = false)
-        private String region;
-
-        protected Id() {
-        }
-
-        public Id(UUID uuid, String region) {
-            Assert.notNull(uuid, "uuid is required");
-            Assert.notNull(region, "region is required");
-            this.uuid = uuid;
-            this.region = region;
-        }
-
-        public static Id of(UUID accountId, String region) {
-            return new Id(accountId, region);
-        }
-
-        public String getRegion() {
-            return region;
-        }
-
-        public UUID getUUID() {
-            return uuid;
-        }
-
-        @Override
-        public int compareTo(Id o) {
-            return o.uuid.compareTo(uuid);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof Id)) {
-                return false;
-            }
-            Id id1 = (Id) o;
-            return Objects.equals(region, id1.region) &&
-                    Objects.equals(uuid, id1.uuid);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(region, uuid);
-        }
-
-        @Override
-        public String toString() {
-            return "Id{" +
-                    "uuid=" + uuid +
-                    ", region=" + region +
-                    '}';
         }
     }
 }

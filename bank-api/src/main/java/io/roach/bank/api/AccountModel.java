@@ -28,7 +28,7 @@ import static io.roach.bank.api.BankLinkRelations.CURIE_PREFIX;
 public class AccountModel extends RepresentationModel<AccountModel> implements WeightedItem {
     private UUID id;
 
-    private String region;
+    private String city;
 
     private String name;
 
@@ -86,12 +86,12 @@ public class AccountModel extends RepresentationModel<AccountModel> implements W
         this.description = description;
     }
 
-    public String getRegion() {
-        return region;
+    public String getCity() {
+        return city;
     }
 
-    public void setRegion(String region) {
-        this.region = region;
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getName() {
@@ -154,7 +154,7 @@ public class AccountModel extends RepresentationModel<AccountModel> implements W
     public String toString() {
         return "AccountResource{" +
 //                "uuid=" + uuid +
-                ", region=" + region +
+                ", region=" + city +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", accountType=" + accountType +

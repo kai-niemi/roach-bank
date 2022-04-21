@@ -8,7 +8,7 @@
 -- TRUNCATE TABLE account CASCADE;
 
 -- boston | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'boston', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'boston', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'boston', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'boston', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'boston', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -109,7 +109,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'boston', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'boston', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- stockholm | SEK
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'stockholm', '100000.00', 'SEK', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'stockholm', '100000.00', 'SEK', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'stockholm', '100000.00', 'SEK', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'stockholm', '100000.00', 'SEK', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'stockholm', '100000.00', 'SEK', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -210,7 +210,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'stockholm', '100000.00', 'SEK', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'stockholm', '100000.00', 'SEK', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- london | GBP
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'london', '100000.00', 'GBP', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'london', '100000.00', 'GBP', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'london', '100000.00', 'GBP', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'london', '100000.00', 'GBP', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'london', '100000.00', 'GBP', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -311,7 +311,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'london', '100000.00', 'GBP', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'london', '100000.00', 'GBP', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- salvador | BRL
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'salvador', '100000.00', 'BRL', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'salvador', '100000.00', 'BRL', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'salvador', '100000.00', 'BRL', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'salvador', '100000.00', 'BRL', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'salvador', '100000.00', 'BRL', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -412,7 +412,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'salvador', '100000.00', 'BRL', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'salvador', '100000.00', 'BRL', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- miami | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'miami', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'miami', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'miami', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'miami', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'miami', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -513,7 +513,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'miami', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'miami', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- oslo | NOK
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'oslo', '100000.00', 'NOK', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'oslo', '100000.00', 'NOK', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'oslo', '100000.00', 'NOK', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'oslo', '100000.00', 'NOK', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'oslo', '100000.00', 'NOK', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -614,7 +614,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'oslo', '100000.00', 'NOK', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'oslo', '100000.00', 'NOK', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- paris | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'paris', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'paris', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'paris', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'paris', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'paris', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -715,7 +715,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'paris', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'paris', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- barcelona | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'barcelona', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'barcelona', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'barcelona', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'barcelona', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'barcelona', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -816,7 +816,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'barcelona', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'barcelona', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- detroit | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'detroit', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'detroit', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'detroit', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'detroit', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'detroit', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -917,7 +917,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'detroit', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'detroit', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- seattle | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'seattle', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'seattle', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'seattle', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'seattle', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'seattle', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1018,7 +1018,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'seattle', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'seattle', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- los angeles | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'los angeles', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'los angeles', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'los angeles', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'los angeles', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'los angeles', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1119,7 +1119,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'los angeles', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'los angeles', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- chicago | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'chicago', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'chicago', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'chicago', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'chicago', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'chicago', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1220,7 +1220,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'chicago', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'chicago', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- minneapolis | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'minneapolis', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'minneapolis', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'minneapolis', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'minneapolis', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'minneapolis', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1321,7 +1321,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'minneapolis', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'minneapolis', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- san francisco | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'san francisco', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'san francisco', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'san francisco', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'san francisco', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'san francisco', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1422,7 +1422,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'san francisco', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'san francisco', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- amsterdam | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'amsterdam', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'amsterdam', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'amsterdam', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'amsterdam', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'amsterdam', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1523,7 +1523,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'amsterdam', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'amsterdam', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- helsinki | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'helsinki', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'helsinki', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'helsinki', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'helsinki', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'helsinki', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1624,7 +1624,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'helsinki', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'helsinki', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- hong kong | HKD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'hong kong', '100000.00', 'HKD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'hong kong', '100000.00', 'HKD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'hong kong', '100000.00', 'HKD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'hong kong', '100000.00', 'HKD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'hong kong', '100000.00', 'HKD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1725,7 +1725,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'hong kong', '100000.00', 'HKD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'hong kong', '100000.00', 'HKD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- milano | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'milano', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'milano', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'milano', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'milano', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'milano', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1826,7 +1826,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'milano', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'milano', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- athens | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'athens', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'athens', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'athens', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'athens', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'athens', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -1927,7 +1927,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'athens', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'athens', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- frankfurt | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'frankfurt', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'frankfurt', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'frankfurt', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'frankfurt', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'frankfurt', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2028,7 +2028,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'frankfurt', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'frankfurt', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- new york | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'new york', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'new york', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'new york', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'new york', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'new york', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2129,7 +2129,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'new york', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'new york', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- rio de janeiro | BRL
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'rio de janeiro', '100000.00', 'BRL', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'rio de janeiro', '100000.00', 'BRL', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'rio de janeiro', '100000.00', 'BRL', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'rio de janeiro', '100000.00', 'BRL', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'rio de janeiro', '100000.00', 'BRL', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2230,7 +2230,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'rio de janeiro', '100000.00', 'BRL', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'rio de janeiro', '100000.00', 'BRL', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- manchester | GBP
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'manchester', '100000.00', 'GBP', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'manchester', '100000.00', 'GBP', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'manchester', '100000.00', 'GBP', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'manchester', '100000.00', 'GBP', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'manchester', '100000.00', 'GBP', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2331,7 +2331,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'manchester', '100000.00', 'GBP', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'manchester', '100000.00', 'GBP', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- tokyo | JPY
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'tokyo', '100000', 'JPY', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'tokyo', '100000', 'JPY', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'tokyo', '100000', 'JPY', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'tokyo', '100000', 'JPY', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'tokyo', '100000', 'JPY', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2432,7 +2432,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'tokyo', '100000', 'JPY', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'tokyo', '100000', 'JPY', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- washington dc | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'washington dc', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'washington dc', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'washington dc', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'washington dc', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'washington dc', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2533,7 +2533,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'washington dc', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'washington dc', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- singapore | SGD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'singapore', '100000.00', 'SGD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'singapore', '100000.00', 'SGD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'singapore', '100000.00', 'SGD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'singapore', '100000.00', 'SGD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'singapore', '100000.00', 'SGD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2634,7 +2634,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'singapore', '100000.00', 'SGD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'singapore', '100000.00', 'SGD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- sydney | AUD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'sydney', '100000.00', 'AUD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'sydney', '100000.00', 'AUD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'sydney', '100000.00', 'AUD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'sydney', '100000.00', 'AUD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'sydney', '100000.00', 'AUD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2735,7 +2735,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'sydney', '100000.00', 'AUD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'sydney', '100000.00', 'AUD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- phoenix | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'phoenix', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'phoenix', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'phoenix', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'phoenix', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'phoenix', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2836,7 +2836,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'phoenix', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'phoenix', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- madrid | EUR
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'madrid', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'madrid', '100000.00', 'EUR', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'madrid', '100000.00', 'EUR', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'madrid', '100000.00', 'EUR', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'madrid', '100000.00', 'EUR', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -2937,7 +2937,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'madrid', '100000.00', 'EUR', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'madrid', '100000.00', 'EUR', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- atlanta | USD
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'atlanta', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'atlanta', '100000.00', 'USD', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'atlanta', '100000.00', 'USD', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'atlanta', '100000.00', 'USD', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'atlanta', '100000.00', 'USD', 'user:0004', 'A', false, 0, clock_timestamp()),
@@ -3038,7 +3038,7 @@ INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,
 	(gen_random_uuid(), 'atlanta', '100000.00', 'USD', 'user:0099', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'atlanta', '100000.00', 'USD', 'user:0100', 'A', false, 0, clock_timestamp())
 ;-- sao paulo | BRL
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'sao paulo', '100000.00', 'BRL', 'user:0001', 'A', false, 0, clock_timestamp()),
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES	(gen_random_uuid(), 'sao paulo', '100000.00', 'BRL', 'user:0001', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'sao paulo', '100000.00', 'BRL', 'user:0002', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'sao paulo', '100000.00', 'BRL', 'user:0003', 'A', false, 0, clock_timestamp()),
 	(gen_random_uuid(), 'sao paulo', '100000.00', 'BRL', 'user:0004', 'A', false, 0, clock_timestamp()),

@@ -27,19 +27,16 @@ public class TransactionItemResourceAssembler
 
         resource.add(linkTo(TransactionItemController.class)
                 .slash(entity.getId().getTransactionId())
-                .slash(entity.getId().getTransactionRegion())
                 .slash(entity.getId().getAccountId())
-                .slash(entity.getId().getAccountRegion())
                 .withSelfRel());
         resource.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder.methodOn(AccountController.class)
-                        .getAccount(entity.getAccount().getUUID(), entity.getAccount().getRegion()))
+                        .getAccount(entity.getAccount().getId()))
                 .withRel(BankLinkRelations.ACCOUNT_REL)
                 .withTitle("Booking account"));
         resource.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder.methodOn(TransactionController.class)
-                        .getTransaction(entity.getTransaction().getUUID(),
-                                entity.getTransaction().getRegion()))
+                        .getTransaction(entity.getTransaction().getId()))
                 .withRel(BankLinkRelations.TRANSACTION_REL)
                 .withTitle("Booking transaction"));
 

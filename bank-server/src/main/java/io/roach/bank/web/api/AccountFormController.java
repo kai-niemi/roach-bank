@@ -73,7 +73,7 @@ public class AccountFormController {
         UUID id = "auto".equals(form.getUuid()) ? UUID.randomUUID() : UUID.fromString(form.getUuid());
 
         Account account = Account.builder()
-                .withId(id, form.getRegion())
+                .withId(id)
                 .withName(form.getName())
                 .withDescription(form.getDescription())
                 .withBalance(Money.of("0.00", form.getCurrencyCode()))
@@ -85,7 +85,7 @@ public class AccountFormController {
         account = accountRepository.createAccount(account);
 
         Link selfLink = linkTo(methodOn(AccountController.class)
-                .getAccount(account.getUUID(), account.getRegion()))
+                .getAccount(account.getId()))
                 .withSelfRel();
 
         if (FollowLocation.ofCurrentRequest()) {
@@ -99,17 +99,17 @@ public class AccountFormController {
     @PostMapping(value = "/batch")
     @TransactionBoundary
     public HttpEntity<Void> submitAccountBatch(
-            @RequestParam(value = "region", defaultValue = "") String region,
+            @RequestParam(value = "city", defaultValue = "") String city,
             @RequestParam(value = "prefix", defaultValue = "gen") String prefix,
             @RequestParam(value = "balance", defaultValue = "100000.00") String balance,
             @RequestParam(value = "numAccounts", defaultValue = "320") Integer numAccounts,
             @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
     ) {
-        final Money balanceM = Money.of(balance, metadataRepository.getRegionCurrency(region));
+        final Money balanceM = Money.of(balance, metadataRepository.getCityCurrency(city));
         final AtomicInteger sequence = new AtomicInteger(1);
 
         accountRepository.createAccountBatch(() -> Account.builder()
-                        .withId(UUID.randomUUID(), region)
+                        .withId(UUID.randomUUID())
                         .withName(prefix + "-" + sequence.incrementAndGet())
                         .withBalance(balanceM)
                         .withAccountType(AccountType.ASSET)

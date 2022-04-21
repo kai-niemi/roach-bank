@@ -39,13 +39,13 @@ public class SavepointTransactionManagement {
         }
     }
 
-    @Profile(ProfileNames.DB_COCKROACH)
+    @Profile(ProfileNames.COCKROACH)
     @Bean
     public SavepointTransactionalAspect savepointTransactionAspect() {
         return new SavepointTransactionalAspect("cockroach_restart", TransactionDefinition.ISOLATION_SERIALIZABLE);
     }
 
-    @Profile(ProfileNames.DB_POSTGRESQL)
+    @Profile(ProfileNames.POSTGRESQL)
     @Bean
     public SavepointTransactionalAspect savepointTransactionAspectUnnamed() {
         return new SavepointTransactionalAspect(null, TransactionDefinition.ISOLATION_SERIALIZABLE);

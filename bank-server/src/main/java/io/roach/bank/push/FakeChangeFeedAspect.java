@@ -24,7 +24,7 @@ import io.roach.bank.domain.Transaction;
 @Aspect
 @Component
 @Order(AdvisorOrder.CHANGE_FEED_ADVISOR)
-@Profile(ProfileNames.CDC_AOP)
+@Profile(ProfileNames.CDC_NONE)
 public class FakeChangeFeedAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -41,7 +41,7 @@ public class FakeChangeFeedAspect {
         transaction.getItems().forEach(item -> {
             AccountChangeEvent.Fields fields = new AccountChangeEvent.Fields();
             fields.setId(item.getId().getAccountId());
-            fields.setRegion(item.getAccount().getRegion());
+            fields.setCity(item.getAccount().getCity());
             fields.setName(item.getAccount().getName());
             fields.setBalance(item.getRunningBalance().getAmount());
             fields.setCurrency(item.getRunningBalance().getCurrency().getCurrencyCode());

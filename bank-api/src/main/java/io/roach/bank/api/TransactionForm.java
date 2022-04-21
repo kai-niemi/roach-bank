@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
@@ -46,11 +45,10 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     }
 
     @NotNull
-    private String uuid = "auto";
+    private UUID uuid;
 
-    @NotNull
-    @Size(min = 2)
-    private String region;
+    @NotBlank
+    private String city;
 
     @NotBlank
     private String transactionType;
@@ -67,17 +65,17 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate transferDate;
 
-    private final List<AccountLeg> accountLegs = new ArrayList<>();
+    private final List<AccountItem> accountLegs = new ArrayList<>();
 
     protected TransactionForm() {
     }
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 
-    public String getRegion() {
-        return region;
+    public String getCity() {
+        return city;
     }
 
     public LocalDate getBookingDate() {
@@ -92,7 +90,7 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
         return transactionType;
     }
 
-    public List<AccountLeg> getAccountLegs() {
+    public List<AccountItem> getAccountLegs() {
         return Collections.unmodifiableList(accountLegs);
     }
 
@@ -103,13 +101,13 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     public static class Builder {
         private final TransactionForm instance = new TransactionForm();
 
-        public Builder withUUID(String uuid) {
+        public Builder withUUID(UUID uuid) {
             this.instance.uuid = uuid;
             return this;
         }
 
-        public Builder withRegion(String region) {
-            this.instance.region = region;
+        public Builder withCity(String city) {
+            this.instance.city = city;
             return this;
         }
 
@@ -127,13 +125,14 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
             this.instance.transferDate = transferDate;
             return this;
         }
+
         public Builder withSelectForUpdate() {
-            this.instance.selectForUpdate =true;
+            this.instance.selectForUpdate = true;
             return this;
         }
 
-        public AccountLegBuilder addLeg() {
-            return new AccountLegBuilder(this, instance.accountLegs::add);
+        public AccountItemBuilder addLeg() {
+            return new AccountItemBuilder(this, instance.accountLegs::add);
         }
 
         public TransactionForm build() {
@@ -144,30 +143,29 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
         }
     }
 
-    public static class AccountLegBuilder {
-        private final AccountLeg instance = new AccountLeg();
+    public static class AccountItemBuilder {
+        private final AccountItem instance = new AccountItem();
 
         private final Builder parentBuilder;
 
-        private final Consumer<AccountLeg> callback;
+        private final Consumer<AccountItem> callback;
 
-        private AccountLegBuilder(Builder parentBuilder, Consumer<AccountLeg> callback) {
+        private AccountItemBuilder(Builder parentBuilder, Consumer<AccountItem> callback) {
             this.parentBuilder = parentBuilder;
             this.callback = callback;
         }
 
-        public AccountLegBuilder withId(UUID id, String region) {
+        public AccountItemBuilder withId(UUID id) {
             this.instance.id = id;
-            this.instance.region = region;
             return this;
         }
 
-        public AccountLegBuilder withAmount(Money amount) {
+        public AccountItemBuilder withAmount(Money amount) {
             this.instance.amount = amount;
             return this;
         }
 
-        public AccountLegBuilder withNote(String note) {
+        public AccountItemBuilder withNote(String note) {
             this.instance.note = note;
             return this;
         }
@@ -184,23 +182,15 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
         }
     }
 
-    public static class AccountLeg {
+    public static class AccountItem {
         private UUID id;
 
-        private String region;
-
-        //        @JsonSerialize(using = MoneySerializer.class)
-//        @JsonDeserialize(using = MoneyDeserializer.class)
         private Money amount;
 
         private String note;
 
         public UUID getId() {
             return id;
-        }
-
-        public String getRegion() {
-            return region;
         }
 
         public Money getAmount() {

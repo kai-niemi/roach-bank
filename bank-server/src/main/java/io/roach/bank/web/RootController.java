@@ -37,7 +37,7 @@ public class RootController {
         if ("".equals(locality) || "all".equals(locality)) {
             model.addAttribute("title", "Roach Bank");
         } else {
-            model.addAttribute("title", "Roach Bank (locality: " + locality + ")");
+            model.addAttribute("title", "Roach Bank (" + locality + ")");
         }
         return "home";
     }

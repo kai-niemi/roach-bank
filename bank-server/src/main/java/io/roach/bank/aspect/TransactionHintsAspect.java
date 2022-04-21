@@ -30,7 +30,7 @@ import io.roach.bank.annotation.TransactionHints;
 @Aspect
 @Component
 @Order(AdvisorOrder.TX_ATTRIBUTES_ADVISOR)
-@Profile(ProfileNames.DB_COCKROACH)
+@Profile(ProfileNames.COCKROACH)
 public class TransactionHintsAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

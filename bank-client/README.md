@@ -38,11 +38,11 @@ Transfer funds between all accounts:
 
 Transfer funds between random accounts in 'us' regions:
 
-    transfer --regions us_west,us_central,us_east
+    transfer --cities us_west,us_central,us_east
 
 Another transfer example:
 
-    transfer --regions us_east,eu_west,ap --amount-range 5.00-15:00 --duration 90m
+    transfer --cities us_east,eu_west,ap --amount-range 5.00-15:00 --duration 90m
 
 Query the balance of random top accounts per region:
 
@@ -56,7 +56,7 @@ Generate 50M accounts for all regions:
 
 Generate 250M accounts without legs for US regions:
 
-    gen-csv --no-legs --regions us_west,us_central,us_east --accounts 250000000
+    gen-csv --no-legs --cities us_west,us_central,us_east --accounts 250000000
 
 ## Configuration
 

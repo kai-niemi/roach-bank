@@ -41,15 +41,18 @@ public abstract class BankLinkRelations {
     // Meta
 
 
-    public static final String REGION_GROUPS_REL = "region-groups";
+    public static final String REGION_CITIES_REL = "region-cities";
 
-    public static final String REGION_CURRENCIES_REL = "region-currency";
+    public static final String CURRENCIES_REL = "currencies";
+
+    public static final String CITIES_REL = "cities";
+
+    public static final String CITY_CURRENCY_REL = "cities-currency";
+
+    public static final String LOCAL_CITIES_REL = "cities-local";
 
     public static final String REGIONS_REL = "regions";
 
-    public static final String LOCAL_REGIONS_REL = "local-regions";
-
-    public static final String CURRENCIES_REL = "currencies";
 
     // Generic context-scoped link relations
 

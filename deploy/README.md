@@ -43,7 +43,7 @@ Transfer funds across all accounts:
 
 Transfer funds across us west accounts:
 
-    transfer --regions us_west
+    transfer --cities us_west
 
 Read account balances for 15min using follower reads:
 

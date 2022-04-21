@@ -28,9 +28,9 @@ public class GenerateSQL extends RestCommandSupport {
             @ShellOption(help = "initial account balance in regional currency", defaultValue = "100000.00")
                     String balance,
             @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
+            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String regions
     ) throws IOException {
-        final Map<String, Currency> regionMap = lookupRegions(regions);
+        final Map<String, Currency> regionMap = findCityCurrency(regions);
         if (regionMap.isEmpty()) {
             return;
         }
@@ -63,7 +63,7 @@ public class GenerateSQL extends RestCommandSupport {
 
                 writer.write(String.format("-- %s | %s\n", region, money.getCurrency()));
                 writer.write(
-                        "INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES");
+                        "INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES");
 
                 for (int i = 1; i <= accountsPerRegion; i++) {
                     writer.write(String.format(

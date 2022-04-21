@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +44,7 @@ public class ReportWebSocketPublisher {
     private final ReentrantLock lock = new ReentrantLock();
 
     @Value("${roachbank.reportQueryTimeout}")
-    private int queryTimeout = 120_000;
+    private int queryTimeout = 120;
 
     @Autowired
     @Lazy
@@ -84,10 +83,10 @@ public class ReportWebSocketPublisher {
                 // Retrieve accounts per region concurrently with a collective timeout
                 List<Callable<Void>> tasks = Collections.synchronizedList(new ArrayList<>());
 
-                selfProxy.currencyRegions().forEach((currency, regions) -> {
+                metadataRepository.getCurrencies().forEach((currency) -> {
                     tasks.add(() -> {
-                        logger.trace("Processing {}->{}", currency, regions);
-                        selfProxy.computeSummaryAndPush(currency, regions);
+                        logger.trace("Processing {}", currency);
+                        selfProxy.computeSummaryAndPush(currency);
                         return null;
                     });
                 });
@@ -109,16 +108,11 @@ public class ReportWebSocketPublisher {
             timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
             vectorize = TransactionBoundary.Vectorize.off,
             priority = TransactionBoundary.Priority.low)
-    public void computeSummaryAndPush(Currency currency, List<String> regions) {
-        AccountSummary accountSummary = reportingRepository.accountSummary(currency, regions);
+    public void computeSummaryAndPush(Currency currency) {
+        AccountSummary accountSummary = reportingRepository.accountSummary(currency);
         simpMessagingTemplate.convertAndSend(TOPIC_ACCOUNT_SUMMARY, accountSummary);
 
-        TransactionSummary transactionSummary = reportingRepository.transactionSummary(currency, regions);
+        TransactionSummary transactionSummary = reportingRepository.transactionSummary(currency);
         simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, transactionSummary);
-    }
-
-    @TransactionBoundary(readOnly = true)
-    public Map<Currency, List<String>> currencyRegions() {
-        return metadataRepository.getCurrencyRegions();
     }
 }

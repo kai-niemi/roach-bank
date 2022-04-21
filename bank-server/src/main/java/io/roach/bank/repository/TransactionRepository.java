@@ -1,5 +1,7 @@
 package io.roach.bank.repository;
 
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -7,15 +9,15 @@ import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 
 public interface TransactionRepository {
-    Transaction create(Transaction transaction);
+    Transaction createTransaction(Transaction transaction);
 
-    Transaction findById(Transaction.Id id);
+    Transaction findTransactionById(UUID id);
 
-    TransactionItem getItemById(TransactionItem.Id id);
+    TransactionItem getTransactionItemById(TransactionItem.Id id);
 
-    Page<Transaction> findAll(Pageable pageable);
+    Page<Transaction> findTransactions(Pageable pageable);
 
-    Page<TransactionItem> findItems(Transaction.Id transactionId, Pageable pageable);
+    Page<TransactionItem> findTransactionItems(UUID transactionId, Pageable pageable);
 
     void deleteAll();
 }

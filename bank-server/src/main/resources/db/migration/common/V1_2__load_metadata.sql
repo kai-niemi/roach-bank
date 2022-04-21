@@ -2,23 +2,9 @@
 -- Metadata used for bank transactions and client account selection
 --
 
--- TRUNCATE TABLE region_group CASCADE;
--- TRUNCATE TABLE region_config CASCADE;
+-- TRUNCATE TABLE region_map CASCADE;
 
-INSERT INTO region_group
-VALUES ('us_west'),
-       ('us_central'),
-       ('us_east'),
-       ('us'),
-       ('eu_west'),
-       ('eu_central'),
-       ('eu_south'),
-       ('eu'),
-       ('apac'),
-       ('sa')
-;
-
-INSERT INTO region_config
+INSERT INTO region_map
 VALUES ('seattle', 'USD', 'us_west'),
        ('seattle', 'USD', 'us'),
        ('san francisco', 'USD', 'us_west'),

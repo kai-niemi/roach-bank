@@ -1,10 +1,9 @@
 package io.roach.bank.service;
 
 import java.util.Collection;
-import java.util.Currency;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import io.roach.bank.annotation.TimeTravel;
 import io.roach.bank.annotation.TimeTravelMode;
 import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
@@ -32,55 +30,58 @@ public class DefaultAccountService implements AccountService {
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
     public Page<Account> findAccountPage(Collection<String> regions, Pageable page) {
-        Map<String, Currency> resolvedRegions = metadataRepository.resolveRegions(regions);
-        return accountRepository.findAccountPage(resolvedRegions.keySet(), page);
+        Set<String> cities = metadataRepository.getCityCurrency(regions).keySet();
+        return accountRepository.findAccountPage(cities, page);
     }
 
-    
-    @Override
-    @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public List<Account> findAccountsByRegion(String region, int limit) {
-        return accountRepository.findAccountsByRegion(region, limit);
-    }
-
-    @Override
-    @TransactionBoundary(readOnly = true)
-    public Set<String> resolveRegions(Collection<String> regions) {
-        return metadataRepository.resolveRegions(regions).keySet();
-    }
-
-    @Override
-    @TransactionBoundary(readOnly = true)
-    public Account getAccountById(Account.Id id) {
-        return accountRepository.getAccountById(id);
-    }
-
-    @Override
-    @TransactionBoundary(readOnly = true)
-    public Money getBalance(Account.Id id) {
-        return accountRepository.getBalance(id);
-    }
 
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public Money getBalanceSnapshot(Account.Id id) {
+    public List<Account> findAccountsByCity(String city, int limit) {
+        return accountRepository.findAccountsByCity(city, limit);
+    }
+
+    @Override
+    @TransactionBoundary(readOnly = true)
+    public Set<String> resolveCities(Collection<String> cities) {
+        return metadataRepository.getCityCurrency(cities).keySet();
+    }
+
+    @Override
+    @TransactionBoundary(readOnly = true)
+    public Account getAccountById(UUID id) {
+        return accountRepository.getAccountById(id)
+                .orElseThrow(() -> new NoSuchAccountException(id));
+    }
+
+    @Override
+    @TransactionBoundary(readOnly = true)
+    public Money getBalance(UUID id) {
+        return accountRepository.getAccountBalance(id);
+    }
+
+    @Override
+    @TransactionBoundary(
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    public Money getBalanceSnapshot(UUID id) {
         return accountRepository.getBalanceSnapshot(id);
     }
 
     @Override
     @TransactionBoundary
-    public Account openAccount(Account.Id id) {
+    public Account openAccount(UUID id) {
         accountRepository.openAccount(id);
-        return accountRepository.getAccountById(id);
+        return accountRepository.getAccountById(id)
+                .orElseThrow(() -> new NoSuchAccountException(id));
     }
 
     @Override
     @TransactionBoundary
-    public Account closeAccount(Account.Id id) {
+    public Account closeAccount(UUID id) {
         accountRepository.closeAccount(id);
-        return accountRepository.getAccountById(id);
+        return accountRepository.getAccountById(id)
+                .orElseThrow(() -> new NoSuchAccountException(id));
     }
 
     @Override

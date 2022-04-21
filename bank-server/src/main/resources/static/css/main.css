@@ -90,7 +90,7 @@ body > .container-fluid {
     top: 20px;
 }
 
-.box .region {
+.box .city {
     position: absolute;
     display: inline-block;
     vertical-align: top;

@@ -45,19 +45,19 @@ public class Transfer extends RestCommandSupport {
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.15-1.75") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
-                    int accountLimit,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
+            int accountLimit,
+            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "use locking (select for update)", defaultValue = "false") boolean sfu,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
 
-        final Map<String, Currency> regionMap = lookupRegions(regions);
-        if (regionMap.isEmpty()) {
+        final Map<String, Currency> cityMap = findCityCurrency(cities);
+        if (cityMap.isEmpty()) {
             return;
         }
 
-        final Map<String, List<AccountModel>> accountMap = lookupAccounts(regionMap.keySet(), accountLimit);
+        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cityMap.keySet(), accountLimit);
         if (accountMap.isEmpty()) {
             return;
         }
@@ -73,9 +73,9 @@ public class Transfer extends RestCommandSupport {
                     .follow(BankLinkRelations.withCurie(TRANSACTION_FORM_REL))
                     .asTemplatedLink();
 
-            accountMap.forEach((regionKey, accountModels) -> {
-                executorTemplate.runAsync("transfer - " + regionKey,
-                        () -> transferFunds(transferLink, regionKey, accountModels, amount, legs, sfu),
+            accountMap.forEach((city, accountModels) -> {
+                executorTemplate.runAsync("transfer - " + city,
+                        () -> transferFunds(transferLink, city, accountModels, amount, legs, sfu),
                         DurationFormat.parseDuration(duration));
             });
         }
@@ -96,7 +96,7 @@ public class Transfer extends RestCommandSupport {
     }
 
     private TransactionModel transferFunds(Link transferLink,
-                                           String regionKey,
+                                           String city,
                                            List<AccountModel> accounts,
                                            String amount,
                                            int legs,
@@ -106,8 +106,8 @@ public class Transfer extends RestCommandSupport {
         Money transferAmount = RandomData.randomMoneyBetween(amountParts[0], amountParts[1], currency);
 
         TransactionForm.Builder formBuilder = TransactionForm.builder()
-                .withUUID("auto")
-                .withRegion(regionKey)
+                .withUUID(UUID.randomUUID())
+                .withCity(city)
                 .withTransactionType("GEN")
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
@@ -127,16 +127,17 @@ public class Transfer extends RestCommandSupport {
 
             formBuilder
                     .addLeg()
-                    .withId(account.getId(), account.getRegion())
+                    .withId(account.getId())
+
                     .withAmount(value % 2 == 0 ? transferAmount.negate() : transferAmount)
                     .withNote(RandomData.selectRandom(QUOTES))
                     .then();
         });
 
         return restTemplate.postForEntity(
-                transferLink.getTemplate().expand(),
-                formBuilder.build(),
-                TransactionModel.class)
+                        transferLink.getTemplate().expand(),
+                        formBuilder.build(),
+                        TransactionModel.class)
                 .getBody();
     }
 }

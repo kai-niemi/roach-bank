@@ -32,14 +32,14 @@ BankDashboard.prototype = {
     createAccountElement: function (account) {
         var _this = this, view;
 
-        var countryCode = ((_this.settings.regionCountry[account.region]) ? _this.settings.regionCountry[account.region] : account.region);
+        var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : account.city);
         view = $('<div>')
                     .attr('id', account.id)
                     .attr('data-toggle', 'tooltip')
                     .addClass('box')
-                    .css(_this.boxSize(account.region, account.balance.currency, account.balance.amount))
+                    .css(_this.boxSize(account.city, account.balance.currency, account.balance.amount))
                     .css({
-                        background: _this.boxColor(account.region, account.currency, account.balance)
+                        background: _this.boxColor(account.city, account.currency, account.balance)
                     })
                     .append(
                             $('<span>')
@@ -53,8 +53,8 @@ BankDashboard.prototype = {
                     )
                     .append(
                             $('<span>')
-                                    .addClass('region')
-                                    .text(account.region)
+                                    .addClass('city')
+                                    .text(account.city)
                     )
                     .append(
                             $('<span>')
@@ -76,16 +76,16 @@ BankDashboard.prototype = {
         _this.accountSpinner.remove();
 
         accounts = data.map(function (account) {
-            var countryCode = ((_this.settings.regionCountry[account.region]) ? _this.settings.regionCountry[account.region] : account.region);
+            var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : account.city);
 
             return $('<div>')
                     .attr('id', account.id)
                     .attr('data-toggle', 'tooltip')
                     .attr('title', account._links.self.href)
                     .addClass('box')
-                    .css(_this.boxSize(account.region, account.balance.currency, account.balance.amount))
+                    .css(_this.boxSize(account.city, account.balance.currency, account.balance.amount))
                     .css({
-                        background: _this.boxColor(account.region, account.balance.currency, account.balance.amount)
+                        background: _this.boxColor(account.city, account.balance.currency, account.balance.amount)
                     })
                     .append(
                             $('<span>')
@@ -99,8 +99,8 @@ BankDashboard.prototype = {
                     )
                     .append(
                             $('<span>')
-                                    .addClass('region')
-                                    .text(account.region)
+                                    .addClass('city')
+                                    .text(account.city)
                     )
                     .append(
                             $('<span>')
@@ -198,17 +198,17 @@ BankDashboard.prototype = {
                 event.map(function (item) {
                     var accountElt = _this.getElement(item.id);
                     if (accountElt) {
-                        _this.handleAccountBalanceUpdate(accountElt, item.region, item.currency, item.balance);
+                        _this.handleAccountBalanceUpdate(accountElt, item.city, item.currency, item.balance);
                     }
                 });
             });
         });
     },
 
-    handleAccountBalanceUpdate: function (account, region, currency, balance) {
+    handleAccountBalanceUpdate: function (account, city, currency, balance) {
         var _this = this;
 
-        var original_color = _this.boxColor(region, currency, balance);
+        var original_color = _this.boxColor(city, currency, balance);
         account.css("background-color", "white");
 
         var m = _this.formatMoney(balance, currency);
@@ -249,7 +249,7 @@ BankDashboard.prototype = {
         totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
     },
 
-    boxSize: function (region, currency, amount) {
+    boxSize: function (city, currency, amount) {
         var size = 45;
         return {
             width: size + 'px',
@@ -258,9 +258,9 @@ BankDashboard.prototype = {
         }
     },
 
-    boxColor: function (region, currency, amount) {
+    boxColor: function (city, currency, amount) {
         var random = this.settings.regionColors[Math.floor(Math.random() * this.settings.regionColors.length)];
-        var hex = ((this.settings.regionColors[region]) ? this.settings.regionColors[region] : random);
+        var hex = ((this.settings.regionColors[city]) ? this.settings.regionColors[city] : random);
 
         var maxBalance = sessionStorage.getItem("account-summary-" + currency);
         if (!maxBalance) {

@@ -3,9 +3,10 @@ package io.roach.bank.repository.jpa;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.persistence.EntityManager;
@@ -57,62 +58,58 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void closeAccount(Account.Id id) {
-        Account account = accountRepository.getOne(id);
+    public void closeAccount(UUID id) {
+        Account account = accountRepository.getById(id);
         if (!account.isClosed()) {
             account.setClosed(true);
         }
     }
 
     @Override
-    public void openAccount(Account.Id id) {
-        Account account = accountRepository.getOne(id);
+    public void openAccount(UUID id) {
+        Account account = accountRepository.getById(id);
         if (account.isClosed()) {
             account.setClosed(false);
         }
     }
 
     @Override
-    public Account getAccountById(Account.Id id) {
-        return accountRepository.getOne(id);
+    public Optional<Account> getAccountById(UUID id) {
+        return accountRepository.findById(id);
     }
 
     @Override
-    public Money getBalance(Account.Id id) {
+    public Money getAccountBalance(UUID id) {
         return accountRepository.findBalanceById(id);
     }
 
     @Override
     @TransactionNotAllowed
-    public Money getBalanceSnapshot(Account.Id id) {
-        Tuple tuple = accountRepository.findBalanceSnapshot(id.getUUID().toString(), id.getRegion());
+    public Money getBalanceSnapshot(UUID id) {
+        Tuple tuple = accountRepository.findBalanceSnapshot(id.toString());
         return Money.of(
                 tuple.get(1, BigDecimal.class).toPlainString(),
                 tuple.get(0, String.class));
     }
 
     @Override
-    public List<Account> findAccountsById(Set<Account.Id> ids, boolean sfu) {
+    public List<Account> findAccountsById(Set<UUID> ids, boolean sfu) {
         if (sfu) {
-            return accountRepository.findAllWithLock(
-                    ids.stream().map(Account.Id::getUUID).collect(Collectors.toSet()),
-                    ids.stream().map(Account.Id::getRegion).collect(Collectors.toSet()));
+            return accountRepository.findAllWithLock(ids);
         }
-        return accountRepository.findAll(
-                ids.stream().map(Account.Id::getUUID).collect(Collectors.toSet()),
-                ids.stream().map(Account.Id::getRegion).collect(Collectors.toSet()));
+        return accountRepository.findAll(ids);
     }
 
     @Override
-    public Page<Account> findAccountPage(Set<String> regions, Pageable page) {
-        return accountRepository.findAll(page, new ArrayList<>(regions));
+    public Page<Account> findAccountPage(Set<String> cities, Pageable page) {
+        return accountRepository.findAll(page, new ArrayList<>(cities));
     }
 
     @Override
-    public List<Account> findAccountsByRegion(String region, int limit) {
-        return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.region=?1",
-                Account.class)
-                .setParameter(1, region)
+    public List<Account> findAccountsByCity(String city, int limit) {
+        return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.city=?1",
+                        Account.class)
+                .setParameter(1, city)
                 .setMaxResults(limit)
                 .getResultList();
     }

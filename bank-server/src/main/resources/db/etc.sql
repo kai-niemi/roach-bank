@@ -13,7 +13,7 @@ CREATE CHANGEFEED FOR TABLE account INTO 'experimental-http://localhost:8090/api
 select gen_random_uuid();
 
 BEGIN;
-INSERT INTO account (id,region,balance,currency,name,type,closed,allow_negative,updated) VALUES
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES
 ('18955dc6-400d-4bb9-96c0-125bbe95e4ab', 'stockholm', '100.00', 'SEK', 'test', 'A', false, 0, clock_timestamp());
 delete from account where id='18955dc6-400d-4bb9-96c0-125bbe95e4ab';
 COMMIT;

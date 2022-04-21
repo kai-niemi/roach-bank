@@ -7,20 +7,13 @@
 -- Metadata
 ----------------------
 
-create table region_group
+create table region_map
 (
-    name varchar(64) not null,
-    primary key (name)
-);
+    city     varchar(64) not null,
+    currency varchar(3)  not null,
+    region   varchar(64) not null,
 
-create table region_config
-(
-    name       varchar(64)    not null,
-    currency   varchar(3) not null,
-    group_name varchar(64)    not null,
-
-    constraint fk_region_group foreign key (group_name) references region_group (name),
-    primary key (name, currency, group_name)
+    primary key (city, currency, region)
 );
 
 ----------------------
@@ -30,7 +23,7 @@ create table region_config
 create table account
 (
     id             uuid,
-    region         varchar(64)     not null,
+    region         varchar(64)    not null,
     balance        numeric(19, 2) not null,
     currency       varchar(3)     not null,
     name           varchar(128)   not null,
@@ -53,11 +46,11 @@ alter table account
 ------------------------------------------------
 create table transaction
 (
-    id               uuid         not null,
-    region           varchar(64)   not null,
-    booking_date     date         null,
-    transfer_date    date         not null,
-    transaction_type varchar(3)   not null,
+    id               uuid        not null,
+    region           varchar(64) not null,
+    booking_date     date null,
+    transfer_date    date        not null,
+    transaction_type varchar(3)  not null,
     remark           varchar(255) null,
 
     primary key (region, id)
@@ -67,9 +60,9 @@ create table transaction
 create table transaction_item
 (
     transaction_id     uuid           not null,
-    transaction_region varchar(64)     not null,
+    transaction_region varchar(64)    not null,
     account_id         uuid           not null,
-    account_region     varchar(64)     not null,
+    account_region     varchar(64)    not null,
     amount             numeric(19, 2) not null,
     currency           varchar(3)     not null,
     note               varchar(255),

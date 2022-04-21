@@ -108,7 +108,8 @@ public class SavepointTransactionalAspect {
                         }
                     }
                 }
-                status.releaseSavepoint(savepoint); // May throw transient errors, catch in outer loop and rollback entire TX
+                status.releaseSavepoint(
+                        savepoint); // May throw transient errors, catch in outer loop and rollback entire TX
             } catch (TransientDataAccessException ex) {
                 handleTransientException(ex, outerAttempts, transactionBoundary.retryAttempts(), pjp, backoffMillis);
                 this.transactionManager.rollback(status);

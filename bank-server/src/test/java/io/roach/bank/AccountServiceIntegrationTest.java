@@ -29,14 +29,16 @@ public class AccountServiceIntegrationTest extends AbstractIntegrationTest {
     @Commit
     public void testCreateAccountPlan() {
         Account account1 = accountService.createAccount(Account.builder()
-                .withGeneratedId("SWE")
+                .withGeneratedId()
+                .withCity("stockholm")
                 .withName("test-swe-1")
                 .withBalance(Money.of("500000.00", "SEK"))
                 .withAccountType(AccountType.ASSET)
                 .build());
 
         Account account2 = accountService.createAccount(Account.builder()
-                .withGeneratedId("SWE")
+                .withGeneratedId()
+                .withCity("stockholm")
                 .withName("test-swe-2")
                 .withBalance(Money.of("250000.00", "SEK"))
                 .withAccountType(AccountType.LIABILITY)

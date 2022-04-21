@@ -1,7 +1,5 @@
 package io.roach.bank.config;
 
-import java.util.concurrent.TimeUnit;
-
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;

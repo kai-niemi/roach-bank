@@ -60,9 +60,9 @@ public class GenerateCSV extends RestCommandSupport {
             @ShellOption(help = "number of transactions per account", defaultValue = "0") int transactionsPerAccount,
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2")
                     int legsPerTransaction,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
+            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String regions
     ) {
-        final Map<String, Currency> regionMap = lookupRegions(regions);
+        final Map<String, Currency> regionMap = findCityCurrency(regions);
         if (regionMap.isEmpty()) {
             return;
         }

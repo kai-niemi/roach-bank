@@ -1,17 +1,18 @@
 package io.roach.bank.domain;
 
-import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-import javax.persistence.*;
-
-import org.springframework.util.Assert;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -26,9 +27,13 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
  */
 @Entity
 @Table(name = "transaction")
-public class Transaction extends AbstractEntity<Transaction.Id> {
-    @EmbeddedId
-    private Transaction.Id id = new Transaction.Id();
+public class Transaction extends AbstractEntity<UUID> {
+    //    @Column(name = "id", updatable = false)
+    @Id
+    private UUID id;
+
+    @Column(name = "city")
+    private String city;
 
     @Column(name = "transaction_type")
     private String transactionType;
@@ -37,7 +42,7 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    private LocalDate transferDate;                                                                                 
+    private LocalDate transferDate;
 
     @Column(name = "booking_date", nullable = false, updatable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -51,29 +56,17 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
     public Transaction() {
     }
 
-    public Transaction(Id id) {
-        this.id = id;
-        this.items = Collections.emptyList();
-    }
-
-    protected Transaction(Id id,
+    protected Transaction(UUID id, String city,
                           String transactionType,
-                          LocalDate bookingDate,
-                          LocalDate transferDate,
+                          LocalDate bookingDate, LocalDate transferDate,
                           List<TransactionItem> items) {
         this.id = id;
+        this.city = city;
         this.transactionType = transactionType;
         this.bookingDate = bookingDate;
         this.transferDate = transferDate;
         this.items = items;
-
-        items.forEach(item -> {
-            item.setId(new TransactionItem.Id(
-                    Objects.requireNonNull(item.getAccount().getId()),
-                    Objects.requireNonNull(getId())
-            ));
-            item.setTransaction(this);
-        });
+        this.items.forEach(item -> item.link(this));
     }
 
     public static Builder builder() {
@@ -88,16 +81,12 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
     }
 
     @Override
-    public Id getId() {
+    public UUID getId() {
         return id;
     }
 
-    public UUID getUUID() {
-        return id.getUUID();
-    }
-
-    public String getRegion() {
-        return id.getRegion();
+    public String getCity() {
+        return city;
     }
 
     public String getTransactionType() {
@@ -118,19 +107,16 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
 
     @Override
     public String toString() {
-        return "Transaction{" +
-                "id=" + id +
-                ", transactionType='" + transactionType + '\'' +
-                ", transferDate=" + transferDate +
-                ", bookingDate=" + bookingDate +
-                ", items=<..>" +
-                '}';
+        return "Transaction{" + "id=" + id + ", transactionType='" + transactionType + '\'' + ", transferDate="
+                + transferDate + ", bookingDate=" + bookingDate + ", items=<..>" + '}';
     }
 
     public static final class Builder {
         private final List<TransactionItem> items = new ArrayList<>();
 
-        private Transaction.Id transactionId;
+        private UUID id;
+
+        private String city;
 
         private String transactionType;
 
@@ -138,8 +124,13 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
 
         private LocalDate transferDate;
 
-        public Builder withId(Transaction.Id id) {
-            this.transactionId = id;
+        public Builder withId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withCity(String city) {
+            this.city = city;
             return this;
         }
 
@@ -163,65 +154,7 @@ public class Transaction extends AbstractEntity<Transaction.Id> {
         }
 
         public Transaction build() {
-            return new Transaction(transactionId, transactionType, bookingDate, transferDate, items);
-        }
-    }
-
-    @Embeddable
-    public static class Id implements Serializable {
-        @Column(name = "id", updatable = false)
-        private UUID uuid;
-
-        @Column(name = "region", updatable = false)
-        private String region;
-
-        protected Id() {
-        }
-
-        public Id(UUID uuid, String region) {
-            Assert.notNull(uuid, "uuid is required");
-            Assert.notNull(region, "region is required");
-            this.uuid = uuid;
-            this.region = region;
-        }
-
-        public static Transaction.Id of(String region) {
-            return of(UUID.randomUUID(), region);
-        }
-
-        public static Transaction.Id of(UUID transactionId, String region) {
-            return new Transaction.Id(transactionId, region);
-        }
-
-        public String getRegion() {
-            return region;
-        }
-
-        public UUID getUUID() {
-            return uuid;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Id id = (Id) o;
-            return uuid.equals(id.uuid) &&
-                    region.equals(id.region);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(uuid, region);
-        }
-
-        @Override
-        public String toString() {
-            return uuid + "::" + region;
+            return new Transaction(id, city, transactionType, bookingDate, transferDate, items);
         }
     }
 }

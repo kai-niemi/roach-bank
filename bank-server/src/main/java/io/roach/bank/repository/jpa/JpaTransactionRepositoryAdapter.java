@@ -1,5 +1,7 @@
 package io.roach.bank.repository.jpa;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -23,29 +25,29 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
     private TransactionItemJpaRepository itemRepository;
 
     @Override
-    public Transaction create(Transaction transaction) {
+    public Transaction createTransaction(Transaction transaction) {
         transaction.getItems().forEach(transactionItem -> itemRepository.save(transactionItem));
         return transactionRepository.save(transaction);
     }
 
     @Override
-    public Transaction findById(Transaction.Id id) {
+    public Transaction findTransactionById(UUID id) {
         return transactionRepository.findById(id).orElse(null);
     }
 
     @Override
-    public Page<Transaction> findAll(Pageable pageable) {
+    public Page<Transaction> findTransactions(Pageable pageable) {
         return transactionRepository.findAll(pageable);
     }
 
     @Override
-    public TransactionItem getItemById(TransactionItem.Id id) {
-        return itemRepository.getOne(id);
+    public TransactionItem getTransactionItemById(TransactionItem.Id id) {
+        return itemRepository.getById(id);
     }
 
     @Override
-    public Page<TransactionItem> findItems(Transaction.Id id, Pageable pageable) {
-        return itemRepository.findById(id.getUUID(), pageable);
+    public Page<TransactionItem> findTransactionItems(UUID id, Pageable pageable) {
+        return itemRepository.findById(id, pageable);
     }
 
     @Override

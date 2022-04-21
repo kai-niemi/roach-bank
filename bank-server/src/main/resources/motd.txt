@@ -1,9 +1,9 @@
-         (o o)      (/   Spring profiles: ${spring.profiles.active}
-         /'v'     ,-'     Datasource URL: ${spring.datasource.url}
- ,------/ >< \---'              Locality: ${roachbank.locality}
-/)     ;  --  :
-   ,---| ---- |--.
+----------- SERVER CONFIGURATION -------------
+Spring profiles: ${spring.profiles.active}
+ Datasource URL: ${spring.datasource.url}
+       Locality: ${roachbank.locality}
+-----------------------------------------------
 
 Welcome to Roach Bank!
-You are in a pitch dark indoor lobby.
+You are in a cold, pitch dark lobby, and you feel a desk in front of you.
 Type help for commands.

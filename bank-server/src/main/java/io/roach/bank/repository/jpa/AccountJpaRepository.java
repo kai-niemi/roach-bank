@@ -23,59 +23,57 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
 @TransactionMandatory
-public interface AccountJpaRepository extends JpaRepository<Account, Account.Id>,
+public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
         JpaSpecificationExecutor<Account> {
 
     @Query(value = "select a.balance "
             + "from Account a "
             + "where a.id = ?1")
-    Money findBalanceById(Account.Id id);
+    Money findBalanceById(UUID id);
 
     @Query(value = "select a.currency,a.balance "
             + "from account a "
             + "as of system time follower_read_timestamp() "
-            + "where a.id = ?1 and a.region = ?2", nativeQuery = true)
+            + "where a.id = ?1", nativeQuery = true)
     @TransactionNotAllowed
-    Tuple findBalanceSnapshot(String id, String region);
+    Tuple findBalanceSnapshot(String id);
 
     @Query(value = "select "
-            + "count (a.id.uuid), "
-            + "count (distinct a.id.region), "
+            + "count (a.id), "
+            + "count (distinct a.city), "
             + "sum (a.balance.amount), "
             + "min (a.balance.amount), "
             + "max (a.balance.amount) "
             + "from Account a "
-            + "where a.balance.currency = ?1 and a.id.region in (?2)")
-    Stream<Tuple> accountSummary(Currency currency, List<String> regions);
+            + "where a.balance.currency = ?1")
+    Stream<Tuple> accountSummary(Currency currency);
 
     @Query(value = "select "
             + "  count (distinct t.id), "
             + "  count (t.id), "
             + "  sum (ti.amount.amount) "
             + "from Transaction t join TransactionItem ti "
-            + "where ti.account.balance.currency = ?1 "
-            + "and ti.transaction.id.region in (?2) "
-            + "and ti.transaction.id.region=t.id.region")
-    Stream<Tuple> transactionSummary(Currency currency, List<String> regions);
+            + "where ti.account.balance.currency = ?1")
+    Stream<Tuple> transactionSummary(Currency currency);
 
     @Query(value = "select a "
             + "from Account a "
-            + "where a.id.uuid in (?1) and a.id.region in (?2)")
+            + "where a.id in (?1)")
     @Lock(LockModeType.PESSIMISTIC_READ)
-    List<Account> findAllWithLock(Set<UUID> ids, Set<String> regions);
+    List<Account> findAllWithLock(Set<UUID> ids);
 
     @Query(value = "select a "
             + "from Account a "
-            + "where a.id.uuid in (?1) and a.id.region in (?2)")
-    List<Account> findAll(Set<UUID> ids, Set<String> regions);
+            + "where a.id in (?1)")
+    List<Account> findAll(Set<UUID> ids);
 
     @Query(value
             = "select a "
             + "from Account a "
-            + "where a.id.region in (:regions)",
+            + "where a.city in (:cities)",
             countQuery
-                    = "select count(a.id.uuid) "
+                    = "select count(a.id) "
                     + "from Account a "
-                    + "where a.id.region in (:regions)")
-    Page<Account> findAll(Pageable pageable, @Param("regions") List<String> regions);
+                    + "where a.city in (:cities)")
+    Page<Account> findAll(Pageable pageable, @Param("cities") List<String> cities);
 }

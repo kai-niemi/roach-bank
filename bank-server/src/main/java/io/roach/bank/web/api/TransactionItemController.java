@@ -17,8 +17,6 @@ import io.roach.bank.annotation.TimeTravel;
 import io.roach.bank.annotation.TimeTravelMode;
 import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.TransactionItemModel;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.TransactionService;
 
@@ -34,28 +32,23 @@ public class TransactionItemController {
     @Autowired
     private PagedResourcesAssembler<TransactionItem> transactionItemPagedResourcesAssembler;
 
-    @GetMapping(value = "/{transactionId}/{region}")
+    @GetMapping(value = "/{transactionId}")
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
     public PagedModel<TransactionItemModel> getTransactionItems(
             @PathVariable("transactionId") UUID transactionId,
-            @PathVariable(value = "region", required = false) String region,
             @PageableDefault(size = 5) Pageable page) {
         Page<TransactionItem> entities = bankService.findItemsByTransactionId(
-                Transaction.Id.of(transactionId, region), page);
+                transactionId, page);
         return transactionItemPagedResourcesAssembler
                 .toModel(entities, transactionItemResourceAssembler);
     }
 
-    @GetMapping(value = "/{transactionId}/{transactionRegion}/{accountId}/{accountRegion}")
+    @GetMapping(value = "/{transactionId}/{accountId}")
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
     public TransactionItemModel getTransactionLeg(
             @PathVariable("transactionId") UUID transactionId,
-            @PathVariable(value = "transactionRegion", required = false) String transactionRegion,
-            @PathVariable("accountId") UUID accountId,
-            @PathVariable(value = "accountRegion", required = false) String accountRegion) {
-        TransactionItem.Id id = TransactionItem.Id.of(
-                Account.Id.of(accountId, accountRegion),
-                Transaction.Id.of(transactionId, transactionRegion));
+            @PathVariable("accountId") UUID accountId) {
+        TransactionItem.Id id = TransactionItem.Id.of(accountId, transactionId);
         return transactionItemResourceAssembler.toModel(bankService.getItemById(id));
     }
 }

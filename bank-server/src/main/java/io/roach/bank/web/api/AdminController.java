@@ -172,9 +172,9 @@ public class AdminController {
     @PostMapping(value = "/clear")
     @Async
     public CompletableFuture<Void> clearAll() {
-        logger.warn("Deleting transactions");
+        logger.warn("Deleting all transactions");
         transactionService.deleteAll();
-        logger.warn("Deleting accounts");
+        logger.warn("Deleting all accounts");
         accountService.deleteAll();
         return CompletableFuture.completedFuture(null);
     }

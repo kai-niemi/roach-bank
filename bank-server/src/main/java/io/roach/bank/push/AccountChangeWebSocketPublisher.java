@@ -94,7 +94,7 @@ public class AccountChangeWebSocketPublisher {
     public void publish(AccountChangeEvent changeEvent) {
         if (changeEvent.getId() != null) {
             Link selfLink = linkTo(methodOn(AccountController.class)
-                    .getAccount(changeEvent.getId(), changeEvent.getRegion()))
+                    .getAccount(changeEvent.getId()))
                     .withSelfRel();
             changeEvent.setHref(selfLink.getHref());
 

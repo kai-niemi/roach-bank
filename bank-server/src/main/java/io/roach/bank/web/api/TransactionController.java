@@ -24,9 +24,9 @@ import io.roach.bank.annotation.TimeTravelMode;
 import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.BankLinkRelations;
 import io.roach.bank.api.TransactionModel;
-import io.roach.bank.service.NoSuchTransactionException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
+import io.roach.bank.service.NoSuchTransactionException;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.MessageModel;
 import io.roach.bank.web.support.ZoomExpression;
@@ -64,7 +64,7 @@ public class TransactionController {
 
         index.add(Link.of(UriTemplate.of(linkTo(TransactionController.class)
                         .toUriComponentsBuilder().path(
-                        "/list/{?page,size}")  // RFC-6570 template
+                                "/list/{?page,size}")  // RFC-6570 template
                         .build().toUriString()),
                 BankLinkRelations.TRANSACTION_LIST_REL
         ).withTitle("Collection of transactions"));
@@ -76,7 +76,7 @@ public class TransactionController {
 
         index.add(Link.of(UriTemplate.of(linkTo(TransactionFormController.class)
                         .toUriComponentsBuilder().path(
-                        "/form/{?limit,amount,regions}")  // RFC-6570 template
+                                "/form/{?limit,amount,regions}")  // RFC-6570 template
                         .build().toUriString()),
                 BankLinkRelations.TRANSACTION_FORM_REL
         ).withTitle("Form template for creating a transfer request"));
@@ -92,22 +92,19 @@ public class TransactionController {
                 .toModel(bankService.find(page), transactionResourceAssembler);
     }
 
-    @GetMapping(value = "/{id}/{region}")
+    @GetMapping(value = "/{id}")
     @TransactionBoundary(readOnly = true)
     public TransactionModel getTransaction(
-            @PathVariable("id") UUID id,
-            @PathVariable(value = "region", required = false) String region) {
-        Transaction.Id txId = Transaction.Id.of(id, region);
-
-        Transaction entity = bankService.findById(txId);
+            @PathVariable("id") UUID id) {
+        Transaction entity = bankService.findById(id);
         if (entity == null) {
-            throw new NoSuchTransactionException(txId.toString());
+            throw new NoSuchTransactionException(id.toString());
         }
 
         TransactionModel resource = transactionResourceAssembler.toModel(entity);
 
         if (ZoomExpression.ofCurrentRequest().containsRel(withCurie(TRANSACTION_ITEMS_REL))) {
-            Page<TransactionItem> entities = bankService.findItemsByTransactionId(txId, PageRequest.of(0, 10));
+            Page<TransactionItem> entities = bankService.findItemsByTransactionId(id, PageRequest.of(0, 10));
             resource.setTransactionItems(transactionItemResourceAssembler.toCollectionModel(entities.getContent()));
         }
 

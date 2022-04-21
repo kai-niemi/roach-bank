@@ -32,14 +32,14 @@ public class CreateAccounts extends RestCommandSupport {
     @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
+            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "initial balance per account", defaultValue = "100000.00") String balance,
             @ShellOption(help = "number of accounts per request", defaultValue = "320") int numAccounts,
             @ShellOption(help = "batch size per request", defaultValue = "32") int batchSize
     ) {
-        final Map<String, Currency> regionMap = lookupRegions(regions);
-        if (regionMap.isEmpty()) {
+        final Map<String, Currency> cityMap = findCityCurrency(cities);
+        if (cityMap.isEmpty()) {
             return;
         }
 
@@ -50,10 +50,10 @@ public class CreateAccounts extends RestCommandSupport {
 
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        regionMap.keySet().forEach(regionKey -> {
-            executorTemplate.runAsync("create-accounts " + regionKey, () -> {
+        cityMap.keySet().forEach(city -> {
+            executorTemplate.runAsync("create-accounts " + city, () -> {
                 UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-                        .queryParam("region", regionKey)
+                        .queryParam("city", city)
                         .queryParam("prefix", "" + batchNumber.incrementAndGet())
                         .queryParam("numAccounts", numAccounts)
                         .queryParam("balance", balance)

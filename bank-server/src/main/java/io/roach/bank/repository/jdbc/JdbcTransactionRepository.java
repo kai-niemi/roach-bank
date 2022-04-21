@@ -29,7 +29,7 @@ import io.roach.bank.repository.TransactionRepository;
 
 @Repository
 @TransactionMandatory
-@Profile(ProfileNames.NOT_JPA)
+@Profile(ProfileNames.JDBC)
 public class JdbcTransactionRepository implements TransactionRepository {
     private JdbcTemplate jdbcTemplate;
 
@@ -39,15 +39,15 @@ public class JdbcTransactionRepository implements TransactionRepository {
     }
 
     @Override
-    public Transaction create(Transaction transaction) {
+    public Transaction createTransaction(Transaction transaction) {
         final LocalDate bookingDate = transaction.getBookingDate();
         final LocalDate transferDate = transaction.getTransferDate();
 
         jdbcTemplate.update("INSERT INTO transaction "
-                        + "(id,region,booking_date,transfer_date,transaction_type) "
-                        + "VALUES(?, ?, ?, ?, ?)",
-                transaction.getUUID(),
-                transaction.getRegion(),
+                        + "(id,city,booking_date,transfer_date,transaction_type) "
+                        + "VALUES(?,?,?,?,?)",
+                transaction.getId(),
+                transaction.getCity(),
                 bookingDate != null ? bookingDate : LocalDate.now(),
                 transferDate != null ? transferDate : LocalDate.now(),
                 transaction.getTransactionType()
@@ -57,19 +57,19 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
         jdbcTemplate.batchUpdate(
                 "INSERT INTO transaction_item "
-                        + "(transaction_region, transaction_id, account_region, account_id, amount, currency, note, running_balance) "
-                        + "VALUES(?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                        + "(transaction_id, transaction_city, account_id, amount, currency, note, running_balance) "
+                        + "VALUES(?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        TransactionItem transactionLeg = items.get(i);
-                        ps.setString(1, transactionLeg.getId().getTransactionRegion());
-                        ps.setObject(2, transactionLeg.getId().getTransactionId());
-                        ps.setString(3, transactionLeg.getId().getAccountRegion());
-                        ps.setObject(4, transactionLeg.getId().getAccountId());
-                        ps.setBigDecimal(5, transactionLeg.getAmount().getAmount());
-                        ps.setString(6, transactionLeg.getAmount().getCurrency().getCurrencyCode());
-                        ps.setString(7, transactionLeg.getNote());
-                        ps.setBigDecimal(8, transactionLeg.getRunningBalance().getAmount());
+                        TransactionItem item = items.get(i);
+                        int idx = 1;
+                        ps.setObject(idx++, item.getId().getTransactionId());
+                        ps.setString(idx++, item.getTransactionCity());
+                        ps.setObject(idx++, item.getId().getAccountId());
+                        ps.setBigDecimal(idx++, item.getAmount().getAmount());
+                        ps.setString(idx++, item.getAmount().getCurrency().getCurrencyCode());
+                        ps.setString(idx++, item.getNote());
+                        ps.setBigDecimal(idx++, item.getRunningBalance().getAmount());
                     }
 
                     @Override
@@ -82,22 +82,23 @@ public class JdbcTransactionRepository implements TransactionRepository {
     }
 
     @Override
-    public Transaction findById(Transaction.Id id) {
+    public Transaction findTransactionById(UUID id) {
         List<Transaction> list = this.jdbcTemplate.query(
-                "SELECT * FROM transaction WHERE region=? and id=?",
+                "SELECT * FROM transaction WHERE id=?",
                 (rs, rowNum) -> mapToTransaction(rs),
-                id.getRegion(), id.getUUID());
+                id);
         return DataAccessUtils.singleResult(list);
     }
 
     private Transaction mapToTransaction(ResultSet rs) throws SQLException {
         UUID transactionId = (UUID) rs.getObject("id");
-        String region = rs.getString("region");
+        String city = rs.getString("city");
         String transactionType = rs.getString("transaction_type");
         LocalDate bookingDate = rs.getDate("booking_date").toLocalDate();
         LocalDate transferDate = rs.getDate("transfer_date").toLocalDate();
         return Transaction.builder()
-                .withId(Transaction.Id.of(transactionId, region))
+                .withId(transactionId)
+                .withCity(city)
                 .withTransactionType(transactionType)
                 .withBookingDate(bookingDate)
                 .withTransferDate(transferDate)
@@ -105,12 +106,12 @@ public class JdbcTransactionRepository implements TransactionRepository {
     }
 
     @Override
-    public Page<Transaction> findAll(Pageable pageable) {
+    public Page<Transaction> findTransactions(Pageable pageable) {
         int count = countAllTransactions();
         List<Transaction> content = this.jdbcTemplate.query(
                 "SELECT * FROM transaction ORDER BY transfer_date LIMIT ? OFFSET ?",
-                new Object[] {pageable.getPageSize(), pageable.getOffset()},
-                (rs, rowNum) -> mapToTransaction(rs));
+                (rs, rowNum) -> mapToTransaction(rs),
+                pageable.getPageSize(), pageable.getOffset());
         return new PageImpl<>(content, pageable, count);
     }
 
@@ -122,58 +123,52 @@ public class JdbcTransactionRepository implements TransactionRepository {
     }
 
     @Override
-    public Page<TransactionItem> findItems(Transaction.Id transactionId, Pageable pageable) {
+    public Page<TransactionItem> findTransactionItems(UUID transactionId, Pageable pageable) {
         long count = countItemsByTransactionId(transactionId);
 
         List<TransactionItem> content = this.jdbcTemplate.query(
-                "SELECT * FROM transaction_item WHERE transaction_id=? and transaction_region=?",
+                "SELECT * FROM transaction_item WHERE transaction_id=?",
                 (rs, rowNum) -> readTransactionItem(rs),
-                transactionId.getUUID(), transactionId.getRegion()
+                transactionId
         );
 
         return new PageImpl<>(content, pageable, count);
     }
 
-    private Long countItemsByTransactionId(Transaction.Id id) {
+    private Long countItemsByTransactionId(UUID id) {
         List<Long> results =
                 this.jdbcTemplate.query(
-                        "SELECT count(transaction_id) FROM transaction_item WHERE transaction_id=? and transaction_region=?",
+                        "SELECT count(transaction_id) FROM transaction_item WHERE transaction_id=?",
                         (rs, rowNum) -> rs.getLong(1),
-                        id.getUUID(), id.getRegion()
+                        id
                 );
         return DataAccessUtils.singleResult(results);
     }
 
     @Override
-    public TransactionItem getItemById(TransactionItem.Id id) {
+    public TransactionItem getTransactionItemById(TransactionItem.Id id) {
         List<TransactionItem> list = this.jdbcTemplate.query(
                 "SELECT * FROM transaction_item WHERE transaction_id=? "
-                        + "AND transaction_region=? "
-                        + "AND account_id=? "
-                        + "AND account_region=?",
-                new Object[] {
-                        id.getTransactionId(),
-                        id.getTransactionRegion(),
-                        id.getAccountId(),
-                        id.getAccountRegion()
-                },
-                (rs, rowNum) -> readTransactionItem(rs));
+                        + "AND account_id=? ",
+                (rs, rowNum) -> readTransactionItem(rs),
+                id.getTransactionId(), id.getAccountId()
+        );
         return DataAccessUtils.requiredSingleResult(list);
     }
 
     private TransactionItem readTransactionItem(ResultSet rs) throws SQLException {
         UUID accountId = (UUID) rs.getObject("account_id");
         UUID transactionId = (UUID) rs.getObject("transaction_id");
-        String transactionRegion = rs.getString("transaction_region");
-        String accountRegion = rs.getString("account_region");
+        String transactionCity = rs.getString("transaction_city");
         Money runningBalance = Money.of(rs.getString("running_balance"), rs.getString("currency"));
         Money amount = Money.of(rs.getString("amount"), rs.getString("currency"));
         String note = rs.getString("note");
 
         return Transaction.builder()
-                .withId(Transaction.Id.of(transactionId, transactionRegion))
+                .withId(transactionId)
+                .withCity(transactionCity)
                 .andItem()
-                .withAccount(Account.builder().withId(accountId, accountRegion).build())
+                .withAccount(Account.builder().withId(accountId).build())
                 .withRunningBalance(runningBalance)
                 .withAmount(amount)
                 .withNote(note)

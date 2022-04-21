@@ -29,7 +29,7 @@ public class AccountChangeEvent extends AbstractChangeEvent {
     }
 
     public String getRegion() {
-        return after.region;
+        return after.city;
     }
 
     public BigDecimal getBalance() {
@@ -68,7 +68,7 @@ public class AccountChangeEvent extends AbstractChangeEvent {
         // Currency code
         private String currency;
 
-        private String region;
+        private String city;
 
         // Latest account balance
         private BigDecimal balance;
@@ -81,12 +81,12 @@ public class AccountChangeEvent extends AbstractChangeEvent {
             this.id = id;
         }
 
-        public String getRegion() {
-            return region;
+        public String getCity() {
+            return city;
         }
 
-        public Fields setRegion(String region) {
-            this.region = region;
+        public Fields setCity(String city) {
+            this.city = city;
             return this;
         }
 

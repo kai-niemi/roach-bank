@@ -34,7 +34,6 @@ import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.BankLinkRelations;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
-import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.util.TimeBoundExecution;
 import io.roach.bank.web.support.MessageModel;
@@ -51,8 +50,8 @@ public class AccountController {
     @Value("${roachbank.reportQueryTimeout}")
     private int queryTimeout;
 
-    @Value("${roachbank.accountsPerRegionLimit}")
-    private int accountsPerRegionLimit;
+    @Value("${roachbank.accountsPerCityLimit}")
+    private int accountsPerCityLimit;
 
     @Autowired
     private AccountService accountService;
@@ -62,9 +61,6 @@ public class AccountController {
 
     @Autowired
     private PagedResourcesAssembler<Account> pagedResourcesAssembler;
-
-    @Autowired
-    private MetadataRepository metadataRepository;
 
     @GetMapping
     public MessageModel index() {
@@ -84,7 +80,7 @@ public class AccountController {
                 ).withTitle("First collection page of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listTopAccountsPerRegion(null, 10))
+                .listTopAccountsPerCity(Collections.emptyList(), 10))
                 .withRel(BankLinkRelations.ACCOUNT_TOP
                 ).withTitle("Collection of top accounts grouped by region"));
 
@@ -95,7 +91,7 @@ public class AccountController {
 
         index.add(Link.of(UriTemplate.of(linkTo(AccountFormController.class)
                         .toUriComponentsBuilder().path(
-                                "/batch/{?region,prefix,numAccounts,batchSize}")  // RFC-6570 template
+                                "/batch/{?city,prefix,numAccounts,batchSize}")  // RFC-6570 template
                         .build().toUriString()),
                 BankLinkRelations.ACCOUNT_BATCH_REL
         ).withTitle("Account creation batch"));
@@ -114,21 +110,20 @@ public class AccountController {
     }
 
     @GetMapping(value = "/top")
-    public ResponseEntity<CollectionModel<AccountModel>> listTopAccountsPerRegion(
-            @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
+    public ResponseEntity<CollectionModel<AccountModel>> listTopAccountsPerCity(
+            @RequestParam(value = "cities", defaultValue = "", required = false) List<String> cities,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) int limit
     ) {
-        final int limitFinal = limit <= 0 ? this.accountsPerRegionLimit : limit;
+        final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
 
-        // Potentially all accounts in specified regions (some regions may timeout due to outages)
         List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
 
-        Set<String> resolvedRegions = accountService.resolveRegions(regions);
+        Set<String> resolveCities = accountService.resolveCities(cities);
 
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
-        resolvedRegions.forEach(r -> tasks.add(() -> {
-            accounts.addAll(accountService.findAccountsByRegion(r, limitFinal));
+        resolveCities.forEach(city -> tasks.add(() -> {
+            accounts.addAll(accountService.findAccountsByCity(city, limitFinal));
             return null;
         }));
 
@@ -139,44 +134,34 @@ public class AccountController {
                 .body(CollectionModel.of(accountResourceAssembler.toCollectionModel(accounts)));
     }
 
-    @GetMapping(value = "/{id}/{region}")
+    @GetMapping(value = "/{id}")
     public AccountModel getAccount(
-            @PathVariable("id") UUID id,
-            @PathVariable(value = "region", required = false) String region) {
-        return accountResourceAssembler.toModel(
-                accountService.getAccountById(Account.Id.of(id, region)));
+            @PathVariable("id") UUID id) {
+        return accountResourceAssembler.toModel(accountService.getAccountById(id));
     }
 
-    @GetMapping(value = "/{id}/{region}/balance")
+    @GetMapping(value = "/{id}/balance")
     public Money getAccountBalance(
-            @PathVariable("id") UUID id,
-            @PathVariable(value = "region", required = false) String region) {
-        return accountService.getBalance(Account.Id.of(id, region));
+            @PathVariable("id") UUID id) {
+        return accountService.getBalance(id);
     }
 
-    @GetMapping(value = "/{id}/{region}/balance-snapshot")
+    @GetMapping(value = "/{id}/balance-snapshot")
     public Money getAccountBalanceSnapshot(
-            @PathVariable("id") UUID id,
-            @PathVariable(value = "region", required = false) String region) {
-        return accountService.getBalanceSnapshot(Account.Id.of(id, region));
+            @PathVariable("id") UUID id) {
+        return accountService.getBalanceSnapshot(id);
     }
 
-    @PutMapping(value = "/{id}/{region}/open")
+    @PutMapping(value = "/{id}/open")
     public AccountModel openAccount(
-            @PathVariable("id") UUID id,
-            @PathVariable(value = "region", required = false) String region) {
-        Account.Id accountId = Account.Id.of(id, region);
-        return accountResourceAssembler.toModel(
-                accountService.openAccount(accountId));
+            @PathVariable("id") UUID id) {
+        return accountResourceAssembler.toModel(accountService.openAccount(id));
     }
 
-    @PutMapping(value = "/{id}/{region}/close")
+    @PutMapping(value = "/{id}/close")
     public AccountModel closeAccount(
-            @PathVariable("id") UUID id,
-            @PathVariable(value = "region", required = false) String region) {
-        Account.Id accountId = Account.Id.of(id, region);
-        return accountResourceAssembler.toModel(
-                accountService.closeAccount(accountId));
+            @PathVariable("id") UUID id) {
+        return accountResourceAssembler.toModel(accountService.closeAccount(id));
     }
 }
 

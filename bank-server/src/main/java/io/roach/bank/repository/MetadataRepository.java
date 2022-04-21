@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 public interface MetadataRepository {
-    List<String> getLocalRegions();
+    List<String> getCities();
 
-    List<String> getRegions();
-
-    List<String> getGroups();
+    List<String> getLocalCities();
 
     List<Currency> getCurrencies();
 
-    Currency getRegionCurrency(String region);
+    List<String> getRegions();
 
-    Map<String, List<String>> getGroupRegions();
+    Map<String, List<String>> getRegionCities();
 
-    Map<Currency, List<String>> getCurrencyRegions();
+    Map<Currency, List<String>> getCurrencyCities();
 
-    Map<String, Currency> resolveRegions(Collection<String> regions);
+    Map<String, Currency> getCityCurrency(Collection<String> cities);
+
+    Currency getCityCurrency(String city);
 }

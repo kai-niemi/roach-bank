@@ -60,8 +60,8 @@ The system uses the following entity model for double-entry bookkeeping of monet
 - **account**  - Accounts with a derived balance from the sum of all transactions
 - **transaction**  - Balanced multi-legged monetary transactions
 - **transaction_item** - Association table between transaction and account representing a leg with a running account balance.
-- **region_config**  - Static information about deployment regions and currencies
-- **region_group**  - Static information about region groups/aliases
+- **region**  - Static information about region groups/aliases
+- **region_map**  - Static information about deployment regions and currencies
 
 ### Main SQL files
 

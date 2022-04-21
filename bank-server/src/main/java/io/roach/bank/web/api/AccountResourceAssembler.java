@@ -22,8 +22,8 @@ public class AccountResourceAssembler
     @Override
     public AccountModel toModel(Account entity) {
         AccountModel resource = new AccountModel();
-        resource.setId(entity.getUUID());
-        resource.setRegion(entity.getRegion());
+        resource.setId(entity.getId());
+        resource.setCity(entity.getCity());
         resource.setName(entity.getName());
         resource.setBalance(entity.getBalance());
         resource.setUpdated(entity.getUpdated());
@@ -33,27 +33,27 @@ public class AccountResourceAssembler
         resource.setAccountType(entity.getAccountType());
 
         resource.add(linkTo(methodOn(AccountController.class)
-                .getAccount(entity.getUUID(), entity.getRegion()))
+                .getAccount(entity.getId()))
                 .withSelfRel());
         resource.add(linkTo(WebMvcLinkBuilder.methodOn(AccountController.class)
-                .getAccountBalance(entity.getUUID(), entity.getRegion()))
+                .getAccountBalance(entity.getId()))
                 .withRel(BankLinkRelations.ACCOUNT_BALANCE_REL)
                 .withTitle("Account balance")
         );
         resource.add(linkTo(WebMvcLinkBuilder.methodOn(AccountController.class)
-                .getAccountBalanceSnapshot(entity.getUUID(), entity.getRegion()))
+                .getAccountBalanceSnapshot(entity.getId()))
                 .withRel(BankLinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
                 .withTitle("Account balance snapshot (follower read)")
         );
 
         if (entity.isClosed()) {
             resource.add(linkTo(methodOn(AccountController.class)
-                    .openAccount(entity.getUUID(), entity.getRegion())
+                    .openAccount(entity.getId())
             ).withRel(BankLinkRelations.OPEN_REL)
                     .withTitle("Open account"));
         } else {
             resource.add(linkTo(methodOn(AccountController.class)
-                    .closeAccount(entity.getUUID(), entity.getRegion())
+                    .closeAccount(entity.getId())
             ).withRel(BankLinkRelations.CLOSE_REL)
                     .withTitle("Close account"));
         }

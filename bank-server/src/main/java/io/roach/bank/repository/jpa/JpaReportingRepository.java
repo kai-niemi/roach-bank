@@ -30,10 +30,10 @@ public class JpaReportingRepository implements ReportingRepository {
     }
 
     @Override
-    public AccountSummary accountSummary(Currency currency, List<String> regions) {
+    public AccountSummary accountSummary(Currency currency) {
         List<AccountSummary> result = new LinkedList<>();
 
-        try (Stream<Tuple> stream = accountRepository.accountSummary(currency, regions)) {
+        try (Stream<Tuple> stream = accountRepository.accountSummary(currency)) {
             stream.forEach(o -> {
                 AccountSummary summary = new AccountSummary();
                 summary.setCurrency(currency);
@@ -51,12 +51,12 @@ public class JpaReportingRepository implements ReportingRepository {
     }
 
     @Override
-    public TransactionSummary transactionSummary(Currency currency, List<String> regions) {
+    public TransactionSummary transactionSummary(Currency currency) {
         assertTransactionActive();
 
         List<TransactionSummary> result = new LinkedList<>();
 
-        try (Stream<Tuple> stream = accountRepository.transactionSummary(currency, regions)) {
+        try (Stream<Tuple> stream = accountRepository.transactionSummary(currency)) {
             stream.forEach(o -> {
                 TransactionSummary summary = new TransactionSummary();
                 summary.setCurrency(currency);

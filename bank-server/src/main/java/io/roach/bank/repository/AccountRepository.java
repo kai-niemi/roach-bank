@@ -1,7 +1,9 @@
 package io.roach.bank.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.springframework.data.domain.Page;
@@ -15,23 +17,23 @@ public interface AccountRepository {
 
     Account createAccount(Account account);
 
-    Account getAccountById(Account.Id id);
+    Optional<Account> getAccountById(UUID id);
 
-    Money getBalance(Account.Id id);
+    Money getAccountBalance(UUID id);
 
-    Money getBalanceSnapshot(Account.Id id);
+    Money getBalanceSnapshot(UUID id);
 
-    void closeAccount(Account.Id id);
+    void closeAccount(UUID id);
 
-    void openAccount(Account.Id id);
+    void openAccount(UUID id);
 
     void updateBalances(List<Account> accounts);
 
-    Page<Account> findAccountPage(Set<String> regions, Pageable page);
+    Page<Account> findAccountPage(Set<String> cities, Pageable page);
 
-    List<Account> findAccountsByRegion(String region, int limit);
+    List<Account> findAccountsByCity(String city, int limit);
 
-    List<Account> findAccountsById(Set<Account.Id> ids, boolean sfu);
+    List<Account> findAccountsById(Set<UUID> ids, boolean sfu);
 
     void deleteAll();
 }

@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(classes = Application.class)
-@ActiveProfiles({ProfileNames.DB_COCKROACH, ProfileNames.RETRY_BACKOFF, ProfileNames.JPA, "integrationtest"})
+@ActiveProfiles({ProfileNames.COCKROACH, ProfileNames.RETRY_BACKOFF, ProfileNames.JPA, "integrationtest"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

@@ -9,7 +9,7 @@ spring:
   application:
     name: roach-bank
   profiles:
-    active: db-crdb,retry-backoff,cdc-aop
+    active: crdb,retry-backoff,cdc-none
   output:
     ansi:
       enabled: ALWAYS
@@ -88,10 +88,10 @@ roachbank:
   pushPermitsPerSec: 4.0
   # Interval of pushing cached balance reports (millis)
   reportPushInterval: 10000
-  # Report query timeout (millis)
-  reportQueryTimeout: 30000
+  # Report query timeout (seconds)
+  reportQueryTimeout: 120
   # Default number of accounts per region for random selection in client workloads (lower number = more conflicts)
-  accountsPerRegionLimit: 10
+  accountsPerCityLimit: 10
   # Locality for bank instance for region filtering (should match partition name in a multi-region deployment)
   # Ex: eu_south, us_central, us_east
   locality: all

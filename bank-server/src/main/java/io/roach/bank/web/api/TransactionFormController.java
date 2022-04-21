@@ -35,10 +35,10 @@ import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.domain.Account;
-import io.roach.bank.service.BadRequestException;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.service.BadRequestException;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.FollowLocation;
 
@@ -76,14 +76,15 @@ public class TransactionFormController {
         if (accountsPerRegion % 2 != 0) {
             throw new BadRequestException("Accounts per region must be a multiple of 2: " + accountsPerRegion);
         }
+
         if (regions.isEmpty()) {
-            regions = Collections.singletonList(RandomData.selectRandom(metadataRepository.getLocalRegions()));
+            regions = Collections.singletonList(RandomData.selectRandom(metadataRepository.getLocalCities()));
         }
 
         List<Account> accounts = new ArrayList<>();
 
-        metadataRepository.resolveRegions(regions).keySet().forEach(
-                r -> accounts.addAll(accountRepository.findAccountsByRegion(r, accountsPerRegion)));
+        metadataRepository.getCityCurrency(regions).keySet().forEach(
+                r -> accounts.addAll(accountRepository.findAccountsByCity(r, accountsPerRegion)));
 
         if (accounts.isEmpty()) {
             throw new MetadataException("No accounts matching regions: "
@@ -91,8 +92,8 @@ public class TransactionFormController {
         }
 
         TransactionForm.Builder formBuilder = TransactionForm.builder()
-                .withUUID("auto")
-                .withRegion(accounts.iterator().next().getRegion())
+                .withUUID(UUID.randomUUID())
+                .withCity(accounts.iterator().next().getCity())
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now())
                 .withTransactionType("GEN");
@@ -105,7 +106,7 @@ public class TransactionFormController {
                 a = a.negate();
             }
             formBuilder.addLeg()
-                    .withId(account.getUUID(), account.getRegion())
+                    .withId(account.getId())
                     .withAmount(a)
                     .withNote(CockroachFacts.nextFact())
                     .then();
@@ -113,10 +114,10 @@ public class TransactionFormController {
 
 
         Link affordances = Affordances.of(linkTo(methodOn(getClass())
-                .getTransactionRequestForm(accountsPerRegion, amount, regions))
-                .withSelfRel()
-                .andAffordance(afford(methodOn(getClass())
-                        .submitTransactionForm(null))))
+                        .getTransactionRequestForm(accountsPerRegion, amount, regions))
+                        .withSelfRel()
+                        .andAffordance(afford(methodOn(getClass())
+                                .submitTransactionForm(null))))
                 .toLink();
 
         return ResponseEntity.ok().body(formBuilder.build().add(affordances));
@@ -125,14 +126,13 @@ public class TransactionFormController {
     @PostMapping(value = "/form")
     @TransactionBoundary
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
-        UUID uuid = "auto".equals(form.getUuid()) ? UUID.randomUUID() : UUID.fromString(form.getUuid());
-        Transaction.Id id = Transaction.Id.of(uuid, form.getRegion());
+        UUID idempotencyKey = form.getUuid();
 
         try {
             Link selfLink = linkTo(methodOn(TransactionController.class)
-                    .getTransaction(id.getUUID(), id.getRegion()))
+                    .getTransaction(idempotencyKey))
                     .withSelfRel();
-            Transaction entity = bankService.createTransaction(id, form);
+            Transaction entity = bankService.createTransaction(idempotencyKey, form);
             if (FollowLocation.ofCurrentRequest()) {
                 return ResponseEntity.created(selfLink.toUri()).body(transactionResourceAssembler.toModel(entity));
             }
@@ -140,10 +140,10 @@ public class TransactionFormController {
         } catch (DataIntegrityViolationException e) {
             String msg = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
             if (msg.contains("duplicate key value")) {
-                logger.warn("Duplicate transaction request: {}", id);
+                logger.warn("Duplicate transaction request: {}", idempotencyKey);
                 return ResponseEntity.status(HttpStatus.OK)
                         .location(linkTo(methodOn(TransactionController.class)
-                                .getTransaction(id.getUUID(), id.getRegion()))
+                                .getTransaction(idempotencyKey))
                                 .toUri())
                         .build();
             }

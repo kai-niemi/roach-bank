@@ -1,23 +1,25 @@
 -- RoachBank DDL for CockroachDB
 
 ----------------------
+-- Types
+----------------------
+
+create type account_type as enum ('A', 'L', 'E', 'R', 'C');
+create type transaction_type as enum ('GEN');
+create type currency_code as enum ('USD', 'SEK', 'EUR', 'NOK', 'GBP','SGD','HKD','AUD','JPY','BRL');
+create type region_code as enum ('us_west','us_central','us_east','us','eu_west','eu_central','eu_south','eu','apac','sa');
+
+----------------------
 -- Metadata
 ----------------------
 
-create table region_group
+create table region_map
 (
-    name string not null,
-    primary key (name)
-);
+    city       string        not null,
+    currency   currency_code not null,
+    region     region_code   not null,
 
-create table region_config
-(
-    name       string    not null,
-    currency   string(3) not null,
-    group_name string    not null,
-
-    constraint fk_region_group foreign key (group_name) references region_group (name),
-    primary key (name, currency, group_name)
+    primary key (city, currency, region)
 );
 
 ----------------------
@@ -27,71 +29,75 @@ create table region_config
 create table account
 (
     id             uuid           not null default gen_random_uuid(),
-    region         string         not null default crdb_internal.locality_value('city'),
+    city           string         not null,
     balance        decimal(19, 2) not null,
-    currency       string(3)      not null,
-    name           string(128)    not null,
-    description    string(256)    null,
-    type           string(1)      not null,
+    currency       currency_code  not null,
+    name           string(128) not null,
+    description    string(256) null,
+    type           account_type   not null,
     closed         boolean        not null default false,
     allow_negative integer        not null default 0,
     updated        timestamptz    not null default clock_timestamp(),
 
-    primary key (region, id)
+    family         update_often(balance, updated),
+    family         update_rarely(currency, name, description, type, closed, allow_negative),
+
+    primary key (id)
 );
--- Column families disabled to enable CDC
--- family         update_often(balance, updated),
--- family         update_never(currency, name, description, type, closed, allow_negative),
 
 create table transaction
 (
-    id               uuid      not null default gen_random_uuid(),
-    region           string    not null default crdb_internal.locality_value('city'),
-    booking_date     date      not null default current_date(),
-    transfer_date    date      not null default current_date(),
-    transaction_type string(3) not null,
+    id               uuid             not null default gen_random_uuid(),
+    city             string           not null,
+    booking_date     date             not null default current_date(),
+    transfer_date    date             not null default current_date(),
+    transaction_type transaction_type not null,
 
-    primary key (region, id)
+    primary key (id)
 );
 
 create table transaction_item
 (
-    transaction_id     uuid           not null,
-    transaction_region string         not null,
-    account_id         uuid           not null,
-    account_region     string         not null,
-    amount             decimal(19, 2) not null,
-    currency           string(3)      not null,
-    note               string,
-    running_balance    decimal(19, 2) not null,
+    transaction_id   uuid           not null,
+    transaction_city string         not null,
+    account_id       uuid           not null,
+    amount           decimal(19, 2) not null,
+    currency         currency_code  not null,
+    note             string,
+    running_balance  decimal(19, 2) not null,
 
-    primary key (transaction_region, transaction_id, account_region, account_id)
+    primary key (transaction_id, account_id)
 );
 
-alter table account
-    add constraint check_account_type check (type in ('A', 'L', 'E', 'R', 'C'));
+create table outbox
+(
+    id             uuid        not null default gen_random_uuid(),
+    create_time    timestamptz not null default clock_timestamp(),
+    aggregate_type string      not null,
+    aggregate_id   string      not null,
+    event_type     string      not null,
+    payload        jsonb       not null,
+
+    primary key (id)
+);
+
+----------------------
+-- Contraints
+----------------------
+
 alter table account
     add constraint check_account_allow_negative check (allow_negative between 0 and 1);
 alter table account
     add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
 
--- alter table transaction_item
---     add constraint fk_region_ref_transaction
---         foreign key (transaction_region, transaction_id) references transaction (region, id);
+alter table transaction_item
+    add constraint fk_txn_item_ref_transaction
+        foreign key (transaction_id) references transaction (id);
 
 -- alter table transaction_item
---     add constraint fk_region_ref_account
---         foreign key (account_region, account_id) references account (region, id);
+--     add constraint fk_txn_item_ref_transaction_city
+--         foreign key (transaction_city) references transaction (city);
 
-create table outbox
-(
-    id               uuid      not null default gen_random_uuid(),
-    create_time      timestamptz  not null default clock_timestamp(),
-    aggregate_type   string    not null,
-    aggregate_id     string    not null,
-    event_type       string    not null,
-    payload          jsonb     not null,
-
-    primary key (id)
-);
-
+alter table transaction_item
+    add constraint fk_txn_item_ref_account
+        foreign key (account_id) references account (id);

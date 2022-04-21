@@ -58,6 +58,7 @@ public @interface TransactionBoundary {
 
     /**
      * Automatically terminates sessions that idle past the specified threshold.
+     *
      * @return When set to 0, the session will not timeout. Negative value use default timeout.
      */
     int idleInSessionTimeout() default -1;
