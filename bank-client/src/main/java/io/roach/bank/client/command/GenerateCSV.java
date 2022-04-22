@@ -62,7 +62,7 @@ public class GenerateCSV extends RestCommandSupport {
                     int legsPerTransaction,
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String regions
     ) {
-        final Map<String, Currency> regionMap = findCityCurrency(regions);
+//        final Map<String, Currency> regionMap = findCityCurrency(regions);
         if (regionMap.isEmpty()) {
             return;
         }

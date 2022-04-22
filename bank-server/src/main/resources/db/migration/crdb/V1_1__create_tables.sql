@@ -4,10 +4,10 @@
 -- Types
 ----------------------
 
-drop type account_type;
-drop type transaction_type;
-drop type currency_code;
-drop type region_code;
+drop type if exists account_type;
+drop type if exists transaction_type;
+drop type if exists currency_code;
+drop type if exists region_code;
 
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 create type transaction_type as enum ('GEN');

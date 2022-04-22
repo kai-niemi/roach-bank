@@ -12,8 +12,12 @@ command_create.sh(){
   source "${functionsdir}/command_create.sh"
 }
 
-command_deploy.sh(){
-  source "${functionsdir}/command_deploy.sh"
+command_bank_deploy.sh(){
+  source "${functionsdir}/command_bank_deploy.sh"
+}
+
+command_bank_start.sh(){
+  source "${functionsdir}/command_bank_start.sh"
 }
 
 command_main.sh(){

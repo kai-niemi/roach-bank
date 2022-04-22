@@ -12,11 +12,11 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
 public interface AccountService {
-    Page<Account> findAccountPage(Collection<String> regions, Pageable page);
+    Page<Account> findAccountPage(Set<String> cities, Pageable page);
 
     List<Account> findAccountsByCity(String city, int limit);
 
-    Set<String> resolveCities(Collection<String> cities);
+    Set<String> findCities(Set<String> alias);
 
     Account getAccountById(UUID id);
 

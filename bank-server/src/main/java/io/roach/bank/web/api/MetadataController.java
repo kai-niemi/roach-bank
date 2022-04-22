@@ -34,38 +34,30 @@ public class MetadataController {
         MessageModel index = new MessageModel();
 
         index.add(linkTo(methodOn(getClass())
+                .listRegions())
+                .withRel(BankLinkRelations.REGIONS_REL)
+                .withTitle("All region names"));
+
+        index.add(linkTo(methodOn(getClass())
                 .regionCities())
                 .withRel(BankLinkRelations.REGION_CITIES_REL)
                 .withTitle("All cities grouped by region"));
 
         index.add(linkTo(methodOn(getClass())
-                .citiesCurrency(Collections.emptyList()))
-                .withRel(BankLinkRelations.CITY_CURRENCY_REL)
-                .withTitle("Currencies by city or region"));
-        index.add(linkTo(methodOn(getClass())
-                .citiesCurrency(null))
+                .cityCurrency())
                 .withRel(BankLinkRelations.CITY_CURRENCY_REL)
                 .withTitle("Currencies by city or region"));
 
         index.add(linkTo(methodOn(getClass())
-                .listCurrencies())
-                .withRel(BankLinkRelations.CURRENCIES_REL)
-                .withTitle("All currencies"));
-
-        index.add(linkTo(methodOn(getClass())
-                .listCities())
+                .listCities(Collections.emptyList()))
                 .withRel(BankLinkRelations.CITIES_REL)
-                .withTitle("All city names"));
+                .withTitle("Cities grouped by region if available"));
 
         index.add(linkTo(methodOn(getClass())
-                .listLocalCities())
-                .withRel(BankLinkRelations.LOCAL_CITIES_REL)
-                .withTitle("All local cities filtered by locality if available"));
+                .listCities(null))
+                .withRel(BankLinkRelations.CITIES_REL)
+                .withTitle("Cities grouped by region if available"));
 
-        index.add(linkTo(methodOn(getClass())
-                .listRegions())
-                .withRel(BankLinkRelations.REGIONS_REL)
-                .withTitle("All region names"));
 
         return index;
     }
@@ -73,7 +65,7 @@ public class MetadataController {
     @GetMapping(value = "/region-cities")
     @TransactionBoundary(readOnly = true)
     public Map<String, List<String>> regionCities() {
-        return metadataRepository.getRegionCities();
+        return metadataRepository.getRegionToCityMap();
     }
 
     @GetMapping(value = "/currencies")
@@ -82,23 +74,16 @@ public class MetadataController {
         return metadataRepository.getCurrencies();
     }
 
-    @GetMapping(value = "/cities-local")
-    @TransactionBoundary(readOnly = true)
-    public List<String> listLocalCities() {
-        return metadataRepository.getLocalCities();
-    }
-
     @GetMapping(value = "/cities")
     @TransactionBoundary(readOnly = true)
-    public List<String> listCities() {
-        return metadataRepository.getCities();
+    public List<String> listCities(@RequestParam(name = "regions", required = false, defaultValue = "") List<String> regions) {
+        return metadataRepository.getRegionCities(regions);
     }
 
-    @GetMapping(value = "/cities-currency")
+    @GetMapping(value = "/city-currency")
     @TransactionBoundary(readOnly = true)
-    public Map<String, Currency> citiesCurrency(
-            @RequestParam(name = "cities", required = false, defaultValue = "") List<String> cities) {
-        return metadataRepository.getCityCurrency(cities);
+    public Map<String, Currency> cityCurrency() {
+        return metadataRepository.getCityToCurrencyMap();
     }
 
     @GetMapping(value = "/regions")

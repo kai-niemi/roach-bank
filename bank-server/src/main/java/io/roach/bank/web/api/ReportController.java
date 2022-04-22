@@ -54,7 +54,7 @@ public class ReportController {
             priority = TransactionBoundary.Priority.low)
     public Collection<AccountSummary> getAccountSummary() {
         Collection<AccountSummary> result = new LinkedList<>();
-        metadataRepository.getCurrencyCities().forEach((currency, regions) -> {
+        metadataRepository.getCurrencyToCityMap().forEach((currency, regions) -> {
             result.add(reportingRepository.accountSummary(currency));
         });
         return result;
@@ -67,7 +67,7 @@ public class ReportController {
             priority = TransactionBoundary.Priority.low)
     public Collection<TransactionSummary> getTransactionSummary() {
         Collection<TransactionSummary> result = new LinkedList<>();
-        metadataRepository.getCurrencyCities().forEach((currency, regions) -> {
+        metadataRepository.getCurrencyToCityMap().forEach((currency, regions) -> {
             result.add(reportingRepository.transactionSummary(currency));
         });
         return result;

@@ -29,11 +29,9 @@ public class DefaultAccountService implements AccountService {
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public Page<Account> findAccountPage(Collection<String> regions, Pageable page) {
-        Set<String> cities = metadataRepository.getCityCurrency(regions).keySet();
+    public Page<Account> findAccountPage(Set<String> cities, Pageable page) {
         return accountRepository.findAccountPage(cities, page);
     }
-
 
     @Override
     @TransactionBoundary(
@@ -44,8 +42,8 @@ public class DefaultAccountService implements AccountService {
 
     @Override
     @TransactionBoundary(readOnly = true)
-    public Set<String> resolveCities(Collection<String> cities) {
-        return metadataRepository.getCityCurrency(cities).keySet();
+    public Set<String> findCities(Set<String> alias) {
+        return metadataRepository.getRegionCities(alias);
     }
 
     @Override

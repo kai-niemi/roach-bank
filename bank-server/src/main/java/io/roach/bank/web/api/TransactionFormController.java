@@ -83,7 +83,7 @@ public class TransactionFormController {
 
         List<Account> accounts = new ArrayList<>();
 
-        metadataRepository.getCityCurrency(regions).keySet().forEach(
+        metadataRepository.getCityToCurrencyMap(regions).keySet().forEach(
                 r -> accounts.addAll(accountRepository.findAccountsByCity(r, accountsPerRegion)));
 
         if (accounts.isEmpty()) {

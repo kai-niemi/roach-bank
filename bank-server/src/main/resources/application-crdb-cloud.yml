@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://kai-test-gc8.gcp-europe-west4.cockroachlabs.cloud:26257/spring_boot?sslmode=require
+    url: jdbc:postgresql://kai-test-gc8.gcp-europe-west4.cockroachlabs.cloud:26257/roach_bank?sslmode=require
     driver-class-name: org.postgresql.Driver
     username: guest
     password: ZV5W2am-Cdxyu01OClTlSQ
@@ -10,5 +10,5 @@ spring:
       connection-timeout: 30000
       validation-timeout: 20000
       max-lifetime: 60000
-      maximum-pool-size: 192
+      maximum-pool-size: 50
       minimum-idle: 50

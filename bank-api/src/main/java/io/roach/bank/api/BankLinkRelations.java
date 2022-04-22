@@ -47,9 +47,7 @@ public abstract class BankLinkRelations {
 
     public static final String CITIES_REL = "cities";
 
-    public static final String CITY_CURRENCY_REL = "cities-currency";
-
-    public static final String LOCAL_CITIES_REL = "cities-local";
+    public static final String CITY_CURRENCY_REL = "city-currency";
 
     public static final String REGIONS_REL = "regions";
 

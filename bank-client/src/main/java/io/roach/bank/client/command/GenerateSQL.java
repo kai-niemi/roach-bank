@@ -28,9 +28,9 @@ public class GenerateSQL extends RestCommandSupport {
             @ShellOption(help = "initial account balance in regional currency", defaultValue = "100000.00")
                     String balance,
             @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion,
-            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String regions
+            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities
     ) throws IOException {
-        final Map<String, Currency> regionMap = findCityCurrency(regions);
+        final Map<String, Currency> regionMap = findCityCurrency(cities);
         if (regionMap.isEmpty()) {
             return;
         }

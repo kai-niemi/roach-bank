@@ -70,12 +70,12 @@ public class AccountController {
                 .index()).withSelfRel());
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listAccountsPerRegion(null, null, null))
+                .listAccounts(null, null, null))
                 .withRel(BankLinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("Collection of accounts by page"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listAccountsPerRegion(Collections.emptyList(), 0, 5))
+                .listAccounts(Collections.emptySet(), 0, 5))
                 .withRel(BankLinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("First collection page of accounts"));
 
@@ -100,29 +100,28 @@ public class AccountController {
     }
 
     @GetMapping(value = "/list")
-    public PagedModel<AccountModel> listAccountsPerRegion(
-            @RequestParam(value = "regions", defaultValue = "", required = false) List<String> regions,
+    public PagedModel<AccountModel> listAccounts(
+            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         return pagedResourcesAssembler
-                .toModel(accountService.findAccountPage(regions, pageable), accountResourceAssembler);
+                .toModel(accountService.findAccountPage(cities, pageable), accountResourceAssembler);
     }
 
     @GetMapping(value = "/top")
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccountsPerCity(
-            @RequestParam(value = "cities", defaultValue = "", required = false) List<String> cities,
+            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) int limit
     ) {
+        Set<String> resolved = accountService.findCities(cities);
+
+        final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
         final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
-
-        List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
-
-        Set<String> resolveCities = accountService.resolveCities(cities);
 
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
-        resolveCities.forEach(city -> tasks.add(() -> {
+        resolved.forEach(city -> tasks.add(() -> {
             accounts.addAll(accountService.findAccountsByCity(city, limitFinal));
             return null;
         }));

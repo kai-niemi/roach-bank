@@ -51,13 +51,7 @@ public class Transfer extends RestCommandSupport {
             @ShellOption(help = "use locking (select for update)", defaultValue = "false") boolean sfu,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
-
-        final Map<String, Currency> cityMap = findCityCurrency(cities);
-        if (cityMap.isEmpty()) {
-            return;
-        }
-
-        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cityMap.keySet(), accountLimit);
+        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cities, accountLimit);
         if (accountMap.isEmpty()) {
             return;
         }

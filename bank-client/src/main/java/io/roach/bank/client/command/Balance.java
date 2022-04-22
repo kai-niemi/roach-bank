@@ -1,7 +1,6 @@
 package io.roach.bank.client.command;
 
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
@@ -30,15 +29,10 @@ public class Balance extends RestCommandSupport {
             @ShellOption(help = "use non-authoritative follower reads", defaultValue = "true") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
                     int accountLimit,
-            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String regions,
+            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
-        final Map<String, Currency> cityMap = findCityCurrency(regions);
-        if (cityMap.isEmpty()) {
-            return;
-        }
-
-        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cityMap.keySet(), accountLimit);
+        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cities, accountLimit);
         if (accountMap.isEmpty()) {
             return;
         }

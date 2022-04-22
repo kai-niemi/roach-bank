@@ -4,21 +4,20 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface MetadataRepository {
-    List<String> getCities();
+    Set<Currency> getCurrencies();
 
-    List<String> getLocalCities();
+    Set<String> getRegions();
 
-    List<Currency> getCurrencies();
+    Set<String> getRegionCities(Collection<String> regions);
 
-    List<String> getRegions();
+    Map<String, List<String>> getRegionToCityMap();
 
-    Map<String, List<String>> getRegionCities();
+    Map<Currency, List<String>> getCurrencyToCityMap();
 
-    Map<Currency, List<String>> getCurrencyCities();
-
-    Map<String, Currency> getCityCurrency(Collection<String> cities);
+    Map<String, Currency> getCityToCurrencyMap();
 
     Currency getCityCurrency(String city);
 }

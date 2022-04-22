@@ -1,7 +1,13 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -13,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import io.roach.bank.repository.MetadataRepository;
 
@@ -33,7 +40,8 @@ public class JdbcMetadataRepository implements MetadataRepository {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-    @Override
+
+//    @Override
     public List<String> getCities() {
         return this.namedParameterJdbcTemplate.query(
                 "SELECT city FROM region_map group by city",
@@ -41,14 +49,14 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public List<Currency> getCurrencies() {
+    public Set<Currency> getCurrencies() {
         return this.namedParameterJdbcTemplate.query(
                 "SELECT currency FROM region_map group by currency",
                 (rs, rowNum) -> Currency.getInstance(rs.getString(1)));
     }
 
     @Override
-    public List<String> getRegions() {
+    public Set<String> getRegions() {
         return this.namedParameterJdbcTemplate.query(
                 "SELECT region FROM region_map group by region",
                 (rs, rowNum) -> rs.getString(1));
@@ -63,103 +71,52 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public Map<String, List<String>> getRegionCities() {
+    public Map<String, List<String>> getRegionToCityMap() {
         Map<String, List<String>> result = new HashMap<>();
-        getRegions().forEach(region -> result.put(region, citiesByRegion(region)));
+        getRegions().forEach(region -> result.put(region, citiesByRegions(Collections.singleton(region))));
         return result;
     }
 
     @Override
-    public Map<Currency, List<String>> getCurrencyCities() {
+    public Map<Currency, List<String>> getCurrencyToCityMap() {
         Map<Currency, List<String>> result = new HashMap<>();
         getCurrencies().forEach(currency -> result.put(currency, citiesByCurrency(currency)));
         return result;
     }
 
     @Override
-    public Map<String, Currency> getCityCurrency(Collection<String> cities) {
-        if (cities.isEmpty()) {
-            cities = getCities();
-        }
-
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("cities", cities);
-
-        Map<String, Currency> result = new HashMap<>();
-
-        this.namedParameterJdbcTemplate.query(
-                "SELECT city,currency FROM region_map "
-                        + "WHERE city IN (:cities) "
-                        + "GROUP BY city,currency",
-                parameters,
-                (rs, rowNum) -> {
-                    result.put(rs.getString(1), Currency.getInstance(rs.getString(2)));
-                    return null;
-                });
-
-        if (!result.isEmpty()) {
-            return result;
-        }
-
-        return getCityCurrenciesByRegion(cities);
-    }
-
-    private Map<String, Currency> getCityCurrenciesByRegion(Collection<String> regions) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("regions", regions);
-        Map<String, Currency> result = new HashMap<>();
-        this.namedParameterJdbcTemplate.query(
-                "SELECT city,currency FROM region_map "
-                        + "WHERE region IN (:regions::region_code) "
-                        + "GROUP BY city,currency",
-                parameters,
-                (rs, rowNum) -> {
-                    result.put(rs.getString(1), Currency.getInstance(rs.getString(2)));
-                    return null;
-                });
-        return result;
-    }
-
-    @Override
-    public List<String> getLocalCities() {
+    public Set<String> getRegionCities(Collection<String> regions) {
         List<String> cities = new ArrayList<>();
 
-        if (partitionTableExists()) {
-            Set<String> regions = new HashSet<>();
-            List<String> listValues;
-            if ("".equals(locality) || "all".equals(locality)) {
-                listValues = this.jdbcTemplate.query(
-                        "SELECT distinct(name),list_value FROM crdb_internal.partitions where name <> 'default'",
-                        (resultSet, i) -> resultSet.getString(2));
-            } else {
-                listValues = this.jdbcTemplate.query(
-                        "SELECT list_value FROM crdb_internal.partitions WHERE name=?",
-                        (rs, rowNum) -> rs.getString(1),
-                        locality);
+        if (regions.isEmpty()) {
+            if (StringUtils.hasLength(locality) && !"all".equals(locality)) {
+                regions.add(locality);
+            } else if ("all".equals(locality)) {
+                regions.addAll(getRegions());
             }
-
-            listValues.forEach(s -> {
-                List<String> p = Arrays.stream(
-                                s.split(",")).map(x -> x.trim().replaceAll("^\\('|'\\)$", ""))
-                        .collect(Collectors.toList());
-                regions.addAll(p);
-            });
-
-            regions.forEach(region -> cities.addAll(citiesByRegion(region)));
         }
 
-        if (cities.isEmpty()) {
-            cities.addAll(getCities());
-        }
+        cities.addAll(citiesByRegions(regions));
 
         return cities;
     }
 
-    private boolean partitionTableExists() {
-        return jdbcTemplate.queryForObject(
-                "SELECT count(*) FROM information_schema.tables "
-                        + "WHERE table_schema='crdb_internal' and table_name = 'partitions' LIMIT 1",
-                Integer.class) != 0;
+    @Override
+    public Map<String, Currency> getCityToCurrencyMap() {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+        Map<String, Currency> result = new HashMap<>();
+
+        this.namedParameterJdbcTemplate.query(
+                "SELECT city,currency FROM region_map "
+                        + "GROUP BY city,currency",
+                parameters,
+                (rs, rowNum) -> {
+                    result.put(rs.getString(1), Currency.getInstance(rs.getString(2)));
+                    return null;
+                });
+
+            return result;
     }
 
     private List<String> citiesByCurrency(Currency currency) {
@@ -170,10 +127,10 @@ public class JdbcMetadataRepository implements MetadataRepository {
         );
     }
 
-    private List<String> citiesByRegion(String region) {
+    private List<String> citiesByRegions(Collection<String> regions) {
         return this.jdbcTemplate.query(
-                "SELECT city FROM region_map WHERE region = ?::region_code group by city",
+                "SELECT city FROM region_map WHERE region in (?::region_code) group by city",
                 (rs, rowNum) -> rs.getString(1),
-                region);
+                regions);
     }
 }

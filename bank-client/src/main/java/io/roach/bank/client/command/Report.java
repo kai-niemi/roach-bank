@@ -12,7 +12,7 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import io.roach.bank.api.BankLinkRelations;
 
 import static io.roach.bank.api.BankLinkRelations.ACCOUNT_SUMMARY_REL;
-import static io.roach.bank.api.BankLinkRelations.LOCAL_CITIES_REL;
+import static io.roach.bank.api.BankLinkRelations.CITIES_REL;
 import static io.roach.bank.api.BankLinkRelations.META_REL;
 import static io.roach.bank.api.BankLinkRelations.REGION_CITIES_REL;
 import static io.roach.bank.api.BankLinkRelations.REPORTING_REL;
@@ -33,7 +33,7 @@ public class Report extends RestCommandSupport {
 
         ResponseEntity<List> entity = traverson.fromRoot()
                 .follow(BankLinkRelations.withCurie(META_REL))
-                .follow(BankLinkRelations.withCurie(LOCAL_CITIES_REL))
+                .follow(BankLinkRelations.withCurie(CITIES_REL))
                 .toEntity(List.class);
         logger.info("Local cities: {}", entity.getBody());
     }

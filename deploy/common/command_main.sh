@@ -35,16 +35,16 @@ if [ -z "${CLUSTER}" ]; then
   exit 1
 fi
 
-if ! fn_prompt_yes_no "Proceed?" Y; then
-  exit 0
-fi
-
 if fn_prompt_yes_no "Create CRDB cluster?" Y; then
   command_create.sh
 fi
 
-if fn_prompt_yes_no "Deploy Bank server?" Y; then
-  command_deploy.sh
+if fn_prompt_yes_no "Deploy Bank servers?" Y; then
+  command_bank_deploy.sh
+fi
+
+if fn_prompt_yes_no "Start Bank servers?" Y; then
+  command_bank_start.sh
 fi
 
 if test -f "$partitionsqlfile"; then

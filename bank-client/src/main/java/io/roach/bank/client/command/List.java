@@ -1,6 +1,5 @@
 package io.roach.bank.client.command;
 
-import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -15,7 +14,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.client.support.Console;
@@ -36,16 +34,11 @@ public class List extends RestCommandSupport {
     public void listAccounts(@ShellOption(help = "page number", defaultValue = "0") int page,
                              @ShellOption(help = "page size", defaultValue = "20") int pageSize,
                              @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY)
-                                     String regions) {
-        final Map<String, Currency> regionMap = findCityCurrency(regions);
-        if (regionMap.isEmpty()) {
-            return;
-        }
-
+                                     String cities) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("page", page);
         parameters.put("size", pageSize);
-        parameters.put("regions", StringUtils.collectionToCommaDelimitedString(regionMap.keySet()));
+        parameters.put("cities", cities);
 
         PagedModel<AccountModel> accountPage = traverson.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
