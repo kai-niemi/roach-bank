@@ -4,7 +4,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionItemModel;
 import io.roach.bank.domain.TransactionItem;
 
@@ -32,12 +32,12 @@ public class TransactionItemResourceAssembler
         resource.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder.methodOn(AccountController.class)
                         .getAccount(entity.getAccount().getId()))
-                .withRel(BankLinkRelations.ACCOUNT_REL)
+                .withRel(LinkRelations.ACCOUNT_REL)
                 .withTitle("Booking account"));
         resource.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder.methodOn(TransactionController.class)
                         .getTransaction(entity.getTransaction().getId()))
-                .withRel(BankLinkRelations.TRANSACTION_REL)
+                .withRel(LinkRelations.TRANSACTION_REL)
                 .withTitle("Booking transaction"));
 
         return resource;

@@ -1,6 +1,7 @@
 package io.roach.bank.web.api;
 
 import java.time.LocalDateTime;
+import java.util.Currency;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -105,13 +106,14 @@ public class AccountFormController {
             @RequestParam(value = "numAccounts", defaultValue = "320") Integer numAccounts,
             @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
     ) {
-        final Money balanceM = Money.of(balance, metadataRepository.getCityCurrency(city));
+        final Currency currency = metadataRepository.getCities().get(city);
+        final Money money = Money.of(balance, currency);
         final AtomicInteger sequence = new AtomicInteger(1);
 
         accountRepository.createAccountBatch(() -> Account.builder()
                         .withId(UUID.randomUUID())
                         .withName(prefix + "-" + sequence.incrementAndGet())
-                        .withBalance(balanceM)
+                        .withBalance(money)
                         .withAccountType(AccountType.ASSET)
                         .build(),
                 numAccounts, batchSize);

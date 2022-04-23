@@ -5,7 +5,7 @@ import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.domain.Transaction;
 
@@ -34,7 +34,7 @@ public class TransactionResourceAssembler
         resource.add(linkTo(DummyInvocationUtils.methodOn(TransactionItemController.class)
                 .getTransactionItems(entity.getId(),
                         PageRequest.of(0, 5)))
-                .withRel(BankLinkRelations.TRANSACTION_ITEMS_REL)
+                .withRel(LinkRelations.TRANSACTION_ITEMS_REL)
                 .withTitle("Transaction legs"));
 
         return resource;

@@ -6,7 +6,6 @@
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 create type transaction_type as enum ('GEN');
 create type currency_code as enum ('USD', 'SEK', 'EUR', 'NOK', 'GBP','SGD','HKD','AUD','JPY','BRL');
-create type region_code as enum ('us_west','us_central','us_east','us','eu_west','eu_central','eu_south','eu','apac','sa');
 
 ----------------------
 -- Metadata
@@ -16,7 +15,7 @@ create table region_map
 (
     city     varchar(64)   not null,
     currency currency_code not null,
-    region   region_code   not null,
+    region   varchar(64)   not null,
 
     primary key (city, currency, region)
 );
@@ -45,7 +44,7 @@ create table transaction
 (
     id               uuid             not null,
     city             varchar(64)      not null,
-    booking_date     date null,
+    booking_date     date             null,
     transfer_date    date             not null,
     transaction_type transaction_type not null,
 

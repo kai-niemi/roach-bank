@@ -18,9 +18,9 @@ import org.springframework.shell.standard.ShellOption;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.client.support.Console;
 
-import static io.roach.bank.api.BankLinkRelations.ACCOUNT_LIST_REL;
-import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
-import static io.roach.bank.api.BankLinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.ACCOUNT_LIST_REL;
+import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 import static io.roach.bank.client.command.Constants.ACCOUNT_MODEL_PTR;
 
 @ShellComponent
@@ -32,13 +32,10 @@ public class List extends RestCommandSupport {
     @ShellMethod(value = "List accounts using pagination", key = {"list", "l"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listAccounts(@ShellOption(help = "page number", defaultValue = "0") int page,
-                             @ShellOption(help = "page size", defaultValue = "20") int pageSize,
-                             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY)
-                                     String cities) {
+                             @ShellOption(help = "page size", defaultValue = "20") int pageSize) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("page", page);
         parameters.put("size", pageSize);
-        parameters.put("cities", cities);
 
         PagedModel<AccountModel> accountPage = traverson.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))

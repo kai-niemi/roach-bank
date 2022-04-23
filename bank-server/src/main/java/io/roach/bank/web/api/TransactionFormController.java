@@ -77,14 +77,11 @@ public class TransactionFormController {
             throw new BadRequestException("Accounts per region must be a multiple of 2: " + accountsPerRegion);
         }
 
-        if (regions.isEmpty()) {
-            regions = Collections.singletonList(RandomData.selectRandom(metadataRepository.getLocalCities()));
-        }
-
         List<Account> accounts = new ArrayList<>();
 
-        metadataRepository.getCityToCurrencyMap(regions).keySet().forEach(
-                r -> accounts.addAll(accountRepository.findAccountsByCity(r, accountsPerRegion)));
+        metadataRepository.getRegionCities(regions).forEach(r -> {
+            accounts.addAll(accountRepository.findAccountsByCity(r, accountsPerRegion));
+        });
 
         if (accounts.isEmpty()) {
             throw new MetadataException("No accounts matching regions: "

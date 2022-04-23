@@ -31,7 +31,7 @@ import com.zaxxer.hikari.HikariConfigMXBean;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.MessageModel;
@@ -69,12 +69,12 @@ public class AdminController {
 
         index.add(linkTo(methodOn(getClass())
                 .updateConnectionPoolSize(50))
-                .withRel(BankLinkRelations.POOL_SIZE_REL)
+                .withRel(LinkRelations.POOL_SIZE_REL)
                 .withTitle("Connection pool size"));
 
         index.add(linkTo(methodOn(getClass())
                 .connectionPoolInfo())
-                .withRel(BankLinkRelations.POOL_SIZE_REL)
+                .withRel(LinkRelations.POOL_SIZE_REL)
                 .withTitle("Connection pool info"));
 
         index.add(Link.of(
@@ -83,7 +83,7 @@ public class AdminController {
                                 .pathSegment("actuator")
                                 .buildAndExpand()
                                 .toUriString()
-                ).withRel(BankLinkRelations.ACTUATOR_REL)
+                ).withRel(LinkRelations.ACTUATOR_REL)
                 .withTitle("Spring boot actuators"));
 
         Arrays.asList(
@@ -122,7 +122,7 @@ public class AdminController {
                                             .pathSegment("actuator", "metrics", key)
                                             .buildAndExpand()
                                             .toUriString()
-                            ).withRel(BankLinkRelations.ACTUATOR_REL)
+                            ).withRel(LinkRelations.ACTUATOR_REL)
                             .withTitle("Metrics endpoint"));
                 });
 

@@ -1,6 +1,5 @@
 package io.roach.bank.service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -15,8 +14,6 @@ public interface AccountService {
     Page<Account> findAccountPage(Set<String> cities, Pageable page);
 
     List<Account> findAccountsByCity(String city, int limit);
-
-    Set<String> findCities(Set<String> alias);
 
     Account getAccountById(UUID id);
 

@@ -12,13 +12,14 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.support.DurationFormat;
 
-import static io.roach.bank.api.BankLinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
@@ -28,22 +29,24 @@ public class Balance extends RestCommandSupport {
     public void balance(
             @ShellOption(help = "use non-authoritative follower reads", defaultValue = "true") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
-                    int accountLimit,
+            int accountLimit,
+            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
-        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cities, accountLimit);
-        if (accountMap.isEmpty()) {
-            return;
+        if (!Constants.EMPTY.equals(regions)) {
+            cities = StringUtils.collectionToCommaDelimitedString(getRegionCities(regions));
         }
+
+        Map<String, List<AccountModel>> accountMap = getCityAccounts(cities, accountLimit);
 
         accountMap.forEach((regionKey, accountModels) -> {
             final List<Link> links = new ArrayList<>();
 
             accountModels.forEach(accountModel -> {
                 links.add(accountModel.getLink(followerReads
-                        ? withCurie(BankLinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
-                        : withCurie(BankLinkRelations.ACCOUNT_BALANCE_REL))
+                                ? withCurie(LinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
+                                : withCurie(LinkRelations.ACCOUNT_BALANCE_REL))
                         .get());
             });
 

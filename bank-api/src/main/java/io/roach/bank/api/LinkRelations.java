@@ -3,7 +3,7 @@ package io.roach.bank.api;
 /**
  * Defines domain specific web constants such as link relation names and resource names.
  */
-public abstract class BankLinkRelations {
+public abstract class LinkRelations {
     // Transaction history rels
     public static final String TRANSACTION_REL = "transaction";
 
@@ -40,16 +40,15 @@ public abstract class BankLinkRelations {
 
     // Meta
 
-
-    public static final String REGION_CITIES_REL = "region-cities";
-
-    public static final String CURRENCIES_REL = "currencies";
+    public static final String REGIONS_REL = "regions";
 
     public static final String CITIES_REL = "cities";
 
-    public static final String CITY_CURRENCY_REL = "city-currency";
+    public static final String CURRENCIES_REL = "currencies";
 
-    public static final String REGIONS_REL = "regions";
+    public static final String REGION_CITIES_REL = "region-cities";
+
+    public static final String GATEWAY_REGION_REL = "gateway-region";
 
 
     // Generic context-scoped link relations
@@ -75,7 +74,7 @@ public abstract class BankLinkRelations {
 
     public static final String CURIE_PREFIX = CURIE_NAMESPACE + ":";
 
-    private BankLinkRelations() {
+    private LinkRelations() {
     }
 
     public static String withCurie(String rel) {

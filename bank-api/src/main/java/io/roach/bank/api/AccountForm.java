@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.roach.bank.api.support.EnumPattern;
 
-import static io.roach.bank.api.BankLinkRelations.ACCOUNT_FORM_REL;
-import static io.roach.bank.api.BankLinkRelations.CURIE_PREFIX;
+import static io.roach.bank.api.LinkRelations.ACCOUNT_FORM_REL;
+import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
 
 @Relation(value = CURIE_PREFIX + ACCOUNT_FORM_REL)
 @JsonPropertyOrder({"links"})

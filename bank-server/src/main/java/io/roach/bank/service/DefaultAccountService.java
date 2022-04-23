@@ -1,6 +1,5 @@
 package io.roach.bank.service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -16,15 +15,11 @@ import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.repository.MetadataRepository;
 
 @Service
 public class DefaultAccountService implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
-
-    @Autowired
-    private MetadataRepository metadataRepository;
 
     @Override
     @TransactionBoundary(
@@ -38,12 +33,6 @@ public class DefaultAccountService implements AccountService {
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
     public List<Account> findAccountsByCity(String city, int limit) {
         return accountRepository.findAccountsByCity(city, limit);
-    }
-
-    @Override
-    @TransactionBoundary(readOnly = true)
-    public Set<String> findCities(Set<String> alias) {
-        return metadataRepository.getRegionCities(alias);
     }
 
     @Override

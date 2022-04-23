@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.roach.bank.Application;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.web.support.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -37,27 +37,27 @@ public class IndexController {
 
         index.add(linkTo(methodOn(AccountController.class)
                 .index())
-                .withRel(BankLinkRelations.ACCOUNT_REL)
+                .withRel(LinkRelations.ACCOUNT_REL)
                 .withTitle("Account resource details")
         );
         index.add(linkTo(methodOn(TransactionController.class)
                 .index())
-                .withRel(BankLinkRelations.TRANSACTION_REL)
+                .withRel(LinkRelations.TRANSACTION_REL)
                 .withTitle("Transaction resource details")
         );
         index.add(linkTo(methodOn(ReportController.class)
                 .index())
-                .withRel(BankLinkRelations.REPORTING_REL)
+                .withRel(LinkRelations.REPORTING_REL)
                 .withTitle("Reporting resource details")
         );
         index.add(linkTo(methodOn(MetadataController.class)
                 .index())
-                .withRel(BankLinkRelations.META_REL)
+                .withRel(LinkRelations.META_REL)
                 .withTitle("Metadata resource details")
         );
         index.add(linkTo(methodOn(AdminController.class)
                 .index())
-                .withRel(BankLinkRelations.ADMIN_REL)
+                .withRel(LinkRelations.ADMIN_REL)
                 .withTitle("Admin resource details")
         );
 

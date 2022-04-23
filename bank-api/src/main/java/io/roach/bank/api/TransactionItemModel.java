@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.roach.bank.api.support.Money;
 
-import static io.roach.bank.api.BankLinkRelations.CURIE_PREFIX;
+import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
 
 /**
  * Describes a transaction item leg resource representation.
  */
-@Relation(value = CURIE_PREFIX + BankLinkRelations.TRANSACTION_ITEM_REL,
-        collectionRelation = CURIE_PREFIX + BankLinkRelations.TRANSACTION_ITEMS_REL)
+@Relation(value = CURIE_PREFIX + LinkRelations.TRANSACTION_ITEM_REL,
+        collectionRelation = CURIE_PREFIX + LinkRelations.TRANSACTION_ITEMS_REL)
 @JsonPropertyOrder({"links"})
 public class TransactionItemModel extends RepresentationModel<TransactionItemModel> {
     private Money amount;

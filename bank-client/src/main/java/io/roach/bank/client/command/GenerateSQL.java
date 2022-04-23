@@ -27,13 +27,9 @@ public class GenerateSQL extends RestCommandSupport {
             @ShellOption(help = "output path", defaultValue = ".data") String output,
             @ShellOption(help = "initial account balance in regional currency", defaultValue = "100000.00")
                     String balance,
-            @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion,
-            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities
+            @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion
     ) throws IOException {
-        final Map<String, Currency> regionMap = findCityCurrency(cities);
-        if (regionMap.isEmpty()) {
-            return;
-        }
+        final Map<String, Currency> cityCurrencyMap = getCityCurrencyMap();
 
         Path path = Paths.get(output);
         if (!path.toFile().isDirectory()) {
@@ -49,36 +45,34 @@ public class GenerateSQL extends RestCommandSupport {
                 .newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
             writer.write("-- balance per account: " + balance + "\n");
             writer.write("-- accounts per region: " + accountsPerRegion + "\n");
-            writer.write("-- accounts total: " + accountsPerRegion * regionMap.size() + "\n");
-            writer.write("-- regions: " + regionMap.keySet() + "\n");
-            writer.newLine();
-            writer.write("-- TRUNCATE TABLE transaction_item CASCADE;\n");
-            writer.write("-- TRUNCATE TABLE transaction CASCADE;\n");
-            writer.write("-- TRUNCATE TABLE account CASCADE;\n");
+            writer.write("-- accounts total: " + accountsPerRegion * cityCurrencyMap.size() + "\n");
+            writer.write("-- regions: " + cityCurrencyMap.keySet() + "\n");
             writer.newLine();
 
-            for (String region : regionMap.keySet()) {
-                final Currency currency = regionMap.get(region);
+            cityCurrencyMap.forEach((city, currency) -> {
                 final Money money = Money.of(balance, currency);
 
-                writer.write(String.format("-- %s | %s\n", region, money.getCurrency()));
-                writer.write(
-                        "INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES");
+                try {
+                    writer.write(String.format("-- %s | %s\n", city, money.getCurrency()));
+                    writer.write("INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES");
 
-                for (int i = 1; i <= accountsPerRegion; i++) {
-                    writer.write(String.format(
-                            "\t(gen_random_uuid(), '%s', '%s', '%s', 'user:%04d', 'A', false, 0, clock_timestamp())",
-                            region,
-                            money.getAmount(),
-                            money.getCurrency().getCurrencyCode(),
-                            i));
-                    if (i < accountsPerRegion) {
-                        writer.write(",");
+                    for (int i = 1; i <= accountsPerRegion; i++) {
+                        writer.write(String.format(
+                                "\t(gen_random_uuid(), '%s', '%s', '%s', 'user:%04d', 'A', false, 0, clock_timestamp())",
+                                city,
+                                money.getAmount(),
+                                money.getCurrency().getCurrencyCode(),
+                                i));
+                        if (i < accountsPerRegion) {
+                            writer.write(",");
+                        }
+                        writer.newLine();
                     }
-                    writer.newLine();
+                    writer.write(";");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                writer.write(";");
-            }
+            });
 
             writer.newLine();
         }

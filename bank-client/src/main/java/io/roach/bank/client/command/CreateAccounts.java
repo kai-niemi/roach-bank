@@ -19,9 +19,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import io.roach.bank.client.support.DurationFormat;
 import io.roach.bank.client.support.ExecutorTemplate;
 
-import static io.roach.bank.api.BankLinkRelations.ACCOUNT_BATCH_REL;
-import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
-import static io.roach.bank.api.BankLinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.ACCOUNT_BATCH_REL;
+import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
@@ -32,16 +32,12 @@ public class CreateAccounts extends RestCommandSupport {
     @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
-            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "initial balance per account", defaultValue = "100000.00") String balance,
             @ShellOption(help = "number of accounts per request", defaultValue = "320") int numAccounts,
             @ShellOption(help = "batch size per request", defaultValue = "32") int batchSize
     ) {
-        final Map<String, Currency> cityMap = findCityCurrency(cities);
-        if (cityMap.isEmpty()) {
-            return;
-        }
+        final Map<String, Currency> cityCurrencyMap = getCityCurrencyMap();
 
         final Link submitLink = traverson.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
@@ -50,7 +46,7 @@ public class CreateAccounts extends RestCommandSupport {
 
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        cityMap.keySet().forEach(city -> {
+        cityCurrencyMap.keySet().forEach(city -> {
             executorTemplate.runAsync("create-accounts " + city, () -> {
                 UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
                         .queryParam("city", city)

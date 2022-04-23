@@ -22,9 +22,9 @@ import org.springframework.web.client.RestTemplate;
 import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.TraversonHelper;
 
-import static io.roach.bank.api.BankLinkRelations.ADMIN_REL;
-import static io.roach.bank.api.BankLinkRelations.POOL_SIZE_REL;
-import static io.roach.bank.api.BankLinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.ADMIN_REL;
+import static io.roach.bank.api.LinkRelations.POOL_SIZE_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)

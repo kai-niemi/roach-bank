@@ -25,7 +25,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 
 @EnableWebMvc
 @EnableHypermediaSupport(type = {
@@ -94,6 +94,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .port(8080)
                 .pathSegment("rels", "{rel}")
                 .build().toUriString();
-        return new DefaultCurieProvider(BankLinkRelations.CURIE_NAMESPACE, UriTemplate.of(uri));
+        return new DefaultCurieProvider(LinkRelations.CURIE_NAMESPACE, UriTemplate.of(uri));
     }
 }

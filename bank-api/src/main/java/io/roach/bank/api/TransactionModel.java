@@ -14,15 +14,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.roach.bank.api.support.LocalDateDeserializer;
 import io.roach.bank.api.support.LocalDateSerializer;
 
-import static io.roach.bank.api.BankLinkRelations.CURIE_PREFIX;
+import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
 
 /**
  * Describes a transaction leg/item resource representation. A transaction leg
  * represents a monetary, balanced, multi-legged transaction between two
  * or more accounts.
  */
-@Relation(value = CURIE_PREFIX + BankLinkRelations.TRANSACTION_REL,
-        collectionRelation = CURIE_PREFIX + BankLinkRelations.TRANSACTION_LIST_REL)
+@Relation(value = CURIE_PREFIX + LinkRelations.TRANSACTION_REL,
+        collectionRelation = CURIE_PREFIX + LinkRelations.TRANSACTION_LIST_REL)
 @JsonPropertyOrder({"links", "transactionItems"})
 public class TransactionModel extends RepresentationModel<TransactionModel> {
     private UUID transactionId;

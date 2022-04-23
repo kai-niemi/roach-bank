@@ -7,24 +7,35 @@
 drop type if exists account_type;
 drop type if exists transaction_type;
 drop type if exists currency_code;
-drop type if exists region_code;
 
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 create type transaction_type as enum ('GEN');
 create type currency_code as enum ('USD', 'SEK', 'EUR', 'NOK', 'GBP','SGD','HKD','AUD','JPY','BRL');
-create type region_code as enum ('us_west','us_central','us_east','us','eu_west','eu_central','eu_south','eu','apac','sa');
+
+-- create type city_name as enum (
+--     'stockholm','helsinki','oslo','london','frankfurt','amsterdam','milano','madrid','athens','barcelona','paris','manchester',
+--     'seattle','san francisco','los angeles','phoenix','minneapolis','chicago','detroit','atlanta','new york','boston','washington dc','miami',
+--     'singapore','hong kong','sydney','tokyo','sao paulo','rio de janeiro','salvador'
+-- );
 
 ----------------------
 -- Metadata
 ----------------------
 
-create table region_map
+create table region
 (
-    city       string        not null,
-    currency   currency_code not null,
-    region     region_code   not null,
+    name   string not null,
+    cities string not null,
 
-    primary key (city, currency, region)
+    primary key (name)
+);
+
+create table city
+(
+    name     string        not null,
+    currency currency_code not null,
+
+    primary key (name)
 );
 
 ----------------------

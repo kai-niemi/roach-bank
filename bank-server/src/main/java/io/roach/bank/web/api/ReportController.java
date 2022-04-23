@@ -12,7 +12,7 @@ import io.roach.bank.annotation.TimeTravel;
 import io.roach.bank.annotation.TimeTravelMode;
 import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.AccountSummary;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.repository.ReportingRepository;
@@ -36,12 +36,12 @@ public class ReportController {
 
         index.add(linkTo(methodOn(getClass())
                 .getAccountSummary())
-                .withRel(BankLinkRelations.ACCOUNT_SUMMARY_REL)
+                .withRel(LinkRelations.ACCOUNT_SUMMARY_REL)
                 .withTitle("Account business report"));
 
         index.add(linkTo(methodOn(getClass())
                 .getTransactionSummary())
-                .withRel(BankLinkRelations.TRANSACTION_SUMMARY_REL)
+                .withRel(LinkRelations.TRANSACTION_SUMMARY_REL)
                 .withTitle("Transaction business report"));
 
         return index;
@@ -54,7 +54,7 @@ public class ReportController {
             priority = TransactionBoundary.Priority.low)
     public Collection<AccountSummary> getAccountSummary() {
         Collection<AccountSummary> result = new LinkedList<>();
-        metadataRepository.getCurrencyToCityMap().forEach((currency, regions) -> {
+        metadataRepository.getCurrencies().forEach(currency -> {
             result.add(reportingRepository.accountSummary(currency));
         });
         return result;
@@ -67,7 +67,7 @@ public class ReportController {
             priority = TransactionBoundary.Priority.low)
     public Collection<TransactionSummary> getTransactionSummary() {
         Collection<TransactionSummary> result = new LinkedList<>();
-        metadataRepository.getCurrencyToCityMap().forEach((currency, regions) -> {
+        metadataRepository.getCurrencies().forEach(currency -> {
             result.add(reportingRepository.transactionSummary(currency));
         });
         return result;

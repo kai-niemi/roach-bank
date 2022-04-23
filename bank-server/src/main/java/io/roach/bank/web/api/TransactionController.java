@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.roach.bank.annotation.TimeTravel;
 import io.roach.bank.annotation.TimeTravelMode;
 import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
@@ -31,8 +31,8 @@ import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.MessageModel;
 import io.roach.bank.web.support.ZoomExpression;
 
-import static io.roach.bank.api.BankLinkRelations.TRANSACTION_ITEMS_REL;
-import static io.roach.bank.api.BankLinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.TRANSACTION_ITEMS_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -66,19 +66,19 @@ public class TransactionController {
                         .toUriComponentsBuilder().path(
                                 "/list/{?page,size}")  // RFC-6570 template
                         .build().toUriString()),
-                BankLinkRelations.TRANSACTION_LIST_REL
+                LinkRelations.TRANSACTION_LIST_REL
         ).withTitle("Collection of transactions"));
 
         index.add(linkTo(methodOn(TransactionController.class)
                 .listTransactions(PageRequest.of(0, 5, Sort.Direction.DESC, "id")))
-                .withRel(BankLinkRelations.TRANSACTION_LIST_REL
+                .withRel(LinkRelations.TRANSACTION_LIST_REL
                 ).withTitle("Collection of transactions"));
 
         index.add(Link.of(UriTemplate.of(linkTo(TransactionFormController.class)
                         .toUriComponentsBuilder().path(
                                 "/form/{?limit,amount,regions}")  // RFC-6570 template
                         .build().toUriString()),
-                BankLinkRelations.TRANSACTION_FORM_REL
+                LinkRelations.TRANSACTION_FORM_REL
         ).withTitle("Form template for creating a transfer request"));
 
         return index;

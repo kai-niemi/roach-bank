@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.AccountStatus;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.domain.Account;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -37,24 +37,24 @@ public class AccountResourceAssembler
                 .withSelfRel());
         resource.add(linkTo(WebMvcLinkBuilder.methodOn(AccountController.class)
                 .getAccountBalance(entity.getId()))
-                .withRel(BankLinkRelations.ACCOUNT_BALANCE_REL)
+                .withRel(LinkRelations.ACCOUNT_BALANCE_REL)
                 .withTitle("Account balance")
         );
         resource.add(linkTo(WebMvcLinkBuilder.methodOn(AccountController.class)
                 .getAccountBalanceSnapshot(entity.getId()))
-                .withRel(BankLinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
+                .withRel(LinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
                 .withTitle("Account balance snapshot (follower read)")
         );
 
         if (entity.isClosed()) {
             resource.add(linkTo(methodOn(AccountController.class)
                     .openAccount(entity.getId())
-            ).withRel(BankLinkRelations.OPEN_REL)
+            ).withRel(LinkRelations.OPEN_REL)
                     .withTitle("Open account"));
         } else {
             resource.add(linkTo(methodOn(AccountController.class)
                     .closeAccount(entity.getId())
-            ).withRel(BankLinkRelations.CLOSE_REL)
+            ).withRel(LinkRelations.CLOSE_REL)
                     .withTitle("Close account"));
         }
 

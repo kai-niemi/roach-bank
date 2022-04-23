@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.service.AccountService;
@@ -71,29 +71,29 @@ public class AccountController {
 
         index.add(linkTo(methodOn(AccountController.class)
                 .listAccounts(null, null, null))
-                .withRel(BankLinkRelations.ACCOUNT_LIST_REL
+                .withRel(LinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("Collection of accounts by page"));
 
         index.add(linkTo(methodOn(AccountController.class)
                 .listAccounts(Collections.emptySet(), 0, 5))
-                .withRel(BankLinkRelations.ACCOUNT_LIST_REL
+                .withRel(LinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("First collection page of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listTopAccountsPerCity(Collections.emptyList(), 10))
-                .withRel(BankLinkRelations.ACCOUNT_TOP
+                .listAccountsByCity(Collections.emptySet(), 10))
+                .withRel(LinkRelations.ACCOUNT_TOP
                 ).withTitle("Collection of top accounts grouped by region"));
 
         index.add(linkTo(methodOn(AccountFormController.class)
                 .getAccountForm())
-                .withRel(BankLinkRelations.ACCOUNT_FORM_REL
+                .withRel(LinkRelations.ACCOUNT_FORM_REL
                 ).withTitle("Form template for new account"));
 
         index.add(Link.of(UriTemplate.of(linkTo(AccountFormController.class)
                         .toUriComponentsBuilder().path(
                                 "/batch/{?city,prefix,numAccounts,batchSize}")  // RFC-6570 template
                         .build().toUriString()),
-                BankLinkRelations.ACCOUNT_BATCH_REL
+                LinkRelations.ACCOUNT_BATCH_REL
         ).withTitle("Account creation batch"));
 
         return index;
@@ -110,18 +110,16 @@ public class AccountController {
     }
 
     @GetMapping(value = "/top")
-    public ResponseEntity<CollectionModel<AccountModel>> listTopAccountsPerCity(
+    public ResponseEntity<CollectionModel<AccountModel>> listAccountsByCity(
             @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) int limit
     ) {
-        Set<String> resolved = accountService.findCities(cities);
-
         final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
         final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
 
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
-        resolved.forEach(city -> tasks.add(() -> {
+        cities.forEach(city -> tasks.add(() -> {
             accounts.addAll(accountService.findAccountsByCity(city, limitFinal));
             return null;
         }));

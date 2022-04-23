@@ -59,13 +59,9 @@ public class GenerateCSV extends RestCommandSupport {
             @ShellOption(help = "number of accounts in total", defaultValue = "1_000_000") String accounts,
             @ShellOption(help = "number of transactions per account", defaultValue = "0") int transactionsPerAccount,
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2")
-                    int legsPerTransaction,
-            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String regions
+                    int legsPerTransaction
     ) {
-//        final Map<String, Currency> regionMap = findCityCurrency(regions);
-        if (regionMap.isEmpty()) {
-            return;
-        }
+        final Map<String, Currency> cityCurrencyMap = getCityCurrencyMap();
 
         Path path = Paths.get(destination);
         if (!path.toFile().isDirectory()) {
@@ -99,10 +95,10 @@ public class GenerateCSV extends RestCommandSupport {
 
         try {
             final int nAccounts = Integer.parseInt(accounts.replace("_", ""));
-            final int accountsPerRegion = nAccounts / regionMap.size();
+            final int accountsPerRegion = nAccounts / cityCurrencyMap.size();
 
             logger.info(">> Generating CSV import files");
-            logger.info("{} regions: {}", regionMap.size(), regionMap.keySet());
+            logger.info("{} regions: {}", cityCurrencyMap.size(), cityCurrencyMap.keySet());
             logger.info("{} accounts total", nAccounts);
             logger.info("{} accounts per region", accountsPerRegion);
             logger.info("{} transactions total", nAccounts * transactionsPerAccount);
@@ -110,7 +106,7 @@ public class GenerateCSV extends RestCommandSupport {
 
             CsvGenerator generator = new CsvGenerator();
             generator.writers = writers;
-            generator.regionMap = regionMap;
+            generator.regionMap = cityCurrencyMap;
             generator.initialBalance = initialBalance;
             generator.accountsPerRegion = accountsPerRegion;
             generator.transactionsPerAccount = transactionsPerAccount;

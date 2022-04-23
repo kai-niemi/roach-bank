@@ -1,7 +1,6 @@
 ----------- SERVER CONFIGURATION -------------
 Spring profiles: ${spring.profiles.active}
  Datasource URL: ${spring.datasource.url}
-       Locality: ${roachbank.locality}
 -----------------------------------------------
 
 Welcome to Roach Bank!

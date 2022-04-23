@@ -22,8 +22,8 @@ import io.roach.bank.api.support.LocalDateDeserializer;
 import io.roach.bank.api.support.LocalDateSerializer;
 import io.roach.bank.api.support.Money;
 
-import static io.roach.bank.api.BankLinkRelations.CURIE_PREFIX;
-import static io.roach.bank.api.BankLinkRelations.TRANSACTION_FORM_REL;
+import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
+import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
 
 /**
  * Request form with a list of account forming a balanced multi-legged monetary transaction.

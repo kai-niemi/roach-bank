@@ -1,12 +1,8 @@
 package io.roach.bank.client.command;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,20 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.shell.Availability;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.client.support.ConnectionUpdatedEvent;
 import io.roach.bank.client.support.ExecutorTemplate;
 import io.roach.bank.client.support.TraversonHelper;
 
-import static io.roach.bank.api.BankLinkRelations.ACCOUNT_REL;
-import static io.roach.bank.api.BankLinkRelations.ACCOUNT_TOP;
-import static io.roach.bank.api.BankLinkRelations.CITY_CURRENCY_REL;
-import static io.roach.bank.api.BankLinkRelations.META_REL;
-import static io.roach.bank.api.BankLinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.*;
 
 public abstract class RestCommandSupport {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -55,60 +46,54 @@ public abstract class RestCommandSupport {
     }
 
     @SuppressWarnings("unchecked")
-    protected Map<String, Currency> findCityCurrency(String citiesOrRegions) {
+    protected Map<String, Currency> getCityCurrencyMap() {
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("cities", citiesOrRegions);
-
-        Map<String, Currency> result = new HashMap<>();
+        final Map<String, Currency> result = new HashMap<>();
 
         Objects.requireNonNull(traverson.fromRoot()
-                .follow(withCurie(META_REL))
-                .follow(withCurie(CITY_CURRENCY_REL))
-                .withTemplateParameters(parameters)
-                .toObject(Map.class))
+                        .follow(withCurie(META_REL))
+                        .follow(withCurie(CITIES_REL))
+                        .withTemplateParameters(parameters)
+                        .toObject(Map.class))
                 .forEach((k, v) -> result.put(
                         (String) k, Currency.getInstance((String) v))
                 );
 
-
-        if (result.isEmpty()) {
-            logger.warn("No matching cities: {}", citiesOrRegions);
-        } else {
-            logger.info("City currencies: {}", result);
-        }
-
         return result;
     }
 
-    protected Map<String, List<AccountModel>> findCityAccounts(String citiesOrRegions, int accountLimit) {
-        final Map<String, List<AccountModel>> accountMap = new HashMap<>();
+    protected Set<String> getRegionCities(String regions) {
         final Map<String, Object> parameters = new HashMap<>();
+        parameters.put("regions", regions);
 
-        parameters.put("cities", citiesOrRegions);
+        final Set<String> cities = new HashSet<>();
+
+        Objects.requireNonNull(traverson.fromRoot()
+                        .follow(LinkRelations.withCurie(META_REL))
+                        .follow(LinkRelations.withCurie(REGION_CITIES_REL))
+                        .withTemplateParameters(parameters)
+                        .toObject(Set.class))
+                .forEach(city -> cities.add((String) city));
+
+        return cities;
+    }
+
+    protected Map<String, List<AccountModel>> getCityAccounts(String alias, int accountLimit) {
+        final Map<String, Object> parameters = new HashMap<>();
+        parameters.put("cities", alias);
         parameters.put("limit", accountLimit);
 
-        logger.info("Looking up top accounts in cities {} with limit {}",
-                StringUtils.commaDelimitedListToSet(citiesOrRegions), accountLimit);
+        final Map<String, List<AccountModel>> accountMap = new HashMap<>();
 
-        // Get top accounts, filter client-side based on region
         for (AccountModel account : Objects.requireNonNull(traverson.fromRoot()
-                .follow(BankLinkRelations.withCurie(ACCOUNT_REL))
-                .follow(BankLinkRelations.withCurie(ACCOUNT_TOP))
+                .follow(LinkRelations.withCurie(ACCOUNT_REL))
+                .follow(LinkRelations.withCurie(ACCOUNT_TOP))
                 .withTemplateParameters(parameters)
                 .toObject(Constants.ACCOUNT_MODEL_PTR))) {
-            Assert.isTrue(citiesOrRegions.contains(account.getCity()), "city mismatch!");
+            Assert.isTrue(alias.contains(account.getCity()), "city mismatch!");
             accountMap.computeIfAbsent(account.getCity(), l -> new ArrayList<>()).add(account);
-        }
-
-        if (accountMap.isEmpty()) {
-            logger.warn("No matching cities [{}]", citiesOrRegions);
-        } else {
-            accountMap.forEach((r, accountModels) -> {
-                logger.info("{} ({} accounts)", r, accountModels.size());
-            });
         }
 
         return accountMap;
     }
-
 }

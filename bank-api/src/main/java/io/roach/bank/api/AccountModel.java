@@ -19,10 +19,10 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.WeightedItem;
 
-import static io.roach.bank.api.BankLinkRelations.CURIE_PREFIX;
+import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
 
-@Relation(value = CURIE_PREFIX + BankLinkRelations.ACCOUNT_REL,
-        collectionRelation = CURIE_PREFIX + BankLinkRelations.ACCOUNT_LIST_REL)
+@Relation(value = CURIE_PREFIX + LinkRelations.ACCOUNT_REL,
+        collectionRelation = CURIE_PREFIX + LinkRelations.ACCOUNT_LIST_REL)
 @JsonPropertyOrder({"links"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountModel extends RepresentationModel<AccountModel> implements WeightedItem {

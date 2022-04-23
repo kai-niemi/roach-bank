@@ -7,7 +7,7 @@ fn_start_server(){
   fn_echo_info_nl "Starting server in locality $locality.."
 
 fn_failcheck roachprod run $CLUSTER:$c <<EOF
-nohup ./bank-server.jar --roachbank.locality=$locality > /dev/null 2>&1 &
+nohup ./bank-server.jar > /dev/null 2>&1 &
 EOF
 
   local url="http://$(roachprod ip $CLUSTER:$c --external):8090"

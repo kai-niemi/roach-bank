@@ -16,17 +16,18 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.BankLinkRelations;
+import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.support.DurationFormat;
 
-import static io.roach.bank.api.BankLinkRelations.TRANSACTION_FORM_REL;
-import static io.roach.bank.api.BankLinkRelations.TRANSACTION_REL;
+import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
+import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
@@ -44,27 +45,28 @@ public class Transfer extends RestCommandSupport {
     public void transfer(
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.15-1.75") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
-            int accountLimit,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int accountLimit,
+            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "use locking (select for update)", defaultValue = "false") boolean sfu,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
-        final Map<String, List<AccountModel>> accountMap = findCityAccounts(cities, accountLimit);
-        if (accountMap.isEmpty()) {
-            return;
+        if (!Constants.EMPTY.equals(regions)) {
+            cities = StringUtils.collectionToCommaDelimitedString(getRegionCities(regions));
         }
 
+        Map<String, List<AccountModel>> accountMap = getCityAccounts(cities, accountLimit);
+
         if (fake) {
-            accountMap.forEach((regionKey, accountModels) -> {
-                executorTemplate.runAsync("fake_transfer - " + regionKey,
-                        () -> transferFake(regionKey), DurationFormat.parseDuration(duration));
+            accountMap.forEach((city, accountModels) -> {
+                executorTemplate.runAsync("transfer - " + city,
+                        () -> transferFake(), DurationFormat.parseDuration(duration));
             });
         } else {
             final Link transferLink = traverson.fromRoot()
-                    .follow(BankLinkRelations.withCurie(TRANSACTION_REL))
-                    .follow(BankLinkRelations.withCurie(TRANSACTION_FORM_REL))
+                    .follow(LinkRelations.withCurie(TRANSACTION_REL))
+                    .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
                     .asTemplatedLink();
 
             accountMap.forEach((city, accountModels) -> {
@@ -77,7 +79,7 @@ public class Transfer extends RestCommandSupport {
         logger.info("All {} workers queued", accountMap.size());
     }
 
-    private TransactionModel transferFake(String regionKey) {
+    private TransactionModel transferFake() {
         try {
             if (Math.random() > 0.9) {
                 Thread.sleep(10_000);
