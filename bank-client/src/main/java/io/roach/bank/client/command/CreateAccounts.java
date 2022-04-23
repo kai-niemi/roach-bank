@@ -37,9 +37,11 @@ public class CreateAccounts extends RestCommandSupport {
             @ShellOption(help = "number of accounts per request", defaultValue = "320") int numAccounts,
             @ShellOption(help = "batch size per request", defaultValue = "32") int batchSize
     ) {
-        final Map<String, Currency> cityCurrencyMap = getCityCurrencyMap();
+        RestCommands restCommands = new RestCommands(traversonHelper);
 
-        final Link submitLink = traverson.fromRoot()
+        final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
+
+        final Link submitLink = traversonHelper.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_BATCH_REL))
                 .asLink();

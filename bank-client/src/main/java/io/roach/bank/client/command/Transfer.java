@@ -52,11 +52,12 @@ public class Transfer extends RestCommandSupport {
             @ShellOption(help = "use locking (select for update)", defaultValue = "false") boolean sfu,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
+        RestCommands restCommands = new RestCommands(traversonHelper);
         if (!Constants.EMPTY.equals(regions)) {
-            cities = StringUtils.collectionToCommaDelimitedString(getRegionCities(regions));
+            cities = StringUtils.collectionToCommaDelimitedString(restCommands.getRegionCities(regions));
         }
 
-        Map<String, List<AccountModel>> accountMap = getCityAccounts(cities, accountLimit);
+        Map<String, List<AccountModel>> accountMap = restCommands.getCityAccounts(cities, accountLimit);
 
         if (fake) {
             accountMap.forEach((city, accountModels) -> {
@@ -64,7 +65,7 @@ public class Transfer extends RestCommandSupport {
                         () -> transferFake(), DurationFormat.parseDuration(duration));
             });
         } else {
-            final Link transferLink = traverson.fromRoot()
+            final Link transferLink = traversonHelper.fromRoot()
                     .follow(LinkRelations.withCurie(TRANSACTION_REL))
                     .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
                     .asTemplatedLink();

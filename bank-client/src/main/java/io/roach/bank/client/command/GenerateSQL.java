@@ -29,7 +29,9 @@ public class GenerateSQL extends RestCommandSupport {
                     String balance,
             @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion
     ) throws IOException {
-        final Map<String, Currency> cityCurrencyMap = getCityCurrencyMap();
+        RestCommands restCommands = new RestCommands(traversonHelper);
+
+        final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
 
         Path path = Paths.get(output);
         if (!path.toFile().isDirectory()) {

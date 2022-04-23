@@ -9,6 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -86,9 +87,9 @@ public class MetadataController {
         return metadataRepository.getRegionCities(regions);
     }
 
-    @GetMapping(value = "/geteway-region")
+    @GetMapping(value = "/gateway-region")
     @TransactionBoundary(readOnly = true)
-    public String gatewayRegion() {
-        return metadataRepository.getGatewayRegion();
+    public ResponseEntity<String> gatewayRegion() {
+        return ResponseEntity.ok(metadataRepository.getGatewayRegion());
     }
 }

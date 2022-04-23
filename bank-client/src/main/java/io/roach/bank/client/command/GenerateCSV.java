@@ -61,7 +61,8 @@ public class GenerateCSV extends RestCommandSupport {
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2")
                     int legsPerTransaction
     ) {
-        final Map<String, Currency> cityCurrencyMap = getCityCurrencyMap();
+        RestCommands restCommands = new RestCommands(traversonHelper);
+        final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
 
         Path path = Paths.get(destination);
         if (!path.toFile().isDirectory()) {

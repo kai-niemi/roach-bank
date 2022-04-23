@@ -34,11 +34,13 @@ public class Balance extends RestCommandSupport {
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
+        RestCommands restCommands = new RestCommands(traversonHelper);
+
         if (!Constants.EMPTY.equals(regions)) {
-            cities = StringUtils.collectionToCommaDelimitedString(getRegionCities(regions));
+            cities = StringUtils.collectionToCommaDelimitedString(restCommands.getRegionCities(regions));
         }
 
-        Map<String, List<AccountModel>> accountMap = getCityAccounts(cities, accountLimit);
+        Map<String, List<AccountModel>> accountMap = restCommands.getCityAccounts(cities, accountLimit);
 
         accountMap.forEach((regionKey, accountModels) -> {
             final List<Link> links = new ArrayList<>();

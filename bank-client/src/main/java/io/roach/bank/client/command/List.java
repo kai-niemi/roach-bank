@@ -37,7 +37,7 @@ public class List extends RestCommandSupport {
         parameters.put("page", page);
         parameters.put("size", pageSize);
 
-        PagedModel<AccountModel> accountPage = traverson.fromRoot()
+        PagedModel<AccountModel> accountPage = traversonHelper.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_LIST_REL))
                 .withTemplateParameters(parameters)
@@ -82,22 +82,22 @@ public class List extends RestCommandSupport {
                     switch (s.next()) {
                         case "N":
                         case "n":
-                            accountPage = traverson.follow(accountPage.getNextLink())
+                            accountPage = traversonHelper.follow(accountPage.getNextLink())
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "P":
                         case "p":
-                            accountPage = traverson.follow(accountPage.getPreviousLink())
+                            accountPage = traversonHelper.follow(accountPage.getPreviousLink())
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "F":
                         case "f":
-                            accountPage = traverson.follow(accountPage.getLink(IanaLinkRelations.FIRST))
+                            accountPage = traversonHelper.follow(accountPage.getLink(IanaLinkRelations.FIRST))
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "L":
                         case "l":
-                            accountPage = traverson.follow(accountPage.getLink(IanaLinkRelations.LAST))
+                            accountPage = traversonHelper.follow(accountPage.getLink(IanaLinkRelations.LAST))
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "C":
