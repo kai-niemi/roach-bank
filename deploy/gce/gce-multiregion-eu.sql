@@ -4,17 +4,17 @@
 
 DELETE FROM region WHERE 1=1;
 
--- INSERT INTO region
--- VALUES
---     ('europe-west1', 'amsterdam,milano,madrid,barcelona,paris'),
---     ('europe-west2', 'london,manchester,dublin,liverpool,bristol'),
---     ('europe-west3', 'stockholm,helsinki,oslo,frankfurt,athens');
-
 INSERT INTO region
 VALUES
-    ('europe-west1', 'seattle,san francisco,los angeles,phoenix,minneapolis,chicago,detroit,atlanta,new york,boston,washington dc,miami'),
-    ('europe-west2', 'stockholm,helsinki,oslo,london,frankfurt,amsterdam,milano,madrid,athens,barcelona,paris,manchester'),
-    ('europe-west3', 'singapore,hong kong,sydney,tokyo,sao paulo,rio de janeiro,salvador');
+    ('europe-west1', 'amsterdam,milano,madrid,barcelona,paris'),
+    ('europe-west2', 'london,manchester,dublin,liverpool,bristol'),
+    ('europe-west3', 'stockholm,helsinki,oslo,frankfurt,athens');
+
+-- INSERT INTO region
+-- VALUES
+--     ('europe-west1', 'seattle,san francisco,los angeles,phoenix,minneapolis,chicago,detroit,atlanta,new york,boston,washington dc,miami'),
+--     ('europe-west2', 'stockholm,helsinki,oslo,london,frankfurt,amsterdam,milano,madrid,athens,barcelona,paris,manchester'),
+--     ('europe-west3', 'singapore,hong kong,sydney,tokyo,sao paulo,rio de janeiro,salvador');
 
 ALTER DATABASE roach_bank PRIMARY REGION "europe-west1";
 ALTER DATABASE roach_bank ADD REGION "europe-west2";
