@@ -130,7 +130,7 @@ public class AccountCreationController {
 
         logger.info("Created {} accounts in city {} using batch size {} in {}",
                 numAccounts, city, batchSize, Instant.now().minusMillis(startTime.toEpochMilli()).toString());
-1
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

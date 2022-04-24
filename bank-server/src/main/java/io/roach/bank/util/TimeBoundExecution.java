@@ -109,7 +109,7 @@ public abstract class TimeBoundExecution {
                     Thread.currentThread().interrupt();
                     logger.warn("Task interrupt: " + e.toString());
                 } catch (CancellationException e) {
-                    logger.warn("Task cancellation", e);
+                    logger.warn("Task cancellation: " + e.toString());
                 } catch (ExecutionException e) {
                     logger.error("Task fail", e);
                 }

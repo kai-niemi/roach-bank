@@ -76,12 +76,12 @@ public class AccountController {
         index.add(linkTo(methodOn(AccountController.class)
                 .listAccounts(null, null, null))
                 .withRel(LinkRelations.ACCOUNT_LIST_REL
-                ).withTitle("Collection of accounts by page"));
+                ).withTitle("Collection of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listAccounts(Collections.emptySet(), 0, 5))
+                .listAccounts(Collections.singleton("stockholm"), 0, 5))
                 .withRel(LinkRelations.ACCOUNT_LIST_REL
-                ).withTitle("First collection page of accounts"));
+                ).withTitle("Collection of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
                 .listTopAccounts(Collections.emptySet(), 10))
@@ -134,6 +134,9 @@ public class AccountController {
             @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
+        if (cities.isEmpty()) {
+            cities = metadataRepository.getRegionCities();
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         return pagedResourcesAssembler
                 .toModel(accountService.findAccountPage(cities, pageable), accountResourceAssembler);

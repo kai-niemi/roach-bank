@@ -46,10 +46,20 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public Set<String> getRegions() {
-        return new HashSet<>(this.namedParameterJdbcTemplate.query(
-                "SELECT name FROM region",
-                (rs, rowNum) -> rs.getString(1)));
+    public Map<String, String> getRegions() {
+        Map<String, String> result = new HashMap<>();
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+        this.namedParameterJdbcTemplate.query(
+                "SELECT name,cities FROM region",
+                parameters,
+                (rs, rowNum) -> {
+                    result.put(rs.getString(1), rs.getString(2));
+                    return null;
+                });
+
+        return result;
     }
 
     @Override

@@ -43,17 +43,21 @@ public class MetadataController {
         index.add(linkTo(methodOn(getClass())
                 .cities())
                 .withRel(LinkRelations.CITIES_REL)
-                .withTitle("Currencies by city or region"));
+                .withTitle("Cities and currencies"));
 
         index.add(linkTo(methodOn(getClass())
                 .currencies())
                 .withRel(LinkRelations.CURRENCIES_REL)
-                .withTitle("Currencies by city or region"));
+                .withTitle("Currencies by city"));
 
         index.add(linkTo(methodOn(getClass())
                 .regionCities(Collections.emptyList()))
                 .withRel(LinkRelations.REGION_CITIES_REL)
-                .withTitle("Cities grouped by region if available"));
+                .withTitle("Cities filtered by gateway region"));
+        index.add(linkTo(methodOn(getClass())
+                .regionCities(null))
+                .withRel(LinkRelations.REGION_CITIES_REL)
+                .withTitle("Cities filtered by gateway region"));
 
         index.add(linkTo(methodOn(getClass())
                 .gatewayRegion())
@@ -65,7 +69,7 @@ public class MetadataController {
 
     @GetMapping(value = "/regions")
     @TransactionBoundary(readOnly = true)
-    public Set<String> regions() {
+    public Map<String, String> regions() {
         return metadataRepository.getRegions();
     }
 
@@ -83,13 +87,14 @@ public class MetadataController {
 
     @GetMapping(value = "/region-cities")
     @TransactionBoundary(readOnly = true)
-    public Set<String> regionCities(@RequestParam(name = "regions", required = false, defaultValue = "") List<String> regions) {
+    public Set<String> regionCities(
+            @RequestParam(name = "regions", required = false, defaultValue = "") List<String> regions) {
         return metadataRepository.getRegionCities(regions);
     }
 
     @GetMapping(value = "/gateway-region")
     @TransactionBoundary(readOnly = true)
-    public ResponseEntity<String> gatewayRegion() {
-        return ResponseEntity.ok(metadataRepository.getGatewayRegion());
+    public ResponseEntity<MessageModel> gatewayRegion() {
+        return ResponseEntity.ok(new MessageModel(metadataRepository.getGatewayRegion()));
     }
 }
