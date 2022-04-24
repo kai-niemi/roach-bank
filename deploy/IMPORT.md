@@ -83,16 +83,6 @@ Commands to generate CSVs for all regions:
       gen-csv --accounts 100_000_000 --destination .data/100m
       gen-csv --accounts 250_000_000 --destination .data/25m
 
-US-only regions:
-
-      gen-csv --accounts 100_000 --destination .data/10k --suffix us --cities us_west,us_central,us_east
-      gen-csv --accounts 500_000 --destination .data/500k --suffix us --cities us_west,us_central,us_east
-      gen-csv --accounts 1_000_000 --destination .data/1m --suffix us --cities us_west,us_central,us_east
-      gen-csv --accounts 25_000_000 --destination .data/25m --suffix us --cities us_west,us_central,us_east
-      gen-csv --accounts 50_000_000 --destination .data/50m --suffix us --cities us_west,us_central,us_east
-      gen-csv --accounts 100_000_000 --destination .data/100m --suffix us --cities us_west,us_central,us_east
-      gen-csv --accounts 250_000_000 --destination .data/25m --suffix us --cities us_west,us_central,us_east
-
 ## NFS/Local import
               
 CockroachDB supports bulk importing from local files also, see 
