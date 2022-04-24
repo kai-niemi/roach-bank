@@ -12,6 +12,8 @@ public interface MetadataRepository {
 
     Set<Currency> getCurrencies();
 
+    Set<String> getRegionCities();
+
     Set<String> getRegionCities(Collection<String> regions);
 
     String getGatewayRegion();

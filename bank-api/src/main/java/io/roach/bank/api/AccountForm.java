@@ -24,7 +24,7 @@ public class AccountForm extends RepresentationModel<AccountForm> {
 
     @NotNull
     @Size(min = 2)
-    private String region;
+    private String city;
 
     @NotBlank
     private String name;
@@ -63,12 +63,12 @@ public class AccountForm extends RepresentationModel<AccountForm> {
         this.uuid = uuid;
     }
 
-    public String getRegion() {
-        return region;
+    public String getCity() {
+        return city;
     }
 
-    public void setRegion(String region) {
-        this.region = region;
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getName() {

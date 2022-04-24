@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.net.URI;
 

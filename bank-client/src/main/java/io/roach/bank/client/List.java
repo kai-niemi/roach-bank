@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,15 +17,19 @@ import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.client.support.Console;
+import io.roach.bank.client.support.RestCommands;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_LIST_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
 import static io.roach.bank.api.LinkRelations.withCurie;
-import static io.roach.bank.client.command.Constants.ACCOUNT_MODEL_PTR;
+import static io.roach.bank.client.Constants.ACCOUNT_MODEL_PTR;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class List extends RestCommandSupport {
+public class List extends CommandSupport {
+    @Autowired
+    private RestCommands restCommands;
+
     @Autowired
     private Console console;
 
@@ -37,7 +41,7 @@ public class List extends RestCommandSupport {
         parameters.put("page", page);
         parameters.put("size", pageSize);
 
-        PagedModel<AccountModel> accountPage = traversonHelper.fromRoot()
+        PagedModel<AccountModel> accountPage = restCommands.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_LIST_REL))
                 .withTemplateParameters(parameters)
@@ -82,22 +86,22 @@ public class List extends RestCommandSupport {
                     switch (s.next()) {
                         case "N":
                         case "n":
-                            accountPage = traversonHelper.follow(accountPage.getNextLink())
+                            accountPage = restCommands.follow(accountPage.getNextLink())
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "P":
                         case "p":
-                            accountPage = traversonHelper.follow(accountPage.getPreviousLink())
+                            accountPage = restCommands.follow(accountPage.getPreviousLink())
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "F":
                         case "f":
-                            accountPage = traversonHelper.follow(accountPage.getLink(IanaLinkRelations.FIRST))
+                            accountPage = restCommands.follow(accountPage.getLink(IanaLinkRelations.FIRST))
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "L":
                         case "l":
-                            accountPage = traversonHelper.follow(accountPage.getLink(IanaLinkRelations.LAST))
+                            accountPage = restCommands.follow(accountPage.getLink(IanaLinkRelations.LAST))
                                     .toObject(ACCOUNT_MODEL_PTR);
                             break innner_loop;
                         case "C":

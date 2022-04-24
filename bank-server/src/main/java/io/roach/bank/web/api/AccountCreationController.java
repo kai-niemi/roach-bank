@@ -1,7 +1,9 @@
 package io.roach.bank.web.api;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,7 +40,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/api/account")
-public class AccountFormController {
+public class AccountCreationController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -56,14 +58,13 @@ public class AccountFormController {
         form.setUuid("auto");
         form.setName("A name");
         form.setDescription("A description");
-        form.setRegion("stockholm");
+        form.setCity("stockholm");
         form.setCurrencyCode("SEK");
         form.setAccountType(AccountType.ASSET);
 
-        Link link = Affordances.of(linkTo(methodOn(getClass()).getAccountForm()).withSelfRel()
+        form.add(Affordances.of(linkTo(methodOn(getClass()).getAccountForm()).withSelfRel()
                         .andAffordance(afford(methodOn(getClass()).submitAccountForm(null))))
-                .toLink();
-        form.add(link);
+                .toLink());
 
         return ResponseEntity.ok(form);
     }
@@ -101,23 +102,35 @@ public class AccountFormController {
     @TransactionBoundary
     public HttpEntity<Void> submitAccountBatch(
             @RequestParam(value = "city", defaultValue = "") String city,
-            @RequestParam(value = "prefix", defaultValue = "gen") String prefix,
+            @RequestParam(value = "prefix", defaultValue = "rnd") String prefix,
             @RequestParam(value = "balance", defaultValue = "100000.00") String balance,
-            @RequestParam(value = "numAccounts", defaultValue = "320") Integer numAccounts,
+            @RequestParam(value = "numAccounts", defaultValue = "1024") Integer numAccounts,
             @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
     ) {
-        final Currency currency = metadataRepository.getCities().get(city);
+        Map<String, Currency> cities = metadataRepository.getCities();
+        if (!cities.containsKey(city)) {
+            throw new MetadataException("No such city: " + city);
+        }
+
+        final Instant startTime = Instant.now();
+        logger.info("Creating {} accounts in city {} using batch size {}", numAccounts, city, batchSize);
+
+        final Currency currency = cities.get(city);
         final Money money = Money.of(balance, currency);
         final AtomicInteger sequence = new AtomicInteger(1);
 
-        accountRepository.createAccountBatch(() -> Account.builder()
+        accountRepository.createAccounts(() -> Account.builder()
                         .withId(UUID.randomUUID())
                         .withName(prefix + "-" + sequence.incrementAndGet())
+                        .withCity(city)
                         .withBalance(money)
                         .withAccountType(AccountType.ASSET)
                         .build(),
                 numAccounts, batchSize);
 
+        logger.info("Created {} accounts in city {} using batch size {} in {}",
+                numAccounts, city, batchSize, Instant.now().minusMillis(startTime.toEpochMilli()).toString());
+1
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -10,7 +10,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -25,13 +28,21 @@ import io.roach.bank.api.TransactionModel;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.support.DurationFormat;
+import io.roach.bank.client.support.ExecutorTemplate;
+import io.roach.bank.client.support.RestCommands;
 
 import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
 import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class Transfer extends RestCommandSupport {
+public class Transfer extends CommandSupport {
+    @Autowired
+    private RestCommands restCommands;
+
+    @Autowired
+    private ExecutorTemplate executorTemplate;
+
     // 64 chars
     private static final List<String> QUOTES = Arrays.asList(
             "Cockroaches can eat anything",
@@ -52,32 +63,32 @@ public class Transfer extends RestCommandSupport {
             @ShellOption(help = "use locking (select for update)", defaultValue = "false") boolean sfu,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
-        RestCommands restCommands = new RestCommands(traversonHelper);
-        if (!Constants.EMPTY.equals(regions)) {
-            cities = StringUtils.collectionToCommaDelimitedString(restCommands.getRegionCities(regions));
+        final Set<String> cityNames = new HashSet<>();
+        cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
+        cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
+
+        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, accountLimit);
+        if (accounts.isEmpty()) {
+            logger.warn("No cities found matching: {}", cityNames);
         }
 
-        Map<String, List<AccountModel>> accountMap = restCommands.getCityAccounts(cities, accountLimit);
-
         if (fake) {
-            accountMap.forEach((city, accountModels) -> {
-                executorTemplate.runAsync("transfer - " + city,
+            accounts.forEach((city, accountModels) -> {
+                executorTemplate.runAsync(city,
                         () -> transferFake(), DurationFormat.parseDuration(duration));
             });
         } else {
-            final Link transferLink = traversonHelper.fromRoot()
+            final Link transferLink = restCommands.fromRoot()
                     .follow(LinkRelations.withCurie(TRANSACTION_REL))
                     .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
                     .asTemplatedLink();
 
-            accountMap.forEach((city, accountModels) -> {
-                executorTemplate.runAsync("transfer - " + city,
+            accounts.forEach((city, accountModels) -> {
+                executorTemplate.runAsync(city,
                         () -> transferFunds(transferLink, city, accountModels, amount, legs, sfu),
                         DurationFormat.parseDuration(duration));
             });
         }
-
-        logger.info("All {} workers queued", accountMap.size());
     }
 
     private TransactionModel transferFake() {
@@ -102,7 +113,7 @@ public class Transfer extends RestCommandSupport {
         String[] amountParts = amount.split("-");
         Money transferAmount = RandomData.randomMoneyBetween(amountParts[0], amountParts[1], currency);
 
-        TransactionForm.Builder formBuilder = TransactionForm.builder()
+        TransactionForm.Builder transactionFormBuilder = TransactionForm.builder()
                 .withUUID(UUID.randomUUID())
                 .withCity(city)
                 .withTransactionType("GEN")
@@ -110,7 +121,7 @@ public class Transfer extends RestCommandSupport {
                 .withTransferDate(LocalDate.now());
 
         if (sfu) {
-            formBuilder.withSelectForUpdate();
+            transactionFormBuilder.withSelectForUpdate();
         }
 
         Set<UUID> trail = new HashSet<>();
@@ -122,7 +133,7 @@ public class Transfer extends RestCommandSupport {
             }
             trail.add(account.getId());
 
-            formBuilder
+            transactionFormBuilder
                     .addLeg()
                     .withId(account.getId())
 
@@ -131,10 +142,12 @@ public class Transfer extends RestCommandSupport {
                     .then();
         });
 
-        return restTemplate.postForEntity(
-                        transferLink.getTemplate().expand(),
-                        formBuilder.build(),
-                        TransactionModel.class)
-                .getBody();
+        HttpHeaders headers = new HttpHeaders();
+//        headers.setETag("");
+//        headers.setContentType(MediaTypes.HAL_JSON);
+
+        HttpEntity<TransactionForm> request = new HttpEntity<>(transactionFormBuilder.build(), headers);
+
+        return restCommands.post(transferLink, request, TransactionModel.class).getBody();
     }
 }

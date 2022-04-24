@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -17,10 +17,9 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.standard.commands.Quit;
-import org.springframework.web.client.RestTemplate;
 
 import io.roach.bank.client.support.Console;
-import io.roach.bank.client.support.TraversonHelper;
+import io.roach.bank.client.support.RestCommands;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
 import static io.roach.bank.api.LinkRelations.POOL_SIZE_REL;
@@ -29,6 +28,9 @@ import static io.roach.bank.api.LinkRelations.withCurie;
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
 public class Admin implements Quit.Command {
+    @Autowired
+    private RestCommands restCommands;
+
     @Autowired
     private ConfigurableApplicationContext applicationContext;
 
@@ -74,23 +76,14 @@ public class Admin implements Quit.Command {
         console.green(" Pending GC: %s\n", m.getObjectPendingFinalizationCount());
     }
 
-    @Autowired
-    private TraversonHelper traverson;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
     @ShellMethod(value = "Print database information (server)", key = {"db-info", "di"})
     public void dbInfo(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
-
-        Link submitLink = traverson.fromRoot()
+        Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
                 .follow(withCurie(POOL_SIZE_REL))
                 .asLink();
 
-        ResponseEntity<String> response =
-                restTemplate.getForEntity(submitLink.toUri(), String.class);
-
+        ResponseEntity<String> response = restCommands.get(submitLink);
         if (!response.getStatusCode().is2xxSuccessful()) {
             console.yellow("Unexpected HTTP status: %s\n", response.toString());
         } else {

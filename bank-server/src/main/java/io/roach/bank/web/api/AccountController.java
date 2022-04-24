@@ -34,6 +34,7 @@ import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
+import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.util.TimeBoundExecution;
 import io.roach.bank.web.support.MessageModel;
@@ -62,6 +63,9 @@ public class AccountController {
     @Autowired
     private PagedResourcesAssembler<Account> pagedResourcesAssembler;
 
+    @Autowired
+    private MetadataRepository metadataRepository;
+
     @GetMapping
     public MessageModel index() {
         MessageModel index = new MessageModel("Monetary account resource");
@@ -80,16 +84,16 @@ public class AccountController {
                 ).withTitle("First collection page of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listAccountsByCity(Collections.emptySet(), 10))
+                .listTopAccounts(Collections.emptySet(), 10))
                 .withRel(LinkRelations.ACCOUNT_TOP
                 ).withTitle("Collection of top accounts grouped by region"));
 
-        index.add(linkTo(methodOn(AccountFormController.class)
+        index.add(linkTo(methodOn(AccountCreationController.class)
                 .getAccountForm())
                 .withRel(LinkRelations.ACCOUNT_FORM_REL
                 ).withTitle("Form template for new account"));
 
-        index.add(Link.of(UriTemplate.of(linkTo(AccountFormController.class)
+        index.add(Link.of(UriTemplate.of(linkTo(AccountCreationController.class)
                         .toUriComponentsBuilder().path(
                                 "/batch/{?city,prefix,numAccounts,batchSize}")  // RFC-6570 template
                         .build().toUriString()),
@@ -99,23 +103,17 @@ public class AccountController {
         return index;
     }
 
-    @GetMapping(value = "/list")
-    public PagedModel<AccountModel> listAccounts(
-            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
-            @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
-            @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
-        return pagedResourcesAssembler
-                .toModel(accountService.findAccountPage(cities, pageable), accountResourceAssembler);
-    }
-
     @GetMapping(value = "/top")
-    public ResponseEntity<CollectionModel<AccountModel>> listAccountsByCity(
+    public ResponseEntity<CollectionModel<AccountModel>> listTopAccounts(
             @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) int limit
     ) {
         final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
         final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
+
+        if (cities.isEmpty()) {
+            cities.addAll(metadataRepository.getRegionCities());
+        }
 
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -129,6 +127,16 @@ public class AccountController {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Client-side caching
                 .body(CollectionModel.of(accountResourceAssembler.toCollectionModel(accounts)));
+    }
+
+    @GetMapping(value = "/list")
+    public PagedModel<AccountModel> listAccounts(
+            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
+            @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
+            @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
+        return pagedResourcesAssembler
+                .toModel(accountService.findAccountPage(cities, pageable), accountResourceAssembler);
     }
 
     @GetMapping(value = "/{id}")

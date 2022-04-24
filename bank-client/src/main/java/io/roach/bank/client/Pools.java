@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -6,20 +6,17 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.client.support.Console;
+import io.roach.bank.client.support.RestCommands;
 import io.roach.bank.client.support.ThreadPoolStats;
-import io.roach.bank.client.support.TraversonHelper;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
 import static io.roach.bank.api.LinkRelations.POOL_SIZE_REL;
@@ -38,10 +35,7 @@ public class Pools {
     private Console console;
 
     @Autowired
-    private TraversonHelper traverson;
-
-    @Autowired
-    private RestTemplate restTemplate;
+    private RestCommands restCommands;
 
     @ShellMethod(value = "Set thread and connection pool sizes", key = {"set-pool-size", "sps"})
     public void setPoolSize(
@@ -54,7 +48,7 @@ public class Pools {
 
         console.yellow("Setting connection pool size to %d\n", connPoolSize);
 
-        Link submitLink = traverson.fromRoot()
+        Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
                 .follow(withCurie(POOL_SIZE_REL))
                 .asLink();
@@ -62,11 +56,7 @@ public class Pools {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
                 .replaceQueryParam("size", connPoolSize);
 
-        String uri = builder.build().toUriString();
-
-        ResponseEntity<String> response =
-                restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity<>(null),
-                        String.class);
+        ResponseEntity<String> response = restCommands.post(Link.of(builder.build().toUriString()));
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             console.yellow("Unexpected HTTP status: %s\n", response.toString());
@@ -86,8 +76,7 @@ public class Pools {
             console.yellow("\ttaskCount: %s\n", stats.taskCount);
             console.yellow("\tlargestPoolSize: %s\n", stats.largestPoolSize);
 
-
-            ResponseEntity<String> response = traverson.fromRoot()
+            ResponseEntity<String> response = restCommands.fromRoot()
                     .follow(withCurie(ADMIN_REL))
                     .follow(withCurie(POOL_SIZE_REL))
                     .toEntity(String.class);

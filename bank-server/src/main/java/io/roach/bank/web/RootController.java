@@ -37,9 +37,9 @@ public class RootController {
         String locality = metadataRepository.getGatewayRegion();
         model.addAttribute("randomFact", CockroachFacts.nextFact());
         if (StringUtils.hasLength(locality)) {
-            model.addAttribute("title", "Roach Bank");
-        } else {
             model.addAttribute("title", "Roach Bank (" + locality + ")");
+        } else {
+            model.addAttribute("title", "Roach Bank");
         }
         return "home";
     }

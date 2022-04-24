@@ -37,7 +37,7 @@ public class JpaAccountRepository implements AccountRepository {
     private EntityManager entityManager;
 
     @Override
-    public void createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize) {
+    public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
         IntStream.rangeClosed(1, numAccounts).forEach(value -> {
             if (value > 0 && value % batchSize == 0) {
                 accountRepository.flush();

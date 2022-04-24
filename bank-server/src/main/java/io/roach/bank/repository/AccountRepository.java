@@ -13,7 +13,7 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
 public interface AccountRepository {
-    void createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize);
+    void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize);
 
     Account createAccount(Account account);
 

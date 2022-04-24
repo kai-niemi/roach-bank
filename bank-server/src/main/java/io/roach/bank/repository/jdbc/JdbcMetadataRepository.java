@@ -1,12 +1,6 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -56,6 +50,11 @@ public class JdbcMetadataRepository implements MetadataRepository {
         return new HashSet<>(this.namedParameterJdbcTemplate.query(
                 "SELECT name FROM region",
                 (rs, rowNum) -> rs.getString(1)));
+    }
+
+    @Override
+    public Set<String> getRegionCities() {
+        return getRegionCities(new ArrayList<>());
     }
 
     @Override

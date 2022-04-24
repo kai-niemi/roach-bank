@@ -1,12 +1,13 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -18,12 +19,20 @@ import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.support.DurationFormat;
+import io.roach.bank.client.support.ExecutorTemplate;
+import io.roach.bank.client.support.RestCommands;
 
 import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class Balance extends RestCommandSupport {
+public class ReadBalance extends CommandSupport {
+    @Autowired
+    private RestCommands restCommands;
+
+    @Autowired
+    private ExecutorTemplate executorTemplate;
+
     @ShellMethod(value = "Query account balances", key = {"b", "balance"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void balance(
@@ -34,15 +43,16 @@ public class Balance extends RestCommandSupport {
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
-        RestCommands restCommands = new RestCommands(traversonHelper);
+        final Set<String> cityNames = new HashSet<>();
+        cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
+        cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
 
-        if (!Constants.EMPTY.equals(regions)) {
-            cities = StringUtils.collectionToCommaDelimitedString(restCommands.getRegionCities(regions));
+        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, accountLimit);
+        if (accounts.isEmpty()) {
+            logger.warn("No cities found matching: {}", cityNames);
         }
 
-        Map<String, List<AccountModel>> accountMap = restCommands.getCityAccounts(cities, accountLimit);
-
-        accountMap.forEach((regionKey, accountModels) -> {
+        accounts.forEach((city, accountModels) -> {
             final List<Link> links = new ArrayList<>();
 
             accountModels.forEach(accountModel -> {
@@ -52,16 +62,13 @@ public class Balance extends RestCommandSupport {
                         .get());
             });
 
-            executorTemplate.runAsync("balance - " + regionKey,
+            executorTemplate.runAsync(city,
                     () -> readAccountBalance(RandomData.selectRandom(links)),
                     DurationFormat.parseDuration(duration));
         });
-
-        logger.info("All {} workers queued", accountMap.size());
     }
 
     private void readAccountBalance(Link link) {
-        restTemplate.exchange(link.toUri(), HttpMethod.GET,
-                new HttpEntity<>(null), String.class);
+        restCommands.get(link);
     }
 }

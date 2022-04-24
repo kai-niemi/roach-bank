@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Currency;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -17,10 +18,14 @@ import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.support.Money;
 import io.roach.bank.client.support.ByteFormat;
+import io.roach.bank.client.support.RestCommands;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
-public class GenerateSQL extends RestCommandSupport {
+public class GenerateSQL extends CommandSupport {
+    @Autowired
+    private RestCommands restCommands;
+
     @ShellMethod(value = "Generate account plan in SQL format", key = {"gen-sql"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void generateSQL(
@@ -29,8 +34,6 @@ public class GenerateSQL extends RestCommandSupport {
                     String balance,
             @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion
     ) throws IOException {
-        RestCommands restCommands = new RestCommands(traversonHelper);
-
         final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
 
         Path path = Paths.get(output);

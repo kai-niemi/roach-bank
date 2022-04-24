@@ -72,7 +72,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize) {
+    public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
         IntStream.rangeClosed(1, numAccounts / batchSize)
                 .forEach(batch -> jdbcTemplate.batchUpdate(
                         "INSERT INTO account "

@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -38,10 +39,14 @@ import org.springframework.util.StringUtils;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.support.ByteFormat;
+import io.roach.bank.client.support.RestCommands;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
-public class GenerateCSV extends RestCommandSupport {
+public class GenerateCSV extends CommandSupport {
+    @Autowired
+    private RestCommands restCommands;
+
     private static int spinner = 0;
 
     private static void tick(String prefix) {
@@ -61,7 +66,6 @@ public class GenerateCSV extends RestCommandSupport {
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2")
                     int legsPerTransaction
     ) {
-        RestCommands restCommands = new RestCommands(traversonHelper);
         final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
 
         Path path = Paths.get(destination);

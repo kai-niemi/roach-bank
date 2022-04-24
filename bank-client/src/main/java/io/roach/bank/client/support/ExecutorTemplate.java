@@ -13,18 +13,13 @@ import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
 public class ExecutorTemplate {
-    @Autowired
-    private ThreadPoolTaskExecutor threadPoolExecutor;
-
-    @Autowired
-    private CallMetrics callMetrics;
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final Map<String, AtomicInteger> workers = new ConcurrentHashMap<>();
@@ -32,6 +27,13 @@ public class ExecutorTemplate {
     private final LinkedList<ListenableFuture<Void>> futures = new LinkedList<>();
 
     private volatile boolean cancelRequested;
+
+    @Qualifier("taskExecutor")
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolExecutor;
+
+    @Autowired
+    private CallMetrics callMetrics;
 
     public ListenableFuture<Void> runAsync(String id, Runnable runnable, Duration duration) {
         ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {

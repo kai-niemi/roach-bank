@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,7 +17,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ShellComponent
 @ShellCommandGroup(Constants.CONFIG_COMMANDS)
-public class Config {
+public class PrintConfig {
     @Autowired
     private ConfigurableApplicationContext applicationContext;
 

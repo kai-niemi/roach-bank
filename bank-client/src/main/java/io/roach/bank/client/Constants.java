@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
