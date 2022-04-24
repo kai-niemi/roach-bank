@@ -21,9 +21,7 @@ import org.springframework.shell.standard.commands.Quit;
 import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.RestCommands;
 
-import static io.roach.bank.api.LinkRelations.ADMIN_REL;
-import static io.roach.bank.api.LinkRelations.POOL_SIZE_REL;
-import static io.roach.bank.api.LinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.*;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -80,7 +78,7 @@ public class Admin implements Quit.Command {
     public void dbInfo(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
         Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
-                .follow(withCurie(POOL_SIZE_REL))
+                .follow(withCurie(POOL_INFO_REL))
                 .asLink();
 
         ResponseEntity<String> response = restCommands.get(submitLink);

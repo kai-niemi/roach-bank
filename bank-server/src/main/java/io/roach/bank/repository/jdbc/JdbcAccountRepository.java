@@ -206,13 +206,14 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findAccountsById(Set<UUID> ids, boolean sfu) {
+    public List<Account> findAccountsById(Set<UUID> ids, String city, boolean sfu) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", ids);
+        parameters.addValue("city", city);
 
         return this.namedParameterJdbcTemplate.query(
-                sfu ? "SELECT * FROM account WHERE id in (:ids) FOR UPDATE"
-                        : "SELECT * FROM account WHERE id in (:ids)",
+                sfu ? "SELECT * FROM account WHERE id in (:ids) AND city=:city FOR UPDATE"
+                    : "SELECT * FROM account WHERE id in (:ids) AND city=:city",
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
     }

@@ -10,7 +10,7 @@ import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 
 public interface TransactionService {
-    Transaction createTransaction(UUID id, TransactionForm transactionRequest);
+    Transaction createTransaction(UUID id, TransactionForm transactionForm);
 
     Transaction findById(UUID id);
 

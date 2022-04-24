@@ -33,7 +33,7 @@ public interface AccountRepository {
 
     List<Account> findAccountsByCity(String city, int limit);
 
-    List<Account> findAccountsById(Set<UUID> ids, boolean sfu);
+    List<Account> findAccountsById(Set<UUID> ids, String city, boolean sfu);
 
     void deleteAll();
 }

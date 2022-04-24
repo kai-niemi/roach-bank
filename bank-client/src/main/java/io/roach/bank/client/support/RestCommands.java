@@ -63,11 +63,11 @@ public class RestCommands {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<String> getRegions() {
-        Set<String> result = fromRoot()
+    public Map<String, String> getRegions() {
+        Map<String, String> result = fromRoot()
                 .follow(LinkRelations.withCurie(META_REL))
                 .follow(LinkRelations.withCurie(REGIONS_REL))
-                .toObject(Set.class);
+                .toObject(Map.class);
         return result;
     }
 
@@ -102,9 +102,9 @@ public class RestCommands {
 
     @SuppressWarnings("unchecked")
     public Set<String> getRegionCities(Set<String> regions) {
-        if (regions.isEmpty()) {
-            return Collections.emptySet();
-        }
+//        if (regions.isEmpty()) {
+//            return Collections.emptySet();
+//        }
 
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("regions", regions);

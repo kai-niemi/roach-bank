@@ -18,13 +18,11 @@ import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.RestCommands;
 import io.roach.bank.client.support.ThreadPoolStats;
 
-import static io.roach.bank.api.LinkRelations.ADMIN_REL;
-import static io.roach.bank.api.LinkRelations.POOL_SIZE_REL;
-import static io.roach.bank.api.LinkRelations.withCurie;
+import static io.roach.bank.api.LinkRelations.*;
 
 @ShellComponent
 @ShellCommandGroup(Constants.CONFIG_COMMANDS)
-public class Pools {
+public class ResourcePools {
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
@@ -78,7 +76,7 @@ public class Pools {
 
             ResponseEntity<String> response = restCommands.fromRoot()
                     .follow(withCurie(ADMIN_REL))
-                    .follow(withCurie(POOL_SIZE_REL))
+                    .follow(withCurie(POOL_INFO_REL))
                     .toEntity(String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {

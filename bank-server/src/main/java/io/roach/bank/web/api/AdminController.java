@@ -53,6 +53,9 @@ public class AdminController {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private HikariDataSource hikariDataSource;
+
     @GetMapping
     public ResponseEntity<MessageModel> index() {
         MessageModel index = new MessageModel();
@@ -73,8 +76,8 @@ public class AdminController {
                 .withTitle("Connection pool size"));
 
         index.add(linkTo(methodOn(getClass())
-                .connectionPoolInfo())
-                .withRel(LinkRelations.POOL_SIZE_REL)
+                .getConnectionPoolInfo())
+                .withRel(LinkRelations.POOL_INFO_REL)
                 .withTitle("Connection pool info"));
 
         index.add(Link.of(
@@ -174,16 +177,15 @@ public class AdminController {
     public CompletableFuture<Void> clearAll() {
         logger.warn("Deleting all transactions");
         transactionService.deleteAll();
+
         logger.warn("Deleting all accounts");
         accountService.deleteAll();
+
         return CompletableFuture.completedFuture(null);
     }
 
-    @Autowired
-    private HikariDataSource hikariDataSource;
-
     @GetMapping(value = "/pool-info")
-    public ResponseEntity<Map<String, Object>> connectionPoolInfo() {
+    public ResponseEntity<Map<String, Object>> getConnectionPoolInfo() {
         final Map<String, Object> properties = new LinkedHashMap<>();
 
         HikariPoolMXBean mxBean = hikariDataSource.getHikariPoolMXBean();

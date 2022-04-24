@@ -58,14 +58,14 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
 
     @Query(value = "select a "
             + "from Account a "
-            + "where a.id in (?1)")
+            + "where a.id in (?1) and a.city=?2")
     @Lock(LockModeType.PESSIMISTIC_READ)
-    List<Account> findAllWithLock(Set<UUID> ids);
+    List<Account> findAllWithLock(Set<UUID> ids, String city);
 
     @Query(value = "select a "
             + "from Account a "
-            + "where a.id in (?1)")
-    List<Account> findAll(Set<UUID> ids);
+            + "where a.id in (?1) and a.city=?2")
+    List<Account> findAll(Set<UUID> ids, String city);
 
     @Query(value
             = "select a "

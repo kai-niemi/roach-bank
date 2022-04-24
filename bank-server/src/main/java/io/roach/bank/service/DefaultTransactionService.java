@@ -34,27 +34,30 @@ public class DefaultTransactionService implements TransactionService {
 
     @Override
     @TransactionMandatory
-    public Transaction createTransaction(UUID id, TransactionForm form) {
+    public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new IllegalStateException("No transaction context - check Spring profile settings");
         }
 
-        if (form.getAccountLegs().size() < 2) {
+        if (transactionForm.getAccountLegs().size() < 2) {
             throw new BadRequestException("Must have at least two account items");
         }
 
         // Coalesce multi-legged transactions
-        final Map<UUID, Pair<Money, String>> legs = coalesce(form);
+        final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
 
         // Lookup accounts with authoritative reads
-        final List<Account> accounts = accountRepository.findAccountsById(legs.keySet(), form.isSelectForUpdate());
+        final List<Account> accounts = accountRepository.findAccountsById(
+                legs.keySet(),
+                transactionForm.getCity(),
+                transactionForm.isSelectForUpdate());
 
         final Transaction.Builder transactionBuilder = Transaction.builder()
                 .withId(id)
-                .withCity(form.getCity())
-                .withTransactionType(form.getTransactionType())
-                .withBookingDate(form.getBookingDate())
-                .withTransferDate(form.getTransferDate());
+                .withCity(transactionForm.getCity())
+                .withTransactionType(transactionForm.getTransactionType())
+                .withBookingDate(transactionForm.getBookingDate())
+                .withTransferDate(transactionForm.getTransferDate());
 
         legs.forEach((accountId, value) -> {
             final Money amount = value.getLeft();

@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -60,12 +59,16 @@ public class Transfer extends CommandSupport {
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = "use locking (select for update)", defaultValue = "false") boolean sfu,
+            @ShellOption(help = "use pessmistic locking reading accounts", defaultValue = "false") boolean sfu,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
         final Set<String> cityNames = new HashSet<>();
-        cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
-        cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
+        if (!regions.equals(Constants.EMPTY)) {
+            cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
+        }
+        if (!cities.equals(Constants.EMPTY)) {
+            cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
+        }
 
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, accountLimit);
         if (accounts.isEmpty()) {
@@ -91,10 +94,12 @@ public class Transfer extends CommandSupport {
         }
     }
 
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
+
     private TransactionModel transferFake() {
         try {
-            if (Math.random() > 0.9) {
-                Thread.sleep(10_000);
+            if (random.nextDouble() > 0.98) {
+                Thread.sleep(1_000);
             } else {
                 Thread.sleep(5);
             }
@@ -103,7 +108,7 @@ public class Transfer extends CommandSupport {
         return null;
     }
 
-    private TransactionModel transferFunds(Link transferLink,
+    private TransactionModel transferFunds(Link link,
                                            String city,
                                            List<AccountModel> accounts,
                                            String amount,
@@ -113,7 +118,7 @@ public class Transfer extends CommandSupport {
         String[] amountParts = amount.split("-");
         Money transferAmount = RandomData.randomMoneyBetween(amountParts[0], amountParts[1], currency);
 
-        TransactionForm.Builder transactionFormBuilder = TransactionForm.builder()
+        TransactionForm.Builder builder = TransactionForm.builder()
                 .withUUID(UUID.randomUUID())
                 .withCity(city)
                 .withTransactionType("GEN")
@@ -121,7 +126,7 @@ public class Transfer extends CommandSupport {
                 .withTransferDate(LocalDate.now());
 
         if (sfu) {
-            transactionFormBuilder.withSelectForUpdate();
+            builder.withSelectForUpdate();
         }
 
         Set<UUID> trail = new HashSet<>();
@@ -133,21 +138,13 @@ public class Transfer extends CommandSupport {
             }
             trail.add(account.getId());
 
-            transactionFormBuilder
-                    .addLeg()
+            builder.addLeg()
                     .withId(account.getId())
-
                     .withAmount(value % 2 == 0 ? transferAmount.negate() : transferAmount)
                     .withNote(RandomData.selectRandom(QUOTES))
                     .then();
         });
 
-        HttpHeaders headers = new HttpHeaders();
-//        headers.setETag("");
-//        headers.setContentType(MediaTypes.HAL_JSON);
-
-        HttpEntity<TransactionForm> request = new HttpEntity<>(transactionFormBuilder.build(), headers);
-
-        return restCommands.post(transferLink, request, TransactionModel.class).getBody();
+        return restCommands.post(link, builder.build(), TransactionModel.class).getBody();
     }
 }

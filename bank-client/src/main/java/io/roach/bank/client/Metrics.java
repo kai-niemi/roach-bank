@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
@@ -23,6 +24,7 @@ public class Metrics {
     private ScheduledExecutorService scheduledExecutorService;
 
     @Autowired
+    @Qualifier("jobExecutor")
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired

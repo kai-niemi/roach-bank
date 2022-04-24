@@ -63,6 +63,8 @@ public abstract class LinkRelations {
 
     public static final String POOL_SIZE_REL = "pool-size";
 
+    public static final String POOL_INFO_REL = "pool-info";
+
     public static final String META_REL = "meta";
 
     public static final String ACTUATOR_REL = "actuator";

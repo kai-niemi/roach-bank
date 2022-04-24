@@ -11,13 +11,20 @@ create type currency_code as enum ('USD', 'SEK', 'EUR', 'NOK', 'GBP','SGD','HKD'
 -- Metadata
 ----------------------
 
-create table region_map
+create table region
 (
-    city     varchar(64)   not null,
-    currency currency_code not null,
-    region   varchar(64)   not null,
+    name   string not null,
+    cities string not null,
 
-    primary key (city, currency, region)
+    primary key (name)
+);
+
+create table city
+(
+    name     string        not null,
+    currency currency_code not null,
+
+    primary key (name)
 );
 
 ----------------------

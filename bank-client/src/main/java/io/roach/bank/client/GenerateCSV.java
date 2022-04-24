@@ -58,7 +58,7 @@ public class GenerateCSV extends CommandSupport {
     public void generateCSV(
             @ShellOption(help = "file destination path", defaultValue = ".data") String destination,
             @ShellOption(help = "file suffix", defaultValue = "") String suffix,
-            @ShellOption(help = "initial account balance in regional currency", defaultValue = "1000.00")
+            @ShellOption(help = "initial account balance in regional currency", defaultValue = "500000.00")
                     String initialBalance,
             @ShellOption(help = "number of CSV files per table", defaultValue = "10") int numFiles,
             @ShellOption(help = "number of accounts in total", defaultValue = "1_000_000") String accounts,

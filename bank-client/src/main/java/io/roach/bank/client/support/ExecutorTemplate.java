@@ -28,7 +28,7 @@ public class ExecutorTemplate {
 
     private volatile boolean cancelRequested;
 
-    @Qualifier("taskExecutor")
+    @Qualifier("jobExecutor")
     @Autowired
     private ThreadPoolTaskExecutor threadPoolExecutor;
 

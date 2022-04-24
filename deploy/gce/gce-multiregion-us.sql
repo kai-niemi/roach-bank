@@ -3,8 +3,8 @@ ALTER DATABASE roach_bank ADD REGION "us-central1";
 ALTER DATABASE roach_bank ADD REGION "us-west1";
 
 -- Pin replicas to regions by disabling NVRs (fast stale reads out of primary region)
-SET enable_multiregion_placement_policy=on;
-ALTER DATABASE roach_bank PLACEMENT RESTRICTED;
+-- SET enable_multiregion_placement_policy=on;
+-- ALTER DATABASE roach_bank PLACEMENT RESTRICTED;
 -- ALTER DATABASE roach_bank PLACEMENT DEFAULT;
 
 ALTER TABLE region SET locality GLOBAL;

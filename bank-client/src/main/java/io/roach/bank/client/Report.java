@@ -38,8 +38,8 @@ public class Report extends CommandSupport {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegions() {
         console.yellow("-- regions --\n");
-        restCommands.getRegions().forEach(s -> {
-            console.cyan("%s\n", s);
+        restCommands.getRegions().forEach((k, v) -> {
+            console.cyan("%s: %s\n", k, v);
         });
     }
 

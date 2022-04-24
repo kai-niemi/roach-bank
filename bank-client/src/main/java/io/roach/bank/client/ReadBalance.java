@@ -36,7 +36,7 @@ public class ReadBalance extends CommandSupport {
     @ShellMethod(value = "Query account balances", key = {"b", "balance"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void balance(
-            @ShellOption(help = "use non-authoritative follower reads", defaultValue = "true") boolean followerReads,
+            @ShellOption(help = "use non-authoritative follower reads", defaultValue = "false") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
             int accountLimit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
@@ -44,8 +44,12 @@ public class ReadBalance extends CommandSupport {
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
         final Set<String> cityNames = new HashSet<>();
-        cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
-        cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
+        if (!regions.equals(Constants.EMPTY)) {
+            cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
+        }
+        if (!cities.equals(Constants.EMPTY)) {
+            cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
+        }
 
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, accountLimit);
         if (accounts.isEmpty()) {

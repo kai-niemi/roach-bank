@@ -17,7 +17,7 @@ import io.roach.bank.client.support.CallMetrics;
 @EnableAsync
 public class ConcurrencyConfig implements AsyncConfigurer {
     @Override
-    @Bean(name = "taskExecutor")
+    @Bean(name = "jobExecutor")
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(250);

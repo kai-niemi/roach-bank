@@ -30,9 +30,9 @@ public class GenerateSQL extends CommandSupport {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void generateSQL(
             @ShellOption(help = "output path", defaultValue = ".data") String output,
-            @ShellOption(help = "initial account balance in regional currency", defaultValue = "100000.00")
+            @ShellOption(help = "initial account balance in regional currency", defaultValue = "500000.00")
                     String balance,
-            @ShellOption(help = "number of accounts per region", defaultValue = "100") int accountsPerRegion
+            @ShellOption(help = "number of accounts per region", defaultValue = "1000") int accountsPerRegion
     ) throws IOException {
         final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
 
@@ -44,14 +44,14 @@ public class GenerateSQL extends CommandSupport {
             }
         }
 
-        path = path.resolve("V1_3__load_accounts.sql");
+        path = path.resolve("accounts.sql");
 
         try (BufferedWriter writer = Files
                 .newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
             writer.write("-- balance per account: " + balance + "\n");
             writer.write("-- accounts per region: " + accountsPerRegion + "\n");
             writer.write("-- accounts total: " + accountsPerRegion * cityCurrencyMap.size() + "\n");
-            writer.write("-- regions: " + cityCurrencyMap.keySet() + "\n");
+            writer.write("-- cities: " + cityCurrencyMap.keySet() + "\n");
             writer.newLine();
 
             cityCurrencyMap.forEach((city, currency) -> {
