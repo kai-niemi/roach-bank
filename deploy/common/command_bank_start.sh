@@ -2,9 +2,8 @@
 
 fn_start_server(){
   local c=$1
-  local locality=$2
 
-  fn_echo_info_nl "Starting server in locality $locality.."
+  fn_echo_info_nl "Starting server.."
 
 fn_failcheck roachprod run $CLUSTER:$c <<EOF
 nohup ./bank-server.jar > /dev/null 2>&1 &
@@ -32,7 +31,7 @@ fi
 i=0;
 for c in "${clients[@]}"
 do
-    fn_start_server $c ${localities[$i]}
+    fn_start_server $c
     i=($i+1)
 done
 

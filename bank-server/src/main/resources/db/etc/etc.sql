@@ -12,5 +12,6 @@ SELECT * FROM crdb_internal.ranges;
 EXPLAIN ANALYZE SELECT * FROM account WHERE city='stockholm' and id='02fde064-10b1-4568-be1c-9012f97cd448';
 
 SHOW RANGE FROM TABLE account FOR ROW ('europe-west1','02fde064-10b1-4568-be1c-9012f97cd448');
+SHOW RANGE FROM TABLE account FOR ROW ('us-east1','fec9e7eb-912d-4052-9aa5-bcddc395920e');
 
 SELECT * FROM system.replication_constraint_stats WHERE violating_ranges > 0;

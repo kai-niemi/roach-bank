@@ -13,8 +13,6 @@ nodes="12"
 crdbnodes="1-9"
 # Array of client nodes (must match size of regions)
 clients=(10 11 12)
-# Array of client localities (must match partition names)
-localities=('us_east1' 'us_central' 'us_west1')
 # Array of regions localities (must match zone names)
 regions=('us-east1' 'us-central1' 'us-west1')
 # AWS/GCE cloud (aws|gce)
@@ -44,5 +42,3 @@ functionsdir="../common"
 source "${functionsdir}/core_functions.sh"
 
 command_main.sh
-
-exit 0

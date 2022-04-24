@@ -2,6 +2,9 @@ ALTER DATABASE roach_bank PRIMARY REGION "eu_west_1";
 ALTER DATABASE roach_bank ADD REGION "eu_west_2";
 ALTER DATABASE roach_bank ADD REGION "eu_central_1";
 
+ALTER TABLE region SET locality GLOBAL;
+ALTER TABLE city SET locality GLOBAL;
+
 ALTER TABLE account ADD COLUMN region crdb_internal_region AS (
     CASE
         WHEN city IN ('stockholm','helsinki','oslo','london','frankfurt','amsterdam','milano','madrid','athens','barcelona','paris','manchester') THEN 'eu_west_1'

@@ -25,7 +25,8 @@ ALTER DATABASE roach_bank ADD REGION "europe-west3";
 -- ALTER DATABASE roach_bank PLACEMENT RESTRICTED;
 -- ALTER DATABASE roach_bank PLACEMENT DEFAULT;
 
-ALTER TABLE region_map SET locality GLOBAL;
+ALTER TABLE region SET locality GLOBAL;
+ALTER TABLE city SET locality GLOBAL;
 
 ALTER TABLE account ADD COLUMN region crdb_internal_region AS (
     CASE

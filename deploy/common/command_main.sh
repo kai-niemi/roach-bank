@@ -22,7 +22,6 @@ fn_echo_header
 	echo -e "${lightblue}CRDB nodes:\t\t${default}$crdbnodes"
 	echo -e "${lightblue}CRDB version:\t\t${default}$releaseversion"
 	echo -e "${lightblue}Client nodes:\t\t${default}${clients[*]}"
-	echo -e "${lightblue}Client localities:\t\t${default}${localities[*]}"
 	echo -e "${lightblue}Cloud:\t\t${default}$cloud"
 	echo -e "${lightblue}Machine types:\t\t${default}$machinetypes"
 	echo -e "${lightblue}Zones:\t\t${default}$zones"
