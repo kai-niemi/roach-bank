@@ -1,14 +1,13 @@
-# Deployment Tutorial
+# Cloud Deployment Tutorial
 
-Deployment tutorial for setting up a full-stack Roach Bank demo using either a 
-single or multi-region topology.
+Deployment tutorial for setting up a full-stack demo using either a single or multi-region cloud deployment.
 
 ## Prerequisites
 
 - JDK8+ with 1.8 language level
 - [Roachprod](https://github.com/cockroachdb/cockroach/tree/master/pkg/cmd/roachprod) - a Cockroach Labs internal
   tool for ramping AWS/GCE/Azure VM clusters 
-    - You will need the AWS/GCE/AZ client SDK, and an account
+- You will need the AWS/GCE/AZ client SDK, and an account
 
 ## Create Cluster
 
@@ -25,8 +24,7 @@ For example:
 
 ## Demo Instructions
 
-Once the cluster is setup and the bank is deployed, you can issue workload commands 
-to create traffic.
+Once the cluster is setup and the bank is deployed, you can issue workload commands to create traffic.
 
 ### Starting the Client
 
@@ -51,8 +49,7 @@ Read account balances:
 
 ### Global Workload
 
-In a multi-region setup, it can be interesting to push traffic concurrently in
-each region:
+In a multi-region setup, it can be interesting to push traffic concurrently in each region:
 
 Connect to region 1:
 

@@ -198,7 +198,7 @@ public class CallMetrics {
             final int size = snapshots.size();
             return size / Math.max(1,
                     Duration.ofNanos(
-                            (System.nanoTime() - (snapshots.isEmpty() ? 0 : snapshots.get(0).endTime)))
+                                    (System.nanoTime() - (snapshots.isEmpty() ? 0 : snapshots.get(0).endTime)))
                             .toMillis() / 1000.0);
         }
 

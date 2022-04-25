@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -27,15 +26,15 @@ import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
 import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class CreateAccounts extends CommandSupport {
+@ShellCommandGroup(Constants.MAIN_COMMANDS)
+public class CreateAccounts extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 
     @Autowired
     private ExecutorTemplate executorTemplate;
 
-    @ShellMethod(value = "Create new accounts", key = {"create-accounts", "ca"})
+    @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
             @ShellOption(help = "create accounts for a time period", defaultValue = "") String duration,
@@ -88,7 +87,8 @@ public class CreateAccounts extends CommandSupport {
                 } else {
                     final int totAccounts = Integer.parseInt(totalAccounts.replace("_", ""));
                     int iterations = Math.max(1, totAccounts / batchSize / cityCurrencyMap.size());
-                    logger.info("Creating {} accounts in '{}' in {} iterations", city, totAccounts / cityCurrencyMap.size(), iterations);
+                    logger.info("Creating {} accounts in '{}' in {} iterations", city,
+                            totAccounts / cityCurrencyMap.size(), iterations);
                     executorTemplate.runAsync(city, worker, iterations);
                 }
             } else {

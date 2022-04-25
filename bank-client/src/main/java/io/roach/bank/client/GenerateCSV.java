@@ -36,8 +36,8 @@ import io.roach.bank.client.support.ByteFormat;
 import io.roach.bank.client.support.RestCommands;
 
 @ShellComponent
-@ShellCommandGroup(Constants.ADMIN_COMMANDS)
-public class GenerateCSV extends CommandSupport {
+@ShellCommandGroup(Constants.MAIN_COMMANDS)
+public class GenerateCSV extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 

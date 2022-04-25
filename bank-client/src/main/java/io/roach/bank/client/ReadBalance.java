@@ -25,8 +25,8 @@ import io.roach.bank.client.support.RestCommands;
 import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class ReadBalance extends CommandSupport {
+@ShellCommandGroup(Constants.MAIN_COMMANDS)
+public class ReadBalance extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 

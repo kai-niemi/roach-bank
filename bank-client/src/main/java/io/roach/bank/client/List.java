@@ -16,7 +16,6 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.RestCommands;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_LIST_REL;
@@ -25,15 +24,12 @@ import static io.roach.bank.api.LinkRelations.withCurie;
 import static io.roach.bank.client.Constants.ACCOUNT_MODEL_PTR;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class List extends CommandSupport {
+@ShellCommandGroup(Constants.REPORTING_COMMANDS)
+public class List extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 
-    @Autowired
-    private Console console;
-
-    @ShellMethod(value = "List accounts using pagination", key = {"list", "l"})
+    @ShellMethod(value = "List accounts using pagination", key = {"list-accounts"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listAccounts(@ShellOption(help = "page number", defaultValue = "0") int page,
                              @ShellOption(help = "page size", defaultValue = "20") int pageSize) {

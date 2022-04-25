@@ -21,8 +21,8 @@ import com.jayway.jsonpath.JsonPath;
 import io.roach.bank.client.support.ConnectionUpdatedEvent;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class Connect {
+@ShellCommandGroup(Constants.MAIN_COMMANDS)
+public class Connect extends AbstractCommand {
     public static final String DEFAULT_URL = "http://localhost:8090/api/";
 
     private static boolean connected;

@@ -11,10 +11,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.client.support.Console;
 import io.roach.bank.client.support.RestCommands;
 import io.roach.bank.client.support.ThreadPoolStats;
 
@@ -22,7 +22,7 @@ import static io.roach.bank.api.LinkRelations.*;
 
 @ShellComponent
 @ShellCommandGroup(Constants.CONFIG_COMMANDS)
-public class ResourcePools {
+public class ResourcePools extends AbstractCommand {
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
@@ -30,12 +30,10 @@ public class ResourcePools {
     private ScheduledExecutorService scheduledExecutorService;
 
     @Autowired
-    private Console console;
-
-    @Autowired
     private RestCommands restCommands;
 
-    @ShellMethod(value = "Set client thread pool and server connection pool sizes", key = {"pool-size-set", "pss"})
+    @ShellMethod(value = "Set client thread pool and server connection pool sizes", key = {"pool-size-set"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void setPoolSize(
             @ShellOption(help = "thread pool size", defaultValue = "100") int threadPoolSize,
             @ShellOption(help = "connection pool size", defaultValue = "100") int connPoolSize
@@ -61,7 +59,8 @@ public class ResourcePools {
         }
     }
 
-    @ShellMethod(value = "Print thread pool information", key = {"pool-size", "ps"})
+    @ShellMethod(value = "Print thread pool information", key = {"pool-size"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getPoolSize(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
         Runnable r = () -> {
             ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);

@@ -10,11 +10,9 @@ public abstract class Constants {
 
     public static final String CONFIG_COMMANDS = "2. Config Commands";
 
-    public static final String WORKLOAD_COMMANDS = "3. Workload Commands";
+    public static final String REPORTING_COMMANDS = "3. Reporting Commands";
 
-    public static final String API_REPORTING_COMMANDS = "4. Reporting Commands";
-
-    public static final String API_MAIN_COMMANDS = "5. Main Commands";
+    public static final String MAIN_COMMANDS = "4. Main Commands";
 
     public static final String DEFAULT_DURATION = "60m";
 

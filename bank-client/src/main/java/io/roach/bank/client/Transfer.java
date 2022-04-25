@@ -34,8 +34,8 @@ import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
 import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
 
 @ShellComponent
-@ShellCommandGroup(Constants.API_MAIN_COMMANDS)
-public class Transfer extends CommandSupport {
+@ShellCommandGroup(Constants.MAIN_COMMANDS)
+public class Transfer extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 

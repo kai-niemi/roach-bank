@@ -13,11 +13,10 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 import io.roach.bank.client.support.CallMetrics;
-import io.roach.bank.client.support.Console;
 
 @ShellComponent
-@ShellCommandGroup(Constants.CONFIG_COMMANDS)
-public class Metrics {
+@ShellCommandGroup(Constants.ADMIN_COMMANDS)
+public class Metrics extends AbstractCommand {
     private boolean printMetrics = true;
 
     @Autowired
@@ -26,9 +25,6 @@ public class Metrics {
     @Autowired
     @Qualifier("jobExecutor")
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-
-    @Autowired
-    private Console console;
 
     @Autowired
     private CallMetrics callMetrics;

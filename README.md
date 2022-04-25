@@ -1,38 +1,37 @@
 # Roch Bank
 
-Roach Bank represents a full-stack, financial accounting ledger demo running on [CockroachDB](https://www.cockroachlabs.com/). 
-It's designed to demonstrate the safety and liveness properties of a globally deployed, system-of-record type 
-of workload.
+Roach Bank represents a full-stack, financial accounting ledger demo running on [CockroachDB](https://www.cockroachlabs.com/)
+and PostgreSQL. It's designed to demonstrate the safety and liveness properties of a globally deployed, 
+system-of-record type of workload.
 
 # Introduction
 
-Each Roach Bank instance provides a single page that displays the top accounts in the system, grouped 
-by currency and region (city) represented by colored rectangles. In a multi-region deployment, the 
-displayed cities are filtered by region.
+The concept of the ledger is to move funds between accounts using balanced, multi-legged transactions 
+at a high frequency. As a financial system, it needs to conserve money at all times and also provide 
+an audit trail of all transactions performed towards the accounts.
+
+This is visualized (below) using a single page to display accounts as rectangles with their current
+balance.
 
 ![frontend](docs/diagram_frontend.png)
-                
-The demo concept is to move funds between accounts using balanced, multi-legged transactions at a high
-frequency. As a financial ledger, it needs to conserve money at all times and also provide an audit trail 
-of all transactions performed towards accounts. 
 
 ## Key Invariants
 
-In Roach Bank, there are two key invariants that must hold true at all times, regardless of observer
-and activities such as infrastructure failure and conflicting operations if updating the same accounts 
-concurrently.
+There are two key invariants that must hold true at all times, regardless of observer and activities 
+such as infrastructure failure and conflicting operations if updating the same accounts 
+concurrently:
 
 * The total balance of all accounts must be constant
 * All user accounts must have a positive balance
 
-The system must refuse forward progress if an operation would result in any invariant being compromised. 
-For instance, if a variation of the total balances is observed at any given time it means these rules 
+The system must deny forward progress if an operation would result in any invariant being compromised. 
+For example, if a variation of the total balances is observed at any given time it means these rules 
 have been breached and money has either been invented or destroyed. Because it's a stateless service, 
-these invariants are safeguarded by the ACID transactional guarantees of the database.
+these invariants are safeguarded by the ACID transactional guarantees of the CockroachDB database.
 
 ## Double-entry Bookkeeping
 
-Roach Bank follows the [double-entry bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping)
+For auditability, this ledger follows the [double-entry bookkeeping](https://en.wikipedia.org/wiki/Double-entry_bookkeeping)
 principle for monetary transactions. This principle was originally formalized and published by the italian 
 mathematician Luca Pacioli during the 15:th century. It involves making at least two account entries for 
 every transaction. A debit in one account and a corresponding credit in another account. The sum of all 
@@ -48,55 +47,34 @@ debits must equal the sum of all credits, providing a simple method for error de
     ------------------------------------------
     Σ         125    +   -125 = 0 
 
-Real accounting doesn't use negative numbers, but in Roach Bank a positive value means increasing value (credit),
-and a negative value decreasing value (debit). A transaction is balanced when the sum of the legs with
-the same currency equals zero.
+Real accounting doesn't use negative numbers, but for simplicty this ledger does. A positive value means 
+increasing value (credit), and a negative value means decreasing value (debit). A transaction is 
+considered balanced when the sum of the legs with the same currency equals zero.
 
-## Deployment
+# Deployment
 
-See the [Deployment Guide](deploy/README.md) on how to deploy it to a single
-or multi-region AWS or GCE cluster.
+See the [Deployment Guide](deploy/README.md) on how to deploy the ledger to a single or multi-region 
+AWS, GCE or Azure cluster. 
 
-Roach Bank can run anywhere, but it's intended to be globally deployed across multiple 
-regions in a single cloud, multi-cloud or on-prem. 
+When deployed in a multi-regional topology (like US-EU), the accounts and transactions needs to be 
+pinned/domiciled to each region for best performance. This is done through the [regional-by-row](https://www.cockroachlabs.com/docs/stable/multiregion-overview.html#regional-by-row-tables)
+topology in CockroachDB. This will provide low read and write latencies in each region, and also for 
+an entire region to be brought down without affecting forward progress in any of the other regions.
 
-When deployed in a multi-regional topology (like US-EU), the accounts and transactions needs 
-to be pinned/domiciled to each region for best performance. This is done through the 
-geo-partitioned replicas topology (SQL scripts are provided). It will provide both 
-local read and write latencies and also for one entire region to be brought down without 
-affecting forward progress in any of the other regions.
+# Design and Implementation
 
-## Implementation
+See the [Design Notes](docs/DESIGN.md) for a complete overview of used architectural mechanisms.
+The ledger is based on a common [Spring Boot](https://spring.io/projects/spring-boot) microservice
+stack using Spring Boot, Spring Data JDBC/JPA, Spring Hateoas, HikariCP, Flyway and more. Kafka
+is optional to use to drive account balance push events.
 
-See the [Design Notes](docs/DESIGN.md) for a complete overview of the different architectural
-mechanisms used.
-
-Roach Bank provides a backend service with a single page web front-end, and a Hypermedia API 
-for workload-generating clients. The clients issue transfer requests to the service API, 
-which in turn executes the SQL transactions and publishes push event for the frontend. 
-
-As an option, CDC can be used to push change events to either Kafka or an HTTP endpoint, 
-which are translated to websocket push events. These push events signals account balance updates
-and drives the frontend updates. Push events are regionally scoped.
-
-A regionally scoped load balancer also sits between the service and CockroachDB nodes.
+Architecture overview:
 
 ![architecture](docs/diagram_architecture.png)
 
-Roach Bank is based on a fairly common [Spring Boot](https://spring.io/projects/spring-boot) microservice 
-stack using frameworks like Spring Data, Spring Hateoas, HikariCP, Flyway and more. 
+# Project Setup
 
-## Project Setup
-
-How to build the service.
-
-### Subprojects
-
-- [api](bank-api/README.md) - API artifacts and message models
-- [client](bank-client/README.md) - Interactive service endpoint shell client for generating load
-- [server](bank-server/README.md) - Main service implementation
-
-### Prerequisites
+## Prerequisites
 
 - JDK8+ with 1.8 language level 
 - [Maven 3](https://maven.apache.org/download.cgi) for building the project (optional, embedded)  
@@ -105,13 +83,19 @@ OpenJDK installation on Ubuntu:
 
     sudo apt-get -qq install -y openjdk-8-jdk
 
-### Supported Databases
+## Subprojects
+
+- [api](bank-api/README.md) - API artifacts and message models
+- [client](bank-client/README.md) - Interactive service endpoint shell client for generating load
+- [server](bank-server/README.md) - Main service implementation
+
+## Supported Databases
 
 Both CockroachDB 20.2+ and PostgreSQL 9.1+ are supported. The database type can be selected 
 at start-up time by activating the appropriate profile (see below). Table schema and
 initial data (account plan) creation is automatic through Flyway. 
 
-#### CockroachDB Notes
+### CockroachDB Notes
 
 A CockroachDB enterprise (trial) license is required for some demo features like 
 geo-partitioning and follower-reads.
@@ -124,7 +108,7 @@ Set an enterprise license (optional):
 
     cockroach sql --insecure --host=localhost -e "SET CLUSTER SETTING cluster.organization = '...'; SET CLUSTER SETTING enterprise.license = '...';"
  
-#### PostgreSQL Notes
+### PostgreSQL Notes
 
 Create the database:
 
@@ -145,11 +129,11 @@ To build and deploy to your local Maven repo, execute:
 
 ### Starting locally
 
-See [server](bank-server/README.md) and [client](bank-client/README.md) for details.
-
 Quick start:
 
     chmod +x bank-server.sh
     chmod +x bank-client.sh
     ./bank-server.sh
     ./bank-client.sh
+
+See [server](bank-server/README.md) and [client](bank-client/README.md) for more details.

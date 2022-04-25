@@ -1,15 +1,12 @@
 # Roach Bank Client 
 
-Main bank client used for generating import files and workloads, including:
+Main bank client used for generating load and more, including:
 
- - Account import CSVs and DMLs
- - Report of accounts and transactions
- - Query account balances 
- - Transfer funds between accounts
- - Create accounts 
-
-It's an interactive REST client implemented using Spring Shell and Spring Hateoas,
-packaged as a self-contained, executable jar. 
+- Create accounts
+- Transfer funds between accounts
+- Query account balances
+- Report of accounts and transactions
+- Generate account import CSV files
 
 ## Usage
 
@@ -18,7 +15,7 @@ Start the client with:
     chmod +x bank-client.jar
     ./bank-client.jar
 
-First specify the endpoint URL (or reverse proxy / loadbalancer):
+First connect to the ledger service endpoint:
 
     connect [url]
      
@@ -32,19 +29,19 @@ Get help for a command:
 
     help balance
 
-Transfer funds between all accounts:
+Transfer funds between all accounts in the local region:
 
     transfer
 
-Transfer funds between random accounts in 'us' regions:
+List regions and cities:
 
-    transfer --cities us_west,us_central,us_east
+    regions
 
-Another transfer example:
+Transfer funds between accounts in specified regions:
 
-    transfer --cities us_east,eu_west,ap --amount-range 5.00-15:00 --duration 90m
+    transfer --regions <..>
 
-Query the balance of random top accounts per region:
+Query the balance of random accounts in the local region:
 
     balance --duration 5m30s --follower-reads
 
@@ -53,10 +50,6 @@ Query the balance of random top accounts per region:
 Generate 50M accounts for all regions:
 
     gen-csv --accounts 50000000
-
-Generate 250M accounts without legs for US regions:
-
-    gen-csv --no-legs --cities us_west,us_central,us_east --accounts 250000000
 
 ## Configuration
 

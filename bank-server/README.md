@@ -1,7 +1,8 @@
 # Roach Bank Server
 
-Provides the main bank service implemented with Spring Boot and packaged as a self-contained, executable jar.
-See the [Deployment Guide](../deploy/README.md) on how to deploy it to a single or multi-region AWS or GCE cluster.
+Main bank service implemented with Spring Boot and packaged as a self-contained, executable jar.
+See the [Deployment Guide](../deploy/README.md) on how to deploy it to a single or multi-region 
+AWS, GCE or Azure cluster.
 
 # Local deployment guide
 
