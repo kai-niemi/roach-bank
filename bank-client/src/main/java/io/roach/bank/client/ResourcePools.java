@@ -35,16 +35,16 @@ public class ResourcePools {
     @Autowired
     private RestCommands restCommands;
 
-    @ShellMethod(value = "Set thread and connection pool sizes", key = {"set-pool-size", "sps"})
+    @ShellMethod(value = "Set client thread pool and server connection pool sizes", key = {"set-pool-size", "sps"})
     public void setPoolSize(
             @ShellOption(help = "thread pool size", defaultValue = "50") int threadPoolSize,
             @ShellOption(help = "connection pool size", defaultValue = "50") int connPoolSize
     ) {
-        console.yellow("Setting thread pool size to %d\n", threadPoolSize);
+        console.yellow("Setting client thread pool size to %d\n", threadPoolSize);
 
         threadPoolTaskExecutor.setCorePoolSize(threadPoolSize);
 
-        console.yellow("Setting connection pool size to %d\n", connPoolSize);
+        console.yellow("Setting server connection pool size to %d\n", connPoolSize);
 
         Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
@@ -80,7 +80,7 @@ public class ResourcePools {
                     .toEntity(String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                console.yellow("Connection pool size: %s\n", response.getBody());
+                console.yellow("Connection pool info: %s\n", response.getBody());
             } else {
                 console.red("Unexpected HTTP status: %s\n", response.toString());
             }

@@ -37,8 +37,7 @@ public class ExecutorTemplate {
 
     public ListenableFuture<Void> runAsync(String id, Runnable runnable, Duration duration) {
         ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
-            logger.info("Starting '{}' for duration {}", id, duration.toString());
-
+//            logger.debug("Starting '{}' for duration {}", id, duration.toString());
             final long startTime = System.currentTimeMillis();
 
             AtomicInteger activeWorkers = workers.computeIfAbsent(id, i -> new AtomicInteger());
@@ -61,7 +60,7 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-            logger.info("Finihed '{}'", id);
+//            logger.debug("Finihed '{}'", id);
 
             return null;
         });

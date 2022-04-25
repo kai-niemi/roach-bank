@@ -84,7 +84,11 @@ public class AccountController {
                 ).withTitle("Collection of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listTopAccounts(Collections.emptySet(), 10))
+                .listTopAccounts(null, null))
+                .withRel(LinkRelations.ACCOUNT_TOP
+                ).withTitle("Collection of top accounts grouped by region"));
+        index.add(linkTo(methodOn(AccountController.class)
+                .listTopAccounts(Collections.emptySet(), -1))
                 .withRel(LinkRelations.ACCOUNT_TOP
                 ).withTitle("Collection of top accounts grouped by region"));
 
@@ -106,7 +110,7 @@ public class AccountController {
     @GetMapping(value = "/top")
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccounts(
             @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
-            @RequestParam(value = "limit", defaultValue = "-1", required = false) int limit
+            @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
         final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
         final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
@@ -139,7 +143,7 @@ public class AccountController {
         }
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         return pagedResourcesAssembler
-                .toModel(accountService.findAccountPage(cities, pageable), accountResourceAssembler);
+                .toModel(accountService.findAccounts(cities, pageable), accountResourceAssembler);
     }
 
     @GetMapping(value = "/{id}")

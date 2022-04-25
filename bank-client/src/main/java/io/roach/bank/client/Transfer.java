@@ -55,11 +55,11 @@ public class Transfer extends CommandSupport {
     public void transfer(
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.15-1.75") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int accountLimit,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = "use pessmistic locking reading accounts", defaultValue = "false") boolean sfu,
+            @ShellOption(help = "use pessmistic locking reading accounts", defaultValue = "false") boolean locking,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
         final Set<String> cityNames = new HashSet<>();
@@ -70,10 +70,14 @@ public class Transfer extends CommandSupport {
             cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
         }
 
-        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, accountLimit);
+        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, limit);
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching: {}", cityNames);
         }
+
+        accounts.forEach((city, accountModels) -> {
+            logger.info("Found {} accounts in '{}'", accountModels.size(), city);
+        });
 
         if (fake) {
             accounts.forEach((city, accountModels) -> {
@@ -88,7 +92,7 @@ public class Transfer extends CommandSupport {
 
             accounts.forEach((city, accountModels) -> {
                 executorTemplate.runAsync(city,
-                        () -> transferFunds(transferLink, city, accountModels, amount, legs, sfu),
+                        () -> transferFunds(transferLink, city, accountModels, amount, legs, locking),
                         DurationFormat.parseDuration(duration));
             });
         }

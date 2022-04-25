@@ -38,7 +38,7 @@ public class ReadBalance extends CommandSupport {
     public void balance(
             @ShellOption(help = "use non-authoritative follower reads", defaultValue = "false") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
-            int accountLimit,
+            int limit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
@@ -51,7 +51,7 @@ public class ReadBalance extends CommandSupport {
             cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
         }
 
-        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, accountLimit);
+        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(cityNames, limit);
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching: {}", cityNames);
         }

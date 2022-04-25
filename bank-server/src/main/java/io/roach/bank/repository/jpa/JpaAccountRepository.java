@@ -95,9 +95,9 @@ public class JpaAccountRepository implements AccountRepository {
     @Override
     public List<Account> findAccountsById(Set<UUID> ids, String city, boolean sfu) {
         if (sfu) {
-            return accountRepository.findAllWithLock(ids, city);
+            return accountRepository.findAllWithLock(ids);
         }
-        return accountRepository.findAll(ids, city);
+        return accountRepository.findAll(ids);
     }
 
     @Override

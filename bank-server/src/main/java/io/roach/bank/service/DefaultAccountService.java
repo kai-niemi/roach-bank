@@ -24,7 +24,7 @@ public class DefaultAccountService implements AccountService {
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public Page<Account> findAccountPage(Set<String> cities, Pageable page) {
+    public Page<Account> findAccounts(Set<String> cities, Pageable page) {
         return accountRepository.findAccountPage(cities, page);
     }
 

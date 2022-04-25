@@ -32,7 +32,7 @@ eu-central-1a,\
 eu-central-1b,\
 eu-central-1c"
 # AWS/GCE machine types
-machinetypes="c5d.2xlarge"
+machinetypes="c5d.4xlarge"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################
