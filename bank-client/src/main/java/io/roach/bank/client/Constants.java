@@ -22,7 +22,7 @@ public abstract class Constants {
 
     public static final String CONNECTED_CHECK = "connectedCheck";
 
-    public static final String DURATION_HELP = "execution duration (expression)";
+    public static final String DURATION_HELP = "execution duration";
 
     public static final String REGIONS_HELP = "comma separated list of regions";
 

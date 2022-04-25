@@ -32,7 +32,7 @@ us-west-2a,\
 us-east-2a,\
 us-east-1a"
 # AWS/GCE machine types
-machinetypes="c5d.2xlarge"
+machinetypes="c5d.4xlarge"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################
@@ -42,5 +42,3 @@ functionsdir="../common"
 source "${functionsdir}/core_functions.sh"
 
 command_main.sh
-
-exit 0

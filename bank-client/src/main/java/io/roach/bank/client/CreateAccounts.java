@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -34,19 +35,24 @@ public class CreateAccounts extends CommandSupport {
     @Autowired
     private ExecutorTemplate executorTemplate;
 
-    @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
+    @ShellMethod(value = "Create new accounts", key = {"create-accounts", "ca"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
-            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = "initial balance per account", defaultValue = "100000.00") String balance,
-            @ShellOption(help = "total number of accounts", defaultValue = "1024") int numAccounts,
-            @ShellOption(help = "batch size", defaultValue = "32") int batchSize,
+            @ShellOption(help = "create accounts for a time period", defaultValue = "") String duration,
+            @ShellOption(help = "create a total number of accounts", defaultValue = "1_000_000") String totalAccounts,
+            @ShellOption(help = "batch size", defaultValue = "1024") int batchSize,
+            @ShellOption(help = "batch statement size", defaultValue = "32") int statementSize,
+            @ShellOption(help = "initial balance per account", defaultValue = "500000.00") String balance,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities
     ) {
         final Set<String> cityNames = new HashSet<>();
-        cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
-        cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
+        if (!regions.equals(Constants.EMPTY)) {
+            cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
+        }
+        if (!cities.equals(Constants.EMPTY)) {
+            cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
+        }
 
         final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
         if (cityNames.isEmpty()) {
@@ -60,26 +66,34 @@ public class CreateAccounts extends CommandSupport {
 
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        cityCurrencyMap.keySet().forEach(city -> {
+        for (String city : cityCurrencyMap.keySet()) {
             if (cityNames.contains(city)) {
-                logger.info("Processing {}", city);
-
-                executorTemplate.runAsync(city, () -> {
+                Runnable worker = () -> {
                     UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
                             .queryParam("city", city)
                             .queryParam("prefix", "" + batchNumber.incrementAndGet())
-                            .queryParam("numAccounts", numAccounts)
+                            .queryParam("numAccounts", batchSize)
                             .queryParam("balance", balance)
-                            .queryParam("batchSize", batchSize);
+                            .queryParam("batchSize", statementSize);
 
                     ResponseEntity<String> response = restCommands.post(Link.of(builder.build().toUriString()));
                     if (!response.getStatusCode().is2xxSuccessful()) {
                         logger.warn("Unexpected HTTP status: {}", response);
                     }
-                }, DurationFormat.parseDuration(duration));
+                };
+
+                if (StringUtils.hasLength(duration)) {
+                    logger.info("Creating accounts in '{}' for duration of {}", city, duration);
+                    executorTemplate.runAsync(city, worker, DurationFormat.parseDuration(duration));
+                } else {
+                    final int totAccounts = Integer.parseInt(totalAccounts.replace("_", ""));
+                    int iterations = Math.max(1, totAccounts / batchSize / cityCurrencyMap.size());
+                    logger.info("Creating {} accounts in '{}' in {} iterations", city, totAccounts / cityCurrencyMap.size(), iterations);
+                    executorTemplate.runAsync(city, worker, iterations);
+                }
             } else {
                 logger.info("Skipping {}", city);
             }
-        });
+        }
     }
 }

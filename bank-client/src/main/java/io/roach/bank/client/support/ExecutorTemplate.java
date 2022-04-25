@@ -36,8 +36,9 @@ public class ExecutorTemplate {
     private CallMetrics callMetrics;
 
     public ListenableFuture<Void> runAsync(String id, Runnable runnable, Duration duration) {
+        logger.info("Started '{}'", id);
+
         ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
-//            logger.debug("Starting '{}' for duration {}", id, duration.toString());
             final long startTime = System.currentTimeMillis();
 
             AtomicInteger activeWorkers = workers.computeIfAbsent(id, i -> new AtomicInteger());
@@ -60,7 +61,42 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-//            logger.debug("Finihed '{}'", id);
+            logger.info("Finihed '{}'", id);
+
+            return null;
+        });
+        futures.add(future);
+        return future;
+    }
+
+    public ListenableFuture<Void> runAsync(String id, Runnable runnable, int iterations) {
+        logger.info("Started '{}'", id);
+
+        ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
+            AtomicInteger activeWorkers = workers.computeIfAbsent(id, i -> new AtomicInteger());
+            activeWorkers.incrementAndGet();
+
+            CallMetrics.Context context = callMetrics.of(id, activeWorkers::get);
+
+            for (int i = 0; i < iterations; i++) {
+                if (Thread.interrupted() || cancelRequested) {
+                    break;
+                }
+
+                final long callTime = context.before();
+                try {
+                    runnable.run();
+                    context.after(callTime, null);
+                } catch (Exception e) {
+                    context.after(callTime, e);
+                    logger.error("Execution error", e);
+                    break;
+                }
+            }
+
+            activeWorkers.decrementAndGet();
+
+            logger.info("Finihed '{}'", id);
 
             return null;
         });

@@ -35,10 +35,10 @@ public class ResourcePools {
     @Autowired
     private RestCommands restCommands;
 
-    @ShellMethod(value = "Set client thread pool and server connection pool sizes", key = {"set-pool-size", "sps"})
+    @ShellMethod(value = "Set client thread pool and server connection pool sizes", key = {"pool-size-set", "pss"})
     public void setPoolSize(
-            @ShellOption(help = "thread pool size", defaultValue = "50") int threadPoolSize,
-            @ShellOption(help = "connection pool size", defaultValue = "50") int connPoolSize
+            @ShellOption(help = "thread pool size", defaultValue = "100") int threadPoolSize,
+            @ShellOption(help = "connection pool size", defaultValue = "100") int connPoolSize
     ) {
         console.yellow("Setting client thread pool size to %d\n", threadPoolSize);
 
@@ -61,7 +61,7 @@ public class ResourcePools {
         }
     }
 
-    @ShellMethod(value = "Print thread pool information", key = {"get-pool-size", "gps"})
+    @ShellMethod(value = "Print thread pool information", key = {"pool-size", "ps"})
     public void getPoolSize(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
         Runnable r = () -> {
             ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);

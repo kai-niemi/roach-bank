@@ -37,17 +37,17 @@ In the client CLI, connect to localhost:
 
     connect
 
-Transfer funds across all accounts:
+Create accounts:
+
+    create-accounts
+
+Transfer funds across local accounts:
 
     transfer
 
-Transfer funds across us west accounts:
+Read account balances:
 
-    transfer --cities us_west
-
-Read account balances for 15min using follower reads:
-
-    balance --duration 15m --follower-reads
+    balance
 
 ### Global Workload
 

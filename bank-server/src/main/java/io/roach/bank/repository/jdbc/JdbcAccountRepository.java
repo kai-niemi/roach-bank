@@ -28,6 +28,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
 import io.roach.bank.annotation.TransactionMandatory;
@@ -72,25 +74,28 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
+    @TransactionNotAllowed
     public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
+        Assert.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Expected no transaction");
+
+        // Implict transactions
         IntStream.rangeClosed(1, numAccounts / batchSize)
                 .forEach(batch -> jdbcTemplate.batchUpdate(
                         "INSERT INTO account "
-                                + "(id, city, balance, currency, name, description, type, closed, allow_negative, updated) "
-                                + "VALUES(?,?,?,?::currency_code,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                                + "(city, balance, currency, name, description, type, closed, allow_negative) "
+                                + "VALUES(?,?,?::currency_code,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                             @Override
                             public void setValues(PreparedStatement ps, int i) throws SQLException {
                                 Account account = factory.get();
-                                ps.setObject(1, account.getId());
-                                ps.setString(2, account.getCity());
-                                ps.setBigDecimal(3, account.getBalance().getAmount());
-                                ps.setString(4, account.getBalance().getCurrency().getCurrencyCode());
-                                ps.setString(5, account.getName());
-                                ps.setString(6, CockroachFacts.nextFact(256));
-                                ps.setString(7, account.getAccountType().getCode());
-                                ps.setBoolean(8, account.isClosed());
-                                ps.setInt(9, account.getAllowNegative());
-                                ps.setTimestamp(10, Timestamp.from(Instant.now()));
+                                int idx = 1;
+                                ps.setString(idx++, account.getCity());
+                                ps.setBigDecimal(idx++, account.getBalance().getAmount());
+                                ps.setString(idx++, account.getBalance().getCurrency().getCurrencyCode());
+                                ps.setString(idx++, account.getName());
+                                ps.setString(idx++, account.getDescription());
+                                ps.setString(idx++, account.getAccountType().getCode());
+                                ps.setBoolean(idx++, account.isClosed());
+                                ps.setInt(idx++, account.getAllowNegative());
                             }
 
                             @Override
@@ -213,7 +218,7 @@ public class JdbcAccountRepository implements AccountRepository {
 
         return this.namedParameterJdbcTemplate.query(
                 sfu ? "SELECT * FROM account WHERE id in (:ids) FOR UPDATE"
-                    : "SELECT * FROM account WHERE id in (:ids)",
+                        : "SELECT * FROM account WHERE id in (:ids)",
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
     }

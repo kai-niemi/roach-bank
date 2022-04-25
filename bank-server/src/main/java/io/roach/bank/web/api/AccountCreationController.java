@@ -28,6 +28,7 @@ import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.AccountForm;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.AccountType;
+import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
@@ -63,7 +64,7 @@ public class AccountCreationController {
         form.setAccountType(AccountType.ASSET);
 
         form.add(Affordances.of(linkTo(methodOn(getClass()).getAccountForm()).withSelfRel()
-                        .andAffordance(afford(methodOn(getClass()).submitAccountForm(null))))
+                        .andAffordance(afford(methodOn(getClass()).createOneAccount(null))))
                 .toLink());
 
         return ResponseEntity.ok(form);
@@ -71,7 +72,7 @@ public class AccountCreationController {
 
     @PostMapping(value = "/form")
     @TransactionBoundary
-    public HttpEntity<AccountModel> submitAccountForm(@Valid @RequestBody AccountForm form) {
+    public HttpEntity<AccountModel> createOneAccount(@Valid @RequestBody AccountForm form) {
         UUID id = "auto".equals(form.getUuid()) ? UUID.randomUUID() : UUID.fromString(form.getUuid());
 
         Account account = Account.builder()
@@ -98,12 +99,13 @@ public class AccountCreationController {
         }
     }
 
+    private static final AtomicInteger SEQ = new AtomicInteger(1);
+
     @PostMapping(value = "/batch")
-    @TransactionBoundary
-    public HttpEntity<Void> submitAccountBatch(
+    public HttpEntity<Void> createBatchAccounts(
             @RequestParam(value = "city", defaultValue = "") String city,
-            @RequestParam(value = "prefix", defaultValue = "rnd") String prefix,
-            @RequestParam(value = "balance", defaultValue = "100000.00") String balance,
+            @RequestParam(value = "prefix", defaultValue = "") String prefix,
+            @RequestParam(value = "balance", defaultValue = "500000.00") String balance,
             @RequestParam(value = "numAccounts", defaultValue = "1024") Integer numAccounts,
             @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
     ) {
@@ -112,24 +114,23 @@ public class AccountCreationController {
             throw new MetadataException("No such city: " + city);
         }
 
-        final Instant startTime = Instant.now();
-        logger.info("Creating {} accounts in city {} using batch size {}", numAccounts, city, batchSize);
-
         final Currency currency = cities.get(city);
         final Money money = Money.of(balance, currency);
-        final AtomicInteger sequence = new AtomicInteger(1);
+
+        final long startTime = System.currentTimeMillis();
 
         accountRepository.createAccounts(() -> Account.builder()
                         .withId(UUID.randomUUID())
-                        .withName(prefix + "-" + sequence.incrementAndGet())
+                        .withName(String.format("%s%05d", prefix, SEQ.incrementAndGet()))
+                        .withDescription(CockroachFacts.nextFact(256))
                         .withCity(city)
                         .withBalance(money)
                         .withAccountType(AccountType.ASSET)
                         .build(),
                 numAccounts, batchSize);
 
-        logger.info("Created {} accounts in city {} using batch size {} in {}",
-                numAccounts, city, batchSize, Instant.now().minusMillis(startTime.toEpochMilli()).toString());
+        logger.info("Created {} accounts in '{}' using batch size {} in {} ms",
+                numAccounts, city, batchSize, System.currentTimeMillis()-startTime);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

@@ -11,14 +11,8 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Currency;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -59,12 +53,12 @@ public class GenerateCSV extends CommandSupport {
             @ShellOption(help = "file destination path", defaultValue = ".data") String destination,
             @ShellOption(help = "file suffix", defaultValue = "") String suffix,
             @ShellOption(help = "initial account balance in regional currency", defaultValue = "500000.00")
-                    String initialBalance,
+            String initialBalance,
             @ShellOption(help = "number of CSV files per table", defaultValue = "10") int numFiles,
             @ShellOption(help = "number of accounts in total", defaultValue = "1_000_000") String accounts,
             @ShellOption(help = "number of transactions per account", defaultValue = "0") int transactionsPerAccount,
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2")
-                    int legsPerTransaction
+            int legsPerTransaction
     ) {
         final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
 
@@ -103,7 +97,7 @@ public class GenerateCSV extends CommandSupport {
             final int accountsPerRegion = nAccounts / cityCurrencyMap.size();
 
             logger.info(">> Generating CSV import files");
-            logger.info("{} regions: {}", cityCurrencyMap.size(), cityCurrencyMap.keySet());
+            logger.info("{} cities: {}", cityCurrencyMap.size(), cityCurrencyMap.keySet());
             logger.info("{} accounts total", nAccounts);
             logger.info("{} accounts per region", accountsPerRegion);
             logger.info("{} transactions total", nAccounts * transactionsPerAccount);
@@ -111,7 +105,7 @@ public class GenerateCSV extends CommandSupport {
 
             CsvGenerator generator = new CsvGenerator();
             generator.writers = writers;
-            generator.regionMap = cityCurrencyMap;
+            generator.cities = cityCurrencyMap;
             generator.initialBalance = initialBalance;
             generator.accountsPerRegion = accountsPerRegion;
             generator.transactionsPerAccount = transactionsPerAccount;
@@ -205,7 +199,7 @@ public class GenerateCSV extends CommandSupport {
     private static class CsvGenerator implements Callable<Long> {
         List<WriterGroup> writers = new LinkedList<>();
 
-        Map<String, Currency> regionMap;
+        Map<String, Currency> cities;
 
         String initialBalance;
 
@@ -217,8 +211,8 @@ public class GenerateCSV extends CommandSupport {
 
         @Override
         public Long call() throws Exception {
-            for (final String region : regionMap.keySet()) {
-                final Money balance = Money.of(initialBalance, regionMap.get(region));
+            for (final String city : cities.keySet()) {
+                final Money balance = Money.of(initialBalance, cities.get(city));
 
                 final String tsISO = LocalDateTime.now()
                         .atOffset(ZoneOffset.UTC)
@@ -239,7 +233,7 @@ public class GenerateCSV extends CommandSupport {
 
                     group.writer(0).printf("%s,%s,%s,%s,%s:%04d,%s,%s,%s,%d,%s\n",
                             accountId, // id
-                            region, // region iso code
+                            city, // region iso code
                             balance.getAmount(), // amount
                             balance.getCurrency(), // currency code
                             "user", // name
@@ -251,7 +245,7 @@ public class GenerateCSV extends CommandSupport {
                             tsISO);
 
                     if (i % 1000 == 0) {
-                        tick(region + String.format(" %,d ", i)
+                        tick(city + String.format(" %,d ", i)
                                 + Math.round((0f + i) / accountsPerRegion * 100.0) + "%");
                     }
 
@@ -263,7 +257,7 @@ public class GenerateCSV extends CommandSupport {
 
                         group.writer(1).printf("%s,%s,%s,%s,GEN\n",
                                 txId, // id
-                                region,
+                                city,
                                 dateISO,
                                 dateISO);
 
@@ -271,9 +265,9 @@ public class GenerateCSV extends CommandSupport {
                             try {
                                 group.writer(2).printf("%s,%s,%s,%s,%s,%s,%s,%s\n",
                                         txId, // tx id
-                                        region, // tx region
+                                        city, // tx region
                                         k, // account id
-                                        region, // account region
+                                        city, // account region
                                         balanceRef.get().getAmount(), // amount
                                         balanceRef.get().getCurrency(), // currency
                                         "(empty)", // note
