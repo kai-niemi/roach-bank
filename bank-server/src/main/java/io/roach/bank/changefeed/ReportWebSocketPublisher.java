@@ -43,7 +43,7 @@ public class ReportWebSocketPublisher {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Value("${roachbank.reportQueryTimeout}")
+    @Value("${roachbank.reportQueryTimeoutSeconds}")
     private int queryTimeout = 120;
 
     @Autowired
@@ -91,7 +91,7 @@ public class ReportWebSocketPublisher {
                     });
                 });
 
-                TimeBoundExecution.runConcurrently(tasks, queryTimeout, TimeUnit.MILLISECONDS);
+                TimeBoundExecution.runConcurrently(tasks, queryTimeout, TimeUnit.SECONDS);
             } finally {
                 // Send empty message to mark completion
                 simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, "");

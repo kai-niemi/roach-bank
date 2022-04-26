@@ -29,9 +29,9 @@ public interface AccountRepository {
 
     void updateBalances(List<Account> accounts);
 
-    Page<Account> findAccountPage(Set<String> cities, Pageable page);
+    Page<Account> findAccountsByCity(Set<String> cities, Pageable page);
 
-    List<Account> findAccountsByCity(String city, int limit);
+    List<Account> findTopAccountsByCity(String city, int limit);
 
     List<Account> findAccountsById(Set<UUID> ids, String city, boolean sfu);
 

@@ -58,7 +58,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
         jdbcTemplate.batchUpdate(
                 "INSERT INTO transaction_item "
                         + "(transaction_id, transaction_city, account_id, amount, currency, note, running_balance) "
-                        + "VALUES(?,?,?,?,?::currency_code,?,?)", new BatchPreparedStatementSetter() {
+                        + "VALUES(?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         TransactionItem item = items.get(i);

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import io.roach.bank.api.support.Money;
 import io.roach.bank.repository.MetadataRepository;
 
 @Repository
@@ -23,71 +24,66 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
     @Override
     public Set<Currency> getCurrencies() {
-        return new HashSet<>(this.namedParameterJdbcTemplate.query(
-                "SELECT DISTINCT currency FROM city",
-                (rs, rowNum) -> Currency.getInstance(rs.getString(1))));
+        return new HashSet<>(Arrays.asList(Money.EUR, Money.USD, Money.SEK));
     }
 
     @Override
-    public Map<String, Currency> getCities() {
-        Map<String, Currency> result = new HashMap<>();
+    public Map<String, Set<String>> getAllRegionCities() {
+        Map<String, Set<String>> result = new HashMap<>();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
 
         this.namedParameterJdbcTemplate.query(
-                "SELECT name,currency FROM city GROUP BY name,currency",
+                "SELECT name,cities FROM region ORDER BY name",
                 parameters,
                 (rs, rowNum) -> {
-                    result.put(rs.getString(1), Currency.getInstance(rs.getString(2)));
+                    result.put(rs.getString(1), StringUtils.commaDelimitedListToSet(rs.getString(2)));
                     return null;
                 });
 
         return result;
-    }
-
-    @Override
-    public Map<String, String> getRegions() {
-        Map<String, String> result = new HashMap<>();
-
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-
-        this.namedParameterJdbcTemplate.query(
-                "SELECT name,cities FROM region",
-                parameters,
-                (rs, rowNum) -> {
-                    result.put(rs.getString(1), rs.getString(2));
-                    return null;
-                });
-
-        return result;
-    }
-
-    @Override
-    public Set<String> getRegionCities() {
-        return getRegionCities(new ArrayList<>());
     }
 
     @Override
     public Set<String> getRegionCities(Collection<String> regions) {
         if (regions.isEmpty()) {
-            regions.add(getGatewayRegion());
+            regions.addAll(getGatewayRegions());
         }
-
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("regions", regions);
 
         Set<String> cities = new HashSet<>();
 
+        regions.forEach(region -> {
+            MapSqlParameterSource parameters = new MapSqlParameterSource();
+            parameters.addValue("region", region.replace("*", "%"));
+
+            this.namedParameterJdbcTemplate.query(
+                    "SELECT cities FROM region where name like :region",
+                    parameters,
+                    (rs, rowNum) -> {
+                        String v = rs.getString(1);
+                        cities.addAll(StringUtils.commaDelimitedListToSet(v));
+                        return null;
+                    });
+        });
+
+        return cities;
+    }
+
+    private Set<String> getGatewayRegions() {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+        Set<String> regions = new HashSet<>();
+
         this.namedParameterJdbcTemplate.query(
-                "SELECT cities FROM region where name in (:regions)",
+                "SELECT region FROM cloud_region where name=(SELECT gateway_region())",
                 parameters,
                 (rs, rowNum) -> {
                     String v = rs.getString(1);
-                    cities.addAll(StringUtils.commaDelimitedListToSet(v));
+                    regions.addAll(StringUtils.commaDelimitedListToSet(v));
                     return null;
                 });
 
-        return cities;
+        return regions;
     }
 
     @Override

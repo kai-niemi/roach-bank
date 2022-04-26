@@ -106,15 +106,10 @@ public class AccountCreationController {
             @RequestParam(value = "city", defaultValue = "") String city,
             @RequestParam(value = "prefix", defaultValue = "") String prefix,
             @RequestParam(value = "balance", defaultValue = "500000.00") String balance,
+            @RequestParam(value = "currency", defaultValue = "USD") String currency,
             @RequestParam(value = "numAccounts", defaultValue = "1024") Integer numAccounts,
             @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
     ) {
-        Map<String, Currency> cities = metadataRepository.getCities();
-        if (!cities.containsKey(city)) {
-            throw new MetadataException("No such city: " + city);
-        }
-
-        final Currency currency = cities.get(city);
         final Money money = Money.of(balance, currency);
 
         final long startTime = System.currentTimeMillis();

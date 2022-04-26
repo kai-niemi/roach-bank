@@ -5,7 +5,26 @@
 
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 create type transaction_type as enum ('GEN');
-create type currency_code as enum ('USD', 'SEK', 'EUR', 'NOK', 'GBP','SGD','HKD','AUD','JPY','BRL');
+
+create table region
+(
+    name   string not null,
+    cities string not null,
+
+    primary key (name)
+);
+
+create table cloud_region
+(
+    name   string not null,
+    region string not null,
+
+    primary key (name)
+);
+
+alter table cloud_region
+    add constraint fk_cloud_region_ref_region
+        foreign key (region) references region (name);
 
 ----------------------
 -- Metadata
@@ -19,14 +38,6 @@ create table region
     primary key (name)
 );
 
-create table city
-(
-    name     string        not null,
-    currency currency_code not null,
-
-    primary key (name)
-);
-
 ----------------------
 -- Main tables
 ----------------------
@@ -36,7 +47,7 @@ create table account
     id             uuid,
     city           varchar(64)    not null,
     balance        numeric(19, 2) not null,
-    currency       currency_code  not null,
+    currency       varchar(64)  not null,
     name           varchar(128)   not null,
     description    varchar(256),
     type           varchar(1)     not null,
@@ -64,7 +75,7 @@ create table transaction_item
     transaction_city varchar(64)    not null,
     account_id       uuid           not null,
     amount           numeric(19, 2) not null,
-    currency         currency_code  not null,
+    currency         varchar(64)  not null,
     note             varchar(255),
     running_balance  numeric(19, 2) not null,
 

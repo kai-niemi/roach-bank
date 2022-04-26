@@ -37,7 +37,7 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     @TransactionBoundary
     @Commit
     public void testSimpleTransaction() {
-        List<Account> accounts = accountService.findAccountsByCity("stockholm", 10);
+        List<Account> accounts = accountService.findTopAccountsByCity("stockholm", 10);
 
         Assertions.assertTrue(accounts.size() > 0);
 
@@ -70,8 +70,8 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     @Commit
     public void testMultiLeggedMultiCurrencyTransaction() {
         // Different regions and currency
-        List<Account> accountsSwe = accountService.findAccountsByCity("stockholm", 10);
-        List<Account> accountsUsa = accountService.findAccountsByCity("new york", 10);
+        List<Account> accountsSwe = accountService.findTopAccountsByCity("stockholm", 10);
+        List<Account> accountsUsa = accountService.findTopAccountsByCity("new york", 10);
 
         Assertions.assertTrue(accountsSwe.size() > 1);
         Assertions.assertTrue(accountsUsa.size() > 1);

@@ -60,74 +60,31 @@ public class AdminController {
     public ResponseEntity<MessageModel> index() {
         MessageModel index = new MessageModel();
 
-        index.add(linkTo(methodOn(getClass())
-                .clearAll())
-                .withRel("clear")
+        index.add(linkTo(methodOn(getClass()).clearAll()).withRel("clear")
                 .withTitle("Clear all accounts and transactions"));
 
-        index.add(linkTo(methodOn(getClass())
-                .databaseMetadata())
-                .withRel("database-info")
+        index.add(linkTo(methodOn(getClass()).databaseMetadata()).withRel("database-info")
                 .withTitle("Database and JDBC driver metadata"));
 
-        index.add(linkTo(methodOn(getClass())
-                .updateConnectionPoolSize(50))
-                .withRel(LinkRelations.POOL_SIZE_REL)
+        index.add(linkTo(methodOn(getClass()).updateConnectionPoolSize(50)).withRel(LinkRelations.POOL_SIZE_REL)
                 .withTitle("Connection pool size"));
 
-        index.add(linkTo(methodOn(getClass())
-                .getConnectionPoolInfo())
-                .withRel(LinkRelations.POOL_INFO_REL)
+        index.add(linkTo(methodOn(getClass()).getConnectionPoolInfo()).withRel(LinkRelations.POOL_INFO_REL)
                 .withTitle("Connection pool info"));
 
-        index.add(Link.of(
-                        ServletUriComponentsBuilder
-                                .fromCurrentContextPath()
-                                .pathSegment("actuator")
-                                .buildAndExpand()
-                                .toUriString()
-                ).withRel(LinkRelations.ACTUATOR_REL)
-                .withTitle("Spring boot actuators"));
+        index.add(Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator").buildAndExpand()
+                .toUriString()).withRel(LinkRelations.ACTUATOR_REL).withTitle("Spring boot actuators"));
 
-        Arrays.asList(
-//                "bank.events.lost",
-//                "bank.events.queued",
-//                "bank.events.sent",
-//                "bank.txn.abort",
-//                "bank.txn.retry",
-//                "bank.txn.success",
-                        "hikaricp.connections",
-                        "hikaricp.connections.acquire",
-                        "hikaricp.connections.active",
-                        "hikaricp.connections.idle",
-                        "hikaricp.connections.max",
-                        "hikaricp.connections.usage",
-                        "http.server.requests",
-                        "jdbc.connections.active",
-                        "jdbc.connections.idle",
-                        "jdbc.connections.max",
-                        "jdbc.connections.min",
-//                "jetty.threads.busy",
-//                "jetty.threads.current",
-//                "jetty.threads.idle",
-//                "jvm.memory.max",
-//                "jvm.memory.used",
-                        "jvm.threads.live",
-                        "jvm.threads.peak",
-                        "process.cpu.usage",
-                        "system.cpu.count",
-                        "system.cpu.usage",
-                        "system.load.average.1m")
-                .forEach(key -> {
-                    index.add(Link.of(
-                                    ServletUriComponentsBuilder
-                                            .fromCurrentContextPath()
-                                            .pathSegment("actuator", "metrics", key)
-                                            .buildAndExpand()
-                                            .toUriString()
-                            ).withRel(LinkRelations.ACTUATOR_REL)
+        Arrays.asList("hikaricp.connections", "hikaricp.connections.acquire", "hikaricp.connections.active",
+                "hikaricp.connections.idle", "hikaricp.connections.max", "hikaricp.connections.usage",
+                "http.server.requests", "jdbc.connections.active", "jdbc.connections.idle", "jdbc.connections.max",
+                "jdbc.connections.min", "jvm.threads.live", "jvm.threads.peak", "process.cpu.usage", "system.cpu.count",
+                "system.cpu.usage", "system.load.average.1m").forEach(key -> {
+            index.add(
+                    Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator", "metrics", key)
+                                    .buildAndExpand().toUriString()).withRel(LinkRelations.ACTUATOR_REL)
                             .withTitle("Metrics endpoint"));
-                });
+        });
 
         return ResponseEntity.ok(index);
     }

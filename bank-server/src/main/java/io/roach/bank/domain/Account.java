@@ -208,7 +208,6 @@ public class Account extends AbstractEntity<UUID> {
         }
 
         public Account build() {
-            Assert.notNull(instance.id, "id is null");
             return instance;
         }
     }

@@ -101,12 +101,12 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Page<Account> findAccountPage(Set<String> cities, Pageable page) {
+    public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
         return accountRepository.findAll(page, new ArrayList<>(cities));
     }
 
     @Override
-    public List<Account> findAccountsByCity(String city, int limit) {
+    public List<Account> findTopAccountsByCity(String city, int limit) {
         return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.city=?1",
                         Account.class)
                 .setParameter(1, city)

@@ -2,7 +2,6 @@ package io.roach.bank.web.api;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,7 +32,6 @@ import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
-import io.roach.bank.api.support.RandomData;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
@@ -80,7 +78,7 @@ public class TransactionFormController {
         List<Account> accounts = new ArrayList<>();
 
         metadataRepository.getRegionCities(regions).forEach(r -> {
-            accounts.addAll(accountRepository.findAccountsByCity(r, accountsPerRegion));
+            accounts.addAll(accountRepository.findTopAccountsByCity(r, accountsPerRegion));
         });
 
         if (accounts.isEmpty()) {

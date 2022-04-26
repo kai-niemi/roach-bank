@@ -3,8 +3,6 @@ package io.roach.bank.repository.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +33,6 @@ import io.roach.bank.ProfileNames;
 import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountType;
-import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
@@ -58,7 +55,7 @@ public class JdbcAccountRepository implements AccountRepository {
     public Account createAccount(Account account) {
         jdbcTemplate.update("INSERT INTO account "
                         + "(id, city, balance, currency, name, description, type, closed, allow_negative, updated) "
-                        + "VALUES(?,?,?,?::currency_code,?,?,?,?,?,?)",
+                        + "VALUES(?,?,?,?,?,?,?,?,?,?)",
                 account.getId(),
                 account.getCity(),
                 account.getBalance().getAmount(),
@@ -83,7 +80,7 @@ public class JdbcAccountRepository implements AccountRepository {
                 .forEach(batch -> jdbcTemplate.batchUpdate(
                         "INSERT INTO account "
                                 + "(city, balance, currency, name, description, type, closed, allow_negative) "
-                                + "VALUES(?,?,?::currency_code,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                                + "VALUES(?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                             @Override
                             public void setValues(PreparedStatement ps, int i) throws SQLException {
                                 Account account = factory.get();
@@ -114,7 +111,7 @@ public class JdbcAccountRepository implements AccountRepository {
                         + "   updated=? "
                         + "WHERE id = ? "
                         + "   AND closed=false "
-                        + "   AND currency = ?::currency_code "
+                        + "   AND currency = ? "
                         + "   AND (?) * abs(allow_negative-1) >= 0", // RETURNING NOTHING
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -173,7 +170,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Page<Account> findAccountPage(Set<String> cities, Pageable pageable) {
+    public Page<Account> findAccountsByCity(Set<String> cities, Pageable pageable) {
         String sql =
                 "SELECT * "
                         + "FROM account "
@@ -199,7 +196,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findAccountsByCity(String city, int limit) {
+    public List<Account> findTopAccountsByCity(String city, int limit) {
         return this.namedParameterJdbcTemplate.query(
                 "SELECT * FROM account WHERE city=:city "
                         + "ORDER BY id,city "

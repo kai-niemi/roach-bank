@@ -97,6 +97,6 @@ roachbank:
   # Interval of pushing cached balance reports (millis)
   reportPushInterval: 10000
   # Report query timeout (seconds)
-  reportQueryTimeout: 120
+  reportQueryTimeoutSeconds: 120
   # Display number
   accountsPerCityLimit: 100

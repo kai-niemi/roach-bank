@@ -1,7 +1,6 @@
 package io.roach.bank.web.api;
 
 import java.util.Collections;
-import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,19 +35,9 @@ public class MetadataController {
         MessageModel index = new MessageModel();
 
         index.add(linkTo(methodOn(getClass())
-                .regions())
+                .regionCities())
                 .withRel(LinkRelations.REGIONS_REL)
-                .withTitle("All region names"));
-
-        index.add(linkTo(methodOn(getClass())
-                .cities())
-                .withRel(LinkRelations.CITIES_REL)
-                .withTitle("Cities and currencies"));
-
-        index.add(linkTo(methodOn(getClass())
-                .currencies())
-                .withRel(LinkRelations.CURRENCIES_REL)
-                .withTitle("Currencies by city"));
+                .withTitle("All regions and cities"));
 
         index.add(linkTo(methodOn(getClass())
                 .regionCities(Collections.emptyList()))
@@ -69,20 +58,8 @@ public class MetadataController {
 
     @GetMapping(value = "/regions")
     @TransactionBoundary(readOnly = true)
-    public Map<String, String> regions() {
-        return metadataRepository.getRegions();
-    }
-
-    @GetMapping(value = "/cities")
-    @TransactionBoundary(readOnly = true)
-    public Map<String, Currency> cities() {
-        return metadataRepository.getCities();
-    }
-
-    @GetMapping(value = "/currencies")
-    @TransactionBoundary(readOnly = true)
-    public Set<Currency> currencies() {
-        return metadataRepository.getCurrencies();
+    public Map<String, Set<String>> regionCities() {
+        return metadataRepository.getAllRegionCities();
     }
 
     @GetMapping(value = "/region-cities")

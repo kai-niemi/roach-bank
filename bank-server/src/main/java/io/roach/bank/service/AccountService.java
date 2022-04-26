@@ -11,9 +11,9 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
 public interface AccountService {
-    Page<Account> findAccounts(Set<String> cities, Pageable page);
+    List<Account> findTopAccountsByCity(String city, int limit);
 
-    List<Account> findAccountsByCity(String city, int limit);
+    Page<Account> findAccountsByCity(Set<String> cities, Pageable page);
 
     Account getAccountById(UUID id);
 

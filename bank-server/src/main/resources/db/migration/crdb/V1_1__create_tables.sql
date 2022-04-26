@@ -6,17 +6,9 @@
 
 drop type if exists account_type;
 drop type if exists transaction_type;
-drop type if exists currency_code;
 
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 create type transaction_type as enum ('GEN');
-create type currency_code as enum ('USD', 'SEK', 'EUR', 'NOK', 'GBP','SGD','HKD','AUD','JPY','BRL');
-
--- create type city_name as enum (
---     'stockholm','helsinki','oslo','london','frankfurt','amsterdam','milano','madrid','athens','barcelona','paris','manchester',
---     'seattle','san francisco','los angeles','phoenix','minneapolis','chicago','detroit','atlanta','new york','boston','washington dc','miami',
---     'singapore','hong kong','sydney','tokyo','sao paulo','rio de janeiro','salvador'
--- );
 
 ----------------------
 -- Metadata
@@ -30,13 +22,29 @@ create table region
     primary key (name)
 );
 
-create table city
+create table cloud_region
 (
-    name     string        not null,
-    currency currency_code not null,
+    name   string not null,
+    region string not null,
 
     primary key (name)
 );
+
+alter table cloud_region
+    add constraint fk_cloud_region_ref_region
+        foreign key (region) references region (name);
+
+create table account_plan
+(
+    accounts_per_city int            not null default 10000,
+    inital_balance    decimal(19, 2) not null default 500000.00,
+    currency          string         not null default 'USD',
+    name_prefix       string(128) not null default 'user:',
+    initialized       boolean        not null default false
+);
+
+insert into account_plan
+values (1024, 250000.00, 'USD', 'u:', false);
 
 ----------------------
 -- Main tables
@@ -47,7 +55,7 @@ create table account
     id             uuid           not null default gen_random_uuid(),
     city           string         not null,
     balance        decimal(19, 2) not null,
-    currency       currency_code  not null,
+    currency       string         not null default 'USD',
     name           string(128) not null,
     description    string(256) null,
     type           account_type   not null,
@@ -79,7 +87,7 @@ create table transaction_item
     transaction_city string         not null,
     account_id       uuid           not null,
     amount           decimal(19, 2) not null,
-    currency         currency_code  not null,
+    currency         string         not null default 'USD',
     note             string,
     running_balance  decimal(19, 2) not null,
 

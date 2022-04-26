@@ -42,20 +42,15 @@ public class CreateAccounts extends AbstractCommand {
             @ShellOption(help = "batch size", defaultValue = "1024") int batchSize,
             @ShellOption(help = "batch statement size", defaultValue = "32") int statementSize,
             @ShellOption(help = "initial balance per account", defaultValue = "500000.00") String balance,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
-            @ShellOption(help = Constants.CITIES_HELP, defaultValue = Constants.EMPTY) String cities
+            @ShellOption(help = "currency to use", defaultValue = "USD") String currency,
+            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) {
-        final Set<String> cityNames = new HashSet<>();
-        if (!regions.equals(Constants.EMPTY)) {
-            cityNames.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
-        }
-        if (!cities.equals(Constants.EMPTY)) {
-            cityNames.addAll(StringUtils.commaDelimitedListToSet(cities));
-        }
+        final Set<String> cities = new HashSet<>();
+        cities.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
 
         final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
-        if (cityNames.isEmpty()) {
-            cityNames.addAll(cityCurrencyMap.keySet());
+        if (cities.isEmpty()) {
+            cities.addAll(cityCurrencyMap.keySet());
         }
 
         final Link submitLink = restCommands.fromRoot()
@@ -66,13 +61,14 @@ public class CreateAccounts extends AbstractCommand {
         final AtomicInteger batchNumber = new AtomicInteger();
 
         for (String city : cityCurrencyMap.keySet()) {
-            if (cityNames.contains(city)) {
+            if (cities.contains(city)) {
                 Runnable worker = () -> {
                     UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
                             .queryParam("city", city)
                             .queryParam("prefix", "" + batchNumber.incrementAndGet())
                             .queryParam("numAccounts", batchSize)
                             .queryParam("balance", balance)
+                            .queryParam("currency", currency)
                             .queryParam("batchSize", statementSize);
 
                     ResponseEntity<String> response = restCommands.post(Link.of(builder.build().toUriString()));

@@ -53,7 +53,7 @@ public class TransactionHintsAspect {
             String org = jdbcTemplate.queryForObject("SHOW CLUSTER SETTING cluster.organization", String.class);
             logger.info("Found CockroachDB Licence for {}", org);
         } else {
-            logger.info("No CockroachDB Licence - disabling use of enterprise features");
+            logger.warn("No CockroachDB Licence found - disabling use of enterprise features");
         }
     }
 

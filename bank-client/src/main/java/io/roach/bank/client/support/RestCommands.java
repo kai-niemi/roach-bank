@@ -102,10 +102,6 @@ public class RestCommands {
 
     @SuppressWarnings("unchecked")
     public Set<String> getRegionCities(Set<String> regions) {
-//        if (regions.isEmpty()) {
-//            return Collections.emptySet();
-//        }
-
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("regions", regions);
 
@@ -121,9 +117,9 @@ public class RestCommands {
         return cities;
     }
 
-    public Map<String, List<AccountModel>> getTopAccounts(Set<String> cities, int limit) {
+    public Map<String, List<AccountModel>> getTopAccounts(Set<String> regions, int limit) {
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("cities", cities);
+        parameters.put("regions", regions);
         parameters.put("limit", limit);
 
         final Map<String, List<AccountModel>> accounts = new HashMap<>();

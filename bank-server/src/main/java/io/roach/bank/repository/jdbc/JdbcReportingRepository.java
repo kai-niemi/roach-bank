@@ -53,7 +53,7 @@ public class JdbcReportingRepository implements ReportingRepository {
                         + "  min(a.balance) min_balance, "
                         + "  max(a.balance) max_balance "
                         + "FROM account a "
-                        + "WHERE a.currency = :currency::currency_code",
+                        + "WHERE a.currency = :currency",
                 parameters,
                 (rs, rowNum) -> {
                     AccountSummary summary = new AccountSummary();
@@ -84,7 +84,7 @@ public class JdbcReportingRepository implements ReportingRepository {
                         + "  sum(ti.amount) "
                         + "FROM transaction t "
                         + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
-                        + "WHERE ti.currency = :currency::currency_code",
+                        + "WHERE ti.currency = :currency",
                 parameters,
                 (rs, rowNum) -> {
                     TransactionSummary summary = new TransactionSummary();

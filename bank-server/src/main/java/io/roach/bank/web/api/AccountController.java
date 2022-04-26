@@ -48,7 +48,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${roachbank.reportQueryTimeout}")
+    @Value("${roachbank.reportQueryTimeoutSeconds}")
     private int queryTimeout;
 
     @Value("${roachbank.accountsPerCityLimit}")
@@ -79,7 +79,7 @@ public class AccountController {
                 ).withTitle("Collection of accounts"));
 
         index.add(linkTo(methodOn(AccountController.class)
-                .listAccounts(Collections.singleton("stockholm"), 0, 5))
+                .listAccounts(Collections.singleton("eu-central"), 0, 5))
                 .withRel(LinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("Collection of accounts"));
 
@@ -109,20 +109,19 @@ public class AccountController {
 
     @GetMapping(value = "/top")
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccounts(
-            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
+            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
-        final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
+        final Set<String> cities = metadataRepository.getRegionCities(regions);
+
         final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
 
-        if (cities.isEmpty()) {
-            cities.addAll(metadataRepository.getRegionCities());
-        }
+        final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
 
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
         cities.forEach(city -> tasks.add(() -> {
-            accounts.addAll(accountService.findAccountsByCity(city, limitFinal));
+            accounts.addAll(accountService.findTopAccountsByCity(city, limitFinal));
             return null;
         }));
 
@@ -135,44 +134,37 @@ public class AccountController {
 
     @GetMapping(value = "/list")
     public PagedModel<AccountModel> listAccounts(
-            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> cities,
+            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
-        if (cities.isEmpty()) {
-            cities = metadataRepository.getRegionCities();
-        }
+        Set<String> cities = metadataRepository.getRegionCities(regions);
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         return pagedResourcesAssembler
-                .toModel(accountService.findAccounts(cities, pageable), accountResourceAssembler);
+                .toModel(accountService.findAccountsByCity(cities, pageable), accountResourceAssembler);
     }
 
     @GetMapping(value = "/{id}")
-    public AccountModel getAccount(
-            @PathVariable("id") UUID id) {
+    public AccountModel getAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.getAccountById(id));
     }
 
     @GetMapping(value = "/{id}/balance")
-    public Money getAccountBalance(
-            @PathVariable("id") UUID id) {
+    public Money getAccountBalance(@PathVariable("id") UUID id) {
         return accountService.getBalance(id);
     }
 
     @GetMapping(value = "/{id}/balance-snapshot")
-    public Money getAccountBalanceSnapshot(
-            @PathVariable("id") UUID id) {
+    public Money getAccountBalanceSnapshot(@PathVariable("id") UUID id) {
         return accountService.getBalanceSnapshot(id);
     }
 
     @PutMapping(value = "/{id}/open")
-    public AccountModel openAccount(
-            @PathVariable("id") UUID id) {
+    public AccountModel openAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.openAccount(id));
     }
 
     @PutMapping(value = "/{id}/close")
-    public AccountModel closeAccount(
-            @PathVariable("id") UUID id) {
+    public AccountModel closeAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.closeAccount(id));
     }
 }

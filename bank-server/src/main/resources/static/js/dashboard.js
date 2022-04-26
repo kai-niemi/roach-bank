@@ -369,6 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         regionCountry: {
             'generic': 'GEN',
+
             'tokyo': 'JPN',
             'barcelona': 'ESP',
             'seattle': 'USA',
@@ -382,7 +383,10 @@ document.addEventListener('DOMContentLoaded', function () {
             'new york': 'USA',
             'boston': 'USA',
             'washington dc': 'USA',
-            'miami': 'USA',
+            'portland': 'USA',
+            'las vegas': 'USA',
+            'charlotte': 'USA',
+
             'stockholm': 'SWE',
             'helsinki': 'FIN',
             'oslo': 'NOR',
@@ -399,7 +403,60 @@ document.addEventListener('DOMContentLoaded', function () {
             'sydney': 'AUS',
             'sao paulo': 'BRL',
             'rio de janeiro': 'BRL',
-            'salvador': 'BRL'
+            'salvador': 'BRL',
+
+            'copenhagen': 'DNK',
+            'riga': 'LVA',
+            'tallinn': 'EST',
+            'dublin': 'IRL',
+            'belfast': 'IRL',
+            'liverpool': 'GBR',
+            'glasgow': 'GBR',
+            'birmingham': 'GBR',
+            'leeds': 'GBR',
+
+            'rotterdam': 'NLD',
+            'antwerp,': 'BEL',
+            'hague': 'NLD',
+            'ghent': 'BEL',
+            'brussels': 'BEL',
+            'berlin': 'GER',
+            'hamburg': 'GER',
+            'munich': 'GER',
+            'dusseldorf': 'GER',
+            'leipzig': 'GER',
+            'dortmund': 'GER',
+            'essen': 'GER',
+            'stuttgart': 'GER',
+
+            'sintra': 'ESP',
+            'rome': 'ITA',
+            'milan': 'ITA',
+            'lyon': 'FRA',
+            'lisbon': 'PRT',
+            'toulouse': 'FRA',
+            'cologne': 'FRA',
+            'seville': 'FRA',
+            'marseille': 'FRA',
+            'naples': 'ITA',
+            'turin': 'ITA',
+            'valencia': 'ITA',
+            'palermo': 'ITA',
+
+            'krakov': 'POL',
+            'zagraeb': 'SRB',
+            'zaragoza': 'ESP',
+            'lodz': 'POL',
+            'bratislava': 'SVK',
+            'prague': 'ZCE',
+            'sofia': 'BGR',
+            'bucharest': 'ROU',
+            'vienna': 'AUT',
+            'warsaw': 'POL',
+            'budapest': 'HUN',
+            'beijing': 'CHN',
+            'shanghai': 'CHN',
+            'melbourne': 'AUS'
         }
     });
 });

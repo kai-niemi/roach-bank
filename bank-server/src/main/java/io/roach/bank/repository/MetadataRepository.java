@@ -6,13 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 public interface MetadataRepository {
-    Map<String, String> getRegions();
-
-    Map<String, Currency> getCities();
-
     Set<Currency> getCurrencies();
 
-    Set<String> getRegionCities();
+    Map<String, Set<String>> getAllRegionCities();
 
     Set<String> getRegionCities(Collection<String> regions);
 

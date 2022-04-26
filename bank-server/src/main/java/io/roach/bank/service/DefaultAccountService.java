@@ -24,15 +24,15 @@ public class DefaultAccountService implements AccountService {
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public Page<Account> findAccounts(Set<String> cities, Pageable page) {
-        return accountRepository.findAccountPage(cities, page);
+    public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
+        return accountRepository.findAccountsByCity(cities, page);
     }
 
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public List<Account> findAccountsByCity(String city, int limit) {
-        return accountRepository.findAccountsByCity(city, limit);
+    public List<Account> findTopAccountsByCity(String city, int limit) {
+        return accountRepository.findTopAccountsByCity(city, limit);
     }
 
     @Override
