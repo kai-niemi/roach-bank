@@ -55,23 +55,23 @@ public class Config extends AbstractCommand {
     public void systemInfo() {
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
         console.yellow(">> OS\n");
-        console.green(" Arch: %s | OS: %s | Version: %s\n", os.getArch(), os.getName(), os.getVersion());
-        console.green(" Available processors: %d\n", os.getAvailableProcessors());
-        console.green(" Load avg: %f\n", os.getSystemLoadAverage());
+        console.cyan(" Arch: %s | OS: %s | Version: %s\n", os.getArch(), os.getName(), os.getVersion());
+        console.cyan(" Available processors: %d\n", os.getAvailableProcessors());
+        console.cyan(" Load avg: %f\n", os.getSystemLoadAverage());
 
         RuntimeMXBean r = ManagementFactory.getRuntimeMXBean();
         console.yellow(">> Runtime\n");
-        console.green(" Uptime: %s\n", r.getUptime());
-        console.green(" VM name: %s | Vendor: %s | Version: %s\n", r.getVmName(), r.getVmVendor(), r.getVmVersion());
+        console.cyan(" Uptime: %s\n", r.getUptime());
+        console.cyan(" VM name: %s | Vendor: %s | Version: %s\n", r.getVmName(), r.getVmVendor(), r.getVmVersion());
 
         ThreadMXBean t = ManagementFactory.getThreadMXBean();
         console.yellow(">> Runtime\n");
-        console.green(" Peak threads: %d\n", t.getPeakThreadCount());
-        console.green(" Thread #: %d\n", t.getThreadCount());
-        console.green(" Total started threads: %d\n", t.getTotalStartedThreadCount());
+        console.cyan(" Peak threads: %d\n", t.getPeakThreadCount());
+        console.cyan(" Thread #: %d\n", t.getThreadCount());
+        console.cyan(" Total started threads: %d\n", t.getTotalStartedThreadCount());
 
         Arrays.stream(t.getAllThreadIds()).sequential().forEach(value -> {
-            console.green(" Thread (%d): %s %s\n", value,
+            console.cyan(" Thread (%d): %s %s\n", value,
                     t.getThreadInfo(value).getThreadName(),
                     t.getThreadInfo(value).getThreadState().toString()
             );
@@ -79,12 +79,13 @@ public class Config extends AbstractCommand {
 
         MemoryMXBean m = ManagementFactory.getMemoryMXBean();
         console.yellow(">> Memory\n");
-        console.green(" Heap: %s\n", m.getHeapMemoryUsage().toString());
-        console.green(" Non-heap: %s\n", m.getNonHeapMemoryUsage().toString());
-        console.green(" Pending GC: %s\n", m.getObjectPendingFinalizationCount());
+        console.cyan(" Heap: %s\n", m.getHeapMemoryUsage().toString());
+        console.cyan(" Non-heap: %s\n", m.getNonHeapMemoryUsage().toString());
+        console.cyan(" Pending GC: %s\n", m.getObjectPendingFinalizationCount());
     }
 
     @ShellMethod(value = "Print database information (server)", key = {"db-info", "di"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void dbInfo(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
         Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
@@ -121,24 +122,6 @@ public class Config extends AbstractCommand {
         console.yellow("-- region cities --\n");
         restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)).forEach(s -> {
             console.cyan("%s\n", s);
-        });
-    }
-
-    @ShellMethod(value = "List cities", key = {"cities"})
-    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void listCities() {
-        console.yellow("-- cities --\n");
-        restCommands.getCities().forEach(s -> {
-            console.cyan("%s\n", s);
-        });
-    }
-
-    @ShellMethod(value = "List city currency", key = {"city-currency"})
-    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void listCityCurrency() {
-        console.yellow("-- city / currency --\n");
-        restCommands.getCityCurrency().forEach((s, currency) -> {
-            console.cyan("%s: %s\n", s, currency);
         });
     }
 }

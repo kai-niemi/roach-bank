@@ -16,7 +16,7 @@ BankDashboard.prototype = {
     loadInitialState: function () {
         var _this = this;
 
-        $.get(this.settings.endpoints.currencies, function (data) {
+        $.get(this.settings.endpoints.cities, function (data) {
             _this.createReportElements(data);
         });
 
@@ -118,80 +118,12 @@ BankDashboard.prototype = {
         this.container.append(accounts);
     },
 
-    createReportElements: function (data) {
-        var _this = this, report;
-
-        report = data.map(function (currency) {
-            return $('<tr>')
-                    .append(
-                            $('<th>')
-                                    .attr('scope', 'row')
-                                    .text(currency)
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', currency + "-total-regions")
-                                    .text("0")
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', currency + "-total-accounts")
-                                    .text("0")
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', currency + "-total-transactions")
-                                    .text("0")
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', currency + "-total-transaction-legs")
-                                    .text("0")
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', currency + "-total-balance")
-                                    .text(_this.formatMoney("0.00", "USD"))
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', currency + "-total-turnover")
-                                    .text(_this.formatMoney("0.00", "USD"))
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', currency + "-total-checksum")
-                                    .text(_this.formatMoney("0.00", "USD"))
-                    )
-        });
-
-        this.reportContainer.append(report);
-    },
-
     addWebsocketListener: function () {
         var socket = new SockJS(this.settings.endpoints.socket),
                 stompClient = Stomp.over(socket),
                 _this = this;
 
         stompClient.connect({}, function (frame) {
-            stompClient.subscribe(_this.settings.topics.reportAccountSummary, function (report) {
-                var event = JSON.parse(report.body);
-
-                sessionStorage.setItem("account-summary-" + event.currency, event.maxBalance);
-
-                _this.handleAccountSummaryUpdate(event);
-            });
-
-            stompClient.subscribe(_this.settings.topics.reportTransactionSummary, function (report) {
-                if (report.body == "") {
-                    _this.refreshButton.prop("disabled", false);
-                    _this.refreshButton.text("Refresh Now");
-                } else {
-                    var event = JSON.parse(report.body);
-                    _this.handleTransactionSummaryUpdate(event);
-                }
-            });
-
             stompClient.subscribe(_this.settings.topics.accounts, function (account) {
                 var event = JSON.parse(account.body); // batch
 
@@ -217,36 +149,6 @@ BankDashboard.prototype = {
         setTimeout( function(){
             account.css("background-color", original_color);
         }, 1500);
-    },
-
-    handleAccountSummaryUpdate: function (accountSummary) {
-        var _this = this;
-
-        var totalRegionsSuffix = _this.getElement(accountSummary.currency + _this.settings.elements.totalRegionsSuffix);
-        var totalAccountSuffix = _this.getElement(accountSummary.currency + _this.settings.elements.totalAccountSuffix);
-        var totalBalanceSuffix = _this.getElement(accountSummary.currency + _this.settings.elements.totalBalanceSuffix);
-
-        totalRegionsSuffix.text(_this.formatNumber(accountSummary.numberOfRegions));
-        totalAccountSuffix.text(_this.formatNumber(accountSummary.numberOfAccounts));
-        totalBalanceSuffix.text(_this.formatMoney(accountSummary.totalBalance, accountSummary.currency));
-    },
-
-    handleTransactionSummaryUpdate: function (transactionSummary) {
-        var _this = this;
-
-        var totalTransactionsSuffix = _this.getElement(
-                transactionSummary.currency + _this.settings.elements.totalTransactionsSuffix);
-        var totalTransactionLegsSuffix = _this.getElement(
-                transactionSummary.currency + _this.settings.elements.totalTransactionLegsSuffix);
-        var totalTurnoverSuffix = _this.getElement(
-                transactionSummary.currency + _this.settings.elements.totalTurnoverSuffix);
-        var totalChecksumSuffix = _this.getElement(
-                transactionSummary.currency + _this.settings.elements.totalChecksumSuffix);
-
-        totalTransactionsSuffix.text(_this.formatNumber(transactionSummary.numberOfTransactions));
-        totalTransactionLegsSuffix.text(_this.formatNumber(transactionSummary.numberOfLegs));
-        totalTurnoverSuffix.text(_this.formatMoney(transactionSummary.totalTurnover, transactionSummary.currency));
-        totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
     },
 
     boxSize: function (city, currency, amount) {
@@ -309,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function () {
     new BankDashboard({
         endpoints: {
             topAccounts: '/api/account/top',
-            currencies: '/api/metadata/currencies',
             socket: '/roach-bank'
         },
 
@@ -321,16 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         elements: {
             container: 'dashboard-container',
-            accountSpinner: 'account-spinner',
-            refreshButton: 'refresh-button',
-            reportContainer: 'report-container',
-            totalRegionsSuffix: '-total-regions',
-            totalAccountSuffix: '-total-accounts',
-            totalTransactionsSuffix: '-total-transactions',
-            totalTransactionLegsSuffix: '-total-transaction-legs',
-            totalBalanceSuffix: '-total-balance',
-            totalTurnoverSuffix: '-total-turnover',
-            totalChecksumSuffix: '-total-checksum'
+            accountSpinner: 'account-spinner'
         },
 
         regionColors: {

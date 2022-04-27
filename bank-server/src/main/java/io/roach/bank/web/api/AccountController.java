@@ -109,7 +109,7 @@ public class AccountController {
 
     @GetMapping(value = "/top")
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccounts(
-            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> regions,
+            @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
         final Set<String> cities = metadataRepository.getRegionCities(regions);
@@ -134,7 +134,7 @@ public class AccountController {
 
     @GetMapping(value = "/list")
     public PagedModel<AccountModel> listAccounts(
-            @RequestParam(value = "cities", defaultValue = "", required = false) Set<String> regions,
+            @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
         Set<String> cities = metadataRepository.getRegionCities(regions);

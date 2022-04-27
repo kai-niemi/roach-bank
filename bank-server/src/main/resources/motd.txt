@@ -1,8 +1,0 @@
------------ SERVER CONFIGURATION -------------
-Spring profiles: ${spring.profiles.active}
- Datasource URL: ${spring.datasource.url}
------------------------------------------------
-
-Welcome to Roach Bank!
-You are in a cold, pitch dark lobby, and you feel a desk in front of you.
-Type help for commands.

@@ -36,15 +36,15 @@ alter table cloud_region
 
 create table account_plan
 (
-    accounts_per_city int            not null default 10000,
-    inital_balance    decimal(19, 2) not null default 500000.00,
-    currency          string         not null default 'USD',
-    name_prefix       string(128) not null default 'user:',
-    initialized       boolean        not null default false
+    accounts_per_region int            not null,
+    inital_balance      decimal(19, 2) not null,
+    currency            string         not null,
+    name_prefix         string(128)    not null,
+    initialized         boolean        not null
 );
 
 insert into account_plan
-values (1024, 250000.00, 'USD', 'u:', false);
+values (5000, 250000.00, 'USD', 'u:', false);
 
 ----------------------
 -- Main tables
@@ -56,8 +56,8 @@ create table account
     city           string         not null,
     balance        decimal(19, 2) not null,
     currency       string         not null default 'USD',
-    name           string(128) not null,
-    description    string(256) null,
+    name           string(128)    not null,
+    description    string(256)    null,
     type           account_type   not null,
     closed         boolean        not null default false,
     allow_negative integer        not null default 0,

@@ -12,7 +12,7 @@ public abstract class Constants {
 
     public static final String REPORTING_COMMANDS = "3. Reporting Commands";
 
-    public static final String MAIN_COMMANDS = "4. Main Commands";
+    public static final String MAIN_COMMANDS = "4. Workload Commands";
 
     public static final String DEFAULT_DURATION = "60m";
 

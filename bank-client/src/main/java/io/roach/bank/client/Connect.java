@@ -56,7 +56,9 @@ public class Connect extends AbstractCommand {
             String name = response.getHeaders().toSingleValueMap().get("X-Application-Context");
             if ("Roach Bank".equals(name)) {
                 String message = JsonPath.parse(response.getBody()).read("$.message", String.class);
-                logger.info("\n{}", message);
+
+                logger.info(message);
+                logger.info("Type help for commands.");
 
                 applicationEventPublisher.publishEvent(
                         new ConnectionUpdatedEvent(this,

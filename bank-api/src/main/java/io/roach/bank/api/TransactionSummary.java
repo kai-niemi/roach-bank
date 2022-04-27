@@ -1,10 +1,9 @@
 package io.roach.bank.api;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 
 public class TransactionSummary {
-    private Currency currency;
+    private String city;
 
     private int numberOfTransactions;
 
@@ -14,12 +13,12 @@ public class TransactionSummary {
 
     private BigDecimal totalCheckSum;
 
-    public Currency getCurrency() {
-        return currency;
+    public String getCity() {
+        return city;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public int getNumberOfTransactions() {
@@ -57,7 +56,7 @@ public class TransactionSummary {
     @Override
     public String toString() {
         return "TransactionSummary{" +
-                "currency=" + currency +
+                "city=" + city +
                 ", numberOfTransactions=" + numberOfTransactions +
                 ", numberOfLegs=" + numberOfLegs +
                 ", totalTurnover=" + totalTurnover +

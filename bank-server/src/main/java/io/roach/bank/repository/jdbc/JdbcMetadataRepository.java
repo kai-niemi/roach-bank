@@ -1,6 +1,14 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
@@ -10,7 +18,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
-import io.roach.bank.api.support.Money;
 import io.roach.bank.repository.MetadataRepository;
 
 @Repository
@@ -23,12 +30,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public Set<Currency> getCurrencies() {
-        return new HashSet<>(Arrays.asList(Money.EUR, Money.USD, Money.SEK));
-    }
-
-    @Override
-    public Map<String, Set<String>> getAllRegionCities() {
+    public Map<String, Set<String>> getRegionCities() {
         Map<String, Set<String>> result = new HashMap<>();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
@@ -46,13 +48,14 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
     @Override
     public Set<String> getRegionCities(Collection<String> regions) {
-        if (regions.isEmpty()) {
-            regions.addAll(getGatewayRegions());
+        List<String> regionList = new ArrayList<>(regions);
+        if (regionList.isEmpty()) {
+            regionList.addAll(getGatewayRegions());
         }
 
-        Set<String> cities = new HashSet<>();
+        Set<String> cities = new TreeSet<>();
 
-        regions.forEach(region -> {
+        regionList.forEach(region -> {
             MapSqlParameterSource parameters = new MapSqlParameterSource();
             parameters.addValue("region", region.replace("*", "%"));
 

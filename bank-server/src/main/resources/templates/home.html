@@ -68,36 +68,6 @@
 
         <p th:text="${randomFact}"></p>
     </div>
-
-    <div class="alert alert-success" role="alert">
-        <button aria-label="Close" class="close" data-dismiss="alert" type="button">
-            <span aria-hidden="true">&times;</span>
-        </button>
-
-        <h4 class="alert-heading">Summary</h4>
-
-        <table class="table table-striped table-dark table-sm">
-            <thead>
-            <tr>
-                <th data-toggle="tooltip" scope="col" title="Account stats are grouped by ISO-4217 currency codes">Currency</th>
-                <th data-toggle="tooltip" scope="col" title="Number of regions/countries per currency">Cities</th>
-                <th data-toggle="tooltip" scope="col" title="Number of accounts per currency">Accounts</th>
-                <th data-toggle="tooltip" scope="col" title="Number of monetary transactions per currency">Transactions</th>
-                <th data-toggle="tooltip" scope="col" title="Number of monetary transaction legs per currency">Legs</th>
-                <th data-toggle="tooltip" scope="col" title="Total balance for all accounts per currency">Balance</th>
-                <th data-toggle="tooltip" scope="col" title="Total exchange of funds per currency">Turnover</th>
-                <th data-toggle="tooltip" scope="col" title="Transaction leg checksum per currency (must be zero)">Checksum</th>
-            </tr>
-            </thead>
-            <tbody data-toggle="tooltip" id="report-container" title="Aggregated stats for all accounts">
-            </tbody>
-        </table>
-
-        <button type="submit" class="btn btn-sm btn-dark" data-toggle="tooltip" data-placement="right" id="refresh-button"
-                title="Refresh account and transaction history (runs every 30s by default)" onclick="refreshReport()">Refresh Now
-        </button>
-
-    </div>
 </main>
 
 <div id="dashboard-container">

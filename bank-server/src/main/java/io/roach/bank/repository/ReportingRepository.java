@@ -1,12 +1,10 @@
 package io.roach.bank.repository;
 
-import java.util.Currency;
-
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 
 public interface ReportingRepository {
-    AccountSummary accountSummary(Currency currency);
+    AccountSummary accountSummary(String city);
 
-    TransactionSummary transactionSummary(Currency currency);
+    TransactionSummary transactionSummary(String city);
 }

@@ -58,9 +58,10 @@ public class GenerateCSV extends AbstractCommand {
             @ShellOption(help = "number of accounts in total", defaultValue = "1_000_000") String accounts,
             @ShellOption(help = "number of transactions per account", defaultValue = "0") int transactionsPerAccount,
             @ShellOption(help = "number of legs per transaction (multiple of 2)", defaultValue = "2")
-            int legsPerTransaction
+            int legsPerTransaction,
+            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) {
-        final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
+        final Set<String> cities = restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions));
 
         Path path = Paths.get(destination);
         if (!path.toFile().isDirectory()) {
@@ -94,10 +95,10 @@ public class GenerateCSV extends AbstractCommand {
 
         try {
             final int nAccounts = Integer.parseInt(accounts.replace("_", ""));
-            final int accountsPerRegion = nAccounts / cityCurrencyMap.size();
+            final int accountsPerRegion = nAccounts / cities.size();
 
             logger.info(">> Generating CSV import files");
-            logger.info("{} cities: {}", cityCurrencyMap.size(), cityCurrencyMap.keySet());
+            logger.info("{} cities: {}", cities.size(), cities);
             logger.info("{} accounts total", nAccounts);
             logger.info("{} accounts per region", accountsPerRegion);
             logger.info("{} transactions total", nAccounts * transactionsPerAccount);
@@ -105,7 +106,7 @@ public class GenerateCSV extends AbstractCommand {
 
             CsvGenerator generator = new CsvGenerator();
             generator.writers = writers;
-            generator.cities = cityCurrencyMap;
+            generator.cities = cities;
             generator.initialBalance = initialBalance;
             generator.accountsPerRegion = accountsPerRegion;
             generator.transactionsPerAccount = transactionsPerAccount;
@@ -199,7 +200,7 @@ public class GenerateCSV extends AbstractCommand {
     private static class CsvGenerator implements Callable<Long> {
         List<WriterGroup> writers = new LinkedList<>();
 
-        Map<String, Currency> cities;
+        Set<String> cities;
 
         String initialBalance;
 
@@ -211,8 +212,8 @@ public class GenerateCSV extends AbstractCommand {
 
         @Override
         public Long call() throws Exception {
-            for (final String city : cities.keySet()) {
-                final Money balance = Money.of(initialBalance, cities.get(city));
+            for (final String city : cities) {
+                final Money balance = Money.of(initialBalance, Money.USD);
 
                 final String tsISO = LocalDateTime.now()
                         .atOffset(ZoneOffset.UTC)

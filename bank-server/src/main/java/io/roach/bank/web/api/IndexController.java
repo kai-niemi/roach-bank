@@ -1,20 +1,12 @@
 package io.roach.bank.web.api;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.Banner;
-import org.springframework.boot.ResourceBanner;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.Application;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.web.support.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -27,13 +19,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping(value = "/api")
 public class IndexController {
-    @Autowired
-    private Environment environment;
-
     @GetMapping
     public ResponseEntity<MessageModel> index() {
         MessageModel index = new MessageModel();
-        index.setMessage(readMessageOfTheDay());
+        index.setMessage(CockroachFacts.nextFact());
 
         index.add(linkTo(methodOn(AccountController.class)
                 .index())
@@ -62,14 +51,5 @@ public class IndexController {
         );
 
         return ResponseEntity.ok(index);
-    }
-
-    private String readMessageOfTheDay() {
-        ByteArrayOutputStream bas = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(bas);
-        Banner banner = new ResourceBanner(new ClassPathResource("motd.txt"));
-        banner.printBanner(environment, Application.class, ps);
-        ps.flush();
-        return bas.toString();
     }
 }

@@ -43,18 +43,20 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
             + "count (distinct a.city), "
             + "sum (a.balance.amount), "
             + "min (a.balance.amount), "
-            + "max (a.balance.amount) "
+            + "max (a.balance.amount), "
+            + "a.balance.currency "
             + "from Account a "
-            + "where a.balance.currency = ?1")
-    Stream<Tuple> accountSummary(Currency currency);
+            + "where a.city = ?1 "
+            + "group by a.city,a.balance.currency")
+    Stream<Tuple> accountSummary(String city);
 
     @Query(value = "select "
             + "  count (distinct t.id), "
             + "  count (t.id), "
             + "  sum (ti.amount.amount) "
             + "from Transaction t join TransactionItem ti "
-            + "where ti.account.balance.currency = ?1")
-    Stream<Tuple> transactionSummary(Currency currency);
+            + "where ti.transactionCity = ?1")
+    Stream<Tuple> transactionSummary(String city);
 
     @Query(value = "select a "
             + "from Account a "

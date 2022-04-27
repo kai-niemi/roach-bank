@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import javax.sql.DataSource;
 
@@ -82,7 +82,7 @@ public class AdminController {
                 "system.cpu.usage", "system.load.average.1m").forEach(key -> {
             index.add(
                     Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator", "metrics", key)
-                                    .buildAndExpand().toUriString()).withRel(LinkRelations.ACTUATOR_REL)
+                            .buildAndExpand().toUriString()).withRel(LinkRelations.ACTUATOR_REL)
                             .withTitle("Metrics endpoint"));
         });
 
@@ -131,14 +131,14 @@ public class AdminController {
 
     @PostMapping(value = "/clear")
     @Async
-    public CompletableFuture<Void> clearAll() {
+    public Future<?> clearAll() {
         logger.warn("Deleting all transactions");
         transactionService.deleteAll();
 
         logger.warn("Deleting all accounts");
         accountService.deleteAll();
 
-        return CompletableFuture.completedFuture(null);
+        return null;
     }
 
     @GetMapping(value = "/pool-info")

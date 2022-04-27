@@ -42,16 +42,10 @@ public class CreateAccounts extends AbstractCommand {
             @ShellOption(help = "batch size", defaultValue = "1024") int batchSize,
             @ShellOption(help = "batch statement size", defaultValue = "32") int statementSize,
             @ShellOption(help = "initial balance per account", defaultValue = "500000.00") String balance,
-            @ShellOption(help = "currency to use", defaultValue = "USD") String currency,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) {
         final Set<String> cities = new HashSet<>();
         cities.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
-
-        final Map<String, Currency> cityCurrencyMap = restCommands.getCityCurrency();
-        if (cities.isEmpty()) {
-            cities.addAll(cityCurrencyMap.keySet());
-        }
 
         final Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
@@ -60,7 +54,7 @@ public class CreateAccounts extends AbstractCommand {
 
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        for (String city : cityCurrencyMap.keySet()) {
+        for (String city : cities) {
             if (cities.contains(city)) {
                 Runnable worker = () -> {
                     UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
@@ -68,7 +62,6 @@ public class CreateAccounts extends AbstractCommand {
                             .queryParam("prefix", "" + batchNumber.incrementAndGet())
                             .queryParam("numAccounts", batchSize)
                             .queryParam("balance", balance)
-                            .queryParam("currency", currency)
                             .queryParam("batchSize", statementSize);
 
                     ResponseEntity<String> response = restCommands.post(Link.of(builder.build().toUriString()));
@@ -82,9 +75,9 @@ public class CreateAccounts extends AbstractCommand {
                     executorTemplate.runAsync(city, worker, DurationFormat.parseDuration(duration));
                 } else {
                     final int totAccounts = Integer.parseInt(totalAccounts.replace("_", ""));
-                    int iterations = Math.max(1, totAccounts / batchSize / cityCurrencyMap.size());
+                    int iterations = Math.max(1, totAccounts / batchSize / cities.size());
                     logger.info("Creating {} accounts in '{}' in {} iterations", city,
-                            totAccounts / cityCurrencyMap.size(), iterations);
+                            totAccounts / cities.size(), iterations);
                     executorTemplate.runAsync(city, worker, iterations);
                 }
             } else {

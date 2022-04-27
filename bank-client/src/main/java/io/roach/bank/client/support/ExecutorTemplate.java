@@ -110,9 +110,10 @@ public class ExecutorTemplate {
     }
 
     public void cancelFutures() {
-        logger.info("Cancelling {} futures", futures.size());
         cancelRequested = true;
         while (!futures.isEmpty()) {
+            logger.info("Cancelling {} futures", futures.size());
+
             ListenableFuture<Void> future = futures.pop();
             future.cancel(true);
             try {

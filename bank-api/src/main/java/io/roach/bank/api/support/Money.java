@@ -134,14 +134,14 @@ public class Money implements Serializable, Comparable<Money> {
 
     public Money divide(BigDecimal divisor) {
         assertNotNull(divisor);
-        BigDecimal newAmount = amount.divide(divisor, RoundingMode.UNNECESSARY);
+        BigDecimal newAmount = amount.divide(divisor, RoundingMode.HALF_EVEN);
         newAmount = setScale(newAmount);
         return new Money(newAmount, currency);
     }
 
     public Money divide(double divisor) {
         BigDecimal newAmount = amount
-                .divide(new BigDecimal(Double.toString(divisor)), RoundingMode.UNNECESSARY);
+                .divide(new BigDecimal(Double.toString(divisor)), RoundingMode.HALF_EVEN);
         newAmount = setScale(newAmount);
         return new Money(newAmount, currency);
     }

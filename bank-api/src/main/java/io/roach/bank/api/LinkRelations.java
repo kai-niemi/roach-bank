@@ -42,10 +42,6 @@ public abstract class LinkRelations {
 
     public static final String REGIONS_REL = "regions";
 
-    public static final String CITIES_REL = "cities";
-
-    public static final String CURRENCIES_REL = "currencies";
-
     public static final String REGION_CITIES_REL = "region-cities";
 
     public static final String GATEWAY_REGION_REL = "gateway-region";

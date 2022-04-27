@@ -2,6 +2,7 @@ package io.roach.bank.repository.jdbc;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -39,41 +40,42 @@ public class JdbcReportingRepository implements ReportingRepository {
 
     @Override
     @Cacheable(value = CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY)
-    public AccountSummary accountSummary(Currency currency) {
+    public AccountSummary accountSummary(String city) {
         assertInTransactionContext();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("currency", currency.getCurrencyCode());
+        parameters.addValue("city", city);
 
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT "
                         + "  count(a.id) tot_accounts, "
-                        + "  count(distinct a.city) tot_cities, "
                         + "  sum(a.balance) tot_balance, "
                         + "  min(a.balance) min_balance, "
-                        + "  max(a.balance) max_balance "
+                        + "  max(a.balance) max_balance, "
+                        + "  a.currency "
                         + "FROM account a "
-                        + "WHERE a.currency = :currency",
+                        + "WHERE a.city = :city "
+                        + "GROUP BY a.city, a.currency",
                 parameters,
                 (rs, rowNum) -> {
                     AccountSummary summary = new AccountSummary();
-                    summary.setCurrency(currency);
+                    summary.setCity(city);
                     summary.setNumberOfAccounts(rs.getInt(1));
-                    summary.setNumberOfRegions(rs.getInt(2));
-                    summary.setTotalBalance(rs.getBigDecimal(3));
-                    summary.setMinBalance(rs.getBigDecimal(4));
-                    summary.setMaxBalance(rs.getBigDecimal(5));
+                    summary.setTotalBalance(rs.getBigDecimal(2));
+                    summary.setMinBalance(rs.getBigDecimal(3));
+                    summary.setMaxBalance(rs.getBigDecimal(4));
+                    summary.setCurrency(Currency.getInstance(rs.getString(5)));
                     return summary;
                 });
     }
 
     @Override
     @Cacheable(value = CacheConfig.CACHE_TRANSACTION_REPORT_SUMMARY)
-    public TransactionSummary transactionSummary(Currency currency) {
+    public TransactionSummary transactionSummary(String city) {
         assertInTransactionContext();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("currency", currency.getCurrencyCode());
+        parameters.addValue("city", city);
 
         // Break down per currency and use parallel queries
         return namedParameterJdbcTemplate.queryForObject(
@@ -84,11 +86,11 @@ public class JdbcReportingRepository implements ReportingRepository {
                         + "  sum(ti.amount) "
                         + "FROM transaction t "
                         + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
-                        + "WHERE ti.currency = :currency",
+                        + "WHERE ti.transaction_city = :city",
                 parameters,
                 (rs, rowNum) -> {
                     TransactionSummary summary = new TransactionSummary();
-                    summary.setCurrency(currency);
+                    summary.setCity(city);
                     summary.setNumberOfTransactions(rs.getInt(1));
                     summary.setNumberOfLegs(rs.getInt(2));
 

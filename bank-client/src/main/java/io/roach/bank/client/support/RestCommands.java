@@ -63,8 +63,8 @@ public class RestCommands {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, String> getRegions() {
-        Map<String, String> result = fromRoot()
+    public Map<String, List<String>> getRegions() {
+        Map<String, List<String>> result = fromRoot()
                 .follow(LinkRelations.withCurie(META_REL))
                 .follow(LinkRelations.withCurie(REGIONS_REL))
                 .toObject(Map.class);
@@ -77,27 +77,6 @@ public class RestCommands {
                 .follow(LinkRelations.withCurie(META_REL))
                 .follow(LinkRelations.withCurie(GATEWAY_REGION_REL))
                 .toObject(String.class);
-    }
-
-    public Set<String> getCities() {
-        return getCityCurrency().keySet();
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Currency> getCityCurrency() {
-        final Map<String, Object> parameters = new HashMap<>();
-        final Map<String, Currency> result = new HashMap<>();
-
-        Objects.requireNonNull(fromRoot()
-                        .follow(withCurie(META_REL))
-                        .follow(withCurie(CITIES_REL))
-                        .withTemplateParameters(parameters)
-                        .toObject(Map.class))
-                .forEach((k, v) -> result.put(
-                        (String) k, Currency.getInstance((String) v))
-                );
-
-        return result;
     }
 
     @SuppressWarnings("unchecked")

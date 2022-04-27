@@ -4,17 +4,25 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 public class AccountSummary {
+    private String city;
+
     private Currency currency;
 
     private int numberOfAccounts;
-
-    private int numberOfRegions;
 
     private BigDecimal totalBalance;
 
     private BigDecimal minBalance;
 
     private BigDecimal maxBalance;
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
 
     public Currency getCurrency() {
         return currency;
@@ -30,14 +38,6 @@ public class AccountSummary {
 
     public void setNumberOfAccounts(int numberOfAccounts) {
         this.numberOfAccounts = numberOfAccounts;
-    }
-
-    public int getNumberOfRegions() {
-        return numberOfRegions;
-    }
-
-    public void setNumberOfRegions(int numberOfRegions) {
-        this.numberOfRegions = numberOfRegions;
     }
 
     public BigDecimal getTotalBalance() {
@@ -67,9 +67,8 @@ public class AccountSummary {
     @Override
     public String toString() {
         return "AccountSummary{" +
-                "currency=" + currency +
+                "region=" + city +
                 ", numberOfAccounts=" + numberOfAccounts +
-                ", numberOfRegions=" + numberOfRegions +
                 ", totalBalance=" + totalBalance +
                 ", minBalance=" + minBalance +
                 ", maxBalance=" + maxBalance +

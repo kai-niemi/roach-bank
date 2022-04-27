@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.persistence.Tuple;
@@ -30,18 +31,18 @@ public class JpaReportingRepository implements ReportingRepository {
     }
 
     @Override
-    public AccountSummary accountSummary(Currency currency) {
+    public AccountSummary accountSummary(String city) {
         List<AccountSummary> result = new LinkedList<>();
 
-        try (Stream<Tuple> stream = accountRepository.accountSummary(currency)) {
+        try (Stream<Tuple> stream = accountRepository.accountSummary(city)) {
             stream.forEach(o -> {
                 AccountSummary summary = new AccountSummary();
-                summary.setCurrency(currency);
+                summary.setCity(city);
                 summary.setNumberOfAccounts(o.get(0, Integer.class));
-                summary.setNumberOfRegions(o.get(1, Integer.class));
-                summary.setTotalBalance(o.get(2, BigDecimal.class));
-                summary.setMinBalance(o.get(3, BigDecimal.class));
-                summary.setMaxBalance(o.get(4, BigDecimal.class));
+                summary.setTotalBalance(o.get(1, BigDecimal.class));
+                summary.setMinBalance(o.get(2, BigDecimal.class));
+                summary.setMaxBalance(o.get(3, BigDecimal.class));
+                summary.setCurrency(Currency.getInstance(o.get(4, String.class)));
 
                 result.add(summary);
             });
@@ -51,15 +52,15 @@ public class JpaReportingRepository implements ReportingRepository {
     }
 
     @Override
-    public TransactionSummary transactionSummary(Currency currency) {
+    public TransactionSummary transactionSummary(String city) {
         assertTransactionActive();
 
         List<TransactionSummary> result = new LinkedList<>();
 
-        try (Stream<Tuple> stream = accountRepository.transactionSummary(currency)) {
+        try (Stream<Tuple> stream = accountRepository.transactionSummary(city)) {
             stream.forEach(o -> {
                 TransactionSummary summary = new TransactionSummary();
-                summary.setCurrency(currency);
+                summary.setCity(city);
                 summary.setNumberOfTransactions(o.get(0, Integer.class));
                 summary.setNumberOfLegs(o.get(1, Integer.class));
                 summary.setTotalTurnover(o.get(2, BigDecimal.class));
