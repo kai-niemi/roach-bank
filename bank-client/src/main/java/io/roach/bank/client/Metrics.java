@@ -29,15 +29,21 @@ public class Metrics extends AbstractCommand {
     @Autowired
     private CallMetrics callMetrics;
 
+    @PostConstruct
+    public void init() {
+        scheduledExecutorService.scheduleAtFixedRate(callMetricsPrinter(), 5, 5, TimeUnit.SECONDS);
+    }
+
+    @ShellMethod(value = "Clear metrics", key = {"clear-metrics", "cm"})
+    public void clearStats() {
+        callMetrics.clear();
+        console.green("Metrics cleared\n");
+    }
+
     @ShellMethod(value = "Toggle console metrics", key = {"metrics", "m"})
     public void toggleMetrics() {
         printMetrics = !printMetrics;
         console.green("Metrics printing is %s\n", printMetrics ? "on" : "off");
-    }
-
-    @PostConstruct
-    public void init() {
-        scheduledExecutorService.scheduleAtFixedRate(callMetricsPrinter(), 5, 5, TimeUnit.SECONDS);
     }
 
     private Runnable callMetricsPrinter() {

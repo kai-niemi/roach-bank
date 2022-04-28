@@ -39,7 +39,11 @@ if fn_prompt_yes_no "Create CRDB cluster?" Y; then
 fi
 
 if fn_prompt_yes_no "Deploy Bank servers?" Y; then
-  command_bank_deploy.sh
+  command_bank_deploy.sh server
+fi
+
+if fn_prompt_yes_no "Deploy Bank clients?" Y; then
+  command_bank_deploy.sh client
 fi
 
 if fn_prompt_yes_no "Start Bank servers?" Y; then
