@@ -24,8 +24,6 @@ public abstract class Constants {
 
     public static final String REGIONS_HELP = "comma separated list of regions";
 
-    public static final String CITIES_HELP = "comma separated list of cities";
-
     public static final String ACCOUNT_LIMIT_HELP = "number of accounts per city (-1 means server default)";
 
     public static final String DEFAULT_ACCOUNT_LIMIT = "-1";

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.changefeed.ReportWebSocketPublisher;
@@ -32,15 +33,18 @@ public class RootController {
     @Autowired
     private MetadataRepository metadataRepository;
 
-    @GetMapping
-    public String homePage(Model model) {
-        String locality = metadataRepository.getGatewayRegion();
+    @GetMapping()
+    public String homePage(@RequestParam(value = "region", required = false) String region, Model model) {
+        String locality = StringUtils.hasLength(region) ? region : metadataRepository.getGatewayRegion();
         model.addAttribute("randomFact", CockroachFacts.nextFact());
         if (StringUtils.hasLength(locality)) {
             model.addAttribute("title", "Roach Bank (" + locality + ")");
         } else {
             model.addAttribute("title", "Roach Bank");
         }
+
+        model.addAttribute("region", region);
+
         return "home";
     }
 

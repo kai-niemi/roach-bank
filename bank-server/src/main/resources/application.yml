@@ -99,4 +99,4 @@ roachbank:
   # Report query timeout (seconds)
   reportQueryTimeoutSeconds: 120
   # Display number
-  accountsPerCityLimit: 100
+  accountsPerCityLimit: 10
