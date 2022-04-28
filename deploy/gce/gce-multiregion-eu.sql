@@ -12,7 +12,6 @@ ALTER DATABASE roach_bank ADD REGION "europe-west3";
 -- ALTER DATABASE roach_bank PLACEMENT DEFAULT;
 
 ALTER TABLE region SET locality GLOBAL;
-ALTER TABLE cloud_region SET locality GLOBAL;
 
 ALTER TABLE account ADD COLUMN region crdb_internal_region AS (
     CASE
@@ -27,7 +26,7 @@ ALTER TABLE account SET LOCALITY REGIONAL BY ROW AS region;
 
 ALTER TABLE transaction ADD COLUMN region crdb_internal_region AS (
     CASE
-        WHEN city IN ('stockholm','copenhagen','helsinki','oslo','riga','tallinn','amsterdam','rotterdam','antwerp','hague','ghent','brussels') THEN 'europe-west1'
+        WHEN city IN ('stockholm','copenhagen','helsinki','oslo','riga','tallinn') THEN 'europe-west1'
         WHEN city IN ('dublin','belfast','london','liverpool','manchester','glasgow','birmingham','leeds') THEN 'europe-west2'
         WHEN city IN ('amsterdam','rotterdam','antwerp','hague','ghent','brussels','berlin','hamburg','munich','frankfurt','dusseldorf','leipzig','dortmund','essen','stuttgart') THEN 'europe-west3'
         ELSE 'europe-west1'
@@ -38,7 +37,7 @@ ALTER TABLE transaction SET LOCALITY REGIONAL BY ROW AS region;
 
 ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
     CASE
-        WHEN transaction_city IN ('stockholm','copenhagen','helsinki','oslo','riga','tallinn','amsterdam','rotterdam','antwerp','hague','ghent','brussels') THEN 'europe-west1'
+        WHEN transaction_city IN ('stockholm','copenhagen','helsinki','oslo','riga','tallinn') THEN 'europe-west1'
         WHEN transaction_city IN ('dublin','belfast','london','liverpool','manchester','glasgow','birmingham','leeds') THEN 'europe-west2'
         WHEN transaction_city IN ('amsterdam','rotterdam','antwerp','hague','ghent','brussels','berlin','hamburg','munich','frankfurt','dusseldorf','leipzig','dortmund','essen','stuttgart') THEN 'europe-west3'
         ELSE 'europe-west1'
@@ -46,3 +45,13 @@ ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
     ) STORED NOT NULL;
 
 ALTER TABLE transaction_item SET LOCALITY REGIONAL BY ROW AS region;
+
+-- Reduce regions to the ones that are relevant
+
+DELETE from region where 1=1;
+
+INSERT into region
+VALUES
+       ('europe-west1', 'stockholm,copenhagen,helsinki,oslo,riga,tallinn'),
+       ('europe-west2', 'dublin,belfast,london,liverpool,manchester,glasgow,birmingham,leeds'),
+       ('europe-west3', 'amsterdam,rotterdam,antwerp,hague,ghent,brussels,berlin,hamburg,munich,frankfurt,dusseldorf,leipzig,dortmund,essen,stuttgart');

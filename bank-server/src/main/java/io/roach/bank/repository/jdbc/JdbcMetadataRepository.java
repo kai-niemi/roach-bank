@@ -1,14 +1,6 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -31,12 +23,12 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
     @Override
     public Map<String, Set<String>> getRegionCities() {
-        Map<String, Set<String>> result = new HashMap<>();
+        Map<String, Set<String>> result = new TreeMap<>();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
 
         this.namedParameterJdbcTemplate.query(
-                "SELECT name,cities FROM region ORDER BY name",
+                "SELECT name,cities FROM region",
                 parameters,
                 (rs, rowNum) -> {
                     result.put(rs.getString(1), StringUtils.commaDelimitedListToSet(rs.getString(2)));
@@ -50,7 +42,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
     public Set<String> getRegionCities(Collection<String> regions) {
         List<String> regionList = new ArrayList<>(regions);
         if (regionList.isEmpty()) {
-            regionList.addAll(getGatewayRegions());
+            regionList.add(getGatewayRegion());
         }
 
         Set<String> cities = new TreeSet<>();
@@ -70,23 +62,6 @@ public class JdbcMetadataRepository implements MetadataRepository {
         });
 
         return cities;
-    }
-
-    private Set<String> getGatewayRegions() {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-
-        Set<String> regions = new HashSet<>();
-
-        this.namedParameterJdbcTemplate.query(
-                "SELECT region FROM cloud_region where name=(SELECT gateway_region())",
-                parameters,
-                (rs, rowNum) -> {
-                    String v = rs.getString(1);
-                    regions.addAll(StringUtils.commaDelimitedListToSet(v));
-                    return null;
-                });
-
-        return regions;
     }
 
     @Override

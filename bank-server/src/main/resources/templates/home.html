@@ -58,27 +58,15 @@
                        href="#" id="navbar1Dropdown" role="button">
                         Region
                     </a>
+
                     <div aria-labelledby="navbarDropdown" class="dropdown-menu">
                         <a class="dropdown-item" th:href="@{/}">local</a>
                         <a class="dropdown-item" th:href="@{?region=*}">*</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" th:href="@{?region=eu_*}">eu_*</a>
-                        <a class="dropdown-item" th:href="@{?region=eu_west}">eu_west</a>
-                        <a class="dropdown-item" th:href="@{?region=eu_east}">eu_east</a>
-                        <a class="dropdown-item" th:href="@{?region=eu_central}">eu_central</a>
-                        <a class="dropdown-item" th:href="@{?region=eu_north}">eu_north</a>
-                        <a class="dropdown-item" th:href="@{?region=eu_south}">eu_south</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" th:href="@{?region=us_*}">us_*</a>
-                        <a class="dropdown-item" th:href="@{?region=us_west}">us_west</a>
-                        <a class="dropdown-item" th:href="@{?region=us_central}">us_central</a>
-                        <a class="dropdown-item" th:href="@{?region=us_east}">us_east</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" th:href="@{?region=ap_*}">ap_*</a>
-                        <a class="dropdown-item" th:href="@{?region=ap_northeast}">ap_northeast</a>
-                        <a class="dropdown-item" th:href="@{?region=ap_southeast}">ap_southeast</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" th:href="@{?region=sa_east}">sa_east</a>
+                        <a th:each="region : ${regions}"
+                           th:href="@{/(region=${region})}"
+                           th:text="${region}"
+                           class="dropdown-item"/>
                     </div>
                 </li>
             </ul>

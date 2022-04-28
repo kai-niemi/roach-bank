@@ -8,7 +8,6 @@ ALTER DATABASE roach_bank ADD REGION "us-west1";
 -- ALTER DATABASE roach_bank PLACEMENT DEFAULT;
 
 ALTER TABLE region SET locality GLOBAL;
-ALTER TABLE city SET locality GLOBAL;
 
 ALTER TABLE account ADD COLUMN region crdb_internal_region AS (
     CASE
@@ -42,3 +41,12 @@ ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
     ) STORED NOT NULL;
 
 ALTER TABLE transaction_item SET LOCALITY REGIONAL BY ROW AS region;
+
+-- Reduce regions to the ones that are relevant
+
+DELETE from region where 1=1;
+
+INSERT into region
+VALUES ('us-east1', 'new york,boston,washington dc,miami,charlotte'),
+       ('us-central1', 'phoenix,minneapolis,chicago,detroit,atlanta'),
+       ('us-west1', 'seattle,san francisco,los angeles,portland,las vegas');

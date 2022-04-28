@@ -14,18 +14,6 @@ create table region
     primary key (name)
 );
 
-create table cloud_region
-(
-    name   string not null,
-    region string not null,
-
-    primary key (name)
-);
-
-alter table cloud_region
-    add constraint fk_cloud_region_ref_region
-        foreign key (region) references region (name);
-
 ----------------------
 -- Metadata
 ----------------------
