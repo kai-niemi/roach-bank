@@ -5,8 +5,6 @@ import java.util.Currency;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +30,7 @@ public class AccountPlanBuilder {
     @Autowired
     private MetadataRepository metadataRepository;
 
-    @PostConstruct
-    public void setupAccountPlan() {
+    public void createAccountPlan() {
         Map<String, Object> plan = readAccountPlan();
 
         if (plan.isEmpty()) {

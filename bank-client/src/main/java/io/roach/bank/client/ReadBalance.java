@@ -1,10 +1,8 @@
 package io.roach.bank.client;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -33,17 +31,17 @@ public class ReadBalance extends AbstractCommand {
     @Autowired
     private ExecutorTemplate executorTemplate;
 
-    @ShellMethod(value = "Query account balances", key = {"b", "balance"})
+    @ShellMethod(value = "Read account balances", key = {"b", "balance"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void balance(
-            @ShellOption(help = "use non-authoritative follower reads", defaultValue = "false") boolean followerReads,
+            @ShellOption(help = "use follower reads", defaultValue = "false") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
-            int limit,
+                    int accountsPerCity,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
-                StringUtils.commaDelimitedListToSet(regions), limit);
+                StringUtils.commaDelimitedListToSet(regions), accountsPerCity);
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching: {}", regions);
         }
@@ -51,20 +49,15 @@ public class ReadBalance extends AbstractCommand {
         accounts.forEach((city, accountModels) -> {
             final List<Link> links = new ArrayList<>();
 
-            accountModels.forEach(accountModel -> {
-                links.add(accountModel.getLink(followerReads
-                                ? withCurie(LinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
-                                : withCurie(LinkRelations.ACCOUNT_BALANCE_REL))
-                        .get());
-            });
+            accountModels.forEach(accountModel -> links.add(accountModel.getLink(
+                    followerReads
+                            ? withCurie(LinkRelations.ACCOUNT_BALANCE_SNAPSHOT_REL)
+                            : withCurie(LinkRelations.ACCOUNT_BALANCE_REL))
+                    .get()));
 
             executorTemplate.runAsync(city,
-                    () -> readAccountBalance(RandomData.selectRandom(links)),
+                    () -> restCommands.get(RandomData.selectRandom(links)),
                     DurationFormat.parseDuration(duration));
         });
-    }
-
-    private void readAccountBalance(Link link) {
-        restCommands.get(link);
     }
 }

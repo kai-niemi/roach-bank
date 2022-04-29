@@ -36,13 +36,8 @@ import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
 @ShellComponent
 @ShellCommandGroup(Constants.MAIN_COMMANDS)
 public class Transfer extends AbstractCommand {
-    @Autowired
-    private RestCommands restCommands;
+    private static final ThreadLocalRandom random = ThreadLocalRandom.current();
 
-    @Autowired
-    private ExecutorTemplate executorTemplate;
-
-    // 64 chars
     private static final List<String> QUOTES = Arrays.asList(
             "Cockroaches can eat anything",
             "Roaches can live up to a week without their head",
@@ -50,19 +45,26 @@ public class Transfer extends AbstractCommand {
             "Cockroaches can run up to three miles in an hour"
     );
 
+    @Autowired
+    private RestCommands restCommands;
+
+    @Autowired
+    private ExecutorTemplate executorTemplate;
+
     @ShellMethod(value = "Transfer funds between accounts", key = {"t", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
             @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.15-1.75") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
+                    int accountsPerCity,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = "use pessmistic locking reading accounts", defaultValue = "false") boolean locking,
+            @ShellOption(help = "use pessmistic read locks (reduce retries)", defaultValue = "false") boolean locking,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
-                StringUtils.commaDelimitedListToSet(regions), limit);
+                StringUtils.commaDelimitedListToSet(regions), accountsPerCity);
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching: {}", regions);
         }
@@ -71,45 +73,25 @@ public class Transfer extends AbstractCommand {
             logger.info("Found {} accounts in '{}'", accountModels.size(), city);
         });
 
-        if (fake) {
-            accounts.forEach((city, accountModels) -> {
-                executorTemplate.runAsync(city,
-                        () -> transferFake(), DurationFormat.parseDuration(duration));
-            });
-        } else {
-            final Link transferLink = restCommands.fromRoot()
-                    .follow(LinkRelations.withCurie(TRANSACTION_REL))
-                    .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
-                    .asTemplatedLink();
+        final Link transferLink = restCommands.fromRoot()
+                .follow(LinkRelations.withCurie(TRANSACTION_REL))
+                .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
+                .asTemplatedLink();
 
-            accounts.forEach((city, accountModels) -> {
-                executorTemplate.runAsync(city,
-                        () -> transferFunds(transferLink, city, accountModels, amount, legs, locking),
-                        DurationFormat.parseDuration(duration));
-            });
-        }
+        accounts.forEach((city, accountModels) -> {
+            executorTemplate.runAsync(city,
+                    () -> transferFunds(transferLink, city, accountModels, amount, legs, locking, fake),
+                    DurationFormat.parseDuration(duration));
+        });
     }
 
-    private final ThreadLocalRandom random = ThreadLocalRandom.current();
-
-    private TransactionModel transferFake() {
-        try {
-            if (random.nextDouble() > 0.98) {
-                Thread.sleep(1_000);
-            } else {
-                Thread.sleep(5);
-            }
-        } catch (InterruptedException e) {
-        }
-        return null;
-    }
-
-    private TransactionModel transferFunds(Link link,
-                                           String city,
-                                           List<AccountModel> accounts,
-                                           String amount,
-                                           int legs,
-                                           boolean sfu) {
+    private void transferFunds(Link link,
+                               String city,
+                               List<AccountModel> accounts,
+                               String amount,
+                               int legs,
+                               boolean sfu,
+                               boolean fake) {
         Currency currency = accounts.get(0).getBalance().getCurrency();
         String[] amountParts = amount.split("-");
         Money transferAmount = RandomData.randomMoneyBetween(amountParts[0], amountParts[1], currency);
@@ -141,6 +123,17 @@ public class Transfer extends AbstractCommand {
                     .then();
         });
 
-        return restCommands.post(link, builder.build(), TransactionModel.class).getBody();
+        if (!fake) {
+            restCommands.post(link, builder.build(), TransactionModel.class);
+        } else {
+            try {
+                if (random.nextDouble() > 0.98) {
+                    Thread.sleep(1_000);
+                } else {
+                    Thread.sleep(5);
+                }
+            } catch (InterruptedException e) {
+            }
+        }
     }
 }

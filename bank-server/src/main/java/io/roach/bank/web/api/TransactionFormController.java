@@ -109,10 +109,10 @@ public class TransactionFormController {
 
 
         Link affordances = Affordances.of(linkTo(methodOn(getClass())
-                        .getTransactionRequestForm(accountsPerRegion, amount, regions))
-                        .withSelfRel()
-                        .andAffordance(afford(methodOn(getClass())
-                                .submitTransactionForm(null))))
+                .getTransactionRequestForm(accountsPerRegion, amount, regions))
+                .withSelfRel()
+                .andAffordance(afford(methodOn(getClass())
+                        .submitTransactionForm(null))))
                 .toLink();
 
         return ResponseEntity.ok().body(formBuilder.build().add(affordances));

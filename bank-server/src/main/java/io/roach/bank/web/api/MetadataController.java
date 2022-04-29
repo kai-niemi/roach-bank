@@ -1,7 +1,5 @@
 package io.roach.bank.web.api;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,13 +39,9 @@ public class MetadataController {
                 .withTitle("All regions and cities"));
 
         index.add(linkTo(methodOn(getClass())
-                .regionCities(Collections.emptyList()))
-                .withRel(LinkRelations.REGION_CITIES_REL)
-                .withTitle("Cities filtered by gateway region"));
-        index.add(linkTo(methodOn(getClass())
                 .regionCities(null))
                 .withRel(LinkRelations.REGION_CITIES_REL)
-                .withTitle("Cities filtered by gateway region"));
+                .withTitle("Cities filtered by region(s)"));
 
         index.add(linkTo(methodOn(getClass())
                 .gatewayRegion())

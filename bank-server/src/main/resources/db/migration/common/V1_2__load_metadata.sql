@@ -3,11 +3,12 @@
 --
 
 INSERT into region
-VALUES ('us-east-1', 'new york,boston,washington dc,miami,charlotte'),
-       ('us-east-2', 'new york,boston,washington dc,miami,charlotte'),
-       ('us-west-1', 'seattle,san francisco,los angeles,portland,las vegas'),
-       ('us-west-2', 'seattle,san francisco,los angeles,portland,las vegas'),
-       ('ca-central-1', 'phoenix,minneapolis,chicago,detroit,atlanta'),
+VALUES ('us-east-1', 'new york,boston,washington dc,miami,charlotte,atlanta'),
+       ('us-east-2', 'chicago,st louis,indianapolis,nashville,dallas,houston'),
+       ('us-west-1', 'san francisco,los angeles,san diego,portland,las vegas,salt lake city'),
+       ('us-west-2', 'seattle,tacoma,portland,salem,bend,eugene'),
+
+       ('ca-central-1', 'calgary,edmonton,winnipeg,regina,brandon,dryden'),
 
        ('eu-west-1', 'dublin,belfast,liverpool,manchester,glasgow'),
        ('eu-west-2', 'london,birmingham,leeds,amsterdam,rotterdam,antwerp,hague,ghent,brussels'),
@@ -24,12 +25,14 @@ VALUES ('us-east-1', 'new york,boston,washington dc,miami,charlotte'),
        ('sa-east-1', 'sao paulo,rio de janeiro,salvador,buenos aires'),
        ('eastasia', 'hong kong,beijing,shanghai,tokyo'),
        ('southeastasia', 'singapore,jakarta,sydney,melbourne'),
+
        ('centralus', 'phoenix,minneapolis,chicago,detroit,atlanta'),
        ('eastus', 'new york,boston,washington dc,miami,charlotte'),
        ('eastus2', 'new york,boston,washington dc,miami,charlotte'),
        ('westus', 'seattle,san francisco,los angeles,portland,las vegas'),
        ('northcentralus', 'phoenix,minneapolis,chicago,detroit,atlanta'),
        ('southcentralus', 'phoenix,minneapolis,chicago,detroit,atlanta'),
+
        ('northeurope', 'stockholm,copenhagen,helsinki,oslo,riga,tallinn'),
        ('westeurope', 'dublin,belfast,london,liverpool,manchester,glasgow,birmingham,leeds'),
 

@@ -35,7 +35,7 @@ public class TransactionResourceAssembler
                 .getTransactionItems(entity.getId(),
                         PageRequest.of(0, 5)))
                 .withRel(LinkRelations.TRANSACTION_ITEMS_REL)
-                .withTitle("Transaction legs"));
+                .withTitle("Transaction items"));
 
         return resource;
     }

@@ -98,7 +98,7 @@ public class GenerateCSV extends AbstractCommand {
             final int accountsPerRegion = nAccounts / cities.size();
 
             logger.info(">> Generating CSV import files");
-            logger.info("{} cities: {}", cities.size(), cities);
+            logger.info("{} cities in region {}: {}", cities.size(), regions, cities);
             logger.info("{} accounts total", nAccounts);
             logger.info("{} accounts per region", accountsPerRegion);
             logger.info("{} transactions total", nAccounts * transactionsPerAccount);
@@ -237,7 +237,7 @@ public class GenerateCSV extends AbstractCommand {
                             city, // region iso code
                             balance.getAmount(), // amount
                             balance.getCurrency(), // currency code
-                            "user", // name
+                            "u", // name
                             i, // name
                             "", // desc
                             "A", // type
