@@ -2,13 +2,15 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
-    <title>Roach Bank</title>
+    <title th:text="${title}"></title>
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
 
-    <link href="/webjars/bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/webjars/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <link href="../static/css/main.css" rel="stylesheet" th:href="@{/css/main.css}"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" rel="stylesheet"/>
-    <link href="../static/images/logo_mark_white.png" rel="icon" th:href="@{/images/logo_mark_white.png}" type="image/png"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"
+          rel="stylesheet"/>
+    <link href="../static/images/logo_mark_white.png" rel="icon" th:href="@{/images/logo_mark_white.png}"
+          type="image/png"/>
 </head>
 
 <!-- Let it snow wintertime -->
@@ -20,80 +22,108 @@
 <a class="github-fork-ribbon right-top fixed" href="https://github.com/kai-niemi/roach-bank"
    data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
 <header>
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark shadow-sm site-header">
-        <a class="navbar-brand" href="#">
-            <img class="d-inline-block align-content-center"
-                 height="32"
-                 src="../static/images/logo_white-32px.png"
-                 th:text="${title}"
-                 th:src="@{/images/logo_mark_white.png}">
-        </a>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img class="d-inline-block align-content-center"
+                     height="33"
+                     src="../static/images/logo_white-32px.png"
+                     th:text="${title}"
+                     th:src="@{/images/logo_mark_white.png}">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                           aria-expanded="false">API</a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><a class="dropdown-item" th:href="@{/api}">API Root</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><h6 class="dropdown-header">Main transactional resources</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/api/account}">Accounts</a></li>
+                            <li><a class="dropdown-item" th:href="@{/api/transaction}">Transactions</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><h6 class="dropdown-header">Reporting and metadata resources</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/api/metadata}">Metadata</a></li>
+                            <li><a class="dropdown-item" th:href="@{/api/admin}">Admin</a></li>
+                            <li><a class="dropdown-item" th:href="@{/api/report}">Reports</a></li>
+                            <li><a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                           aria-expanded="false">Region</a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><h6 class="dropdown-header">Gateway region</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/}" th:text="${gateway_region}"></a></li>
+                            <li><a class="dropdown-item" th:href="@{?region=*}">all (*)</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li th:each="region : ${regions}">
+                                <a th:href="@{/(region=${region})}"
+                                   th:text="${region}"
+                                   class="dropdown-item"/>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                           aria-expanded="false">Limits</a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><h6 class="dropdown-header">Number of accounts per city</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=10)}">10</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=50)}">50</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=100)}">100</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=200)}">200</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=500)}">500</a></li>
+                        </ul>
+                    </li>
 
-        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
-                data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item dropdown">
-                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
-                       href="#" id="navbar1Dropdown" role="button">
-                        API
-                    </a>
-                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                        <a class="dropdown-item" th:href="@{/api}">Root</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" th:href="@{/api/account}">Accounts</a>
-                        <a class="dropdown-item" th:href="@{/api/transaction}">Transactions</a>
-                        <a class="dropdown-item" th:href="@{/api/report}">Reports</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" th:href="@{/api/metadata}">Metadata</a>
-                        <a class="dropdown-item" th:href="@{/api/admin}">Admin</a>
-                        <a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a>
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
-                       href="#" id="navbar1Dropdown" role="button">
-                        Region
-                    </a>
-
-                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                        <a class="dropdown-item" th:href="@{/}">local</a>
-                        <a class="dropdown-item" th:href="@{?region=*}">*</a>
-                        <div class="dropdown-divider"></div>
-                        <a th:each="region : ${regions}"
-                           th:href="@{/(region=${region})}"
-                           th:text="${region}"
-                           class="dropdown-item"/>
-                    </div>
-                </li>
-            </ul>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+                            Viewing region <span th:text="${view_region}"/> </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 </header>
 
 <main class="container-fluid" role="main">
-    <div class="alert alert-success" role="alert">
-        <button aria-label="Close" class="close" data-dismiss="alert" type="button">
-            <span aria-hidden="true">&times;</span>
-        </button>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </symbol>
+        <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+        </symbol>
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </symbol>
+    </svg>
 
-        <h4 class="alert-heading">Did you know?</h4>
-
-        <p th:text="${randomFact}"></p>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+        <span th:text="${randomFact}"/>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 </main>
 
 <div id="dashboard-container">
-    <div id="account-spinner" class="d-flex justify-content-center">
+    <div id="account-spinner" class="text-center">
+        <div class="spinner-border" role="status">
+        </div>
         <p class="lead">
             Receiving accounts...
         </p>
-        <div class="spinner-grow spinner-grow-sm text-dark" role="status">
-            <span class="sr-only">Waiting</span>
-        </div>
     </div>
 </div>
 
@@ -106,49 +136,78 @@
                  width="48" height="48" src="../static/images/logo_mark_black.png"
                  th:src="@{/images/logo_mark_black.png}"
             ></a>
-            <small class="d-block mb-3 text-muted">A CockroachDB powered accounting ledger using the double-entry bookkeeping principle</small>
+            <small class="d-block mb-3 text-muted">A CockroachDB powered accounting ledger using the double-entry
+                bookkeeping principle</small>
         </div>
         <div class="col-6 col-md">
             <h5>Get Started</h5>
             <ul class="list-unstyled text-small">
                 <li><a class="text-muted" href="https://university.cockroachlabs.com/catalog">Online Training</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html">Install CockroachDB</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html">Start a Local Cluster</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html">Learn CockroachDB SQL</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/build-an-app-with-cockroachdb.html">Hello, World!</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html">Explore Capabilities</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html">Install
+                    CockroachDB</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html">Start
+                    a Local Cluster</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html">Learn
+                    CockroachDB SQL</a></li>
+                <li><a class="text-muted"
+                       href="https://www.cockroachlabs.com/docs/stable/build-an-app-with-cockroachdb.html">Hello,
+                    World!</a></li>
+                <li><a class="text-muted"
+                       href="https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html">Explore
+                    Capabilities</a></li>
             </ul>
         </div>
         <div class="col-6 col-md">
             <h5>Develop</h5>
             <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-client-drivers.html">Client Drivers</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/connection-parameters.html">Connection Parameters</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/performance-best-practices-overview.html">SQL Best Practices</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-statements.html">SQL Statements</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/data-types.html">SQL Data Types</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-tuning-with-explain.html">SQL Tuning</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-client-drivers.html">Client
+                    Drivers</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/connection-parameters.html">Connection
+                    Parameters</a></li>
+                <li><a class="text-muted"
+                       href="https://www.cockroachlabs.com/docs/stable/performance-best-practices-overview.html">SQL
+                    Best Practices</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-statements.html">SQL
+                    Statements</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/data-types.html">SQL Data
+                    Types</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-tuning-with-explain.html">SQL
+                    Tuning</a></li>
             </ul>
         </div>
         <div class="col-6 col-md">
             <h5>Deployment</h5>
             <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/recommended-production-settings.html">Production Checklist</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/topology-patterns.html">Topology Patterns</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/manual-deployment.html">Manual Deployment</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/orchestration.html">Orchestration</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/performance.html">Performance</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/upgrade-cockroach-version.html">Rolling Upgrade</a></li>
+                <li><a class="text-muted"
+                       href="https://www.cockroachlabs.com/docs/stable/recommended-production-settings.html">Production
+                    Checklist</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/topology-patterns.html">Topology
+                    Patterns</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/manual-deployment.html">Manual
+                    Deployment</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/orchestration.html">Orchestration</a>
+                </li>
+                <li><a class="text-muted"
+                       href="https://www.cockroachlabs.com/docs/stable/performance.html">Performance</a></li>
+                <li><a class="text-muted"
+                       href="https://www.cockroachlabs.com/docs/stable/upgrade-cockroach-version.html">Rolling
+                    Upgrade</a></li>
             </ul>
         </div>
         <div class="col-6 col-md">
             <h5>FAQs</h5>
             <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/frequently-asked-questions.html">Product FAQs</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-faqs.html">SQL FAQs</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Operational FAQs</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Availability FAQs</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/licensing-faqs.html">Licensing FAQs</a></li>
+                <li><a class="text-muted"
+                       href="https://www.cockroachlabs.com/docs/stable/frequently-asked-questions.html">Product FAQs</a>
+                </li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-faqs.html">SQL FAQs</a>
+                </li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Operational
+                    FAQs</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Availability
+                    FAQs</a></li>
+                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/licensing-faqs.html">Licensing
+                    FAQs</a></li>
             </ul>
         </div>
     </div>
@@ -188,21 +247,19 @@
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/color/jquery.color-2.1.2.js" integrity="sha256-1Cn7TdfHiMcEbTuku97ZRSGt2b3SvZftEIn68UMgHC8=" crossorigin="anonymous"></script>
-<script src="/webjars/sockjs-client/1.1.1/sockjs.min.js"></script>
-<script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
-<script src="/webjars/bootstrap/4.5.3/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+        crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
+        integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/color/jquery.color-2.1.2.js"
+        integrity="sha256-1Cn7TdfHiMcEbTuku97ZRSGt2b3SvZftEIn68UMgHC8=" crossorigin="anonymous"></script>
+
+<script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
+<script src="/webjars/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+
 <script src="js/dashboard.js"></script>
 <script src="js/snow.js"></script>
 
-<script>
-    function refreshReport() {
-        $("#refresh-button").prop("disabled", true);
-        $("#refresh-button").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`);
-        $(this).load("/refresh-report");
-    }
-</script>
 </body>
 </html>

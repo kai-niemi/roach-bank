@@ -18,15 +18,21 @@ BankDashboard.prototype = {
 
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
+
+        var limit=10;
+
+        if (urlParams.has('limit')) {
+            limit = urlParams.get('limit');
+        }
+
         if (urlParams.has('region')) {
             const region = urlParams.get('region');
-            console.log(region);
 
-            $.get(this.settings.endpoints.topAccounts+"?limit=10&regions="+region, function (data) {
+            $.get(this.settings.endpoints.topAccounts+"?limit="+limit+"&regions="+region, function (data) {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
         } else {
-            $.get(this.settings.endpoints.topAccounts+"?limit=10", function (data) {
+            $.get(this.settings.endpoints.topAccounts+"?limit="+limit, function (data) {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
         }

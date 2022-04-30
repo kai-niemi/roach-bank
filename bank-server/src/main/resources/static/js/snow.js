@@ -4,7 +4,8 @@ var requestAnimationFrame = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.msRequestAnimationFrame;
 
-var transforms = ["transform",
+var transforms = [
+    "transform",
     "msTransform",
     "webkitTransform",
     "mozTransform",
@@ -25,9 +26,36 @@ var resetPosition = false;
 // It all starts here...
 //
 function setup() {
-    if (new Date().getMonth() < 3 || new Date().getMonth() >= 10) {
+    var month = new Date().getMonth();
+    var snowing = month >= 9 || month <= 2; // oct-mar
+
+    // snowing = true;
+    // month = 11;
+
+    if (month == 9) { // Oct
+        numberOfSnowflakes = 15; // flurry
+    }
+    if (month == 10) {
+        numberOfSnowflakes = 50;
+    }
+    if (month == 11) {
+        numberOfSnowflakes = 80;
+    }
+    if (month == 0) {
+        numberOfSnowflakes = 120; // blizzard
+    }
+    if (month == 1) {
+        numberOfSnowflakes = 80;
+    }
+    if (month == 2) {
+        numberOfSnowflakes = 15;
+    }
+
+    if (snowing) {
         window.addEventListener("DOMContentLoaded", generateSnowflakes, false);
         window.addEventListener("resize", setResetFlag, false);
+    } else {
+        console.log("Only snowing between Oct-Mar");
     }
 }
 
@@ -115,8 +143,8 @@ function generateSnowflakes() {
         // set our snowflake's initial position and related properties
         var initialXPos = getPosition(50, browserWidth);
         var initialYPos = getPosition(50, browserHeight);
-        var speed = 5+Math.random()*40;
-        var radius = 4+Math.random()*10;
+        var speed = 5 + Math.random() * 40;
+        var radius = 4 + Math.random() * 10;
 
         // create our Snowflake object
         var snowflakeObject = new Snowflake(snowflakeCopy,
@@ -165,7 +193,7 @@ function moveSnowflakes() {
 // This function returns a number between (maximum - offset) and (maximum + offset)
 //
 function getPosition(offset, size) {
-    return Math.round(-1*offset + Math.random() * (size+2*offset));
+    return Math.round(-1 * offset + Math.random() * (size + 2 * offset));
 }
 
 //

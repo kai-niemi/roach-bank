@@ -35,15 +35,13 @@ public class RootController {
 
     @GetMapping()
     public String homePage(@RequestParam(value = "region", required = false) String region, Model model) {
-        String locality = StringUtils.hasLength(region) ? region : metadataRepository.getGatewayRegion();
-        if (StringUtils.hasLength(locality)) {
-            model.addAttribute("title", "Roach Bank (" + locality + ")");
-        } else {
-            model.addAttribute("title", "Roach Bank");
-        }
+        String gatewayRegion = metadataRepository.getGatewayRegion();
 
+        model.addAttribute("title", "Roach Bank - " + gatewayRegion);
         model.addAttribute("randomFact", CockroachFacts.nextFact());
         model.addAttribute("regions", metadataRepository.getRegionCities().keySet());
+        model.addAttribute("gateway_region", gatewayRegion);
+        model.addAttribute("view_region", StringUtils.hasLength(region)?region:gatewayRegion);
 
         return "home";
     }
