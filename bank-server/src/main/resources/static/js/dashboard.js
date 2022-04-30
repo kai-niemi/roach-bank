@@ -6,9 +6,7 @@ var BankDashboard = function (settings) {
 BankDashboard.prototype = {
     init: function () {
         this.container = this.getElement(this.settings.elements.container);
-        this.reportContainer = this.getElement(this.settings.elements.reportContainer);
         this.accountSpinner = this.getElement(this.settings.elements.accountSpinner);
-        this.refreshButton = this.getElement(this.settings.elements.refreshButton);
         this.loadInitialState();
         this.addWebsocketListener();
     },
@@ -40,47 +38,6 @@ BankDashboard.prototype = {
 
     getElement: function (id) {
         return $('#' + id);
-    },
-
-    createAccountElement: function (account) {
-        var _this = this, view;
-
-        var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : account.city);
-        view = $('<div>')
-                    .attr('id', account.id)
-                    .attr('data-toggle', 'tooltip')
-                    .addClass('box')
-                    .css(_this.boxSize(account.city, account.balance.currency, account.balance.amount))
-                    .css({
-                        background: _this.boxColor(account.city, account.currency, account.balance)
-                    })
-                    .append(
-                            $('<span>')
-                                    .addClass('amount')
-                                    .text(_this.formatMoney(account.balance, account.currency))
-                    )
-                    .append(
-                            $('<span>')
-                                    .addClass('name')
-                                    .text(account.name)
-                    )
-                    .append(
-                            $('<span>')
-                                    .addClass('city')
-                                    .text(account.city)
-                    )
-                    .append(
-                            $('<span>')
-                                    .addClass('flag')
-                                    .append($('<a>')
-                                            .append(
-                                                    $('<img>')
-                                                            .addClass('img-fluid')
-                                                            .attr("src", "/images/flags/" + countryCode + ".png")
-                                            )
-                                             .attr('href', account.href))
-                    );
-        this.container.append(view);
     },
 
     createAccountElements: function (data) {
@@ -200,7 +157,7 @@ BankDashboard.prototype = {
             }
             return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255, a].join(',') + ')';
         }
-        console.log("WARN: bad color hex " + hex);
+        // console.log("WARN: bad color hex " + hex);
         return "rgba(1,0.5,1,1)";
     },
 
@@ -208,13 +165,6 @@ BankDashboard.prototype = {
         var formatter = new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: currency,
-        });
-        return formatter.format(number);
-    },
-
-    formatNumber: function (number) {
-        var formatter = new Intl.NumberFormat('en-US', {
-            maximumSignificantDigits: 3
         });
         return formatter.format(number);
     }
@@ -291,6 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'portland': 'USA',
             'las vegas': 'USA',
             'charlotte': 'USA',
+            'miami': 'USA',
 
             'stockholm': 'SWE',
             'helsinki': 'FIN',
@@ -309,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'sao paulo': 'BRL',
             'rio de janeiro': 'BRL',
             'salvador': 'BRL',
+            'buenos aires': 'ARG',
 
             'copenhagen': 'DNK',
             'riga': 'LVA',
@@ -321,18 +273,18 @@ document.addEventListener('DOMContentLoaded', function () {
             'leeds': 'GBR',
 
             'rotterdam': 'NLD',
-            'antwerp,': 'BEL',
+            'antwerp': 'BEL',
             'hague': 'NLD',
             'ghent': 'BEL',
             'brussels': 'BEL',
-            'berlin': 'GER',
-            'hamburg': 'GER',
-            'munich': 'GER',
-            'dusseldorf': 'GER',
-            'leipzig': 'GER',
-            'dortmund': 'GER',
-            'essen': 'GER',
-            'stuttgart': 'GER',
+            'berlin': 'DEU',
+            'hamburg': 'DEU',
+            'munich': 'DEU',
+            'dusseldorf': 'DEU',
+            'leipzig': 'DEU',
+            'dortmund': 'DEU',
+            'essen': 'DEU',
+            'stuttgart': 'DEU',
 
             'sintra': 'ESP',
             'rome': 'ITA',
@@ -361,7 +313,10 @@ document.addEventListener('DOMContentLoaded', function () {
             'budapest': 'HUN',
             'beijing': 'CHN',
             'shanghai': 'CHN',
-            'melbourne': 'AUS'
+            'melbourne': 'AUS',
+            'jakarta': 'IDN',
+            'tallinn': 'IDN',
+            'riga': 'IDN',
         }
     });
 });

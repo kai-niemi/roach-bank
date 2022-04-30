@@ -16,6 +16,7 @@ create type transaction_type as enum ('GEN');
 
 create table region
 (
+    cloud  string not null,
     name   string not null,
     cities string not null,
 
@@ -53,6 +54,8 @@ create table account
 
     primary key (id)
 );
+
+create index idx_account_city on account (city);
 
 -- Breaks CDC
 -- family         update_often(balance, updated),

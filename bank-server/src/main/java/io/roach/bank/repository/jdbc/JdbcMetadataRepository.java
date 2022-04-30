@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import io.roach.bank.domain.Region;
 import io.roach.bank.repository.MetadataRepository;
 
 @Repository
@@ -19,6 +20,33 @@ public class JdbcMetadataRepository implements MetadataRepository {
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    }
+
+    @Override
+    public Map<String, List<Region>> getRegions() {
+        Map<String, List<Region>> result = new TreeMap<>();
+
+        List<String> clouds = namedParameterJdbcTemplate
+                .queryForList("SELECT cloud FROM region GROUP BY cloud", Collections.emptyMap(), String.class);
+
+        clouds.forEach(cloud -> {
+            MapSqlParameterSource parameters = new MapSqlParameterSource();
+            parameters.addValue("cloud",cloud);
+
+            this.namedParameterJdbcTemplate.query(
+                    "SELECT name,cities FROM region WHERE cloud=:cloud ORDER BY name",
+                    parameters,
+                    (rs, rowNum) -> {
+                        Region r = new Region();
+                        r.setCloud(cloud);
+                        r.setName(rs.getString(1));
+                        r.setCities(StringUtils.commaDelimitedListToSet(rs.getString(2)));
+                        result.computeIfAbsent(cloud, regions -> new ArrayList<>()).add(r);
+                        return null;
+                    });
+        });
+
+        return result;
     }
 
     @Override

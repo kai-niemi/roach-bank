@@ -28,14 +28,51 @@
                 <img class="d-inline-block align-content-center"
                      height="33"
                      src="../static/images/logo_white-32px.png"
-                     th:text="${title}"
                      th:src="@{/images/logo_mark_white.png}">
+            Roach Bank
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+                            Viewing <span th:text="${view_region}"/> </a>
+                    </li>
+
+                    <li class="nav-item dropdown" th:each="item, iStat : ${region_groups}">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                           aria-expanded="false" > Regions (<span th:text="${item.key}"/>) </a>
+
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><h6 class="dropdown-header">Gateway region</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/}" th:text="${gateway_region}"></a></li>
+                            <li><a class="dropdown-item" th:href="@{?region=*}">all (*)</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li th:each="region : ${item.value}">
+                                <a th:href="@{/(region=${region.name})}"
+                                   th:text="${region.name}"
+                                   class="dropdown-item"/>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                           aria-expanded="false">Limits</a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><h6 class="dropdown-header">Number of accounts per city</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=10)}">10</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=50)}">50</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=100)}">100</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=200)}">200</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=500)}">500</a></li>
+                        </ul>
+                    </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                            aria-expanded="false">API</a>
@@ -56,40 +93,6 @@
                             <li><a class="dropdown-item" th:href="@{/api/report}">Reports</a></li>
                             <li><a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a></li>
                         </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-                           aria-expanded="false">Region</a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Gateway region</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/}" th:text="${gateway_region}"></a></li>
-                            <li><a class="dropdown-item" th:href="@{?region=*}">all (*)</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li th:each="region : ${regions}">
-                                <a th:href="@{/(region=${region})}"
-                                   th:text="${region}"
-                                   class="dropdown-item"/>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-                           aria-expanded="false">Limits</a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Number of accounts per city</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=10)}">10</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=50)}">50</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=100)}">100</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=200)}">200</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${region},limit=500)}">500</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
-                            Viewing region <span th:text="${view_region}"/> </a>
                     </li>
                 </ul>
             </div>
