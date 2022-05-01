@@ -51,20 +51,20 @@ public class Transfer extends AbstractCommand {
     @Autowired
     private ExecutorTemplate executorTemplate;
 
+    // transfer --limit --amount 150.00 --locking
     @ShellMethod(value = "Transfer funds between accounts", key = {"t", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
-            @ShellOption(help = "amount per transaction (from-to)", defaultValue = "0.15-1.75") final String amount,
+            @ShellOption(help = "amount per transaction", defaultValue = "0.25") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
-                    int accountsPerCity,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "use pessmistic read locks (reduce retries)", defaultValue = "false") boolean locking,
             @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
-                StringUtils.commaDelimitedListToSet(regions), accountsPerCity);
+                StringUtils.commaDelimitedListToSet(regions), limit);
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching: {}", regions);
         }
@@ -90,11 +90,9 @@ public class Transfer extends AbstractCommand {
                                List<AccountModel> accounts,
                                String amount,
                                int legs,
-                               boolean sfu,
+                               boolean locking,
                                boolean fake) {
-        Currency currency = accounts.get(0).getBalance().getCurrency();
-        String[] amountParts = amount.split("-");
-        Money transferAmount = RandomData.randomMoneyBetween(amountParts[0], amountParts[1], currency);
+        Money transferAmount =  Money.of(""+amount, accounts.get(0).getBalance().getCurrency());
 
         TransactionForm.Builder builder = TransactionForm.builder()
                 .withUUID(UUID.randomUUID())
@@ -103,7 +101,7 @@ public class Transfer extends AbstractCommand {
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
 
-        if (sfu) {
+        if (locking) {
             builder.withSelectForUpdate();
         }
 

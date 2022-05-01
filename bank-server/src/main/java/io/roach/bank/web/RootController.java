@@ -40,8 +40,14 @@ public class RootController {
         model.addAttribute("title", "Roach Bank - " + gatewayRegion);
         model.addAttribute("randomFact", CockroachFacts.nextFact());
         model.addAttribute("gateway_region", gatewayRegion);
-        model.addAttribute("view_region", StringUtils.hasLength(region) ? region : gatewayRegion);
         model.addAttribute("region_groups", metadataRepository.getRegions());
+        model.addAttribute("view_region", StringUtils.hasLength(region) ? region : gatewayRegion);
+        model.addAttribute("view_gateway", !StringUtils.hasLength(region) || gatewayRegion.equalsIgnoreCase(region));
+
+        logger.debug("Attributes");
+        model.asMap().forEach((k, v) -> {
+            logger.debug("\t{}: {}", k, v);
+        });
 
         return "home";
     }

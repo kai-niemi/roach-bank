@@ -37,8 +37,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
+
                     <li class="nav-item dropdown">
-                        <a class="nav-link active dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                            aria-expanded="false">API</a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li><a class="dropdown-item" th:href="@{/api}">API Root</a></li>
@@ -58,18 +59,12 @@
                             <li><a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a></li>
                         </ul>
                     </li>
-
+                    <!-- -->
                     <li class="nav-item dropdown" th:each="item, iStat : ${region_groups}">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                            aria-expanded="false" > Regions (<span th:text="${item.key}"/>) </a>
 
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Gateway region</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/}" th:text="${gateway_region}"></a></li>
-                            <li><a class="dropdown-item" th:href="@{?region=*}">all (*)</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
                             <li th:each="region : ${item.value}">
                                 <a th:href="@{/(region=${region.name})}"
                                    th:text="${region.name}"
@@ -77,12 +72,16 @@
                             </li>
                         </ul>
                     </li>
-
+                    <!-- -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-                           aria-expanded="false">Limits</a>
+                           aria-expanded="false">View</a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Number of accounts per city</h6></li>
+                            <li><h6 class="dropdown-header">Region (gateway)</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/}" th:text="${gateway_region}"></a></li>
+                            <li><a class="dropdown-item" th:href="@{?region=*}">all (*)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">Accounts per city</h6></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=10)}">10</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=50)}">50</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=100)}">100</a></li>
@@ -90,10 +89,12 @@
                             <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=500)}">500</a></li>
                         </ul>
                     </li>
-
+                    <!-- -->
                     <li class="nav-item">
-                        <a class="nav-link disabled">
-                            Viewing <span class="text-warning" th:text="${view_region}"/> </a>
+                        <a class="nav-link disabled" th:switch="${view_gateway}">
+                          <span th:case="true" class="text-info" th:text="${view_region}"></span>
+                          <span th:case="false" class="text-warning" th:text="${view_region}"></span>
+                        </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">

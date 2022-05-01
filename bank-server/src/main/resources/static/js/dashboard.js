@@ -53,9 +53,9 @@ BankDashboard.prototype = {
                     .attr('data-toggle', 'tooltip')
                     .attr('title', account._links.self.href)
                     .addClass('box')
-                    .css(_this.boxSize(account.city, account.balance.currency, account.balance.amount))
+                    .css(_this.boxSize(account.balance.amount, account.balance.currency))
                     .css({
-                        background: _this.boxColor(account.city, account.balance.currency, account.balance.amount)
+                        background: _this.boxColor(account.city)
                     })
                     .append(
                             $('<span>')
@@ -110,7 +110,7 @@ BankDashboard.prototype = {
     handleAccountBalanceUpdate: function (account, city, currency, balance) {
         var _this = this;
 
-        var original_color = _this.boxColor(city, currency, balance);
+        var original_color = _this.boxColor(city);
         account.css("background-color", "white");
 
         var m = _this.formatMoney(balance, currency);
@@ -121,8 +121,8 @@ BankDashboard.prototype = {
         }, 1500);
     },
 
-    boxSize: function (city, currency, amount) {
-        var size = 45;
+    boxSize: function (amount,currency) {
+        var size=50;
         return {
             width: size + 'px',
             height: size + 'px',
@@ -130,31 +130,20 @@ BankDashboard.prototype = {
         }
     },
 
-    boxColor: function (city, currency, amount) {
+    boxColor: function (city) {
         var random = this.settings.regionColors[Math.floor(Math.random() * this.settings.regionColors.length)];
         var hex = ((this.settings.regionColors[city]) ? this.settings.regionColors[city] : random);
-
-        var maxBalance = sessionStorage.getItem("account-summary-" + currency);
-        if (!maxBalance) {
-            maxBalance = 0;
-        }
-
-        return this.hexToRgbA(hex, amount, maxBalance);
+        return this.hexToRgbA(hex);
     },
 
-    hexToRgbA: function (hex, amount, maxAmount) {
+    hexToRgbA: function (hex) {
         if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
             var c = hex.substring(1).split('');
             if (c.length == 3) {
                 c = [c[0], c[0], c[1], c[1], c[2], c[2]];
             }
             c = '0x' + c.join('');
-            var a;
-            if (maxAmount > 0) {
-                a = Math.max(0.5, amount / maxAmount);
-            } else {
-                a = 1;
-            }
+            var a=1;
             return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255, a].join(',') + ')';
         }
         // console.log("WARN: bad color hex " + hex);

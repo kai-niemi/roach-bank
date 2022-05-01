@@ -22,7 +22,7 @@ public class IndexController {
     @GetMapping
     public ResponseEntity<MessageModel> index() {
         MessageModel index = new MessageModel();
-        index.setMessage(CockroachFacts.nextFact());
+        index.setMessage("Welcome to text-only Bank. You are in a dark, cold lobby.");
 
         index.add(linkTo(methodOn(AccountController.class)
                 .index())

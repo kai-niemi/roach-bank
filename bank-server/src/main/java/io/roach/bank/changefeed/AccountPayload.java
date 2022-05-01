@@ -5,7 +5,6 @@ import java.util.Currency;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class AccountPayload extends AbstractPayload {
     @JsonProperty("after")
@@ -29,7 +28,7 @@ public class AccountPayload extends AbstractPayload {
         return after.name;
     }
 
-    public String getRegion() {
+    public String getCity() {
         return after.city;
     }
 
@@ -53,6 +52,7 @@ public class AccountPayload extends AbstractPayload {
     public String toString() {
         return "AccountPayload{" +
                 "id=" + after.id +
+                ", city='" + after.city + '\'' +
                 ", name='" + after.name + '\'' +
                 ", currency='" + after.currency + '\'' +
                 ", balance=" + after.balance +
