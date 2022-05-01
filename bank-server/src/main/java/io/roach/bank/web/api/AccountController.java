@@ -113,6 +113,10 @@ public class AccountController {
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
         final Set<String> cities = metadataRepository.getRegionCities(regions);
+        if (cities.isEmpty()) {
+            logger.warn("No cities matching regions: {}", regions);
+            return ResponseEntity.noContent().build();
+        }
 
         final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
 

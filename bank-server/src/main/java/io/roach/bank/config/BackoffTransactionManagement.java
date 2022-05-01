@@ -24,7 +24,7 @@ import io.roach.bank.aspect.RetryableTransactionalAspect;
  * re-executed, following an exponential backoff strategy.
  */
 @Configuration
-@Profile({ProfileNames.RETRY_BACKOFF})
+@Profile({ProfileNames.RETRY_DEFAULT})
 @EnableTransactionManagement(order = AdvisorOrder.TX_ADVISOR)
 public class BackoffTransactionManagement {
     @Autowired

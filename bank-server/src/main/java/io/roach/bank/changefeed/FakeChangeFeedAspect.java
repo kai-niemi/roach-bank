@@ -24,7 +24,7 @@ import io.roach.bank.domain.Transaction;
 @Aspect
 @Component
 @Order(AdvisorOrder.CHANGE_FEED_ADVISOR)
-@Profile(ProfileNames.CDC_NONE)
+@Profile(ProfileNames.CDC_DEFAULT)
 public class FakeChangeFeedAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

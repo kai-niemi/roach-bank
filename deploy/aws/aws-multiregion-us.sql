@@ -45,12 +45,3 @@ ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
     ) STORED NOT NULL;
 
 ALTER TABLE transaction_item SET LOCALITY REGIONAL BY ROW AS region;
-
--- Reduce regions to the ones that are relevant
-
-DELETE from region where 1=1;
-
-INSERT into region
-VALUES ('us-east-1', 'new york,boston,washington dc,miami,charlotte,atlanta'),
-       ('us-east-2', 'chicago,st louis,indianapolis,nashville,dallas,houston'),
-       ('us-west-2', 'seattle,tacoma,portland,salem,bend,eugene');

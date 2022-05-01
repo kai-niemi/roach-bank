@@ -11,7 +11,7 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import io.roach.bank.ProfileNames;
 
 @Configuration
-@Profile(value = {ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
+@Profile(value = {ProfileNames.DEV})
 public class ThymeleafConfig {
     @Autowired
     private ThymeleafProperties properties;

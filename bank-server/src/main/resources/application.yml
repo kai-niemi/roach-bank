@@ -6,10 +6,12 @@
 ##############################################
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: roach-bank
   profiles:
-    active: crdb,retry-backoff,cdc-none
+    active: retry-default,cdc-default,crdb-local
   output:
     ansi:
       enabled: ALWAYS
@@ -35,6 +37,26 @@ spring:
           no-cache: true
           no-store: true
 #############################
+  jpa:
+    show-sql: false
+    open-in-view: false
+  flyway:
+    enabled: false
+    connect-retries: 15
+    clean-on-validation-error: true
+    baseline-on-migrate: false
+#    clean-disabled: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: roach-bank
+      connection-init-sql: SELECT 1
+      connection-timeout: 30000
+      validation-timeout: 20000
+      max-lifetime: 60000
+      maximum-pool-size: 80
+      minimum-idle: 80
+#############################
 logging:
   pattern:
     console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr([%logger{39}]){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
@@ -58,7 +80,7 @@ management:
     enabled-by-default: true
     web:
       exposure:
-        include: env,info,health,metrics,threaddump,flyway,prometheus
+        include: env,info,health,metrics,flyway,prometheus
   endpoint:
     health:
       show-details: always
@@ -71,6 +93,7 @@ management:
     tags:
       application: ${spring.application.name}
 #############################
+# HTTP and HTTPS with self-signed cert for webhook sink
 server:
   http:
     port: 8090
@@ -88,7 +111,7 @@ server:
 #############################
 roachbank:
   health:
-    # Admin UI endpoint base URL
+    # CRDB Admin UI endpoint base URL
     admin-endpoint: http://localhost:8080
     # Validation query for datasource health check
     validation-query: select 1
@@ -98,5 +121,5 @@ roachbank:
   reportPushInterval: 10000
   # Report query timeout (seconds)
   reportQueryTimeoutSeconds: 120
-  # Display number
-  accountsPerCityLimit: 10
+  # Default limit unless client specified
+  accountsPerCityLimit: 1000

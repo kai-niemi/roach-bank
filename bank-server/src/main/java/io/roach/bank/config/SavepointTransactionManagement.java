@@ -33,19 +33,19 @@ public class SavepointTransactionManagement {
     @PostConstruct
     public void checkProfiles() {
         for (String profile : env.getActiveProfiles()) {
-            Assert.isTrue(!ProfileNames.RETRY_BACKOFF.equals(profile), "Conflicting spring profiles");
+            Assert.isTrue(!ProfileNames.RETRY_DEFAULT.equals(profile), "Conflicting spring profiles");
             Assert.isTrue(!ProfileNames.RETRY_NONE.equals(profile), "Conflicting spring profiles");
             Assert.isTrue(!ProfileNames.JPA.equals(profile), "Savepoints are not supported in JPA/Hibernate");
         }
     }
 
-    @Profile(ProfileNames.COCKROACH)
+    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_ODIN, ProfileNames.CRDB_SLEIPNER})
     @Bean
     public SavepointTransactionalAspect savepointTransactionAspect() {
         return new SavepointTransactionalAspect("cockroach_restart", TransactionDefinition.ISOLATION_SERIALIZABLE);
     }
 
-    @Profile(ProfileNames.POSTGRESQL)
+    @Profile({ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_SLEIPNER})
     @Bean
     public SavepointTransactionalAspect savepointTransactionAspectUnnamed() {
         return new SavepointTransactionalAspect(null, TransactionDefinition.ISOLATION_SERIALIZABLE);

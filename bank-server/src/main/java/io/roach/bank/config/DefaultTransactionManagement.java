@@ -36,7 +36,7 @@ public class DefaultTransactionManagement implements TransactionManagementConfig
     @PostConstruct
     public void checkProfiles() {
         for (String profile : env.getActiveProfiles()) {
-            Assert.isTrue(!ProfileNames.RETRY_BACKOFF.equals(profile), "Conflicting spring profiles");
+            Assert.isTrue(!ProfileNames.RETRY_DEFAULT.equals(profile), "Conflicting spring profiles");
             Assert.isTrue(!ProfileNames.RETRY_SAVEPOINT.equals(profile), "Conflicting spring profiles");
         }
     }

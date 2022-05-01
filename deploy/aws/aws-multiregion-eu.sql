@@ -42,12 +42,3 @@ ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
 
 ALTER TABLE transaction_item SET LOCALITY REGIONAL BY ROW AS region;
 
--- Reduce regions to the ones that are relevant
-
-DELETE from region where 1=1;
-
-INSERT into region
-VALUES
-    ('eu-west-1', 'dublin,belfast,liverpool,manchester,glasgow'),
-    ('eu-west-2', 'london,birmingham,leeds,amsterdam,rotterdam,antwerp,hague,ghent,brussels'),
-    ('eu-central-1', 'berlin,hamburg,munich,frankfurt,dusseldorf,leipzig,dortmund,essen,stuttgart,stockholm,copenhagen,helsinki,oslo,riga,tallinn');

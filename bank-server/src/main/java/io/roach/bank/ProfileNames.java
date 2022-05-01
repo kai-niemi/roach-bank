@@ -5,19 +5,14 @@ package io.roach.bank;
  */
 public abstract class ProfileNames {
     /**
-     * Use PostgreSQL database and REPEATABLE_READ (SI) isolation level.
-     */
-    public static final String POSTGRESQL = "psql";
-
-    /**
-     * Use CockroachDB database and SERIALIZABLE isolation level.
-     */
-    public static final String COCKROACH = "crdb";
-
-    /**
      * Adopt server-side expontential backoff retrys on serialization errors.
      */
-    public static final String RETRY_BACKOFF = "retry-backoff";
+    public static final String RETRY_DEFAULT = "retry-default";
+
+    /**
+     * Propagate transaction retry's to clients on serialization errors.
+     */
+    public static final String RETRY_NONE = "retry-none";
 
     /**
      * Adopt server-side savepoint rollback retrys on serialization errors.
@@ -26,9 +21,9 @@ public abstract class ProfileNames {
     public static final String RETRY_SAVEPOINT = "retry-savepoint";
 
     /**
-     * Propagate transaction retry's to clients on serialization errors.
+     * Websocket/STOMP events via AOP interceptors (dual-write)
      */
-    public static final String RETRY_NONE = "retry-none";
+    public static final String CDC_DEFAULT = "cdc-default";
 
     /**
      * Websocket/STOMP events via Kafka listeners via CRDB kafka sink.
@@ -41,22 +36,12 @@ public abstract class ProfileNames {
     public static final String CDC_HTTP = "cdc-http";
 
     /**
-     * Websocket/STOMP events via AOP interceptors (dual-write)
-     */
-    public static final String CDC_NONE = "cdc-none";
-
-    /**
      * Use filesystem paths for Thymeleaf templates.
      */
-    public static final String CRDB_DEV = "crdb-dev";
+    public static final String DEV = "dev";
 
     /**
-     * Use CRDB dedicated.
-     */
-    public static final String CRDB_CLOUD = "crdb-cloud";
-
-    /**
-     * Enable transactional outbox pattern
+     * Enable transactional outbox pattern.
      */
     public static final String OUTBOX = "outbox";
 
@@ -65,7 +50,37 @@ public abstract class ProfileNames {
      */
     public static final String JPA = "jpa";
 
+    /**
+     * Enable JDBC repositories.
+     */
     public static final String JDBC = "!jpa";
+
+    /**
+     * CockroachDB local.
+     */
+    public static final String CRDB_LOCAL = "crdb-local";
+
+    /**
+     * CockroachDB dedicated cluster.
+     */
+    public static final String CRDB_ODIN = "crdb-odin";
+
+    /**
+     * CockroachDB local self-hosted.
+     */
+    public static final String CRDB_SLEIPNER = "crdb-sleipner";
+
+    /**
+     *
+     * PSQL local self-hosted.
+     */
+    public static final String PSQL_LOCAL = "psql-local";
+
+    /**
+     *
+     * PSQL local self-hosted.
+     */
+    public static final String PSQL_SLEIPNER = "psql-sleipner";
 
     private ProfileNames() {
     }

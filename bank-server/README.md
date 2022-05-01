@@ -47,18 +47,18 @@ The config can be overridden at startup time through the command line and by act
 
 Database type, one of:
 
-   * crdb - Enables CockroachDB features and db schema (default)
-   * psql - Enables PostgreSQL features and db schema
+   * crdb-local - Enables CockroachDB features and db schema (default)
+   * psql-local - Enables PostgreSQL features and db schema
 
 Retry strategy, one of:
 
-   * retry-backoff - Enables retryable transactions with exponential backoff for concurrency errors (default)
+   * retry-default - Enables retryable transactions with exponential backoff for concurrency errors (default)
    * retry-savepoint - Enables retryable transactions using savepoints
    * retry-none - Enables default Spring declarative transaction management without any retrys
 
 Change data capture and websocket push events, one of:
 
-   * cdc-none - Enables synthetic CDC events (via AOP) for websocket push (default)
+   * cdc-default - Enables synthetic CDC events (via AOP) for websocket push (default)
    * cdc-kafka - Enables Kafka subscriptions of CDC events for websocket push (requires CRDB, CDC, Kafka)
    * cdc-http - Enables HTTP subscriptions of CDC events for websocket push (requires CRDB and CDC)
  
@@ -66,22 +66,17 @@ Optional:
 
    * jpa - Enables JPA repositories over JDBC (default)
    * outbox - Enables writing transfer requests to a transactional outbox table
-   * crdb-dev - Enables debug features for Thymeleaf and DB connection presets
-   * crdb-cloud - Enables CockroachDB dedicated connection presets
+   * dev - Enables debug features for Thymeleaf 
    
 Note: Some features including CDC requires a CockroachDB enterprise license (trial).
 
 Profiles are set during startup with following command line parameter:
 
-    --spring.profiles.active=db-crdb,retry-backoff,cdc-none
-
-CockroachDB example:
-
     java -jar target/bank-server.jar \
     --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=db-crdb,retry-backoff,cdc-none  \
+    --spring.profiles.active=retry-default,cdc-default,crdb-local  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8090
 
@@ -91,7 +86,7 @@ PostgreSQL example:
     --spring.datasource.url=jdbc:postgresql://localhost:5432/roach_bank \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=db-psql,retry-backoff,cdc-none  \
+    --spring.profiles.active=retry-default,cdc-default,psql-local  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8090
     

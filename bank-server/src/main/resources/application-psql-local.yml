@@ -3,27 +3,15 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQL10Dialect
-    show-sql: false
-    open-in-view: false
-  main:
-    allow-bean-definition-overriding: true
   flyway:
-    connect-retries: 50
     enabled: true
     locations: classpath:db/migration/psql,classpath:db/migration/common
-    clean-on-validation-error: true
   datasource:
     url: jdbc:postgresql://localhost:5432/roach_bank
-    driver-class-name: org.postgresql.Driver
     username: postgres
     password: root
     hikari:
       transaction-isolation: TRANSACTION_SERIALIZABLE
-      pool-name: roach-bank
-      connection-init-sql: SELECT 1
-      maximum-pool-size: 80
-      minimum-idle: 80
-#############################
 roachbank:
   health:
     validation-query: select 1
