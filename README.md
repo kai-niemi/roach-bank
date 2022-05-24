@@ -1,4 +1,8 @@
-# Roch Bank
+[![Java CI](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/kai-niemi/roach-batch/actions/workflows/maven.yml)
+[![coverage](.github/badges/jacoco.svg)](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml)
+[![branches coverage](.github/badges/branches.svg)](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml)
+
+# Roach Bank
 
 Roach Bank represents a full-stack, financial accounting ledger demo running on [CockroachDB](https://www.cockroachlabs.com/)
 and PostgreSQL. It's designed to demonstrate the safety and liveness properties of a globally deployed, 
