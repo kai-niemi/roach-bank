@@ -31,9 +31,13 @@ import com.zaxxer.hikari.HikariConfigMXBean;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
+import io.roach.bank.api.ConnectionPoolConfig;
+import io.roach.bank.api.ConnectionPoolSize;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.service.TransactionService;
+import io.roach.bank.web.support.ConnectionPoolConfigFactory;
+import io.roach.bank.web.support.ConnectionPoolSizeFactory;
 import io.roach.bank.web.support.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -66,11 +70,15 @@ public class AdminController {
         index.add(linkTo(methodOn(getClass()).databaseMetadata()).withRel("database-info")
                 .withTitle("Database and JDBC driver metadata"));
 
-        index.add(linkTo(methodOn(getClass()).updateConnectionPoolSize(50)).withRel(LinkRelations.POOL_SIZE_REL)
+        index.add(linkTo(methodOn(getClass())
+                .getConnectionPoolSize())
+                .withRel(LinkRelations.POOL_SIZE_REL)
                 .withTitle("Connection pool size"));
 
-        index.add(linkTo(methodOn(getClass()).getConnectionPoolInfo()).withRel(LinkRelations.POOL_INFO_REL)
-                .withTitle("Connection pool info"));
+        index.add(linkTo(methodOn(getClass())
+                .getConnectionPoolConfig())
+                .withRel(LinkRelations.POOL_CONFIG_REL)
+                .withTitle("Connection pool config"));
 
         index.add(Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator").buildAndExpand()
                 .toUriString()).withRel(LinkRelations.ACTUATOR_REL).withTitle("Spring boot actuators"));
@@ -141,36 +149,42 @@ public class AdminController {
         return null;
     }
 
-    @GetMapping(value = "/pool-info")
-    public ResponseEntity<Map<String, Object>> getConnectionPoolInfo() {
-        final Map<String, Object> properties = new LinkedHashMap<>();
-
+    @GetMapping(value = "/pool-size")
+    public ResponseEntity<ConnectionPoolSize> getConnectionPoolSize() {
         HikariPoolMXBean mxBean = hikariDataSource.getHikariPoolMXBean();
-
-        properties.put("activeConnections", mxBean.getActiveConnections());
-        properties.put("idleConnections", mxBean.getIdleConnections());
-        properties.put("threadsAwaitingConnection", mxBean.getThreadsAwaitingConnection());
-        properties.put("totalConnections", mxBean.getTotalConnections());
-
-        HikariConfigMXBean mxConfigBean = hikariDataSource.getHikariConfigMXBean();
-        properties.put("config.connectionTimeout", mxConfigBean.getConnectionTimeout());
-        properties.put("config.poolName", mxConfigBean.getPoolName());
-        properties.put("config.idleTimeout", mxConfigBean.getIdleTimeout());
-        properties.put("config.leakDetectionThreshold", mxConfigBean.getLeakDetectionThreshold());
-        properties.put("config.maximumPoolSize", mxConfigBean.getMaximumPoolSize());
-        properties.put("config.maxLifetime", mxConfigBean.getMaxLifetime());
-        properties.put("config.minimumIdle", mxConfigBean.getMinimumIdle());
-        properties.put("config.validationTimeout", mxConfigBean.getValidationTimeout());
-
-        return ResponseEntity.ok(properties);
+        return ResponseEntity.ok(ConnectionPoolSizeFactory.from(mxBean)
+                .add(linkTo(methodOn(getClass())
+                        .getConnectionPoolConfig())
+                        .withRel(LinkRelations.POOL_CONFIG_REL))
+                .add(linkTo(methodOn(getClass())
+                        .getConnectionPoolSize())
+                        .withSelfRel()));
     }
 
     @PostMapping(value = "/pool-size")
-    public ResponseEntity<MessageModel> updateConnectionPoolSize(
+    public ResponseEntity<MessageModel> setConnectionPoolSize(
             @RequestParam(value = "size", defaultValue = "50") int size) {
         hikariDataSource.setMaximumPoolSize(size);
         hikariDataSource.setMinimumIdle(size);
         logger.info("Setting max and min idle pool size to {}", size);
-        return ResponseEntity.ok(new MessageModel("ok"));
+        return ResponseEntity.ok(new MessageModel("ok")
+                .add(linkTo(methodOn(getClass())
+                        .getConnectionPoolConfig())
+                        .withRel(LinkRelations.POOL_CONFIG_REL))
+                .add(linkTo(methodOn(getClass())
+                        .getConnectionPoolSize())
+                        .withSelfRel()));
+    }
+
+    @GetMapping(value = "/pool-config")
+    public ResponseEntity<ConnectionPoolConfig> getConnectionPoolConfig() {
+        HikariConfigMXBean mxConfigBean = hikariDataSource.getHikariConfigMXBean();
+        return ResponseEntity.ok(ConnectionPoolConfigFactory.from(mxConfigBean)
+                .add(linkTo(methodOn(getClass())
+                        .getConnectionPoolSize())
+                        .withRel(LinkRelations.POOL_SIZE_REL))
+                .add(linkTo(methodOn(getClass())
+                        .getConnectionPoolConfig())
+                        .withSelfRel()));
     }
 }

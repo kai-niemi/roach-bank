@@ -8,11 +8,13 @@ import io.roach.bank.api.AccountModel;
 public abstract class Constants {
     public static final String ADMIN_COMMANDS = "1. Admin Commands";
 
-    public static final String CONFIG_COMMANDS = "2. Config Commands";
+    public static final String POOL_COMMANDS = "2. Resource Pool";
 
-    public static final String REPORTING_COMMANDS = "3. Reporting Commands";
+    public static final String METADATA_COMMANDS = "3. Metadata Commands";
 
-    public static final String MAIN_COMMANDS = "4. Workload Commands";
+    public static final String REPORTING_COMMANDS = "4. Reporting Commands";
+
+    public static final String WORKLOAD_COMMANDS = "5. Workload Commands";
 
     public static final String DEFAULT_DURATION = "60m";
 

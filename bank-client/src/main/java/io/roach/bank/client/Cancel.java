@@ -8,7 +8,7 @@ import org.springframework.shell.standard.ShellMethod;
 import io.roach.bank.client.support.ExecutorTemplate;
 
 @ShellComponent
-@ShellCommandGroup(Constants.MAIN_COMMANDS)
+@ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class Cancel extends AbstractCommand {
     @Autowired
     private ExecutorTemplate executorTemplate;

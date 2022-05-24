@@ -36,7 +36,7 @@ import io.roach.bank.client.support.ByteFormat;
 import io.roach.bank.client.support.RestCommands;
 
 @ShellComponent
-@ShellCommandGroup(Constants.MAIN_COMMANDS)
+@ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class GenerateCSV extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
@@ -47,7 +47,7 @@ public class GenerateCSV extends AbstractCommand {
         System.out.printf(Locale.US, "\r%30s (%s)", prefix, "|/-\\".toCharArray()[spinner++ % 4]);
     }
 
-    @ShellMethod(value = "Generate account import files in CSV format", key = {"gen-csv"})
+    @ShellMethod(value = "Generate account import files in CSV format", key = {"csv"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void generateCSV(
             @ShellOption(help = "file destination path", defaultValue = ".data") String destination,

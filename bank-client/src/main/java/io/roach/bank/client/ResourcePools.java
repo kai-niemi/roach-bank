@@ -1,9 +1,5 @@
 package io.roach.bank.client;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -18,31 +14,25 @@ import org.springframework.web.util.UriComponentsBuilder;
 import io.roach.bank.client.support.RestCommands;
 import io.roach.bank.client.support.ThreadPoolStats;
 
-import static io.roach.bank.api.LinkRelations.*;
+import static io.roach.bank.api.LinkRelations.ADMIN_REL;
+import static io.roach.bank.api.LinkRelations.POOL_CONFIG_REL;
+import static io.roach.bank.api.LinkRelations.POOL_SIZE_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
-@ShellCommandGroup(Constants.CONFIG_COMMANDS)
+@ShellCommandGroup(Constants.POOL_COMMANDS)
 public class ResourcePools extends AbstractCommand {
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
-    private ScheduledExecutorService scheduledExecutorService;
-
-    @Autowired
     private RestCommands restCommands;
 
-    @ShellMethod(value = "Set client thread pool and server connection pool sizes", key = {"pool-size-set"})
+    @ShellMethod(value = "Set server connection pool size", key = {"set-pool-size", "sps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void setPoolSize(
-            @ShellOption(help = "thread pool size", defaultValue = "100") int threadPoolSize,
-            @ShellOption(help = "connection pool size", defaultValue = "100") int connPoolSize
+    public void setPoolSize(@ShellOption(help = "connection pool size", defaultValue = "100") int size
     ) {
-        console.yellow("Setting client thread pool size to %d\n", threadPoolSize);
-
-        threadPoolTaskExecutor.setCorePoolSize(threadPoolSize);
-
-        console.yellow("Setting server connection pool size to %d\n", connPoolSize);
+        console.yellow("Setting connectopn pool size to %d\n", size);
 
         Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
@@ -50,7 +40,7 @@ public class ResourcePools extends AbstractCommand {
                 .asLink();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
-                .replaceQueryParam("size", connPoolSize);
+                .replaceQueryParam("size", size);
 
         ResponseEntity<String> response = restCommands.post(Link.of(builder.build().toUriString()));
 
@@ -59,42 +49,41 @@ public class ResourcePools extends AbstractCommand {
         }
     }
 
-    @ShellMethod(value = "Print thread pool information", key = {"pool-size"})
+    @ShellMethod(value = "Get server connection pool size", key = {"get-pool-size", "gps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void getPoolSize(@ShellOption(help = "repeat period in seconds", defaultValue = "0") int repeatTime) {
-        Runnable r = () -> {
-            ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);
-            console.yellow("Thread pool status:\n");
-            console.yellow("\tpoolSize: %s\n", stats.poolSize);
-            console.yellow("\tmaximumPoolSize: %s\n", stats.maximumPoolSize);
-            console.yellow("\tcorePoolSize: %s\n", stats.corePoolSize);
-            console.yellow("\tactiveCount: %s\n", stats.activeCount);
-            console.yellow("\tcompletedTaskCount: %s\n", stats.completedTaskCount);
-            console.yellow("\ttaskCount: %s\n", stats.taskCount);
-            console.yellow("\tlargestPoolSize: %s\n", stats.largestPoolSize);
+    public void getPoolSize() {
+        ResponseEntity<String> configResponse = restCommands.fromRoot()
+                .follow(withCurie(ADMIN_REL))
+                .follow(withCurie(POOL_CONFIG_REL))
+                .toEntity(String.class);
 
-            ResponseEntity<String> response = restCommands.fromRoot()
-                    .follow(withCurie(ADMIN_REL))
-                    .follow(withCurie(POOL_INFO_REL))
-                    .toEntity(String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                console.yellow("Connection pool info: %s\n", response.getBody());
-            } else {
-                console.red("Unexpected HTTP status: %s\n", response.toString());
-            }
-        };
-
-        if (repeatTime > 0) {
-            ScheduledFuture<?> f = scheduledExecutorService
-                    .scheduleAtFixedRate(r, 0, 2, TimeUnit.SECONDS);
-            scheduledExecutorService
-                    .schedule(() -> {
-                        f.cancel(true);
-                    }, repeatTime, TimeUnit.SECONDS);
-        } else {
-            r.run();
-        }
+        console.cyan("Connection pool size:");
+        console.yellow("%s\n", configResponse.getBody());
     }
 
+    @ShellMethod(value = "Get server connection pool config", key = {"get-pool-config", "gpc"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void getPoolConfig() {
+        ResponseEntity<String> response = restCommands.fromRoot()
+                .follow(withCurie(ADMIN_REL))
+                .follow(withCurie(POOL_CONFIG_REL))
+                .toEntity(String.class);
+
+        console.cyan("Connection pool config:");
+        console.yellow("%s\n", response.getBody());
+    }
+
+    @ShellMethod(value = "Print local thread pool size", key = {"thread-pool-size", "tp"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void getThreadPoolSize() {
+        ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);
+        console.cyan("Thread pool stats:\n");
+        console.yellow("\tpoolSize: %s\n", stats.poolSize);
+        console.yellow("\tmaximumPoolSize: %s\n", stats.maximumPoolSize);
+        console.yellow("\tcorePoolSize: %s\n", stats.corePoolSize);
+        console.yellow("\tactiveCount: %s\n", stats.activeCount);
+        console.yellow("\tcompletedTaskCount: %s\n", stats.completedTaskCount);
+        console.yellow("\ttaskCount: %s\n", stats.taskCount);
+        console.yellow("\tlargestPoolSize: %s\n", stats.largestPoolSize);
+    }
 }

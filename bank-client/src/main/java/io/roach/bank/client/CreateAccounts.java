@@ -1,8 +1,6 @@
 package io.roach.bank.client;
 
-import java.util.Currency;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,7 +24,7 @@ import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
 import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
-@ShellCommandGroup(Constants.MAIN_COMMANDS)
+@ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class CreateAccounts extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
@@ -34,7 +32,7 @@ public class CreateAccounts extends AbstractCommand {
     @Autowired
     private ExecutorTemplate executorTemplate;
 
-    @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
+    @ShellMethod(value = "Create new accounts", key = {"create-accounts", "ca"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
             @ShellOption(help = "create accounts for a time period", defaultValue = "") String duration,

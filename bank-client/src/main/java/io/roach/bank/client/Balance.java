@@ -3,6 +3,7 @@ package io.roach.bank.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -23,8 +24,8 @@ import io.roach.bank.client.support.RestCommands;
 import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
-@ShellCommandGroup(Constants.MAIN_COMMANDS)
-public class ReadBalance extends AbstractCommand {
+@ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
+public class Balance extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 
@@ -38,7 +39,8 @@ public class ReadBalance extends AbstractCommand {
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
                     int accountsPerCity,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
-            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
+            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
+            @ShellOption(help = "number of threads per city", defaultValue = "1") int concurrency
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
                 StringUtils.commaDelimitedListToSet(regions), accountsPerCity);
@@ -55,9 +57,11 @@ public class ReadBalance extends AbstractCommand {
                             : withCurie(LinkRelations.ACCOUNT_BALANCE_REL))
                     .get()));
 
-            executorTemplate.runAsync(city,
-                    () -> restCommands.get(RandomData.selectRandom(links)),
-                    DurationFormat.parseDuration(duration));
+            IntStream.rangeClosed(1,concurrency).forEach(value -> {
+                executorTemplate.runAsync(city + " (b)",
+                        () -> restCommands.get(RandomData.selectRandom(links)),
+                        DurationFormat.parseDuration(duration));
+            });
         });
     }
 }

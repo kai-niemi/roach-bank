@@ -122,4 +122,4 @@ roachbank:
   # Report query timeout (seconds)
   reportQueryTimeoutSeconds: 120
   # Default limit unless client specified
-  accountsPerCityLimit: 1000
+  accountsPerCityLimit: 100

@@ -2,7 +2,6 @@ package io.roach.bank.client;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Currency;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
 import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
 
 @ShellComponent
-@ShellCommandGroup(Constants.MAIN_COMMANDS)
+@ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class Transfer extends AbstractCommand {
     private static final ThreadLocalRandom random = ThreadLocalRandom.current();
 
@@ -79,7 +78,7 @@ public class Transfer extends AbstractCommand {
                 .asTemplatedLink();
 
         accounts.forEach((city, accountModels) -> {
-            executorTemplate.runAsync(city,
+            executorTemplate.runAsync(city + " (t)",
                     () -> transferFunds(transferLink, city, accountModels, amount, legs, locking, fake),
                     DurationFormat.parseDuration(duration));
         });
@@ -92,7 +91,7 @@ public class Transfer extends AbstractCommand {
                                int legs,
                                boolean locking,
                                boolean fake) {
-        Money transferAmount =  Money.of(""+amount, accounts.get(0).getBalance().getCurrency());
+        Money transferAmount = Money.of("" + amount, accounts.get(0).getBalance().getCurrency());
 
         TransactionForm.Builder builder = TransactionForm.builder()
                 .withUUID(UUID.randomUUID())
@@ -125,11 +124,7 @@ public class Transfer extends AbstractCommand {
             restCommands.post(link, builder.build(), TransactionModel.class);
         } else {
             try {
-                if (random.nextDouble() > 0.98) {
-                    Thread.sleep(1_000);
-                } else {
-                    Thread.sleep(5);
-                }
+                Thread.sleep(random.nextLong(5));
             } catch (InterruptedException e) {
             }
         }

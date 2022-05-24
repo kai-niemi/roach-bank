@@ -66,7 +66,7 @@ public class MetadataController {
 
     @GetMapping(value = "/gateway-region")
     @TransactionBoundary(readOnly = true)
-    public ResponseEntity<MessageModel> gatewayRegion() {
-        return ResponseEntity.ok(new MessageModel(metadataRepository.getGatewayRegion()));
+    public ResponseEntity<String> gatewayRegion() {
+        return ResponseEntity.ok(metadataRepository.getGatewayRegion());
     }
 }
