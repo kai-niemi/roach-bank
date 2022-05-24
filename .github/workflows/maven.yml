@@ -48,7 +48,7 @@ jobs:
     - name: Commit and push the coverage badges and summary file
       if: ${{ github.event_name != 'pull_request' }}
       run: |
-        cd badges
+        cd .github/badges
         if [[ `git status --porcelain *.svg *.json` ]]; then
           git config --global user.name 'github-actions'
           git config --global user.email 'kai.niemi.se@gmail.com'
@@ -60,7 +60,7 @@ jobs:
     - name: Comment on PR with coverage percentages
       if: ${{ github.event_name == 'pull_request' }}
       run: |
-        REPORT=$(<badges/coverage-summary.json)
+        REPORT=$(<.github/badges/coverage-summary.json)
         COVERAGE=$(jq -r '.coverage' <<< "$REPORT")%
         BRANCHES=$(jq -r '.branches' <<< "$REPORT")%
         NEWLINE=$'\n'
