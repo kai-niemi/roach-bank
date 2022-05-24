@@ -32,17 +32,18 @@ jobs:
         generate-branches-badge: true
         badges-directory: .github/badges
         generate-summary: true
+        jacoco-csv-file: bank-server/target/site/jacoco/jacoco.csv  
         
     - name: Log coverage percentages to workflow output
       run: |
         echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
         echo "branches = ${{ steps.jacoco.outputs.branches }}"
         
-    - name: Upload JaCoCo coverage report as a workflow artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: jacoco-report
-        path: bank-server/target/site/jacoco/        
+   # - name: Upload JaCoCo coverage report as a workflow artifact
+   #   uses: actions/upload-artifact@v2
+   #   with:
+   #     name: jacoco-report
+   #     path: bank-server/target/site/jacoco/        
 
     - name: Commit and push the coverage badges and summary file
       if: ${{ github.event_name != 'pull_request' }}
