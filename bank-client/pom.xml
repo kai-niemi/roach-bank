@@ -101,6 +101,12 @@
                 <configuration>
                     <executable>true</executable>
                     <mainClass>io.roach.bank.client.Application</mainClass>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                    <image>
+                        <name>docker.io/library/${project.artifactId}</name>
+                    </image>
                 </configuration>
             </plugin>
 

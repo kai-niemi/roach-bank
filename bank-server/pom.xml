@@ -200,6 +200,12 @@
                 <configuration>
                     <executable>true</executable>
                     <mainClass>io.roach.bank.Application</mainClass>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                    <image>
+                        <name>docker.io/library/${project.artifactId}</name>
+                    </image>
                 </configuration>
             </plugin>
         </plugins>
