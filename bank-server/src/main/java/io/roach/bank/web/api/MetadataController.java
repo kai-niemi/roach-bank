@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.repository.MetadataRepository;
-import io.roach.bank.web.support.MessageModel;
+import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;

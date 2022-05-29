@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.changefeed.model;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -60,19 +60,15 @@ public class AccountPayload extends AbstractPayload {
     }
 
     public static class Fields {
-        // Account ID
         private UUID id;
 
-        // Account name
         private String name;
-
-        // Currency code
-        private String currency;
 
         private String city;
 
-        // Latest account balance
         private BigDecimal balance;
+
+        private String currency;
 
         public UUID getId() {
             return id;

@@ -37,9 +37,9 @@ ALTER TABLE transaction SET LOCALITY REGIONAL BY ROW AS region;
 
 ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
     CASE
-        WHEN transaction_city IN ('new york','boston','washington dc','miami','charlotte') THEN 'us-east-1'
-        WHEN transaction_city IN ('phoenix','minneapolis','chicago','detroit','atlanta') THEN 'us-east-2'
-        WHEN transaction_city IN ('seattle','san francisco','los angeles','portland','las vegas') THEN 'us-west-2'
+        WHEN city IN ('new york','boston','washington dc','miami','charlotte') THEN 'us-east-1'
+        WHEN city IN ('phoenix','minneapolis','chicago','detroit','atlanta') THEN 'us-east-2'
+        WHEN city IN ('seattle','san francisco','los angeles','portland','las vegas') THEN 'us-west-2'
         ELSE 'us-east-1'
         END
     ) STORED NOT NULL;

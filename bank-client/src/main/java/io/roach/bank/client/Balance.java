@@ -58,7 +58,7 @@ public class Balance extends AbstractCommand {
                     .get()));
 
             IntStream.rangeClosed(1,concurrency).forEach(value -> {
-                executorTemplate.runAsync(city + " (b)",
+                executorTemplate.runAsync(city + " (balance)",
                         () -> restCommands.get(RandomData.selectRandom(links)),
                         DurationFormat.parseDuration(duration));
             });

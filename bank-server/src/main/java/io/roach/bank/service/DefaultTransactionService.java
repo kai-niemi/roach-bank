@@ -1,6 +1,7 @@
 package io.roach.bank.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,15 +45,11 @@ public class DefaultTransactionService implements TransactionService {
             throw new BadRequestException("Must have at least two account items");
         }
 
+        if (transactionForm.isSmokeTest()) {
+            return Transaction.builder().withId(id).build();
+        }
+
         // Coalesce multi-legged transactions
-        final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
-
-        // Lookup accounts with authoritative reads
-        final List<Account> accounts = accountRepository.findAccountsById(
-                legs.keySet(),
-                transactionForm.getCity(),
-                transactionForm.isSelectForUpdate());
-
         final Transaction.Builder transactionBuilder = Transaction.builder()
                 .withId(id)
                 .withCity(transactionForm.getCity())
@@ -59,27 +57,31 @@ public class DefaultTransactionService implements TransactionService {
                 .withBookingDate(transactionForm.getBookingDate())
                 .withTransferDate(transactionForm.getTransferDate());
 
+        final List<Pair<UUID,BigDecimal>> balanceUpdates = new ArrayList<>();
+
+        final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
+
         legs.forEach((accountId, value) -> {
             final Money amount = value.getLeft();
 
-            Account account = accounts.stream().filter(a -> Objects.equals(a.getId(), accountId))
-                    .findFirst().orElseThrow(() -> new NoSuchAccountException(accountId));
-            if (account.isClosed()) {
-                throw new AccountClosedException(account.toDisplayString());
-            }
+            // Get by reference to avoid SELECT
+            Account account = accountRepository.getAccountByReference(accountId);
 
             transactionBuilder
                     .andItem()
                     .withAccount(account)
-                    .withRunningBalance(account.getBalance())
                     .withAmount(amount)
                     .withNote(value.getRight())
                     .then();
 
-            account.addAmount(amount);
+            balanceUpdates.add(Pair.of(accountId, amount.getAmount()));
         });
 
-        accountRepository.updateBalances(accounts);
+        try {
+            accountRepository.updateBalances(balanceUpdates);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            throw new NegativeBalanceException("Negative balance check failed", e);
+        }
 
         return transactionRepository.createTransaction(transactionBuilder.build());
     }

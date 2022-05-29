@@ -26,8 +26,8 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
     @EmbeddedId
     private Id id = new Id();
 
-    @Column(name = "transaction_city")
-    private String transactionCity;
+    @Column(name = "city")
+    private String city;
 
     @Embedded
     @AttributeOverrides({
@@ -38,16 +38,6 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
                             updatable = false))
     })
     private Money amount;
-
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "amount",
-                    column = @Column(name = "running_balance", nullable = false, updatable = false)),
-            @AttributeOverride(name = "currency",
-                    column = @Column(name = "currency", length = 3, nullable = false, insertable = false,
-                            updatable = false))
-    })
-    private Money runningBalance;
 
     @Column(name = "note", length = 128, updatable = false)
     @Basic(fetch = FetchType.LAZY)
@@ -83,15 +73,15 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
     public TransactionItem link(Transaction transaction) {
         this.transaction = transaction;
-        this.transactionCity = transaction.getCity();
+        this.city = transaction.getCity();
         this.id = new TransactionItem.Id(
                 Objects.requireNonNull(account.getId()),
                 Objects.requireNonNull(transaction.getId()));
         return this;
     }
 
-    public String getTransactionCity() {
-        return transactionCity;
+    public String getCity() {
+        return city;
     }
 
     public Money getAmount() {
@@ -102,14 +92,6 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
         this.amount = amount;
     }
 
-    public Money getRunningBalance() {
-        return runningBalance;
-    }
-
-    public void setRunningBalance(Money runningBalance) {
-        this.runningBalance = runningBalance;
-    }
-
     public String getNote() {
         return note;
     }
@@ -118,21 +100,8 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
         this.note = note;
     }
 
-    public Account getAccount() {
-        return account;
-    }
-
     public void setAccount(Account account) {
         this.account = account;
-    }
-
-    public Transaction getTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-        this.transactionCity = transaction.getCity();
     }
 
     @Override
@@ -140,7 +109,6 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
         return "TransactionItem{" +
                 "id=" + id +
                 ", amount=" + amount +
-                ", runningBalance=" + runningBalance +
                 ", note='" + note + '\'' +
                 '}';
     }
@@ -207,8 +175,6 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
         private Money amount;
 
-        private Money runningBalance;
-
         private Account account;
 
         private String note;
@@ -220,11 +186,6 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
         public Builder withAmount(Money amount) {
             this.amount = amount;
-            return this;
-        }
-
-        public Builder withRunningBalance(Money runningBalance) {
-            this.runningBalance = runningBalance;
             return this;
         }
 
@@ -244,7 +205,6 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
             TransactionItem transactionItem = new TransactionItem();
             transactionItem.setAccount(account);
             transactionItem.setAmount(amount);
-            transactionItem.setRunningBalance(runningBalance);
             transactionItem.setNote(note);
 
             callback.accept(transactionItem);

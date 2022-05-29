@@ -61,6 +61,8 @@ public abstract class LinkRelations {
 
     public static final String POOL_CONFIG_REL = "pool-config";
 
+    public static final String TOGGLE_TRACE_LOG = "toggle-tracelog";
+
     public static final String META_REL = "meta";
 
     public static final String ACTUATOR_REL = "actuator";

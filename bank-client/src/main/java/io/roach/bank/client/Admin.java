@@ -14,15 +14,24 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.hateoas.Link;
+import org.springframework.http.ResponseEntity;
 import org.springframework.shell.ExitRequest;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.commands.Quit;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.client.support.Console;
+import io.roach.bank.client.support.RestCommands;
 
+import static io.roach.bank.api.LinkRelations.ADMIN_REL;
+import static io.roach.bank.api.LinkRelations.TOGGLE_TRACE_LOG;
+import static io.roach.bank.api.LinkRelations.withCurie;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ShellComponent
@@ -30,6 +39,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Admin implements Quit.Command {
     @Autowired
     private ConfigurableApplicationContext applicationContext;
+
+    @Autowired
+    private RestCommands restCommands;
 
     @Autowired
     private Console console;
@@ -82,5 +94,25 @@ public class Admin implements Quit.Command {
         console.cyan(" Heap: %s\n", m.getHeapMemoryUsage().toString());
         console.cyan(" Non-heap: %s\n", m.getNonHeapMemoryUsage().toString());
         console.cyan(" Pending GC: %s\n", m.getObjectPendingFinalizationCount());
+    }
+
+    @ShellMethod(value = "Toggle SQL trace logging (server side)", key = {"toggle-trace", "l"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void toggleSqlTraceLogging() {
+        Link submitLink = restCommands.fromRoot()
+                .follow(withCurie(ADMIN_REL))
+                .follow(withCurie(TOGGLE_TRACE_LOG))
+                .asLink();
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri());
+
+        ResponseEntity<MessageModel> response = restCommands
+                .post(Link.of(builder.build().toUriString()), MessageModel.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            console.yellow("Unexpected HTTP status: %s\n", response.toString());
+        } else {
+            console.green("%s\n", response.getBody().getMessage());
+        }
     }
 }

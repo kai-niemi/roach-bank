@@ -21,9 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
 import io.roach.bank.annotation.TransactionNotAllowed;
-import io.roach.bank.changefeed.AccountChangeWebSocketPublisher;
-import io.roach.bank.changefeed.AccountPayload;
-import io.roach.bank.changefeed.ChangeFeedEvent;
+import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
+import io.roach.bank.changefeed.model.AccountPayload;
+import io.roach.bank.changefeed.model.ChangeFeedEvent;
 
 @RestController
 @RequestMapping(value = "/api/cdc/webhook")

@@ -51,6 +51,13 @@ public class RestCommands {
         return restTemplate.postForEntity(link.getTemplate().expand(), null, String.class);
     }
 
+    public <T> ResponseEntity<T> post(Link link, Class<T> reponseType) {
+        return restTemplate.postForEntity(
+                link.getTemplate().expand(),
+                null,
+                reponseType);
+    }
+
     public <T> ResponseEntity<T> post(Link link, Object request, Class<T> reponseType) {
         return restTemplate.postForEntity(
                 link.getTemplate().expand(),

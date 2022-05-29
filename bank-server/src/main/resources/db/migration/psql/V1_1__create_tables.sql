@@ -60,7 +60,7 @@ create table transaction
 create table transaction_item
 (
     transaction_id   uuid           not null,
-    transaction_city varchar(64)    not null,
+    city varchar(64)    not null,
     account_id       uuid           not null,
     amount           numeric(19, 2) not null,
     currency         varchar(64)  not null,

@@ -1,7 +1,10 @@
 package io.roach.bank.repository.jpa;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,16 +18,25 @@ import javax.persistence.Tuple;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
+import io.roach.bank.annotation.TimeTravel;
+import io.roach.bank.annotation.TimeTravelMode;
+import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.util.Pair;
 
 @Service
 @TransactionMandatory
@@ -35,6 +47,9 @@ public class JpaAccountRepository implements AccountRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
@@ -53,13 +68,58 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void updateBalances(List<Account> accounts) {
-        // No-op, batch update via transparent persistence
+    public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
+        int[] rowsAffected = jdbcTemplate.batchUpdate(
+                "UPDATE account "
+                        + "SET "
+                        + "   balance = balance + ?,"
+                        + "   updated = clock_timestamp() "
+                        + "WHERE id = ? "
+                        + "   AND closed=false "
+                        + "   AND (balance + ?) * abs(allow_negative-1) >= 0",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        Pair<UUID, BigDecimal> entry = balanceUpdates.get(i);
+                        ps.setBigDecimal(1, entry.getRight());
+                        ps.setObject(2, entry.getLeft());
+                        ps.setBigDecimal(3, entry.getRight());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return balanceUpdates.size();
+                    }
+                });
+
+        // Check invariant on neg balance
+        Arrays.stream(rowsAffected)
+                .filter(i -> i != 1)
+                .forEach(i -> {
+                    throw new IncorrectResultSizeDataAccessException(1, i);
+                });
+
+//        balanceUpdates.forEach(pair -> {
+//            Query q = entityManager.createNativeQuery("UPDATE account"
+//                    + " SET "
+//                    + "   balance = balance + ?,"
+//                    + "   updated = clock_timestamp()"
+//                    + " WHERE id = ?"
+//                    + "   AND closed=false"
+//                    + "   AND (balance + ?) * abs(allow_negative-1) >= 0");
+//            q.setParameter(1, pair.getRight());
+//            q.setParameter(2, pair.getLeft());
+//            q.setParameter(3, pair.getRight());
+//            int r = q.executeUpdate();
+//            if (r != 1) {
+//                throw new IncorrectResultSizeDataAccessException(1, r);
+//            }
+//        });
     }
 
     @Override
     public void closeAccount(UUID id) {
-        Account account = accountRepository.getById(id);
+        Account account = accountRepository.getReferenceById(id);
         if (!account.isClosed()) {
             account.setClosed(true);
         }
@@ -67,10 +127,15 @@ public class JpaAccountRepository implements AccountRepository {
 
     @Override
     public void openAccount(UUID id) {
-        Account account = accountRepository.getById(id);
+        Account account = accountRepository.getReferenceById(id);
         if (account.isClosed()) {
             account.setClosed(false);
         }
+    }
+
+    @Override
+    public Account getAccountByReference(UUID id) {
+        return accountRepository.getReferenceById(id);
     }
 
     @Override
@@ -93,10 +158,9 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findAccountsById(Set<UUID> ids, String city, boolean sfu) {
-        if (sfu) {
-            return accountRepository.findAllWithLock(ids);
-        }
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    public List<Account> findAccountsById(Set<UUID> ids) {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
         return accountRepository.findAll(ids);
     }
 
@@ -108,7 +172,7 @@ public class JpaAccountRepository implements AccountRepository {
     @Override
     public List<Account> findTopAccountsByCity(String city, int limit) {
         return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.city=?1",
-                        Account.class)
+                Account.class)
                 .setParameter(1, city)
                 .setMaxResults(limit)
                 .getResultList();

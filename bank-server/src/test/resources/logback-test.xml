@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+<!--    <include resource="org/springframework/boot/logging/logback/base.xml"/>-->
 
     <logger name="org.eclipse.jetty" level="WARN"/>
     <logger name="org.springframework" level="INFO"/>
@@ -11,8 +14,14 @@
 <!--    <logger name="org.springframework.jdbc.core" level="DEBUG"/>-->
 <!--    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>-->
 
-    <logger name="io.roach" level="DEBUG"/>
+    <logger name="io.roach.bank" level="TRACE" additivity="false"/>
 
-    <root level="INFO"/>
+    <logger name="SQL_TRACE" level="TRACE" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
 </configuration>
 

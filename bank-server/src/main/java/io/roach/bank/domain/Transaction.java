@@ -56,7 +56,8 @@ public class Transaction extends AbstractEntity<UUID> {
     public Transaction() {
     }
 
-    protected Transaction(UUID id, String city,
+    protected Transaction(UUID id,
+                          String city,
                           String transactionType,
                           LocalDate bookingDate, LocalDate transferDate,
                           List<TransactionItem> items) {

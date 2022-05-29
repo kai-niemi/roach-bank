@@ -86,7 +86,7 @@ public class JdbcReportingRepository implements ReportingRepository {
                         + "  sum(ti.amount) "
                         + "FROM transaction t "
                         + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
-                        + "WHERE ti.transaction_city = :city",
+                        + "WHERE ti.city = :city",
                 parameters,
                 (rs, rowNum) -> {
                     TransactionSummary summary = new TransactionSummary();

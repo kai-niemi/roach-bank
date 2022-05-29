@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.changefeed.ingress;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +26,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
+import io.roach.bank.changefeed.model.AccountPayload;
+import io.roach.bank.changefeed.model.TransactionChangeEvent;
+import io.roach.bank.changefeed.model.TransactionItemChangeEvent;
 
 @EnableKafka
 @EnableConfigurationProperties(KafkaProperties.class)

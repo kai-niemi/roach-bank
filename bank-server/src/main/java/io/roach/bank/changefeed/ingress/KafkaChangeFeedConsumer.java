@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.changefeed.ingress;
 
 import javax.annotation.PostConstruct;
 
@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 
 import io.roach.bank.ProfileNames;
 import io.roach.bank.annotation.TransactionNotAllowed;
+import io.roach.bank.changefeed.model.AccountPayload;
+import io.roach.bank.changefeed.model.TransactionChangeEvent;
+import io.roach.bank.changefeed.model.TransactionItemChangeEvent;
+import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 
 @Service
 @Profile(ProfileNames.CDC_KAFKA)

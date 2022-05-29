@@ -26,7 +26,7 @@ public abstract class RandomData {
         if (high <= low) {
             throw new IllegalArgumentException("high<=low");
         }
-        return Money.of(String.format(Locale.US, "%.2f", Math.max(low, random.nextDouble() * high)), currency);
+        return Money.of(String.format(Locale.US, "%.2f", random.nextDouble(low, high)), currency);
     }
 
     public static String randomString(int length) {

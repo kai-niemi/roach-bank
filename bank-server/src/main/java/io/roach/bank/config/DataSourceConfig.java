@@ -14,13 +14,12 @@ import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import com.zaxxer.hikari.HikariDataSource;
 
 import net.ttddyy.dsproxy.listener.ChainListener;
-import net.ttddyy.dsproxy.listener.DataSourceQueryCountListener;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Configuration
 public class DataSourceConfig {
-    protected final Logger traceLogger = LoggerFactory.getLogger("io.roach.SQL_TRACE");
+    public static final String SQL_TRACE_LOGGER = "SQL_TRACE";
 
     @Bean
     @Primary
@@ -43,21 +42,13 @@ public class DataSourceConfig {
     public DataSource dataSource() {
         HikariDataSource dataSource = primaryDataSource();
 
-        if (traceLogger.isTraceEnabled()) {
-            ChainListener listener = new ChainListener();
-            listener.addListener(new DataSourceQueryCountListener());
-            return new LazyConnectionDataSourceProxy(ProxyDataSourceBuilder
-                    .create(dataSource)
-                    .name("SQL-Trace")
-                    .listener(listener)
-                    .asJson()
-                    .countQuery()
-                    .logQueryBySlf4j(SLF4JLogLevel.TRACE, "io.roach.SQL_TRACE")
-//                    .logSlowQueryBySlf4j(150, TimeUnit.MILLISECONDS)
-//                    .multiline()
-                    .build());
-        }
-
-        return new LazyConnectionDataSourceProxy(dataSource);
+        ChainListener listener = new ChainListener();
+        return new LazyConnectionDataSourceProxy(ProxyDataSourceBuilder
+                .create(dataSource)
+                .name("SQL-Trace")
+                .listener(listener)
+                .asJson()
+                .logQueryBySlf4j(SLF4JLogLevel.TRACE, SQL_TRACE_LOGGER)
+                .build());
     }
 }

@@ -18,8 +18,6 @@ import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
 public class TransactionItemModel extends RepresentationModel<TransactionItemModel> {
     private Money amount;
 
-    private Money runningBalance;
-
     private String note;
 
     public Money getAmount() {
@@ -28,14 +26,6 @@ public class TransactionItemModel extends RepresentationModel<TransactionItemMod
 
     public void setAmount(Money amount) {
         this.amount = amount;
-    }
-
-    public Money getRunningBalance() {
-        return runningBalance;
-    }
-
-    public void setRunningBalance(Money runningBalance) {
-        this.runningBalance = runningBalance;
     }
 
     public String getNote() {

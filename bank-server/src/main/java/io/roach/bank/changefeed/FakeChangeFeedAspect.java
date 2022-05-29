@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import io.roach.bank.ProfileNames;
 import io.roach.bank.aspect.AdvisorOrder;
+import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 import io.roach.bank.domain.Transaction;
 
 /**
@@ -38,19 +39,6 @@ public class FakeChangeFeedAspect {
 
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")
     public void doAfterTransaction(Transaction transaction) {
-        transaction.getItems().forEach(item -> {
-            AccountPayload.Fields fields = new AccountPayload.Fields();
-            fields.setId(item.getId().getAccountId());
-            fields.setCity(item.getAccount().getCity());
-            fields.setName(item.getAccount().getName());
-            fields.setBalance(item.getRunningBalance().getAmount());
-            fields.setCurrency(item.getRunningBalance().getCurrency().getCurrencyCode());
-
-            AccountPayload changeEvent = new AccountPayload();
-            changeEvent.setAfter(fields);
-//            changeEvent.setUpdated(System.nanoTime() + ".0");
-
-            changeFeedPublisher.publish(changeEvent);
-        });
+        changeFeedPublisher.publish(transaction);
     }
 }

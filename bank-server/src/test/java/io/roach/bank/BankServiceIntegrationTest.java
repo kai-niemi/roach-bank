@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Commit;
@@ -25,9 +26,14 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private AccountRepository accountService;
 
+    private List<Account> accountsSwe;
+
+    private List<Account> accountsUsa;
+
     @Test
     @TransactionBoundary
-    public void testDummyLookup() {
+    @Order(1)
+    public void whenFindByIdWithRandomID_thenReturnNothing() {
         Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 
         bankService.findById(UUID.randomUUID());
@@ -35,19 +41,30 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @TransactionBoundary
+    @Order(1)
+    public void whenFindingTopAccounts_thenReturnTestAccounts() {
+        Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+
+        accountsSwe = accountService.findTopAccountsByCity("stockholm", 10);
+        accountsUsa = accountService.findTopAccountsByCity("new york", 10);
+
+        Assertions.assertTrue(accountsSwe.size() >= 10, "expected >= 10");
+        Assertions.assertTrue(accountsUsa.size() >= 10, "expected >= 10");
+    }
+
+    @Test
+    @TransactionBoundary
     @Commit
-    public void testSimpleTransaction() {
-        List<Account> accounts = accountService.findTopAccountsByCity("stockholm", 10);
-
-        Assertions.assertTrue(accounts.size() > 0);
-
-        Account accountFrom1 = accounts.get(0);
-        Account accountTo1 = accounts.get(1);
+    @Order(2)
+    public void withBalancedTransaction_thenSucceed() {
+        Account accountFrom1 = accountsSwe.get(0);
+        Account accountTo1 = accountsSwe.get(1);
 
         Assertions.assertNotEquals(accountFrom1, accountTo1);
 
         TransactionForm request = TransactionForm.builder()
                 .withTransactionType("GEN")
+                .withCity("stockholm")
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now())
                 .addLeg()
@@ -62,17 +79,15 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
                 .then()
                 .build();
 
-        UUID transaction = bankService.createTransaction(UUID.randomUUID(), request).getId();
+        Transaction t = bankService.createTransaction(UUID.randomUUID(), request);
+        Assertions.assertNotNull(t);
     }
 
     @Test
     @TransactionBoundary
     @Commit
-    public void testMultiLeggedMultiCurrencyTransaction() {
-        // Different regions and currency
-        List<Account> accountsSwe = accountService.findTopAccountsByCity("stockholm", 10);
-        List<Account> accountsUsa = accountService.findTopAccountsByCity("new york", 10);
-
+    @Order(3)
+    public void withBalancedMultiLeggedTransaction_thenSucceed() {
         Assertions.assertTrue(accountsSwe.size() > 1);
         Assertions.assertTrue(accountsUsa.size() > 1);
 
@@ -86,6 +101,7 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
         Assertions.assertNotEquals(accountFrom2, accountTo2);
 
         TransactionForm request = TransactionForm.builder()
+                .withCity("stockholm")
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now())
                 .withTransactionType("GEN")
@@ -118,7 +134,5 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
 
         Transaction t = bankService.createTransaction(UUID.randomUUID(), request);
         Assertions.assertNotNull(t);
-
-        logger.info("Created {}", t.getId());
     }
 }

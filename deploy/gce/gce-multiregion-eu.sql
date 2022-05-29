@@ -37,9 +37,9 @@ ALTER TABLE transaction SET LOCALITY REGIONAL BY ROW AS region;
 
 ALTER TABLE transaction_item ADD COLUMN region crdb_internal_region AS (
     CASE
-        WHEN transaction_city IN ('stockholm','copenhagen','helsinki','oslo','riga','tallinn') THEN 'europe-west1'
-        WHEN transaction_city IN ('dublin','belfast','london','liverpool','manchester','glasgow','birmingham','leeds') THEN 'europe-west2'
-        WHEN transaction_city IN ('amsterdam','rotterdam','antwerp','hague','ghent','brussels','berlin','hamburg','munich','frankfurt','dusseldorf','leipzig','dortmund','essen','stuttgart') THEN 'europe-west3'
+        WHEN city IN ('stockholm','copenhagen','helsinki','oslo','riga','tallinn') THEN 'europe-west1'
+        WHEN city IN ('dublin','belfast','london','liverpool','manchester','glasgow','birmingham','leeds') THEN 'europe-west2'
+        WHEN city IN ('amsterdam','rotterdam','antwerp','hague','ghent','brussels','berlin','hamburg','munich','frankfurt','dusseldorf','leipzig','dortmund','essen','stuttgart') THEN 'europe-west3'
         ELSE 'europe-west1'
         END
     ) STORED NOT NULL;

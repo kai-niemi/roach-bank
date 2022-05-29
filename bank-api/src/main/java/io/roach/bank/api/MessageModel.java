@@ -1,4 +1,4 @@
-package io.roach.bank.web.support;
+package io.roach.bank.api;
 
 import org.springframework.hateoas.RepresentationModel;
 

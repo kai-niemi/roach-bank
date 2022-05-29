@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.changefeed.ReportWebSocketPublisher;
+import io.roach.bank.changefeed.egress.ReportWebSocketPublisher;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.MetadataRepository;
 

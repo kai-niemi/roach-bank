@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 @Component
 public class ExecutorTemplate {
@@ -36,7 +38,7 @@ public class ExecutorTemplate {
     private CallMetrics callMetrics;
 
     public ListenableFuture<Void> runAsync(String id, Runnable runnable, Duration duration) {
-        logger.info("Started '{}'", id);
+        logger.info("Started '{}' to run for {}", id, duration);
 
         ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
             final long startTime = System.currentTimeMillis();
@@ -46,14 +48,23 @@ public class ExecutorTemplate {
 
             CallMetrics.Context context = callMetrics.of(id, activeWorkers::get);
 
+            int fails = 0;
             do {
                 final long callTime = context.before();
                 try {
                     runnable.run();
                     context.after(callTime, null);
+                } catch (HttpClientErrorException e) {
+                    context.after(callTime, e);
+                    logger.warn("HTTP 4xx error - backing off", e);
+                    backoff(++fails);
+                } catch (HttpServerErrorException e) {
+                    context.after(callTime, e);
+                    logger.error("HTTP 5xx error - cancelling", e);
+                    break;
                 } catch (Exception e) {
                     context.after(callTime, e);
-                    logger.error("Execution error", e);
+                    logger.error("Uncategorized error - cancelling", e);
                     break;
                 }
             } while (System.currentTimeMillis() - startTime < duration.toMillis()
@@ -70,7 +81,7 @@ public class ExecutorTemplate {
     }
 
     public ListenableFuture<Void> runAsync(String id, Runnable runnable, int iterations) {
-        logger.info("Started '{}'", id);
+        logger.info("Started '{}' to run {} times", id, iterations);
 
         ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
             AtomicInteger activeWorkers = workers.computeIfAbsent(id, i -> new AtomicInteger());
@@ -78,19 +89,30 @@ public class ExecutorTemplate {
 
             CallMetrics.Context context = callMetrics.of(id, activeWorkers::get);
 
+            loop:
             for (int i = 0; i < iterations; i++) {
                 if (Thread.interrupted() || cancelRequested) {
                     break;
                 }
 
-                final long callTime = context.before();
-                try {
-                    runnable.run();
-                    context.after(callTime, null);
-                } catch (Exception e) {
-                    context.after(callTime, e);
-                    logger.error("Execution error", e);
-                    break;
+                for (int fails=0; fails<10; fails++) {
+                    final long callTime = context.before();
+                    try {
+                        runnable.run();
+                        context.after(callTime, null);
+                    } catch (HttpClientErrorException e) {
+                        context.after(callTime, e);
+                        logger.warn("HTTP 4xx error - backing off", e);
+                        backoff(++fails);
+                    } catch (HttpServerErrorException e) {
+                        context.after(callTime, e);
+                        logger.error("HTTP 5xx error - cancelling", e);
+                        break loop;
+                    } catch (Exception e) {
+                        context.after(callTime, e);
+                        logger.error("Uncategorized error - cancelling", e);
+                        break loop;
+                    }
                 }
             }
 
@@ -104,6 +126,16 @@ public class ExecutorTemplate {
         return future;
     }
 
+    private void backoff(int fails) {
+        try {
+            long backoffMillis = Math.min((long) (Math.pow(2, ++fails) + Math.random() * 1000), 5000);
+            Thread.sleep(backoffMillis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
     @PreDestroy
     public void shutdown() {
         this.cancelRequested = true;
@@ -112,7 +144,7 @@ public class ExecutorTemplate {
     public void cancelFutures() {
         cancelRequested = true;
         while (!futures.isEmpty()) {
-            logger.info("Cancelling {} futures", futures.size());
+            logger.debug("Cancelling {} futures", futures.size());
 
             ListenableFuture<Void> future = futures.pop();
             future.cancel(true);
@@ -126,7 +158,7 @@ public class ExecutorTemplate {
                 logger.error("", e.getCause());
             }
         }
-        logger.info("All futures cancelled");
+        logger.debug("All futures cancelled");
         cancelRequested = false;
     }
 

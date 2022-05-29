@@ -37,7 +37,7 @@ import io.roach.bank.domain.Account;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.util.TimeBoundExecution;
-import io.roach.bank.web.support.MessageModel;
+import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -87,6 +87,7 @@ public class AccountController {
                 .listTopAccounts(null, null))
                 .withRel(LinkRelations.ACCOUNT_TOP
                 ).withTitle("Collection of top accounts grouped by region"));
+
         index.add(linkTo(methodOn(AccountController.class)
                 .listTopAccounts(Collections.emptySet(), -1))
                 .withRel(LinkRelations.ACCOUNT_TOP

@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.changefeed.model;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -18,9 +18,6 @@ public class TransactionItemChangeEvent extends AbstractPayload {
 
     @JsonProperty("currency")
     private String currency;
-
-    @JsonProperty("running_balance")
-    private BigDecimal runningBalance;
 
     @Override
     public boolean equals(Object o) {
@@ -76,15 +73,6 @@ public class TransactionItemChangeEvent extends AbstractPayload {
         return this;
     }
 
-    public BigDecimal getRunningBalance() {
-        return runningBalance;
-    }
-
-    public TransactionItemChangeEvent setRunningBalance(BigDecimal runningBalance) {
-        this.runningBalance = runningBalance;
-        return this;
-    }
-
     @Override
     public String toString() {
         return "TransactionLegChangeEvent{" +
@@ -92,7 +80,6 @@ public class TransactionItemChangeEvent extends AbstractPayload {
                 ", transactionId=" + transactionId +
                 ", amount=" + amount +
                 ", currency='" + currency + '\'' +
-                ", runningBalance=" + runningBalance +
                 "} " + super.toString();
     }
 }

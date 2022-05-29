@@ -22,7 +22,6 @@ public class TransactionItemResourceAssembler
     public TransactionItemModel toModel(TransactionItem entity) {
         TransactionItemModel resource = new TransactionItemModel();
         resource.setAmount(entity.getAmount());
-        resource.setRunningBalance(entity.getRunningBalance());
         resource.setNote(entity.getNote());
 
         resource.add(linkTo(TransactionItemController.class)
@@ -31,12 +30,12 @@ public class TransactionItemResourceAssembler
                 .withSelfRel());
         resource.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder.methodOn(AccountController.class)
-                        .getAccount(entity.getAccount().getId()))
+                        .getAccount(entity.getId().getAccountId()))
                 .withRel(LinkRelations.ACCOUNT_REL)
                 .withTitle("Booking account"));
         resource.add(WebMvcLinkBuilder
                 .linkTo(WebMvcLinkBuilder.methodOn(TransactionController.class)
-                        .getTransaction(entity.getTransaction().getId()))
+                        .getTransaction(entity.getId().getTransactionId()))
                 .withRel(LinkRelations.TRANSACTION_REL)
                 .withTitle("Booking transaction"));
 

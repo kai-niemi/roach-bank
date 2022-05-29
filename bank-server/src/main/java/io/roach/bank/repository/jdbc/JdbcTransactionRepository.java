@@ -57,19 +57,18 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
         jdbcTemplate.batchUpdate(
                 "INSERT INTO transaction_item "
-                        + "(transaction_id, transaction_city, account_id, amount, currency, note, running_balance) "
-                        + "VALUES(?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                        + "(transaction_id, city, account_id, amount, currency, note) "
+                        + "VALUES(?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         TransactionItem item = items.get(i);
                         int idx = 1;
                         ps.setObject(idx++, item.getId().getTransactionId());
-                        ps.setString(idx++, item.getTransactionCity());
+                        ps.setString(idx++, item.getCity());
                         ps.setObject(idx++, item.getId().getAccountId());
                         ps.setBigDecimal(idx++, item.getAmount().getAmount());
                         ps.setString(idx++, item.getAmount().getCurrency().getCurrencyCode());
                         ps.setString(idx++, item.getNote());
-                        ps.setBigDecimal(idx++, item.getRunningBalance().getAmount());
                     }
 
                     @Override
@@ -159,8 +158,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
     private TransactionItem readTransactionItem(ResultSet rs) throws SQLException {
         UUID accountId = (UUID) rs.getObject("account_id");
         UUID transactionId = (UUID) rs.getObject("transaction_id");
-        String transactionCity = rs.getString("transaction_city");
-        Money runningBalance = Money.of(rs.getString("running_balance"), rs.getString("currency"));
+        String transactionCity = rs.getString("city");
         Money amount = Money.of(rs.getString("amount"), rs.getString("currency"));
         String note = rs.getString("note");
 
@@ -169,7 +167,6 @@ public class JdbcTransactionRepository implements TransactionRepository {
                 .withCity(transactionCity)
                 .andItem()
                 .withAccount(Account.builder().withId(accountId).build())
-                .withRunningBalance(runningBalance)
                 .withAmount(amount)
                 .withNote(note)
                 .then()

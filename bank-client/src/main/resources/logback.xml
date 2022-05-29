@@ -12,7 +12,7 @@
         <appender-ref ref="FILE" />
     </appender>
 
-    <logger name="io.roach" level="DEBUG">
+    <logger name="io.roach" level="INFO">
     </logger>
 
     <logger name="org.springframework" level="WARN"/>

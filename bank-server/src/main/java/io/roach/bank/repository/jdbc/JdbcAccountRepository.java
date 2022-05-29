@@ -1,9 +1,9 @@
 package io.roach.bank.repository.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,12 +30,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
+import io.roach.bank.annotation.TimeTravel;
+import io.roach.bank.annotation.TimeTravelMode;
+import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.util.Pair;
 
 @Repository
 @TransactionMandatory
@@ -103,38 +107,36 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void updateBalances(List<Account> accounts) {
+    public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
         int[] rowsAffected = jdbcTemplate.batchUpdate(
                 "UPDATE account "
                         + "SET "
-                        + "   balance = ?,"
-                        + "   updated=? "
+                        + "   balance = balance + ?,"
+                        + "   updated = clock_timestamp() "
                         + "WHERE id = ? "
                         + "   AND closed=false "
-                        + "   AND currency = ? "
-                        + "   AND (?) * abs(allow_negative-1) >= 0", // RETURNING NOTHING
+                        + "   AND (balance + ?) * abs(allow_negative-1) >= 0",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Account account = accounts.get(i);
-
-                        ps.setBigDecimal(1, account.getBalance().getAmount());
-                        ps.setObject(2, LocalDateTime.now());
-                        ps.setObject(3, account.getId());
-                        ps.setString(4, account.getBalance().getCurrency().getCurrencyCode());
-                        ps.setBigDecimal(5, account.getBalance().getAmount());
+                        Pair<UUID, BigDecimal> entry = balanceUpdates.get(i);
+                        ps.setBigDecimal(1, entry.getRight());
+                        ps.setObject(2, entry.getLeft());
+                        ps.setBigDecimal(3, entry.getRight());
                     }
 
                     @Override
                     public int getBatchSize() {
-                        return accounts.size();
+                        return balanceUpdates.size();
                     }
                 });
 
-        // Trust but verify
-        Arrays.stream(rowsAffected).filter(i -> i != 1).forEach(i -> {
-            throw new IncorrectResultSizeDataAccessException(1, i);
-        });
+        // Check invariant on neg balance
+        Arrays.stream(rowsAffected)
+                .filter(i -> i != 1)
+                .forEach(i -> {
+                    throw new IncorrectResultSizeDataAccessException(1, i);
+                });
     }
 
     @Override
@@ -208,16 +210,22 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findAccountsById(Set<UUID> ids, String city, boolean sfu) {
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    public List<Account> findAccountsById(Set<UUID> ids) {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
+
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", ids);
-//        parameters.addValue("city", city);
 
         return this.namedParameterJdbcTemplate.query(
-                sfu ? "SELECT * FROM account WHERE id in (:ids) FOR UPDATE"
-                        : "SELECT * FROM account WHERE id in (:ids)",
+                "SELECT * FROM account WHERE id in (:ids)",
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
+    }
+
+    @Override
+    public Account getAccountByReference(UUID id) {
+        return Account.builder().withId(id).build();
     }
 
     @Override

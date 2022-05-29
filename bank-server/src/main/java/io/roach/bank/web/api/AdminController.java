@@ -31,14 +31,17 @@ import com.zaxxer.hikari.HikariConfigMXBean;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import io.roach.bank.api.ConnectionPoolConfig;
 import io.roach.bank.api.ConnectionPoolSize;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.config.DataSourceConfig;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.ConnectionPoolConfigFactory;
 import io.roach.bank.web.support.ConnectionPoolSizeFactory;
-import io.roach.bank.web.support.MessageModel;
+import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -79,6 +82,11 @@ public class AdminController {
                 .getConnectionPoolConfig())
                 .withRel(LinkRelations.POOL_CONFIG_REL)
                 .withTitle("Connection pool config"));
+
+        index.add(linkTo(methodOn(getClass())
+                .toggleTraceLogging())
+                .withRel(LinkRelations.TOGGLE_TRACE_LOG)
+                .withTitle("Toggle SQL trace logging"));
 
         index.add(Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator").buildAndExpand()
                 .toUriString()).withRel(LinkRelations.ACTUATOR_REL).withTitle("Spring boot actuators"));
@@ -187,4 +195,34 @@ public class AdminController {
                         .getConnectionPoolConfig())
                         .withSelfRel()));
     }
+
+    @PostMapping(value = "/toggle-trace")
+    public ResponseEntity<MessageModel> toggleTraceLogging() {
+
+        boolean enabled = toggleLogLevel(DataSourceConfig.SQL_TRACE_LOGGER, Level.TRACE);
+        logger.info("SQL Trace Logging {}", enabled ? "ENABLED" : "DISABLED");
+
+        return ResponseEntity.ok(
+                new MessageModel("SQL Trace Logging " + (enabled ? "ENABLED" : "DISABLED"))
+                        .add(linkTo(methodOn(getClass())
+                                .toggleTraceLogging())
+                                .withRel(LinkRelations.TOGGLE_TRACE_LOG))
+                        .add(linkTo(methodOn(getClass())
+                                .getConnectionPoolSize())
+                                .withSelfRel()));
+
+    }
+
+    private boolean toggleLogLevel(String name, Level traceLevel) {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.Logger logger = loggerContext.getLogger(name);
+        if (logger.getLevel().isGreaterOrEqual(Level.INFO)) {
+            logger.setLevel(traceLevel);
+            return true;
+        } else {
+            logger.setLevel(Level.INFO);
+            return false;
+        }
+    }
+
 }

@@ -28,7 +28,7 @@ import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.NoSuchTransactionException;
 import io.roach.bank.service.TransactionService;
-import io.roach.bank.web.support.MessageModel;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.web.support.ZoomExpression;
 
 import static io.roach.bank.api.LinkRelations.TRANSACTION_ITEMS_REL;

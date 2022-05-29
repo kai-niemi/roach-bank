@@ -53,7 +53,7 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     @NotBlank
     private String transactionType;
 
-    private boolean selectForUpdate;
+    private boolean smokeTest;
 
     @NotNull
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -94,8 +94,8 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
         return Collections.unmodifiableList(accountLegs);
     }
 
-    public boolean isSelectForUpdate() {
-        return selectForUpdate;
+    public boolean isSmokeTest() {
+        return smokeTest;
     }
 
     public static class Builder {
@@ -126,8 +126,8 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
             return this;
         }
 
-        public Builder withSelectForUpdate() {
-            this.instance.selectForUpdate = true;
+        public Builder withSmokeTest() {
+            this.instance.smokeTest = true;
             return this;
         }
 

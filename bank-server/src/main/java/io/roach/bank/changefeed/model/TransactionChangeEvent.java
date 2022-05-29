@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.changefeed.model;
 
 import java.util.HashSet;
 import java.util.Set;

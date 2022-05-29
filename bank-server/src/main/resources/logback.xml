@@ -21,16 +21,16 @@
 <!--    <logger name="org.springframework.transaction.interceptor" level="DEBUG"/>-->
 <!--    <logger name="org.springframework.jdbc.core" level="DEBUG"/>-->
 <!--    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>-->
-    
-    <logger name="io.roach" level="DEBUG"/>
 
-    <!-- Use TRACE level to enable SQL trace logging -->
-    <logger name="io.roach.SQL_TRACE" level="DEBUG"/>
-    <!--
-        <logger name="io.roach.SQL_TRACE" level="INFO" additivity="false">
-            <appender-ref ref="ASYNC_FILE" />
-        </logger>
-    -->
+    <logger name="io.roach.bank" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ASYNC_FILE" />
+    </logger>
+
+    <logger name="SQL_TRACE" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ASYNC_FILE" />
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

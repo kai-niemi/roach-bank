@@ -54,13 +54,15 @@ public class Transfer extends AbstractCommand {
     @ShellMethod(value = "Transfer funds between accounts", key = {"t", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
-            @ShellOption(help = "amount per transaction", defaultValue = "0.25") final String amount,
+            @ShellOption(help = "min amount", defaultValue = "0.50") final String minAmount,
+            @ShellOption(help = "max amount", defaultValue = "10.00") final String maxAmount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = "use pessmistic read locks (reduce retries)", defaultValue = "false") boolean locking,
-            @ShellOption(help = "fake transfers", defaultValue = "false") boolean fake
+            @ShellOption(help = "execution iterations (precedence over duration if >0)", defaultValue = "0")
+                    int iterations,
+            @ShellOption(help = "smoke test (do nothing server side)", defaultValue = "false") boolean smokeTest
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
                 StringUtils.commaDelimitedListToSet(regions), limit);
@@ -77,21 +79,33 @@ public class Transfer extends AbstractCommand {
                 .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
                 .asTemplatedLink();
 
+        double min = Double.parseDouble(minAmount);
+        double max = Double.parseDouble(maxAmount);
+
         accounts.forEach((city, accountModels) -> {
-            executorTemplate.runAsync(city + " (t)",
-                    () -> transferFunds(transferLink, city, accountModels, amount, legs, locking, fake),
-                    DurationFormat.parseDuration(duration));
+            if (iterations > 0) {
+                executorTemplate.runAsync(city + " (transfer)",
+                        () -> transferFunds(transferLink, city, accountModels, min, max, legs, smokeTest),
+                        iterations
+                );
+            } else {
+                executorTemplate.runAsync(city + " (transfer)",
+                        () -> transferFunds(transferLink, city, accountModels, min, max, legs, smokeTest),
+                        DurationFormat.parseDuration(duration)
+                );
+            }
         });
     }
 
     private void transferFunds(Link link,
                                String city,
                                List<AccountModel> accounts,
-                               String amount,
+                               double minAmount,
+                               double maxAmount,
                                int legs,
-                               boolean locking,
-                               boolean fake) {
-        Money transferAmount = Money.of("" + amount, accounts.get(0).getBalance().getCurrency());
+                               boolean smokeTest) {
+        Money transferAmount = RandomData
+                .randomMoneyBetween(minAmount, maxAmount, accounts.get(0).getBalance().getCurrency());
 
         TransactionForm.Builder builder = TransactionForm.builder()
                 .withUUID(UUID.randomUUID())
@@ -100,8 +114,8 @@ public class Transfer extends AbstractCommand {
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
 
-        if (locking) {
-            builder.withSelectForUpdate();
+        if (smokeTest) {
+            builder.withSmokeTest();
         }
 
         Set<UUID> trail = new HashSet<>();
@@ -120,13 +134,6 @@ public class Transfer extends AbstractCommand {
                     .then();
         });
 
-        if (!fake) {
-            restCommands.post(link, builder.build(), TransactionModel.class);
-        } else {
-            try {
-                Thread.sleep(random.nextLong(5));
-            } catch (InterruptedException e) {
-            }
-        }
+        restCommands.post(link, builder.build(), TransactionModel.class);
     }
 }

@@ -70,7 +70,25 @@ by default.
 
 - [SQL files](../bank-server/src/main/resources/db) 
 
-## Transaction Workflow
+## Transaction Workflow (Current)
+
+Each monetary transaction creates a transaction (1) with legs (2) for each account update, and finally updates 
+the balance on each account (3). As an extra safety guarantee, a schema CHECK constraint will ensure balances 
+don't end up negative, unless allowed for that account.
+
+    (1) INSERT INTO transaction (id,city,balance,currency,name,..);
+    
+    -- for each leg (batch)
+    (2) INSERT INTO transaction_item (city,transaction_id,..);
+    
+    -- for each account (batch)
+    (3) UPDATE account SET balance=balance+? WHERE id=? AND (balance+?)*abs(allow_negative-1)>=0;
+
+In this workflow the initial read with/without a lock is made redundant since the invariant check
+is done through the final UPDATE. An UPDATE takes an implicit lock at the read part in
+CockroachDB (configurable).
+
+## Transaction Workflow (Old) 
 
 Each monetary transaction first reads the current balance of the accounts involved using pessimistic locks (1), 
 then creates a transaction (2) with legs (3) for each account update, and finally updates the balance on each 
@@ -82,12 +100,12 @@ unless allowed for that account.
     (2) INSERT INTO transaction (id,city,balance,currency,name,..);
     
     -- for each leg (batch)
-    (3) INSERT INTO transaction_item (transaction_city,transaction_id,..);
+    (3) INSERT INTO transaction_item (city,transaction_id,..);
     
     -- for each account (batch)
-    (4) UPDATE account SET balance=balance+? WHERE id=? AND city=? AND (balance+?)*abs(allow_negative-1)>=0;
+    (4) UPDATE account SET balance=? WHERE id=? AND (?)*abs(allow_negative-1)>=0;
 
 ### Transaction Retry Strategy
 
 Any database running in serializable is exposed to transient retry errors. These errors are detected
-and handled via Spring/CGLIB proxies with exponential backoff. 
+and handled via Spring/CGLIB proxies with an exponential backoff. 

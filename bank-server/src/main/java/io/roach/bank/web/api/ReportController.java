@@ -16,7 +16,7 @@ import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.repository.ReportingRepository;
-import io.roach.bank.web.support.MessageModel;
+import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;

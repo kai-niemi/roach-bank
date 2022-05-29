@@ -3,13 +3,20 @@ package io.roach.bank.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.*;
-
-import org.springframework.util.Assert;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
-import io.roach.bank.service.NegativeBalanceException;
 
 /**
  * Represents a monetary account like asset, liability, expense, capital accounts and so forth.
@@ -65,14 +72,6 @@ public class Account extends AbstractEntity<UUID> {
         if (updated == null) {
             updated = LocalDateTime.now();
         }
-    }
-
-    public void addAmount(Money amount) {
-        Money newBalance = getBalance().plus(amount);
-        if (getAllowNegative() == 0 && newBalance.isNegative()) {
-            throw new NegativeBalanceException(toDisplayString());
-        }
-        this.balance = newBalance;
     }
 
     @Override
