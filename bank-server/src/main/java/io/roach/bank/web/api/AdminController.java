@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -173,8 +175,8 @@ public class AdminController {
     public ResponseEntity<MessageModel> setConnectionPoolSize(
             @RequestParam(value = "size", defaultValue = "50") int size) {
         hikariDataSource.setMaximumPoolSize(size);
-        hikariDataSource.setMinimumIdle(size);
-        logger.info("Setting max and min idle pool size to {}", size);
+        hikariDataSource.setMinimumIdle(size / 2);
+        logger.info("Setting max pool size to {} min idle to {}", size, size / 2);
         return ResponseEntity.ok(new MessageModel("ok")
                 .add(linkTo(methodOn(getClass())
                         .getConnectionPoolConfig())

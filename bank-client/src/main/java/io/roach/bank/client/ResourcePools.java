@@ -32,7 +32,7 @@ public class ResourcePools extends AbstractCommand {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void setPoolSize(@ShellOption(help = "connection pool size", defaultValue = "100") int size
     ) {
-        console.yellow("Setting connectopn pool size to %d\n", size);
+        console.yellow("Setting connection pool size to %d\n", size);
 
         Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
@@ -54,7 +54,7 @@ public class ResourcePools extends AbstractCommand {
     public void getPoolSize() {
         ResponseEntity<String> configResponse = restCommands.fromRoot()
                 .follow(withCurie(ADMIN_REL))
-                .follow(withCurie(POOL_CONFIG_REL))
+                .follow(withCurie(POOL_SIZE_REL))
                 .toEntity(String.class);
 
         console.cyan("Connection pool size:");
@@ -73,7 +73,7 @@ public class ResourcePools extends AbstractCommand {
         console.yellow("%s\n", response.getBody());
     }
 
-    @ShellMethod(value = "Print local thread pool size", key = {"thread-pool-size", "tp"})
+    @ShellMethod(value =  "Get local thread pool size", key = {"get-thread-pool-size", "gtps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getThreadPoolSize() {
         ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);
@@ -85,5 +85,13 @@ public class ResourcePools extends AbstractCommand {
         console.yellow("\tcompletedTaskCount: %s\n", stats.completedTaskCount);
         console.yellow("\ttaskCount: %s\n", stats.taskCount);
         console.yellow("\tlargestPoolSize: %s\n", stats.largestPoolSize);
+    }
+
+    @ShellMethod(value = "Set local thread pool size", key = {"set-thread-pool-size", "stps"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "100") int size) {
+        threadPoolTaskExecutor.setCorePoolSize(size);
+        console.cyan("Thread pool size set to %d", size);
+
     }
 }

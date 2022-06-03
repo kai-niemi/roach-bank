@@ -8,8 +8,8 @@ public class ThreadPoolStats {
     public static ThreadPoolStats from(ThreadPoolTaskExecutor boundedExecutor) {
         ThreadPoolExecutor pool = boundedExecutor.getThreadPoolExecutor();
         ThreadPoolStats instance = new ThreadPoolStats();
-        instance.corePoolSize = pool.getCorePoolSize();
         instance.poolSize = pool.getPoolSize();
+        instance.corePoolSize = pool.getCorePoolSize();
         instance.maximumPoolSize = pool.getMaximumPoolSize();
         instance.activeCount = pool.getActiveCount();
         instance.taskCount = pool.getTaskCount();
