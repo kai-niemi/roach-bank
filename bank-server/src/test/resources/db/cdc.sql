@@ -4,7 +4,6 @@ SET CLUSTER SETTING kv.range_merge.queue_enabled = false;
 CREATE CHANGEFEED FOR TABLE account INTO 'kafka://localhost:9092' with updated, resolved='5s';
 CREATE CHANGEFEED FOR TABLE account INTO 'experimental-http://localhost:8090/api/cdc/cloud/account' with updated, resolved='5s';
 CREATE CHANGEFEED FOR TABLE account INTO 'webhook-https://localhost:8443/api/cdc/webhook/account?insecure_tls_skip_verify=true' with updated, resolved='5s';
-
 CREATE CHANGEFEED FOR TABLE account INTO 'webhook-https://192.168.1.113:8443/api/cdc/webhook/account?insecure_tls_skip_verify=true' with updated, resolved='5s';
 
 INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES
@@ -24,3 +23,7 @@ VALUES (gen_random_uuid(), 'transaction', gen_random_uuid()::string, 'Transactio
         "def": true
     }
 ]');
+
+ALTER TABLE outbox SET (ttl_expire_after = '1 hour');
+
+SELECT * FROM [SHOW JOBS] WHERE job_type = 'ROW LEVEL TTL';
