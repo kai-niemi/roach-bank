@@ -15,18 +15,15 @@ import io.roach.bank.client.support.RestCommands;
 @ShellCommandGroup(Constants.METADATA_COMMANDS)
 public class Config extends AbstractCommand {
     @Autowired
-    private ConfigurableApplicationContext applicationContext;
-
-    @Autowired
     private RestCommands restCommands;
 
-    @ShellMethod(value = "Print gateway region", key = {"gateway-region","gr"})
+    @ShellMethod(value = "Print gateway region", key = {"gateway-region"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void printGatewayRegion() {
-        console.yellow("Gateway region is '%s'\n", restCommands.getGatewayRegion());
+        console.yellow("%s\n", restCommands.getGatewayRegion());
     }
 
-    @ShellMethod(value = "List regions", key = {"list-regions","lr"})
+    @ShellMethod(value = "List regions", key = {"list-regions"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegions() {
         console.cyan("Available regions:\n");
@@ -36,11 +33,12 @@ public class Config extends AbstractCommand {
         printGatewayRegion();
     }
 
-    @ShellMethod(value = "List region cities", key = {"list-cities","lc"})
+    @ShellMethod(value = "List cities", key = {"list-cities"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegionCities(
             @ShellOption(help = "region names (gateway region if omitted)", defaultValue = "") String regions) {
-        console.cyan("-- region cities --\n");
+        console.yellow("Gateway: %s\n", restCommands.getGatewayRegion());
+        console.cyan("-- region '%s' cities --\n", regions);
         restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)).forEach(s -> {
             console.yellow("%s\n", s);
         });

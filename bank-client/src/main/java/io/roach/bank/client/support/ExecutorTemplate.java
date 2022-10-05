@@ -135,7 +135,6 @@ public class ExecutorTemplate {
         }
     }
 
-
     @PreDestroy
     public void shutdown() {
         this.cancelRequested = true;
@@ -161,5 +160,4 @@ public class ExecutorTemplate {
         logger.debug("All futures cancelled");
         cancelRequested = false;
     }
-
 }

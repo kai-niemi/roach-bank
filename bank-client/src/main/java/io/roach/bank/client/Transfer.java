@@ -67,7 +67,7 @@ public class Transfer extends AbstractCommand {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
                 StringUtils.commaDelimitedListToSet(regions), limit);
         if (accounts.isEmpty()) {
-            logger.warn("No cities found matching: {}", regions);
+            logger.warn("No cities found matching region(s): {}", regions);
         }
 
         accounts.forEach((city, accountModels) -> {
