@@ -87,8 +87,8 @@ create table outbox
 
 alter table account
     add constraint check_account_allow_negative check (allow_negative between 0 and 1);
--- alter table account
---     add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
+alter table account
+    add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
 
 alter table transaction_item
     add constraint fk_txn_item_ref_transaction

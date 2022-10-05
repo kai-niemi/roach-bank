@@ -40,7 +40,7 @@ public class Account extends AbstractEntity<UUID> {
     private String description;
 
     @Convert(converter = AccountTypeConverter.class)
-    @Column(name = "type", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private AccountType accountType;
 
     @Column(name = "updated")
@@ -57,7 +57,7 @@ public class Account extends AbstractEntity<UUID> {
     @Column(nullable = false)
     private boolean closed;
 
-    @Column(nullable = false, name = "allow_negative")
+    @Column(nullable = false)
     private int allowNegative;
 
     protected Account() {
