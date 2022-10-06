@@ -1,18 +1,12 @@
 package io.roach.bank.client;
 
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jline.reader.History;
-import org.jline.reader.LineReader;
-import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -21,14 +15,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.shell.Input;
 import org.springframework.shell.InputProvider;
 import org.springframework.shell.Shell;
-import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.shell.jline.PromptProvider;
 import org.springframework.util.StringUtils;
 
@@ -50,27 +40,11 @@ public class Application implements PromptProvider {
     private String connection;
 
     @Autowired
-    @Lazy
-    private History history;
-
-    @Autowired
     private Shell shell;
 
     @Bean
     public CommandLineRunner commandLineRunner() {
         return new ProvidedCommandLineRunner(shell);
-    }
-
-    @Bean
-    @Lazy
-    public History history(LineReader lineReader, @Value("${roachbank.history.file}") String historyPath) {
-        lineReader.setVariable(LineReader.HISTORY_FILE, Paths.get(historyPath));
-        return new DefaultHistory(lineReader);
-    }
-
-    @EventListener
-    public void onContextClosedEvent(ContextClosedEvent event) throws IOException {
-        history.save();
     }
 
     @EventListener
@@ -88,7 +62,6 @@ public class Application implements PromptProvider {
     }
 }
 
-@Order(InteractiveShellApplicationRunner.PRECEDENCE - 2)
 class ProvidedCommandLineRunner implements CommandLineRunner {
     private final Shell shell;
 

@@ -96,7 +96,7 @@ public class Admin implements Quit.Command {
         console.cyan(" Pending GC: %s\n", m.getObjectPendingFinalizationCount());
     }
 
-    @ShellMethod(value = "Toggle SQL trace logging (server side)", key = {"toggle-trace", "l"})
+    @ShellMethod(value = "Toggle SQL trace logging (server side)", key = {"sql-trace"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void toggleSqlTraceLogging() {
         Link submitLink = restCommands.fromRoot()

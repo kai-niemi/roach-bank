@@ -40,7 +40,7 @@ public class Metrics extends AbstractCommand {
         console.green("Metrics cleared\n");
     }
 
-    @ShellMethod(value = "Toggle console metrics", key = {"metrics", "m"})
+    @ShellMethod(value = "Toggle console metrics", key = {"toggle-metrics", "tm"})
     public void toggleMetrics() {
         printMetrics = !printMetrics;
         console.green("Metrics printing is %s\n", printMetrics ? "on" : "off");

@@ -28,7 +28,7 @@ public class ResourcePools extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 
-    @ShellMethod(value = "Set server connection pool size", key = {"set-pool-size", "sps"})
+    @ShellMethod(value = "Set server connection pool size", key = {"set-pool-size"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void setPoolSize(@ShellOption(help = "connection pool size", defaultValue = "100") int size
     ) {
@@ -49,7 +49,7 @@ public class ResourcePools extends AbstractCommand {
         }
     }
 
-    @ShellMethod(value = "Get server connection pool size", key = {"get-pool-size", "gps"})
+    @ShellMethod(value = "Get server connection pool size", key = {"get-pool-size"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getPoolSize() {
         ResponseEntity<String> configResponse = restCommands.fromRoot()
@@ -61,7 +61,7 @@ public class ResourcePools extends AbstractCommand {
         console.yellow("%s\n", configResponse.getBody());
     }
 
-    @ShellMethod(value = "Get server connection pool config", key = {"get-pool-config", "gpc"})
+    @ShellMethod(value = "Get server connection pool config", key = {"get-pool-config"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getPoolConfig() {
         ResponseEntity<String> response = restCommands.fromRoot()
@@ -73,7 +73,7 @@ public class ResourcePools extends AbstractCommand {
         console.yellow("%s\n", response.getBody());
     }
 
-    @ShellMethod(value =  "Get local thread pool size", key = {"get-thread-pool-size", "gtps"})
+    @ShellMethod(value = "Get local thread pool size", key = {"get-thread-pool-size"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getThreadPoolSize() {
         ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);
@@ -87,11 +87,11 @@ public class ResourcePools extends AbstractCommand {
         console.yellow("\tlargestPoolSize: %s\n", stats.largestPoolSize);
     }
 
-    @ShellMethod(value = "Set local thread pool size", key = {"set-thread-pool-size", "stps"})
+    @ShellMethod(value = "Set local thread pool size", key = {"set-thread-pool-size"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "100") int size) {
+    public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "-1") int size) {
+        size = size > 0 ? size : Runtime.getRuntime().availableProcessors() * 4;
         threadPoolTaskExecutor.setCorePoolSize(size);
         console.cyan("Thread pool size set to %d", size);
-
     }
 }

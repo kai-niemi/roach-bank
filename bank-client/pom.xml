@@ -14,8 +14,7 @@
 
     <properties>
         <skipTests>true</skipTests>
-        <jline.version>3.16.0</jline.version>
-        <springshell.version>2.0.1.RELEASE</springshell.version>
+        <springshell.version>2.1.2</springshell.version>
     </properties>
 
     <dependencies>
@@ -28,18 +27,6 @@
             <groupId>org.springframework.shell</groupId>
             <artifactId>spring-shell-starter</artifactId>
             <version>${springshell.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.shell</groupId>
-            <artifactId>spring-shell-table</artifactId>
-            <version>${springshell.version}</version>
-            <exclusions>
-                <!-- break 4.3 -->
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-beans</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -58,24 +45,7 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jline</groupId>
-            <artifactId>jline</artifactId>
-            <version>${jline.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jline</groupId>
-            <artifactId>jline-terminal-jna</artifactId>
-            <version>${jline.version}</version>
-        </dependency>
-        <!-- Jline related -->
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
-            <version>1.18</version>
-            <scope>runtime</scope>
-        </dependency>
-        
+
         <!-- TEST -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
