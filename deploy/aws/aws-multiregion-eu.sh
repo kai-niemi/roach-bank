@@ -6,7 +6,7 @@
 
 title="CockroachDB 3-region EU deployment"
 # CRDB release version
-releaseversion="v22.1.8"
+releaseversion="v22.1.11"
 # Number of node instances in total including clients
 nodes="12"
 # Nodes hosting CRDB
@@ -32,7 +32,7 @@ eu-west-1a,\
 eu-west-2a,\
 eu-central-1a"
 # AWS/GCE machine types
-machinetypes="c5d.4xlarge"
+machinetypes="c5d.2xlarge"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################
@@ -41,4 +41,4 @@ functionsdir="../common"
 
 source "${functionsdir}/core_functions.sh"
 
-command_main.sh
+main.sh

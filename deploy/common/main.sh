@@ -34,24 +34,26 @@ if [ -z "${CLUSTER}" ]; then
   exit 1
 fi
 
-if fn_prompt_yes_no "Create CRDB cluster?" Y; then
-  command_create.sh
+if fn_prompt_yes_no "1/5: Create CRDB cluster?" Y; then
+  01_create_cluster.sh
 fi
 
-if fn_prompt_yes_no "Deploy Bank servers?" Y; then
-  command_bank_deploy.sh server
+if fn_prompt_yes_no "2/5: Deploy Bank servers?" Y; then
+  02_deploy_servers.sh
 fi
 
-if fn_prompt_yes_no "Deploy Bank clients?" Y; then
-  command_bank_deploy.sh client
+if fn_prompt_yes_no "3/5: Deploy Bank clients?" Y; then
+  03_deploy_clients.sh
 fi
 
-if fn_prompt_yes_no "Start Bank servers?" Y; then
-  command_bank_start.sh
+if fn_prompt_yes_no "4/5: Start Bank servers?" Y; then
+  04_start_servers.sh
 fi
 
 if test -f "$partitionsqlfile"; then
-  if fn_prompt_yes_no "Apply geo-partitioning?" Y; then
-    command_partition.sh
+  if fn_prompt_yes_no "5/5: Apply partitioning?" Y; then
+    05_partition.sh
   fi
 fi
+
+fn_echo_info_nl "Done!"

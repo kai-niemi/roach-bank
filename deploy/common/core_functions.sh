@@ -4,23 +4,27 @@ core_util.sh(){
   source "${functionsdir}/core_util.sh"
 }
 
-command_partition.sh(){
-  source "${functionsdir}/command_partition.sh"
+01_create_cluster.sh(){
+  source "${functionsdir}/01_create_cluster.sh"
 }
 
-command_create.sh(){
-  source "${functionsdir}/command_create.sh"
+02_deploy_servers.sh(){
+  source "${functionsdir}/02_deploy_servers.sh"
 }
 
-command_bank_deploy.sh(){
-  source "${functionsdir}/command_bank_deploy.sh"
+03_deploy_clients.sh(){
+  source "${functionsdir}/03_deploy_clients.sh"
 }
 
-command_bank_start.sh(){
-  source "${functionsdir}/command_bank_start.sh"
+04_start_servers.sh(){
+  source "${functionsdir}/04_start_servers.sh"
 }
 
-command_main.sh(){
-  source "${functionsdir}/command_main.sh"
+05_partition.sh(){
+  source "${functionsdir}/05_partition.sh"
+}
+
+main.sh(){
+  source "${functionsdir}/main.sh"
 }
 

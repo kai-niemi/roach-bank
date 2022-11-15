@@ -3,7 +3,7 @@
 fn_start_server(){
   local c=$1
 
-  fn_echo_info_nl "Starting server.."
+  fn_echo_info_nl "Starting bank server.."
 
 fn_failcheck roachprod run $CLUSTER:$c <<EOF
 nohup ./bank-server.jar > /dev/null 2>&1 &

@@ -24,7 +24,7 @@ fn_start_cluster() {
   fn_failcheck roachprod admin --open --ips $CLUSTER:1
 }
 
-fn_stage_clients() {
+fn_stage_lb() {
   i=0;
   for c in "${clients[@]}"
   do
@@ -55,8 +55,23 @@ if [ -z "${CLUSTER}" ]; then
   export CLUSTER="your-cluster-id"
 fi
 
+if fn_prompt_yes_no "1.1/5: Create new cluster?" Y; then
 fn_create_cluster
+fi
+
+if fn_prompt_yes_no "1.2/5: Stage cluster?" Y; then
 fn_stage_cluster
+fi
+
+if fn_prompt_yes_no "1.1/5: Start cluster?" Y; then
 fn_start_cluster
-fn_stage_clients
+fi
+
+if fn_prompt_yes_no "1.1/5: Stage LB?" Y; then
+fn_stage_lb
+fi
+
+if fn_prompt_yes_no "1.1/5: Create DB?" Y; then
 fn_create_db
+fi
+
