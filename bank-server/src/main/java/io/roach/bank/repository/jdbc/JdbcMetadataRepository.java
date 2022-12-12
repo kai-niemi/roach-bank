@@ -31,7 +31,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
         clouds.forEach(cloud -> {
             MapSqlParameterSource parameters = new MapSqlParameterSource();
-            parameters.addValue("cloud",cloud);
+            parameters.addValue("cloud", cloud);
 
             this.namedParameterJdbcTemplate.query(
                     "SELECT name,cities FROM region WHERE cloud=:cloud ORDER BY name",

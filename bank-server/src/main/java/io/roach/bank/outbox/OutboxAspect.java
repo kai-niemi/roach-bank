@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import io.roach.bank.ProfileNames;
 import io.roach.bank.AdvisorOrder;
+import io.roach.bank.ProfileNames;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.service.InfrastructureException;
 

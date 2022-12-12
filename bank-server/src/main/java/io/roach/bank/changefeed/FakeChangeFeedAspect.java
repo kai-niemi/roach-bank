@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import io.roach.bank.ProfileNames;
 import io.roach.bank.AdvisorOrder;
+import io.roach.bank.ProfileNames;
 import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 import io.roach.bank.domain.Transaction;
 

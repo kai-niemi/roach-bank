@@ -20,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,12 +36,12 @@ import ch.qos.logback.classic.LoggerContext;
 import io.roach.bank.api.ConnectionPoolConfig;
 import io.roach.bank.api.ConnectionPoolSize;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.config.DataSourceConfig;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.ConnectionPoolConfigFactory;
 import io.roach.bank.web.support.ConnectionPoolSizeFactory;
-import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -100,7 +98,7 @@ public class AdminController {
                 "system.cpu.usage", "system.load.average.1m").forEach(key -> {
             index.add(
                     Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator", "metrics", key)
-                            .buildAndExpand().toUriString()).withRel(LinkRelations.ACTUATOR_REL)
+                                    .buildAndExpand().toUriString()).withRel(LinkRelations.ACTUATOR_REL)
                             .withTitle("Metrics endpoint"));
         });
 

@@ -33,12 +33,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.util.TimeBoundExecution;
-import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;

@@ -26,12 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.Assert;
 
-import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
-import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
-import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.ProfileNames;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;

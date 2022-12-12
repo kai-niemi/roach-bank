@@ -29,7 +29,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
-import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.web.api.AccountController;
 

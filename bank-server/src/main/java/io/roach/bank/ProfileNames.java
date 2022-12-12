@@ -76,13 +76,11 @@ public abstract class ProfileNames {
     public static final String CRDB_SLEIPNER = "crdb-sleipner";
 
     /**
-     *
      * PSQL local self-hosted.
      */
     public static final String PSQL_LOCAL = "psql-local";
 
     /**
-     *
      * PSQL local self-hosted.
      */
     public static final String PSQL_SLEIPNER = "psql-sleipner";
