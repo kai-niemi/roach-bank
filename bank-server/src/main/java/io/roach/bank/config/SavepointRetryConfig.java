@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
-import io.cockroachdb.jdbc.spring.aspect.SavepointTransactionalAspect;
+import io.cockroachdb.jdbc.spring.aspect.SavepointRetryAspect;
 import io.cockroachdb.jdbc.spring.aspect.TransactionBoundaryAspect;
 import io.roach.bank.ProfileNames;
 
@@ -42,15 +42,15 @@ public class SavepointRetryConfig {
 
     @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_ODIN, ProfileNames.CRDB_SLEIPNER})
     @Bean
-    public SavepointTransactionalAspect savepointTransactionAspect(PlatformTransactionManager transactionManager) {
-        return new SavepointTransactionalAspect(transactionManager, "cockroach_restart");
+    public SavepointRetryAspect savepointTransactionAspect(PlatformTransactionManager transactionManager) {
+        return new SavepointRetryAspect(transactionManager, "cockroach_restart");
     }
 
     @Profile({ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_SLEIPNER})
     @Bean
-    public SavepointTransactionalAspect savepointTransactionAspectUnnamed(
+    public SavepointRetryAspect savepointTransactionAspectUnnamed(
             PlatformTransactionManager transactionManager) {
-        return new SavepointTransactionalAspect(transactionManager, null);
+        return new SavepointRetryAspect(transactionManager, null);
     }
 
     @Bean
