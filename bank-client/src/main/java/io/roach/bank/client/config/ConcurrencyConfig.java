@@ -20,7 +20,7 @@ public class ConcurrencyConfig implements AsyncConfigurer {
     @Bean(name = "jobExecutor")
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 4);
+        executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 8);
         executor.setMaxPoolSize(300);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("worker");

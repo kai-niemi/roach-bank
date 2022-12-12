@@ -21,10 +21,13 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import io.roach.bank.ProfileNames;
+import io.roach.bank.AdvisorOrder;
 
 @Configuration
+@EnableTransactionManagement(order = AdvisorOrder.TRANSACTION_ADVISOR)
 @Profile(ProfileNames.JPA)
 public class JpaTransactionManagerConfig {
     @Bean

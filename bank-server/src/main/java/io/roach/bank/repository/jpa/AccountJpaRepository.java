@@ -1,6 +1,5 @@
 package io.roach.bank.repository.jpa;
 
-import java.util.Currency;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -16,13 +15,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import io.roach.bank.annotation.TransactionMandatory;
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
-@TransactionMandatory
+@Transactional(propagation = Propagation.MANDATORY)
 public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
         JpaSpecificationExecutor<Account> {
 
@@ -35,7 +34,7 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
             + "from account a "
             + "as of system time follower_read_timestamp() "
             + "where a.id = ?1", nativeQuery = true)
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     Tuple findBalanceSnapshot(String id);
 
     @Query(value = "select "

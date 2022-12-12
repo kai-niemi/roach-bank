@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;

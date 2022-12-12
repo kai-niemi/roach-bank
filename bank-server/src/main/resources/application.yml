@@ -11,7 +11,7 @@ spring:
   application:
     name: roach-bank
   profiles:
-    active: retry-default,cdc-default,crdb-local
+    active: retry-none,cdc-none,crdb-local
   output:
     ansi:
       enabled: ALWAYS
@@ -47,7 +47,7 @@ spring:
     baseline-on-migrate: false
 #    clean-disabled: true
   datasource:
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: io.cockroachdb.jdbc.CockroachDriver
     hikari:
       pool-name: roach-bank
       connection-init-sql: SELECT 1
@@ -123,3 +123,5 @@ roachbank:
   reportQueryTimeoutSeconds: 120
   # Default limit unless client specified
   accountsPerCityLimit: 100
+  # Load account by reference or hit database with SELECT (former drastically reduce contention)
+  loadAccountByReference: false

@@ -24,22 +24,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
+import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.annotation.TransactionMandatory;
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.util.Pair;
 
 @Service
-@TransactionMandatory
+@Transactional(propagation = Propagation.MANDATORY)
 @Profile(ProfileNames.JPA)
 public class JpaAccountRepository implements AccountRepository {
     @Autowired
@@ -149,7 +149,7 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Money getBalanceSnapshot(UUID id) {
         Tuple tuple = accountRepository.findBalanceSnapshot(id.toString());
         return Money.of(
@@ -172,7 +172,7 @@ public class JpaAccountRepository implements AccountRepository {
     @Override
     public List<Account> findTopAccountsByCity(String city, int limit) {
         return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.city=?1",
-                Account.class)
+                        Account.class)
                 .setParameter(1, city)
                 .setMaxResults(limit)
                 .getResultList();

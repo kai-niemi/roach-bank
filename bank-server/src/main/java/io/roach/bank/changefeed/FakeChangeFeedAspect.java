@@ -12,7 +12,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.aspect.AdvisorOrder;
+import io.roach.bank.AdvisorOrder;
 import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 import io.roach.bank.domain.Transaction;
 
@@ -25,7 +25,7 @@ import io.roach.bank.domain.Transaction;
 @Aspect
 @Component
 @Order(AdvisorOrder.CHANGE_FEED_ADVISOR)
-@Profile(ProfileNames.CDC_DEFAULT)
+@Profile(ProfileNames.CDC_NONE)
 public class FakeChangeFeedAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

@@ -26,15 +26,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.annotation.TransactionMandatory;
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -42,7 +39,7 @@ import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.util.Pair;
 
 @Repository
-@TransactionMandatory
+@Transactional(propagation = Propagation.MANDATORY)
 @Profile(ProfileNames.JDBC)
 public class JdbcAccountRepository implements AccountRepository {
     private JdbcTemplate jdbcTemplate;
@@ -75,7 +72,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
         Assert.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Expected no transaction");
 
@@ -210,7 +207,6 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
     public List<Account> findAccountsById(Set<UUID> ids) {
         Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
 
@@ -251,7 +247,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Money getBalanceSnapshot(UUID id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency "

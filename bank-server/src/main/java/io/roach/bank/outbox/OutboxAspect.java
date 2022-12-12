@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,8 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionMandatory;
-import io.roach.bank.aspect.AdvisorOrder;
+import io.roach.bank.AdvisorOrder;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.service.InfrastructureException;
 
@@ -50,7 +51,7 @@ public class OutboxAspect {
     }
 
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")
-    @TransactionMandatory
+    @Transactional(propagation = Propagation.MANDATORY)
     public void doAfterTransaction(Transaction transaction) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new IllegalStateException("No transaction context - check Spring profile settings");

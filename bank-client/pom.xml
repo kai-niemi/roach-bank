@@ -14,7 +14,7 @@
 
     <properties>
         <skipTests>true</skipTests>
-        <springshell.version>2.1.2</springshell.version>
+        <springshell.version>2.1.4</springshell.version>
     </properties>
 
     <dependencies>
@@ -70,7 +70,7 @@
                 </executions>
                 <configuration>
                     <executable>true</executable>
-                    <mainClass>io.roach.bank.client.Application</mainClass>
+                    <mainClass>io.roach.bank.client.ClientApplication</mainClass>
                     <layers>
                         <enabled>true</enabled>
                     </layers>

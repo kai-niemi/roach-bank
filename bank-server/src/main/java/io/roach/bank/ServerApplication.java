@@ -3,7 +3,6 @@ package io.roach.bank;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -42,7 +41,7 @@ import io.roach.bank.api.support.LocalDateTimeSerializer;
 @EnableJpaRepositories(basePackages = {"io.roach"})
 @ComponentScan(basePackages = "io.roach")
 @ServletComponentScan
-public class Application {
+public class ServerApplication {
     @Bean
     public Module module() {
         SimpleModule module = new SimpleModule("RoachBankModule", new Version(1, 0, 0, null, null, null));
@@ -54,7 +53,7 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(Application.class)
+        new SpringApplicationBuilder(ServerApplication.class)
                 .logStartupInfo(false)
                 .web(WebApplicationType.SERVLET)
                 .run(args);

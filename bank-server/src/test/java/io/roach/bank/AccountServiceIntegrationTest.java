@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -19,13 +18,11 @@ public class AccountServiceIntegrationTest extends AbstractIntegrationTest {
     private AccountRepository accountService;
 
     @Test
-    @TransactionBoundary
     public void testDummy() {
         Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
     }
 
     @Test
-    @TransactionBoundary
     @Commit
     public void testCreateAccountPlan() {
         Account account1 = accountService.createAccount(Account.builder()

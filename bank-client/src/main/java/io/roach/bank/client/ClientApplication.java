@@ -28,9 +28,9 @@ import io.roach.bank.client.support.ConnectionUpdatedEvent;
 @EnableAutoConfiguration
 @EnableConfigurationProperties
 @ComponentScan(basePackages = "io.roach.bank.client")
-public class Application implements PromptProvider {
+public class ClientApplication implements PromptProvider {
     public static void main(String[] args) {
-        new SpringApplicationBuilder(Application.class)
+        new SpringApplicationBuilder(ClientApplication.class)
                 .web(WebApplicationType.NONE)
                 .headless(false)
                 .logStartupInfo(true)

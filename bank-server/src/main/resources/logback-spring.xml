@@ -22,12 +22,15 @@
 <!--    <logger name="org.springframework.jdbc.core" level="DEBUG"/>-->
 <!--    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>-->
 
-    <logger name="io.roach.bank" level="INFO" additivity="false">
+    <logger name="io.cockroachdb.jdbc" level="DEBUG"/>
+    <logger name="io.cockroachdb.jdbc.retry" level="DEBUG"/>
+
+    <logger name="io.roach.bank.SQL_TRACE" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="ASYNC_FILE" />
     </logger>
 
-    <logger name="SQL_TRACE" level="INFO" additivity="false">
+    <logger name="io.roach.bank" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="ASYNC_FILE" />
     </logger>

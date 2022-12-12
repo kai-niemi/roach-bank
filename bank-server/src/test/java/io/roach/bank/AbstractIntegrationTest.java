@@ -9,8 +9,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest(classes = Application.class)
-@ActiveProfiles({ProfileNames.CRDB_LOCAL, ProfileNames.RETRY_DEFAULT, ProfileNames.CDC_DEFAULT, ProfileNames.JPA, "integrationtest"})
+@SpringBootTest(classes = ServerApplication.class)
+@ActiveProfiles({ProfileNames.CRDB_LOCAL, ProfileNames.RETRY_DRIVER, ProfileNames.CDC_NONE, ProfileNames.JPA, "integrationtest"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

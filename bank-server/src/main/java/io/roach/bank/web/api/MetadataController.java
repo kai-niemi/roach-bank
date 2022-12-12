@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.api.MessageModel;

@@ -25,9 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.annotations.Retryable;
+import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.api.support.CockroachFacts;
@@ -120,6 +121,7 @@ public class TransactionFormController {
 
     @PostMapping(value = "/form")
     @TransactionBoundary
+    @Retryable
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
         UUID idempotencyKey = form.getUuid();
 

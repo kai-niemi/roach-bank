@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -31,7 +30,6 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     private List<Account> accountsUsa;
 
     @Test
-    @TransactionBoundary
     @Order(1)
     public void whenFindByIdWithRandomID_thenReturnNothing() {
         Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -40,7 +38,6 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @TransactionBoundary
     @Order(1)
     public void whenFindingTopAccounts_thenReturnTestAccounts() {
         Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -53,7 +50,6 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @TransactionBoundary
     @Commit
     @Order(2)
     public void withBalancedTransaction_thenSucceed() {
@@ -84,7 +80,6 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @TransactionBoundary
     @Commit
     @Order(3)
     public void withBalancedMultiLeggedTransaction_thenSucceed() {

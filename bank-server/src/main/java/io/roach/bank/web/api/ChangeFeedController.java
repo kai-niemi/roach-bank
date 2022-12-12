@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.changefeed.model.ChangeFeedEvent;
@@ -28,7 +29,7 @@ import io.roach.bank.changefeed.model.ChangeFeedEvent;
 @RestController
 @RequestMapping(value = "/api/cdc/webhook")
 @Profile(ProfileNames.CDC_HTTP)
-@TransactionNotAllowed
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ChangeFeedController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

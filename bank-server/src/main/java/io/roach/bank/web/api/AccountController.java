@@ -22,6 +22,8 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.support.Money;
@@ -44,7 +45,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/api/account")
-@TransactionNotAllowed
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

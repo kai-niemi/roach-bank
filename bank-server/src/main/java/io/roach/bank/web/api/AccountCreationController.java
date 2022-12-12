@@ -1,9 +1,6 @@
 package io.roach.bank.web.api;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Currency;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
 import io.roach.bank.api.AccountForm;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.AccountType;
@@ -32,7 +29,6 @@ import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.web.support.FollowLocation;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
@@ -49,9 +45,6 @@ public class AccountCreationController {
 
     @Autowired
     private AccountResourceAssembler accountResourceAssembler;
-
-    @Autowired
-    private MetadataRepository metadataRepository;
 
     @GetMapping(value = "/form")
     public ResponseEntity<AccountForm> getAccountForm() {
@@ -125,7 +118,7 @@ public class AccountCreationController {
                 numAccounts, batchSize);
 
         logger.info("Created {} accounts in '{}' using batch size {} in {} ms",
-                numAccounts, city, batchSize, System.currentTimeMillis()-startTime);
+                numAccounts, city, batchSize, System.currentTimeMillis() - startTime);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

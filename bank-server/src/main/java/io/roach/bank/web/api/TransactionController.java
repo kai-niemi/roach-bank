@@ -19,16 +19,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.NoSuchTransactionException;
 import io.roach.bank.service.TransactionService;
-import io.roach.bank.api.MessageModel;
 import io.roach.bank.web.support.ZoomExpression;
 
 import static io.roach.bank.api.LinkRelations.TRANSACTION_ITEMS_REL;

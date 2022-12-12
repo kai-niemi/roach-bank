@@ -5,14 +5,19 @@ package io.roach.bank;
  */
 public abstract class ProfileNames {
     /**
-     * Adopt server-side expontential backoff retrys on serialization errors.
-     */
-    public static final String RETRY_DEFAULT = "retry-default";
-
-    /**
      * Propagate transaction retry's to clients on serialization errors.
      */
     public static final String RETRY_NONE = "retry-none";
+
+    /**
+     * Handle serialization errors at JDBC drive-level
+     */
+    public static final String RETRY_DRIVER = "retry-driver";
+
+    /**
+     * Handle serialization errors at app/client level
+     */
+    public static final String RETRY_CLIENT = "retry-client";
 
     /**
      * Adopt server-side savepoint rollback retrys on serialization errors.
@@ -23,7 +28,7 @@ public abstract class ProfileNames {
     /**
      * Websocket/STOMP events via AOP interceptors (dual-write)
      */
-    public static final String CDC_DEFAULT = "cdc-default";
+    public static final String CDC_NONE = "cdc-none";
 
     /**
      * Websocket/STOMP events via Kafka listeners via CRDB kafka sink.

@@ -7,11 +7,10 @@ spring:
     enabled: true
     locations: classpath:db/migration/crdb,classpath:db/migration/common
   datasource:
-    url: jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable
+    driver-class-name: io.cockroachdb.jdbc.CockroachDriver
     username: root
     password:
-#############################
 roachbank:
   health:
     validation-query: select node_id from [SHOW CLUSTER SESSIONS] limit 1

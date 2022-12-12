@@ -16,7 +16,7 @@
 
     <logger name="io.roach.bank" level="TRACE" additivity="false"/>
 
-    <logger name="SQL_TRACE" level="TRACE" additivity="false">
+    <logger name="io.roach.bank.SQL_TRACE" level="TRACE" additivity="false">
         <appender-ref ref="CONSOLE" />
     </logger>
 

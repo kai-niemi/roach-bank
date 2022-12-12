@@ -7,8 +7,8 @@ spring:
     enabled: true
     locations: classpath:db/migration/crdb,classpath:db/migration/common
   datasource:
-    url: jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:cockroachdb://192.168.1.99:26300/roach_bank?sslmode=disable
+    driver-class-name: io.cockroachdb.jdbc.CockroachDriver
     username: root
 roachbank:
   health:

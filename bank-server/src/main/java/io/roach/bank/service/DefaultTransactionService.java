@@ -6,17 +6,18 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -34,8 +35,11 @@ public class DefaultTransactionService implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Value("${roachbank.loadAccountByReference}")
+    private boolean loadByReference = false;
+
     @Override
-    @TransactionMandatory
+    @Transactional(propagation = Propagation.MANDATORY)
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new IllegalStateException("No transaction context - check Spring profile settings");
@@ -57,7 +61,7 @@ public class DefaultTransactionService implements TransactionService {
                 .withBookingDate(transactionForm.getBookingDate())
                 .withTransferDate(transactionForm.getTransferDate());
 
-        final List<Pair<UUID,BigDecimal>> balanceUpdates = new ArrayList<>();
+        final List<Pair<UUID, BigDecimal>> balanceUpdates = new ArrayList<>();
 
         final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
 
@@ -65,7 +69,10 @@ public class DefaultTransactionService implements TransactionService {
             final Money amount = value.getLeft();
 
             // Get by reference to avoid SELECT
-            Account account = accountRepository.getAccountByReference(accountId);
+            Account account = loadByReference
+                    ? accountRepository.getAccountByReference(accountId)
+                    : accountRepository.getAccountById(accountId)
+                    .orElseThrow(() -> new NoSuchAccountException(accountId));
 
             transactionBuilder
                     .andItem()
@@ -113,31 +120,31 @@ public class DefaultTransactionService implements TransactionService {
     }
 
     @Override
-    @TransactionMandatory
+    @Transactional(propagation = Propagation.MANDATORY)
     public Page<Transaction> find(Pageable page) {
         return transactionRepository.findTransactions(page);
     }
 
     @Override
-    @TransactionMandatory
+    @Transactional(propagation = Propagation.MANDATORY)
     public Transaction findById(UUID id) {
         return transactionRepository.findTransactionById(id);
     }
 
     @Override
-    @TransactionMandatory
+    @Transactional(propagation = Propagation.MANDATORY)
     public TransactionItem getItemById(TransactionItem.Id id) {
         return transactionRepository.getTransactionItemById(id);
     }
 
     @Override
-    @TransactionMandatory
+    @Transactional(propagation = Propagation.MANDATORY)
     public Page<TransactionItem> findItemsByTransactionId(UUID transactionId, Pageable page) {
         return transactionRepository.findTransactionItems(transactionId, page);
     }
 
     @Override
-    @TransactionMandatory
+    @Transactional(propagation = Propagation.MANDATORY)
     public void deleteAll() {
         transactionRepository.deleteAll();
     }

@@ -23,9 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
@@ -106,7 +106,6 @@ public class ReportWebSocketPublisher {
 
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
-            vectorize = TransactionBoundary.Vectorize.off,
             priority = TransactionBoundary.Priority.low)
     public void computeSummaryAndPush(String region, Set<String> cities) {
         cities.forEach(city -> {

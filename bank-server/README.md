@@ -52,13 +52,14 @@ Database type, one of:
 
 Retry strategy, one of:
 
-   * retry-default - Enables retryable transactions with exponential backoff for concurrency errors (default)
-   * retry-savepoint - Enables retryable transactions using savepoints
-   * retry-none - Enables default Spring declarative transaction management without any retrys
+   * retry-none - Disable retries
+   * retry-driver - Enable JDBC driver level retries
+   * retry-client - Enables client-side retries with exponential backoff
+   * retry-savepoint - Enables client-side retries using savepoints
 
 Change data capture and websocket push events, one of:
 
-   * cdc-default - Enables synthetic CDC events (via AOP) for websocket push (default)
+   * cdc-none - Enables synthetic CDC events (via AOP) for websocket push (default)
    * cdc-kafka - Enables Kafka subscriptions of CDC events for websocket push (requires CRDB, CDC, Kafka)
    * cdc-http - Enables HTTP subscriptions of CDC events for websocket push (requires CRDB and CDC)
  
@@ -76,7 +77,7 @@ Profiles are set during startup with following command line parameter:
     --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=retry-default,cdc-default,crdb-local  \
+    --spring.profiles.active=retry-none,cdc-none,crdb-local  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8090
 
@@ -86,7 +87,7 @@ PostgreSQL example:
     --spring.datasource.url=jdbc:postgresql://localhost:5432/roach_bank \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=retry-default,cdc-default,psql-local  \
+    --spring.profiles.active=retry-none,cdc-none,psql-local  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8090
     

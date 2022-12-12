@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
+import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
+import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.repository.ReportingRepository;
-import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -50,7 +50,6 @@ public class ReportController {
     @GetMapping(value = "/account-summary")
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
-            vectorize = TransactionBoundary.Vectorize.off,
             priority = TransactionBoundary.Priority.low)
     public Collection<AccountSummary> getAccountSummary() {
         Collection<AccountSummary> result = new LinkedList<>();
@@ -65,7 +64,6 @@ public class ReportController {
     @GetMapping(value = "/transaction-summary")
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
-            vectorize = TransactionBoundary.Vectorize.off,
             priority = TransactionBoundary.Priority.low)
     public Collection<TransactionSummary> getTransactionSummary() {
         Collection<TransactionSummary> result = new LinkedList<>();

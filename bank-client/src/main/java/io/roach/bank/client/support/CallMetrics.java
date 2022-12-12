@@ -37,6 +37,12 @@ public class CallMetrics {
         metrics.clear();
     }
 
+    public void reset() {
+        metrics.values().stream().forEach(context -> {
+            context.reset();
+        });
+    }
+
     public String prettyPrintHeader() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -139,6 +145,12 @@ public class CallMetrics {
         private Context(String name, Supplier<Integer> concurrencyCallback) {
             this.name = name;
             this.concurrencyCallback = concurrencyCallback;
+        }
+
+        public void reset() {
+            successful.set(0);
+            failed.set(0);
+            snapshots.clear();
         }
 
         public long before() {

@@ -9,12 +9,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
 import io.roach.bank.ProfileNames;
+import io.roach.bank.AdvisorOrder;
 
 @Configuration
+@EnableTransactionManagement(order = AdvisorOrder.TRANSACTION_ADVISOR)
 @Profile(ProfileNames.JDBC)
-public class JdbcTransactionManagerConfig {
+public class JdbcTransactionManagerConfig implements TransactionManagementConfigurer {
     @Autowired
     private DataSource dataSource;
 
@@ -33,5 +37,11 @@ public class JdbcTransactionManagerConfig {
     @Bean
     public PersistenceExceptionTranslationPostProcessor persistenceExceptionTranslationPostProcessor() {
         return new PersistenceExceptionTranslationPostProcessor();
+    }
+
+
+    @Override
+    public PlatformTransactionManager annotationDrivenTransactionManager() {
+        return new DataSourceTransactionManager(dataSource);
     }
 }
