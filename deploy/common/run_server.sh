@@ -1,0 +1,1 @@
+nohup java -jar bank-server.jar --spring.profiles.active=retry-driver,cdc-none,crdb-local > /dev/null 2>&1 &©

@@ -35,9 +35,11 @@ public class SavepointRetryConfig {
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.JPA)),
                 "Savepoints are not supported in JPA/Hibernate");
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_NONE)),
-                "Cant have both RETRY_NONE and RETRY_SAVEPOINT");
+                "Cant have both RETRY_SAVEPOINT and RETRY_NONE");
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER)),
-                "Cant have both RETRY_DRIVER and RETRY_SAVEPOINT");
+                "Cant have both RETRY_SAVEPOINT and RETRY_DRIVER");
+        Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_CLIENT)),
+                "Cant have both RETRY_SAVEPOINT and RETRY_CLIENT");
     }
 
     @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_ODIN, ProfileNames.CRDB_SLEIPNER})

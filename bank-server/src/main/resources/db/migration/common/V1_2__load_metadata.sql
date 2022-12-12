@@ -1,6 +1,7 @@
 --
 -- Region to city mapping metadata
 --
+DELETE  from region where 1=1;
 
 INSERT into region
 VALUES ('aws','us-east-1', 'new york,boston,washington dc,miami,charlotte,atlanta'),
@@ -19,6 +20,7 @@ VALUES ('aws','us-east-1', 'new york,boston,washington dc,miami,charlotte,atlant
        ('aws','ap-southeast-2', 'singapore,jakarta,sydney,melbourne'),
        ('aws','ap-south-1', 'singapore,jakarta,sydney,melbourne'),
        ('aws','sa-east-1', 'sao paulo,rio de janeiro,salvador,buenos aires'),
+       ('aws','eu-north-1', 'stockholm'),
 
        ('azure','eastasia', 'hong kong,beijing,shanghai,tokyo'),
        ('azure','southeastasia', 'singapore,jakarta,sydney,melbourne'),

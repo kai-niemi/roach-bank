@@ -122,6 +122,6 @@ roachbank:
   # Report query timeout (seconds)
   reportQueryTimeoutSeconds: 120
   # Default limit unless client specified
-  accountsPerCityLimit: 100
+  accountsPerCityLimit: 10
   # Load account by reference or hit database with SELECT (former drastically reduce contention)
   loadAccountByReference: false

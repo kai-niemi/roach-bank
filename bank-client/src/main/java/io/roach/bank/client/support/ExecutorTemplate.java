@@ -60,11 +60,11 @@ public class ExecutorTemplate {
                     backoff(++fails);
                 } catch (HttpServerErrorException e) {
                     context.after(callTime, e);
-                    logger.error("HTTP 5xx error - cancelling", e);
-                    break;
+                    logger.warn("HTTP 5xx error - backing off", e);
+                    backoff(++fails);
                 } catch (Exception e) {
                     context.after(callTime, e);
-                    logger.error("Uncategorized error - cancelling", e);
+                    logger.error("Uncategorized error - cancelling prematurely", e);
                     break;
                 }
             } while (System.currentTimeMillis() - startTime < duration.toMillis()

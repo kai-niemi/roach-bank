@@ -3,5 +3,5 @@ ${AnsiColor.BRIGHT_YELLOW}                                             C O C K R
 ───▀▄─█─▄▀▄▄▄      / _ \___  ___ _____/ /    / _ )___ ____  / /__
 ▄██▄████▄██▄▀█▄   / , _/ _ \/ _ `/ __/ _ \  / _  / _ `/ _ \/  '_/
 ─▀▀─█▀█▀▄▀███▀   /_/|_|\___/\_,_/\__/_//_/ /____/\_,_/_//_/_/\_\ 
-──▄▄▀─█──▀▄▄     ${AnsiColor.BRIGHT_GREEN}${application.formatted-version}CLIENT ${application.formatted-version} powered by Spring Boot ${spring-boot.formatted-version}
+──▄▄▀─█──▀▄▄     ${AnsiColor.BRIGHT_GREEN}CLIENT ${application.formatted-version} powered by Spring Boot ${spring-boot.formatted-version}
 ${AnsiColor.DEFAULT}

@@ -89,11 +89,17 @@
                         <fileset>
                             <directory>${basedir}</directory>
                             <includes>
-                                <include>*.log</include>
+                                <include>.log</include>
                                 <include>*.gz</include>
                                 <include>*.tmp</include>
                                 <include>*.csv</include>
                                 <include>*.sql</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/.log</directory>
+                            <includes>
+                                <include>*</include>
                             </includes>
                         </fileset>
                     </filesets>

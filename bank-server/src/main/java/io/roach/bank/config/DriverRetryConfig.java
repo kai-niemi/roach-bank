@@ -27,11 +27,11 @@ public class DriverRetryConfig {
     @PostConstruct
     public void checkProfiles() {
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_SAVEPOINT)),
-                "Cant have both RETRY_SAVEPOINT and RETRY_DRIVER");
-        Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER)),
-                "Cant have both RETRY_DRIVER and RETRY_DRIVER");
+                "Cant have both RETRY_DRIVER and RETRY_SAVEPOINT");
+        Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_CLIENT)),
+                "Cant have both RETRY_DRIVER and RETRY_CLIENT");
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_NONE)),
-                "Cant have both RETRY_DRIVER and RETRY_DRIVER");
+                "Cant have both RETRY_DRIVER and RETRY_NONE");
 
         logger.info("Enabled JDBC-driver level retrys");
     }

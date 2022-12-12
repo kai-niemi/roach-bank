@@ -30,9 +30,11 @@ public class NoRetryConfig {
     @PostConstruct
     public void checkProfiles() {
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_SAVEPOINT)),
-                "Cant have both RETRY_SAVEPOINT and RETRY_NONE");
+                "Cant have both RETRY_NONE and RETRY_SAVEPOINT");
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER)),
-                "Cant have both RETRY_DRIVER and RETRY_NONE");
+                "Cant have both RETRY_NONE and RETRY_DRIVER");
+        Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_CLIENT)),
+                "Cant have both RETRY_NONE and RETRY_CLIENT");
     }
 
     @Bean

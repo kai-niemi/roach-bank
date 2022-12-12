@@ -1,4 +1,3 @@
--- RoachBank DDL for PostgreSQL
 
 -- For error 'function gen_random_uuid() does not exist' run:
 -- CREATE extension pgcrypto;

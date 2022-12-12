@@ -14,7 +14,7 @@
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL9Dialect"/>
             <property name="hibernate.connection.username" value="postgres"/>
             <property name="hibernate.connection.password" value="root"/>
-            <property name="hibernate.connection.url" value="jdbc:postgresql://localhost:5432/roach_bank"/>
+            <property name="hibernate.connection.url" value="jdbc:cockroachdb://localhost:5432/roach_bank"/>
             <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
         </properties>
     </persistence-unit>
@@ -27,7 +27,7 @@
             <property name="hibernate.dialect" value="org.hibernate.dialect.CockroachDB201Dialect"/>
             <property name="hibernate.connection.username" value="root"/>
             <property name="hibernate.connection.password" value=""/>
-            <property name="hibernate.connection.url" value="jdbc:postgresql://localhost:26257/roach_bank"/>
+            <property name="hibernate.connection.url" value="jdbc:cockroachdb://localhost:26257/roach_bank"/>
             <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
         </properties>
     </persistence-unit>

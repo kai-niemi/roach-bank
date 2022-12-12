@@ -27,9 +27,11 @@ public class ClientLevelRetryConfig {
     @PostConstruct
     public void checkProfiles() {
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_NONE)),
-                "Cant have both RETRY_NONE and RETRY_CLIENT");
+                "Cant have both RETRY_CLIENT and RETRY_NONE");
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_SAVEPOINT)),
-                "Cant have both RETRY_SAVEPOINT and RETRY_CLIENT");
+                "Cant have both RETRY_CLIENT and RETRY_SAVEPOINT");
+        Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER)),
+                "Cant have both RETRY_CLIENT and RETRY_DRIVER");
     }
 
     @Bean

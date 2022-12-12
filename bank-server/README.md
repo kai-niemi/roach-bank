@@ -37,7 +37,7 @@ and have the same name but suffixed with `.conf` rather than `.jar`.
 
 Example:    
 
-    RUN_ARGS="--spring.datasource.url=jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable --server.port=8088"
+    RUN_ARGS="--spring.datasource.url=jdbc:cockroachdb://192.168.1.99:26300/roach_bank?sslmode=disable --server.port=8088"
     PID_FOLDER=/tmp
 
 ## Configuration
@@ -74,7 +74,7 @@ Note: Some features including CDC requires a CockroachDB enterprise license (tri
 Profiles are set during startup with following command line parameter:
 
     java -jar target/bank-server.jar \
-    --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable \
+    --spring.datasource.url=jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
     --spring.profiles.active=retry-none,cdc-none,crdb-local  \
@@ -84,7 +84,7 @@ Profiles are set during startup with following command line parameter:
 PostgreSQL example:
 
     java -jar target/bank-server.jar \
-    --spring.datasource.url=jdbc:postgresql://localhost:5432/roach_bank \
+    --spring.datasource.url=jdbc:cockroachdb://localhost:5432/roach_bank \
     --spring.datasource.username=root \
     --spring.datasource.password= \
     --spring.profiles.active=retry-none,cdc-none,psql-local  \
