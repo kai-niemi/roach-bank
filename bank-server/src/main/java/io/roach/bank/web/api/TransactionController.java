@@ -85,7 +85,7 @@ public class TransactionController {
     }
 
     @GetMapping(value = "/list")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public PagedModel<TransactionModel> listTransactions(@PageableDefault(size = 5) Pageable page) {
         return pagedTransactionResourceAssembler
                 .toModel(bankService.find(page), transactionResourceAssembler);

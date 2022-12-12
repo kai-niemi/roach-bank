@@ -2,10 +2,13 @@ package io.roach.bank.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,14 +68,31 @@ public class DefaultTransactionService implements TransactionService {
 
         final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
 
+        List<Account> accounts;
+
+        if (!loadByReference) {
+            Set<UUID> accountIds = new HashSet<>();
+            legs.forEach((accountId, value) -> accountIds.add(accountId));
+            accounts = accountRepository.findAccountsById(accountIds,false);
+        } else {
+            accounts = Collections.emptyList();
+        }
+
         legs.forEach((accountId, value) -> {
             final Money amount = value.getLeft();
 
+            Account account;
             // Get by reference to avoid SELECT
-            Account account = loadByReference
-                    ? accountRepository.getAccountByReference(accountId)
-                    : accountRepository.getAccountById(accountId)
-                    .orElseThrow(() -> new NoSuchAccountException(accountId));
+            if (loadByReference) {
+                account = accountRepository.getAccountByReference(accountId);
+            } else {
+//                account = accountRepository.getAccountById(accountId)
+//                        .orElseThrow(() -> new NoSuchAccountException(accountId));
+                account = accounts.stream()
+                        .filter(a -> a.getId().equals(accountId))
+                        .findFirst()
+                        .orElseThrow(() -> new NoSuchAccountException(accountId));
+            }
 
             transactionBuilder
                     .andItem()

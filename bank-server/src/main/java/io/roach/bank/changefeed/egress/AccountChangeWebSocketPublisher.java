@@ -30,6 +30,7 @@ import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.service.AccountService;
 import io.roach.bank.web.api.AccountController;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -59,7 +60,7 @@ public class AccountChangeWebSocketPublisher {
     private MeterRegistry meterRegistry;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     private Counter eventsQueued;
 
@@ -115,7 +116,6 @@ public class AccountChangeWebSocketPublisher {
             accountPayloads = drainPendingAccounts();
         }
 
-
         accountPayloads.forEach(payload -> {
             Link selfLink = linkTo(methodOn(AccountController.class)
                     .getAccount(payload.getId()))
@@ -134,7 +134,8 @@ public class AccountChangeWebSocketPublisher {
         if (id != null) {
             idBuffer.drainTo(ids, BATCH_SIZE / 2);
 
-            List<Account> accounts = accountRepository.findAccountsById(ids);
+            List<Account> accounts = accountService.findAccountsById(ids);
+
             accounts.forEach(account -> {
                 AccountPayload.Fields fields = new AccountPayload.Fields();
                 fields.setId(account.getId());

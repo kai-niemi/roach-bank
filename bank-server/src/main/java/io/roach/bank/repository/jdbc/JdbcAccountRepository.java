@@ -207,14 +207,14 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findAccountsById(Set<UUID> ids) {
+    public List<Account> findAccountsById(Set<UUID> ids, boolean locking) {
         Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", ids);
 
         return this.namedParameterJdbcTemplate.query(
-                "SELECT * FROM account WHERE id in (:ids)",
+                "SELECT * FROM account WHERE id in (:ids)" + (locking ? " FOR UPDATE" : ""),
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
     }

@@ -21,16 +21,22 @@ public class DefaultAccountService implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
+    @TransactionBoundary(
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    public List<Account> findAccountsById(Set<UUID> ids) {
+        return accountRepository.findAccountsById(ids, false);
+    }
+
     @Override
     @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
         return accountRepository.findAccountsByCity(cities, page);
     }
 
     @Override
     @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public List<Account> findTopAccountsByCity(String city, int limit) {
         return accountRepository.findTopAccountsByCity(city, limit);
     }
@@ -50,7 +56,7 @@ public class DefaultAccountService implements AccountService {
 
     @Override
     @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public Money getBalanceSnapshot(UUID id) {
         return accountRepository.getBalanceSnapshot(id);
     }

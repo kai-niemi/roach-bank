@@ -37,7 +37,7 @@ public interface AccountRepository {
 
     List<Account> findTopAccountsByCity(String city, int limit);
 
-    List<Account> findAccountsById(Set<UUID> ids);
+    List<Account> findAccountsById(Set<UUID> ids, boolean locking);
 
     void deleteAll();
 }

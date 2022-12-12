@@ -133,6 +133,7 @@ public class JpaAccountRepository implements AccountRepository {
         }
     }
 
+
     @Override
     public Account getAccountByReference(UUID id) {
         return accountRepository.getReferenceById(id);
@@ -158,10 +159,9 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public List<Account> findAccountsById(Set<UUID> ids) {
-        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
-        return accountRepository.findAll(ids);
+    public List<Account> findAccountsById(Set<UUID> ids, boolean locking) {
+        return locking ? accountRepository.findAllWithLock(ids)
+                : accountRepository.findAll(ids);
     }
 
     @Override

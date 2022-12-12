@@ -63,7 +63,7 @@ public class TransactionFormController {
     private TransactionResourceAssembler transactionResourceAssembler;
 
     @GetMapping("/form")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public ResponseEntity<TransactionForm> getTransactionRequestForm(
             @RequestParam(value = "accountsPerRegion", defaultValue = "2", required = false) int accountsPerRegion,
             @RequestParam(value = "amount", defaultValue = "5.00", required = false) final String amount,

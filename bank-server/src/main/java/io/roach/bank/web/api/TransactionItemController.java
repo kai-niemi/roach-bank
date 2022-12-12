@@ -33,7 +33,7 @@ public class TransactionItemController {
     private PagedResourcesAssembler<TransactionItem> transactionItemPagedResourcesAssembler;
 
     @GetMapping(value = "/{transactionId}")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public PagedModel<TransactionItemModel> getTransactionItems(
             @PathVariable("transactionId") UUID transactionId,
             @PageableDefault(size = 5) Pageable page) {
@@ -44,7 +44,7 @@ public class TransactionItemController {
     }
 
     @GetMapping(value = "/{transactionId}/{accountId}")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public TransactionItemModel getTransactionLeg(
             @PathVariable("transactionId") UUID transactionId,
             @PathVariable("accountId") UUID accountId) {
