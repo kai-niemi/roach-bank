@@ -98,10 +98,10 @@ public class AccountCreationController {
     public HttpEntity<Void> createBatchAccounts(
             @RequestParam(value = "city", defaultValue = "") String city,
             @RequestParam(value = "prefix", defaultValue = "") String prefix,
-            @RequestParam(value = "balance", defaultValue = "500000.00") String balance,
+            @RequestParam(value = "balance", defaultValue = "50000.00") String balance,
             @RequestParam(value = "currency", defaultValue = "USD") String currency,
             @RequestParam(value = "numAccounts", defaultValue = "1024") Integer numAccounts,
-            @RequestParam(value = "batchSize", defaultValue = "32") Integer batchSize
+            @RequestParam(value = "batchSize", defaultValue = "64") Integer batchSize
     ) {
         final Money money = Money.of(balance, currency);
 

@@ -62,7 +62,7 @@ public class ReportWebSocketPublisher {
     @Autowired
     private CacheManager cacheManager;
 
-    @Scheduled(fixedRateString = "${roachbank.reportPushInterval}", initialDelayString = "${roachbank.reportPushInterval}")
+//    @Scheduled(fixedRateString = "${roachbank.reportPushInterval}", initialDelayString = "${roachbank.reportPushInterval}")
     public void publishReport() {
         Cache cache = cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY);
         ConcurrentHashMap map = (ConcurrentHashMap) cache.getNativeCache();
@@ -85,8 +85,7 @@ public class ReportWebSocketPublisher {
 
                 metadataRepository.getRegionCities().forEach((region, cities) -> {
                     tasks.add(() -> {
-                        logger.trace("Processing {}", region);
-                        selfProxy.computeSummaryAndPush(region, cities);
+                        selfProxy.computeSummaryAndPush(cities);
                         return null;
                     });
                 });
@@ -107,7 +106,7 @@ public class ReportWebSocketPublisher {
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
-    public void computeSummaryAndPush(String region, Set<String> cities) {
+    public void computeSummaryAndPush(Set<String> cities) {
         cities.forEach(city -> {
             AccountSummary accountSummary = reportingRepository.accountSummary(city);
             simpMessagingTemplate.convertAndSend(TOPIC_ACCOUNT_SUMMARY, accountSummary);

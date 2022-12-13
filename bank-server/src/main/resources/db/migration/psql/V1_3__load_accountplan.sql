@@ -1,0 +1,11 @@
+-- INSERT INTO account (id, city, balance, currency, name, type, closed, allow_negative, updated)
+-- SELECT gen_random_uuid(),
+--        'stockholm',
+--        (50000.00)::decimal, 'EUR',
+--        md5(random()::text),
+--        'A',
+--        false,
+--        0,
+--        CURRENT_TIMESTAMP
+-- FROM generate_series(1, 1000);
+--

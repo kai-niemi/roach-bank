@@ -58,8 +58,8 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
         jdbcTemplate.batchUpdate(
                 "INSERT INTO transaction_item "
-                        + "(transaction_id, city, account_id, amount, currency, note) "
-                        + "VALUES(?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                        + "(transaction_id, city, account_id, amount, currency, note, running_balance) "
+                        + "VALUES(?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         TransactionItem item = items.get(i);
@@ -70,6 +70,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
                         ps.setBigDecimal(idx++, item.getAmount().getAmount());
                         ps.setString(idx++, item.getAmount().getCurrency().getCurrencyCode());
                         ps.setString(idx++, item.getNote());
+                        ps.setBigDecimal(idx, item.getRunningBalance().getAmount());
                     }
 
                     @Override
@@ -161,6 +162,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
         UUID transactionId = (UUID) rs.getObject("transaction_id");
         String transactionCity = rs.getString("city");
         Money amount = Money.of(rs.getString("amount"), rs.getString("currency"));
+        Money runningBalance = Money.of(rs.getString("running_balance"), rs.getString("currency"));
         String note = rs.getString("note");
 
         return Transaction.builder()
@@ -168,6 +170,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
                 .withCity(transactionCity)
                 .andItem()
                 .withAccount(Account.builder().withId(accountId).build())
+                .withRunningBalance(runningBalance)
                 .withAmount(amount)
                 .withNote(note)
                 .then()

@@ -36,10 +36,10 @@ public class CreateAccounts extends AbstractCommand {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
             @ShellOption(help = "create accounts for a time period", defaultValue = "") String duration,
-            @ShellOption(help = "create a total number of accounts", defaultValue = "1_000_000") String totalAccounts,
+            @ShellOption(help = "create a total number of accounts", defaultValue = "50_000") String totalAccounts,
             @ShellOption(help = "batch size", defaultValue = "1024") int batchSize,
-            @ShellOption(help = "batch statement size", defaultValue = "32") int statementSize,
-            @ShellOption(help = "initial balance per account", defaultValue = "500000.00") String balance,
+            @ShellOption(help = "batch statement size", defaultValue = "64") int statementSize,
+            @ShellOption(help = "initial balance per account", defaultValue = "25000.00") String balance,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
     ) {
         final Set<String> cities = new HashSet<>();
@@ -69,14 +69,17 @@ public class CreateAccounts extends AbstractCommand {
                 };
 
                 if (StringUtils.hasLength(duration)) {
+                    executorTemplate.runAsync(city + " (create) " + duration, worker, DurationFormat.parseDuration(duration));
+
                     logger.info("Creating accounts in '{}' for duration of {}", city, duration);
-                    executorTemplate.runAsync(city, worker, DurationFormat.parseDuration(duration));
                 } else {
-                    final int totAccounts = Integer.parseInt(totalAccounts.replace("_", ""));
+                    int totAccounts = Integer.parseInt(totalAccounts.replace("_", ""));
                     int iterations = Math.max(1, totAccounts / batchSize / cities.size());
+
+                    executorTemplate.runAsync(city + " (create) " + iterations, worker, iterations);
+
                     logger.info("Creating {} accounts in '{}' in {} iterations", city,
                             totAccounts / cities.size(), iterations);
-                    executorTemplate.runAsync(city, worker, iterations);
                 }
             } else {
                 logger.info("Skipping {}", city);

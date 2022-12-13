@@ -5,6 +5,9 @@ import java.util.UUID;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 
@@ -15,6 +18,8 @@ import io.roach.bank.api.support.Money;
  */
 @Entity
 @Table(name = "account")
+@DynamicInsert
+@DynamicUpdate
 public class Account extends AbstractEntity<UUID> {
     @Id
     private UUID id;

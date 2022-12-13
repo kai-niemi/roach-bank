@@ -1,6 +1,13 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
@@ -94,7 +101,13 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
     @Override
     public String getGatewayRegion() {
-        return namedParameterJdbcTemplate
-                .queryForObject("SELECT gateway_region()", Collections.emptyMap(), String.class);
+        String version = namedParameterJdbcTemplate.queryForObject("select version()",
+                Collections.emptyMap(),
+                String.class);
+        if (version.contains("CockroachDB")) {
+            return namedParameterJdbcTemplate
+                    .queryForObject("SELECT gateway_region()", Collections.emptyMap(), String.class);
+        }
+        return "europe-west1";
     }
 }

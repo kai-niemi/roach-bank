@@ -33,8 +33,9 @@ create table account
     city           string         not null,
     balance        decimal(19, 2) not null,
     currency       string         not null default 'USD',
-    name           string(128)    not null,
-    description    string(256)    null,
+    balance_money  string as (concat(balance::string, ' ', currency)) virtual,
+    name           string(128) not null,
+    description    string(256) null,
     type           account_type   not null,
     closed         boolean        not null default false,
     allow_negative integer        not null default 0,
@@ -43,7 +44,7 @@ create table account
     primary key (id)
 );
 
-create index idx_account_city on account (city);
+create index on account (city) storing (balance, currency);
 
 create table transaction
 (
@@ -58,13 +59,15 @@ create table transaction
 
 create table transaction_item
 (
-    transaction_id  uuid           not null,
-    account_id      uuid           not null,
-    city            string         not null,
-    amount          decimal(19, 2) not null,
-    currency        string         not null default 'USD',
-    note            string,
-    running_balance decimal(19, 2),
+    transaction_id        uuid           not null,
+    account_id            uuid           not null,
+    city                  string         not null,
+    amount                decimal(19, 2) not null,
+    currency              string         not null default 'USD',
+    amount_money          string as (concat(amount::string, ' ', currency)) virtual,
+    note                  string,
+    running_balance       decimal(19, 2),
+    running_balance_money string as (concat(running_balance::string, ' ', currency)) virtual,
 
     primary key (transaction_id, account_id)
 );
@@ -90,9 +93,9 @@ alter table account
 alter table account
     add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
 
--- alter table transaction_item
---     add constraint fk_txn_item_ref_transaction
---         foreign key (transaction_id) references transaction (id);
--- alter table transaction_item
---     add constraint fk_txn_item_ref_account
---         foreign key (account_id) references account (id);
+alter table transaction_item
+    add constraint fk_txn_item_ref_transaction
+        foreign key (transaction_id) references transaction (id);
+alter table transaction_item
+    add constraint fk_txn_item_ref_account
+        foreign key (account_id) references account (id);

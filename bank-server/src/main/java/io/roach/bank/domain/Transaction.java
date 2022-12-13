@@ -14,6 +14,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
  */
 @Entity
 @Table(name = "transaction")
+@DynamicInsert
 public class Transaction extends AbstractEntity<UUID> {
     //    @Column(name = "id", updatable = false)
     @Id

@@ -51,6 +51,11 @@ public class ExecutorTemplate {
 
             int fails = 0;
             do {
+                if (Thread.interrupted() || cancelRequested) {
+                    logger.warn("Cancelled '{}'", id);
+                    break;
+                }
+
                 final long callTime = context.before();
                 try {
                     runnable.run();
@@ -63,12 +68,13 @@ public class ExecutorTemplate {
                     logger.error("Uncategorized error - cancelling prematurely", e);
                     break;
                 }
-            } while (System.currentTimeMillis() - startTime < duration.toMillis()
-                    && !Thread.interrupted() && !cancelRequested);
+            } while (System.currentTimeMillis() - startTime < duration.toMillis());
 
             activeWorkers.decrementAndGet();
 
-            logger.info("Finihed '{}'", id);
+            if (!cancelRequested) {
+                logger.info("Finihed '{}'", id);
+            }
 
             return null;
         });
@@ -88,6 +94,7 @@ public class ExecutorTemplate {
             loop:
             for (int i = 0; i < iterations; i++) {
                 if (Thread.interrupted() || cancelRequested) {
+                    logger.warn("Cancelled '{}'", id);
                     break;
                 }
 
@@ -109,7 +116,9 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-            logger.info("Finihed '{}'", id);
+            if (!cancelRequested) {
+                logger.info("Finihed '{}'", id);
+            }
 
             return null;
         });
@@ -137,6 +146,7 @@ public class ExecutorTemplate {
 
     public void cancelFutures() {
         cancelRequested = true;
+
         while (!futures.isEmpty()) {
             logger.debug("Cancelling {} futures", futures.size());
 

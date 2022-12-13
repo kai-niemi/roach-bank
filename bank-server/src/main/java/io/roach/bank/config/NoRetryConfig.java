@@ -38,6 +38,7 @@ public class NoRetryConfig {
     }
 
     @Bean
+    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_ODIN, ProfileNames.CRDB_SLEIPNER})
     public TransactionBoundaryAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
         return new TransactionBoundaryAspect(jdbcTemplate);
     }
