@@ -27,6 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.client.support.Console;
+import io.roach.bank.client.support.DurationFormat;
 import io.roach.bank.client.support.RestCommands;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
@@ -50,6 +51,12 @@ public class Admin implements Quit.Command {
     public void quit() {
         applicationContext.close();
         throw new ExitRequest();
+    }
+
+    @ShellMethod(value = "Print application uptime")
+    public void uptime() {
+        long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
+        console.cyan("%s\n", DurationFormat.millisecondsToDisplayString(uptime));
     }
 
     @ShellMethod(value = "Print application YAML config")

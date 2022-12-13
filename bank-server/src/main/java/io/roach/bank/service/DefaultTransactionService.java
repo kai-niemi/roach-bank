@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +21,9 @@ import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.TransactionRepository;
-import io.roach.bank.util.Pair;
 
 @Service
+@Transactional(propagation = Propagation.MANDATORY)
 public class DefaultTransactionService implements TransactionService {
     @Autowired
     private AccountRepository accountRepository;
@@ -31,10 +32,9 @@ public class DefaultTransactionService implements TransactionService {
     private TransactionRepository transactionRepository;
 
     @Value("${roachbank.loadAccountByReference}")
-    private boolean loadByReference = false;
+    private boolean loadByReference;
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new IllegalStateException("No transaction context - check Spring profile settings");
@@ -65,13 +65,13 @@ public class DefaultTransactionService implements TransactionService {
         if (!loadByReference) {
             Set<UUID> accountIds = new HashSet<>();
             legs.forEach((accountId, value) -> accountIds.add(accountId));
-            accounts = accountRepository.findAccountsById(accountIds, false);
+            accounts = accountRepository.findByIDs(accountIds, true);
         } else {
             accounts = Collections.emptyList();
         }
 
         legs.forEach((accountId, value) -> {
-            final Money amount = value.getLeft();
+            final Money amount = value.getFirst();
 
             Account account;
             // Get by reference to avoid SELECT
@@ -90,7 +90,7 @@ public class DefaultTransactionService implements TransactionService {
                     .andItem()
                     .withAccount(account)
                     .withAmount(amount)
-                    .withNote(value.getRight())
+                    .withNote(value.getSecond())
                     .then();
 
             balanceUpdates.add(Pair.of(accountId, amount.getAmount()));
@@ -114,7 +114,7 @@ public class DefaultTransactionService implements TransactionService {
             legs.compute(leg.getId(),
                     (key, amount) -> (amount == null)
                             ? Pair.of(leg.getAmount(), leg.getNote())
-                            : Pair.of(amount.getLeft().plus(leg.getAmount()), leg.getNote()));
+                            : Pair.of(amount.getFirst().plus(leg.getAmount()), leg.getNote()));
             amounts.compute(leg.getAmount().getCurrency(),
                     (currency, amount) -> (amount == null)
                             ? leg.getAmount().getAmount() : leg.getAmount().getAmount().add(amount));
@@ -132,31 +132,26 @@ public class DefaultTransactionService implements TransactionService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
     public Page<Transaction> find(Pageable page) {
         return transactionRepository.findTransactions(page);
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
     public Transaction findById(UUID id) {
         return transactionRepository.findTransactionById(id);
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
     public TransactionItem getItemById(TransactionItem.Id id) {
         return transactionRepository.getTransactionItemById(id);
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
     public Page<TransactionItem> findItemsByTransactionId(UUID transactionId, Pageable page) {
         return transactionRepository.findTransactionItems(transactionId, page);
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
     public void deleteAll() {
         transactionRepository.deleteAll();
     }

@@ -80,6 +80,10 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
         return this;
     }
 
+    public Account getAccount() {
+        return account;
+    }
+
     public String getCity() {
         return city;
     }

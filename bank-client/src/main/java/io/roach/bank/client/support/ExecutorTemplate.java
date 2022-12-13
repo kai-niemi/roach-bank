@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 @Component
 public class ExecutorTemplate {
@@ -54,14 +55,9 @@ public class ExecutorTemplate {
                 try {
                     runnable.run();
                     context.after(callTime, null);
-                } catch (HttpClientErrorException e) {
+                } catch (HttpClientErrorException | HttpServerErrorException e) {
                     context.after(callTime, e);
-                    logger.warn("HTTP 4xx error - backing off", e);
-                    backoff(++fails);
-                } catch (HttpServerErrorException e) {
-                    context.after(callTime, e);
-                    logger.warn("HTTP 5xx error - backing off", e);
-                    backoff(++fails);
+                    backoffDelay(++fails, e);
                 } catch (Exception e) {
                     context.after(callTime, e);
                     logger.error("Uncategorized error - cancelling prematurely", e);
@@ -100,14 +96,9 @@ public class ExecutorTemplate {
                     try {
                         runnable.run();
                         context.after(callTime, null);
-                    } catch (HttpClientErrorException e) {
+                    } catch (HttpClientErrorException | HttpServerErrorException e) {
                         context.after(callTime, e);
-                        logger.warn("HTTP 4xx error - backing off", e);
-                        backoff(++fails);
-                    } catch (HttpServerErrorException e) {
-                        context.after(callTime, e);
-                        logger.error("HTTP 5xx error - cancelling", e);
-                        break loop;
+                        backoffDelay(++fails, e);
                     } catch (Exception e) {
                         context.after(callTime, e);
                         logger.error("Uncategorized error - cancelling", e);
@@ -126,9 +117,13 @@ public class ExecutorTemplate {
         return future;
     }
 
-    private void backoff(int fails) {
+    private void backoffDelay(int fails, HttpStatusCodeException httpStatusCodeException) {
         try {
-            long backoffMillis = Math.min((long) (Math.pow(2, ++fails) + Math.random() * 1000), 5000);
+            long backoffMillis = Math.min((long) (Math.pow(2, fails) + Math.random() * 1000), 5000);
+            logger.warn("{} - backing off {} ms: {}",
+                    httpStatusCodeException.getStatusCode(),
+                    backoffMillis,
+                    httpStatusCodeException.toString());
             Thread.sleep(backoffMillis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

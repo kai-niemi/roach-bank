@@ -9,10 +9,10 @@ import java.util.function.Supplier;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
-import io.roach.bank.util.Pair;
 
 public interface AccountRepository {
     void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize);
@@ -23,7 +23,7 @@ public interface AccountRepository {
 
     Optional<Account> getAccountById(UUID id);
 
-    Money getAccountBalance(UUID id);
+    Money getBalance(UUID id);
 
     Money getBalanceSnapshot(UUID id);
 
@@ -33,11 +33,11 @@ public interface AccountRepository {
 
     void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates);
 
-    Page<Account> findAccountsByCity(Set<String> cities, Pageable page);
-
-    List<Account> findTopAccountsByCity(String city, int limit);
-
-    List<Account> findAccountsById(Set<UUID> ids, boolean locking);
-
     void deleteAll();
+
+    Page<Account> findPageByCity(Set<String> cities, Pageable page);
+
+    List<Account> findByCity(String city, int limit);
+
+    List<Account> findByIDs(Set<UUID> ids, boolean locking);
 }

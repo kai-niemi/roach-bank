@@ -84,12 +84,12 @@ public class Transfer extends AbstractCommand {
 
         accounts.forEach((city, accountModels) -> {
             if (iterations > 0) {
-                executorTemplate.runAsync(city + " (transfer)",
+                executorTemplate.runAsync(city + " (transfer) " + iterations,
                         () -> transferFunds(transferLink, city, accountModels, min, max, legs, smokeTest),
                         iterations
                 );
             } else {
-                executorTemplate.runAsync(city + " (transfer)",
+                executorTemplate.runAsync(city + " (transfer) " + duration,
                         () -> transferFunds(transferLink, city, accountModels, min, max, legs, smokeTest),
                         DurationFormat.parseDuration(duration)
                 );

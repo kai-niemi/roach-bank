@@ -42,8 +42,8 @@ public class BankServiceIntegrationTest extends AbstractIntegrationTest {
     public void whenFindingTopAccounts_thenReturnTestAccounts() {
         Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 
-        accountsSwe = accountService.findTopAccountsByCity("stockholm", 10);
-        accountsUsa = accountService.findTopAccountsByCity("new york", 10);
+        accountsSwe = accountService.findByCity("stockholm", 10);
+        accountsUsa = accountService.findByCity("new york", 10);
 
         Assertions.assertTrue(accountsSwe.size() >= 10, "expected >= 10");
         Assertions.assertTrue(accountsUsa.size() >= 10, "expected >= 10");

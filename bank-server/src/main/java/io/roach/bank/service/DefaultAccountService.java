@@ -17,28 +17,23 @@ import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
 
 @Service
+@TransactionBoundary
 public class DefaultAccountService implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
-
-    @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
-    public List<Account> findAccountsById(Set<UUID> ids) {
-        return accountRepository.findAccountsById(ids, false);
-    }
 
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
-        return accountRepository.findAccountsByCity(cities, page);
+        return accountRepository.findPageByCity(cities, page);
     }
 
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public List<Account> findTopAccountsByCity(String city, int limit) {
-        return accountRepository.findTopAccountsByCity(city, limit);
+        return accountRepository.findByCity(city, limit);
     }
 
     @Override
@@ -51,7 +46,7 @@ public class DefaultAccountService implements AccountService {
     @Override
     @TransactionBoundary(readOnly = true)
     public Money getBalance(UUID id) {
-        return accountRepository.getAccountBalance(id);
+        return accountRepository.getBalance(id);
     }
 
     @Override
@@ -62,7 +57,6 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    @TransactionBoundary
     public Account openAccount(UUID id) {
         accountRepository.openAccount(id);
         return accountRepository.getAccountById(id)
@@ -70,7 +64,6 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    @TransactionBoundary
     public Account closeAccount(UUID id) {
         accountRepository.closeAccount(id);
         return accountRepository.getAccountById(id)
@@ -78,7 +71,6 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    @TransactionBoundary
     public void deleteAll() {
         accountRepository.deleteAll();
     }

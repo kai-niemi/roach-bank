@@ -79,7 +79,7 @@ public class TransactionFormController {
         List<Account> accounts = new ArrayList<>();
 
         metadataRepository.getRegionCities(regions).forEach(r -> {
-            accounts.addAll(accountRepository.findTopAccountsByCity(r, accountsPerRegion));
+            accounts.addAll(accountRepository.findByCity(r, accountsPerRegion));
         });
 
         if (accounts.isEmpty()) {

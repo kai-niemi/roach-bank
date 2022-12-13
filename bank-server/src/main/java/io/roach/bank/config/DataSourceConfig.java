@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
@@ -17,11 +18,13 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import io.cockroachdb.jdbc.CockroachProperty;
 import io.roach.bank.ProfileNames;
+import io.roach.bank.util.SpringApplicationContext;
 import net.ttddyy.dsproxy.listener.ChainListener;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Configuration
+@DependsOn("springApplicationContext")
 public class DataSourceConfig {
     public static final String SQL_TRACE_LOGGER = "io.roach.bank.SQL_TRACE";
 
@@ -46,8 +49,9 @@ public class DataSourceConfig {
         if (environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER))) {
             ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), "true");
             ds.addDataSourceProperty(CockroachProperty.RETRY_TRANSIENT_ERRORS.getName(), "true");
-            ds.addDataSourceProperty(CockroachProperty.RETRY_MAX_ATTEMPTS.getName(), "5");
+            ds.addDataSourceProperty(CockroachProperty.RETRY_MAX_ATTEMPTS.getName(), "7");
             ds.addDataSourceProperty(CockroachProperty.RETRY_MAX_BACKOFF_TIME.getName(), "15000");
+            ds.addDataSourceProperty(CockroachProperty.RETRY_LISTENER_CLASSNAME.getName(), RetryListenerDelegate.class.getName());
         }
 
         return ds;

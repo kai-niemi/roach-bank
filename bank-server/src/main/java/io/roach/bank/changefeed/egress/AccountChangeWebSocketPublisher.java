@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +28,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
-import io.roach.bank.service.AccountService;
+import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.web.api.AccountController;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -43,7 +42,7 @@ public class AccountChangeWebSocketPublisher {
 
     private final BlockingQueue<AccountPayload> payloadBuffer = new ArrayBlockingQueue<>(BATCH_SIZE);
 
-    private final BlockingQueue<UUID> idBuffer = new ArrayBlockingQueue<>(BATCH_SIZE);
+    private final BlockingQueue<TransactionItem> idBuffer = new ArrayBlockingQueue<>(BATCH_SIZE);
 
     @Value("${roachbank.pushPermitsPerSec}")
     private double permitsPerSec;
@@ -57,9 +56,6 @@ public class AccountChangeWebSocketPublisher {
 
     @Autowired
     private MeterRegistry meterRegistry;
-
-    @Autowired
-    private AccountService accountService;
 
     private Counter eventsQueued;
 
@@ -127,27 +123,26 @@ public class AccountChangeWebSocketPublisher {
 
     private List<AccountPayload> drainPendingAccounts() throws InterruptedException {
         List<AccountPayload> payloadBatch = new ArrayList<>();
+        Set<TransactionItem> ids = new HashSet<>();
 
-        Set<UUID> ids = new HashSet<>();
-        UUID id = idBuffer.poll(1000, TimeUnit.MILLISECONDS);
-        if (id != null) {
+        TransactionItem transactionItem = idBuffer.poll(1000, TimeUnit.MILLISECONDS);
+
+        if (transactionItem != null) {
             idBuffer.drainTo(ids, BATCH_SIZE / 2);
 
-            List<Account> accounts = accountService.findAccountsById(ids);
+            Account account = transactionItem.getAccount();
 
-            accounts.forEach(account -> {
-                AccountPayload.Fields fields = new AccountPayload.Fields();
-                fields.setId(account.getId());
-                fields.setCity(account.getCity());
-                fields.setName(account.getName());
-                fields.setBalance(account.getBalance().getAmount());
-                fields.setCurrency(account.getBalance().getCurrency().getCurrencyCode());
+            AccountPayload.Fields fields = new AccountPayload.Fields();
+            fields.setId(account.getId());
+            fields.setCity(transactionItem.getCity());
+            fields.setName(account.getName());
+            fields.setBalance(account.getBalance().getAmount());
+            fields.setCurrency(account.getBalance().getCurrency().getCurrencyCode());
 
-                AccountPayload accountPayload = new AccountPayload();
-                accountPayload.setAfter(fields);
+            AccountPayload accountPayload = new AccountPayload();
+            accountPayload.setAfter(fields);
 
-                payloadBatch.add(accountPayload);
-            });
+            payloadBatch.add(accountPayload);
         }
 
         return payloadBatch;
@@ -155,8 +150,7 @@ public class AccountChangeWebSocketPublisher {
 
     public void publish(Transaction transaction) {
         transaction.getItems().forEach(transactionItem -> {
-            if (idBuffer.offer(Objects.requireNonNull(transactionItem.getId())
-                    .getAccountId())) {
+            if (idBuffer.offer(Objects.requireNonNull(transactionItem))) {
                 eventsQueued.increment();
             } else {
                 eventsLost.increment();

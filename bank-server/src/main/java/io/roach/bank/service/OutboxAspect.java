@@ -1,4 +1,4 @@
-package io.roach.bank.outbox;
+package io.roach.bank.service;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -50,7 +50,8 @@ public class OutboxAspect {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")
+    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))",
+            returning = "transaction")
     @Transactional(propagation = Propagation.MANDATORY)
     public void doAfterTransaction(Transaction transaction) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
