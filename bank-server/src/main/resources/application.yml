@@ -116,7 +116,7 @@ roachbank:
     # Validation query for datasource health check
     validation-query: select 1
   # WS push permits per second rate limit
-  pushPermitsPerSec: 4.0
+  pushPermitsPerSec: 10.0
   # Interval of pushing cached balance reports (millis) (default: 1h since its unused)
   reportPushInterval: 3600000
   # Report / WS push query timeout (seconds)
