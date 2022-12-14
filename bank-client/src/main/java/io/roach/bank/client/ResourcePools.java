@@ -57,7 +57,7 @@ public class ResourcePools extends AbstractCommand {
                 .follow(withCurie(POOL_SIZE_REL))
                 .toEntity(String.class);
 
-        console.cyan("Connection pool size:");
+        console.cyan("Connection pool size:\n");
         console.yellow("%s\n", configResponse.getBody());
     }
 
@@ -69,8 +69,16 @@ public class ResourcePools extends AbstractCommand {
                 .follow(withCurie(POOL_CONFIG_REL))
                 .toEntity(String.class);
 
-        console.cyan("Connection pool config:");
+        console.cyan("Connection pool config:\n");
         console.yellow("%s\n", response.getBody());
+    }
+
+    @ShellMethod(value = "Set local thread pool size", key = {"set-thread-pool-size"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "-1") int size) {
+        size = size > 0 ? size : Runtime.getRuntime().availableProcessors() * 8;
+        threadPoolTaskExecutor.setCorePoolSize(size);
+        console.cyan("Thread pool size set to %d\n", size);
     }
 
     @ShellMethod(value = "Get local thread pool size", key = {"get-thread-pool-size"})
@@ -85,13 +93,5 @@ public class ResourcePools extends AbstractCommand {
         console.yellow("\tcompletedTaskCount: %s\n", stats.completedTaskCount);
         console.yellow("\ttaskCount: %s\n", stats.taskCount);
         console.yellow("\tlargestPoolSize: %s\n", stats.largestPoolSize);
-    }
-
-    @ShellMethod(value = "Set local thread pool size", key = {"set-thread-pool-size"})
-    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "-1") int size) {
-        size = size > 0 ? size : Runtime.getRuntime().availableProcessors() * 4;
-        threadPoolTaskExecutor.setCorePoolSize(size);
-        console.cyan("Thread pool size set to %d", size);
     }
 }

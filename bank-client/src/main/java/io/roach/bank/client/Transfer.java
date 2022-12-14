@@ -62,7 +62,8 @@ public class Transfer extends AbstractCommand {
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "execution iterations (precedence over duration if >0)", defaultValue = "0")
                     int iterations,
-            @ShellOption(help = "smoke test (do nothing server side)", defaultValue = "false") boolean smokeTest
+            @ShellOption(help = "number of threads per city", defaultValue = "1") int concurrency,
+            @ShellOption(help = "fake test run", defaultValue = "false") boolean fake
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
                 StringUtils.commaDelimitedListToSet(regions), limit);
@@ -83,17 +84,19 @@ public class Transfer extends AbstractCommand {
         double max = Double.parseDouble(maxAmount);
 
         accounts.forEach((city, accountModels) -> {
-            if (iterations > 0) {
-                executorTemplate.runAsync(city + " (transfer) " + iterations,
-                        () -> transferFunds(transferLink, city, accountModels, min, max, legs, smokeTest),
-                        iterations
-                );
-            } else {
-                executorTemplate.runAsync(city + " (transfer) " + duration,
-                        () -> transferFunds(transferLink, city, accountModels, min, max, legs, smokeTest),
-                        DurationFormat.parseDuration(duration)
-                );
-            }
+            IntStream.rangeClosed(1,concurrency).forEach(value -> {
+                if (iterations > 0) {
+                    executorTemplate.runAsync(city + " (transfer) " + iterations,
+                            () -> transferFunds(transferLink, city, accountModels, min, max, legs, fake),
+                            iterations
+                    );
+                } else {
+                    executorTemplate.runAsync(city + " (transfer) " + duration,
+                            () -> transferFunds(transferLink, city, accountModels, min, max, legs, fake),
+                            DurationFormat.parseDuration(duration)
+                    );
+                }
+            });
         });
     }
 
@@ -103,7 +106,7 @@ public class Transfer extends AbstractCommand {
                                double minAmount,
                                double maxAmount,
                                int legs,
-                               boolean smokeTest) {
+                               boolean fake) {
         Money transferAmount = RandomData
                 .randomMoneyBetween(minAmount, maxAmount, accounts.get(0).getBalance().getCurrency());
 
@@ -114,8 +117,8 @@ public class Transfer extends AbstractCommand {
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
 
-        if (smokeTest) {
-            builder.withSmokeTest();
+        if (fake) {
+            builder.withFakeFlag();
         }
 
         Set<UUID> trail = new HashSet<>();

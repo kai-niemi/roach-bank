@@ -35,7 +35,7 @@ public class RestConfig {
     @Bean
     public PoolingHttpClientConnectionManager poolingHttpClientConnectionManager() {
         if (defaultMaxPerRoute <= 0 || maxTotal <= 0) {
-            defaultMaxPerRoute = Runtime.getRuntime().availableProcessors() * 4;
+            defaultMaxPerRoute = Runtime.getRuntime().availableProcessors() * 8;
             maxTotal = defaultMaxPerRoute * 2;
         }
 

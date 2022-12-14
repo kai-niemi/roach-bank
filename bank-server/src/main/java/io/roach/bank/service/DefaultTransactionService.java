@@ -40,12 +40,13 @@ public class DefaultTransactionService implements TransactionService {
             throw new IllegalStateException("No transaction context - check Spring profile settings");
         }
 
-        if (transactionForm.getAccountLegs().size() < 2) {
-            throw new BadRequestException("Must have at least two account items");
+        // Short-circuit
+        if (transactionForm.isFake()) {
+            return Transaction.builder().withId(id).build();
         }
 
-        if (transactionForm.isSmokeTest()) {
-            return Transaction.builder().withId(id).build();
+        if (transactionForm.getAccountLegs().size() < 2) {
+            throw new BadRequestException("Must have at least two account legs");
         }
 
         // Coalesce multi-legged transactions

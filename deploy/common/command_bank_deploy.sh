@@ -8,8 +8,8 @@ fn_deploy_server() {
 fn_deploy_client() {
   fn_echo_info_nl "Deploying bank binaries to ${CLUSTER}:$1"
   fn_failcheck roachprod put ${CLUSTER}:$1 ../../bank-client/target/bank-client.jar
-  fn_failcheck roachprod put ${CLUSTER}:$1 run_client.sh
-  fn_failcheck roachprod put ${CLUSTER}:$1 run_server.sh
+  fn_failcheck roachprod put ${CLUSTER}:$1 ${functionsdir}/run_client.sh
+  fn_failcheck roachprod put ${CLUSTER}:$1 ${functionsdir}/run_server.sh
 }
 
 #############################################################

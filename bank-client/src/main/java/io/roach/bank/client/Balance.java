@@ -44,6 +44,7 @@ public class Balance extends AbstractCommand {
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
                 StringUtils.commaDelimitedListToSet(regions), limit);
+
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching region(s): {}", regions);
         }
@@ -58,7 +59,7 @@ public class Balance extends AbstractCommand {
                     .get()));
 
             IntStream.rangeClosed(1,concurrency).forEach(value -> {
-                executorTemplate.runAsync(city + " (balance)",
+                executorTemplate.runAsync(city + " (balance) " + duration,
                         () -> restCommands.get(RandomData.selectRandom(links)),
                         DurationFormat.parseDuration(duration));
             });

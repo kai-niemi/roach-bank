@@ -53,7 +53,7 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     @NotBlank
     private String transactionType;
 
-    private boolean smokeTest;
+    private boolean fake;
 
     @NotNull
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -94,8 +94,8 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
         return Collections.unmodifiableList(accountLegs);
     }
 
-    public boolean isSmokeTest() {
-        return smokeTest;
+    public boolean isFake() {
+        return fake;
     }
 
     public static class Builder {
@@ -126,8 +126,8 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
             return this;
         }
 
-        public Builder withSmokeTest() {
-            this.instance.smokeTest = true;
+        public Builder withFakeFlag() {
+            this.instance.fake = true;
             return this;
         }
 
