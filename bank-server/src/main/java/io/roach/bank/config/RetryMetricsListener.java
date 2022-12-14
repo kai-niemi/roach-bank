@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import io.cockroachdb.jdbc.retry.DefaultRetryListener;
-import io.cockroachdb.jdbc.retry.MethodExecutionResult;
 import io.cockroachdb.jdbc.retry.RetryListener;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

@@ -74,16 +74,18 @@ public class DefaultTransactionService implements TransactionService {
             final Money amount = value.getFirst();
 
             Account account;
-            // Get by reference to avoid SELECT
+            Money runningBalance;
+
+            // Get by reference to avoid SELECT but no running balance
             if (loadByReference) {
                 account = accountRepository.getAccountByReference(accountId);
+                runningBalance = Money.zero(Money.USD);
             } else {
-//                account = accountRepository.getAccountById(accountId)
-//                        .orElseThrow(() -> new NoSuchAccountException(accountId));
                 account = accounts.stream()
                         .filter(a -> a.getId().equals(accountId))
                         .findFirst()
                         .orElseThrow(() -> new NoSuchAccountException(accountId));
+                runningBalance = account.getBalance();
             }
 
             transactionBuilder
@@ -91,6 +93,7 @@ public class DefaultTransactionService implements TransactionService {
                     .withAccount(account)
                     .withAmount(amount)
                     .withNote(value.getSecond())
+                    .withRunningBalance(runningBalance)
                     .then();
 
             balanceUpdates.add(Pair.of(accountId, amount.getAmount()));

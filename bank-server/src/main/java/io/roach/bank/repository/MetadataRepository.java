@@ -8,9 +8,9 @@ import java.util.Set;
 import io.roach.bank.domain.Region;
 
 public interface MetadataRepository {
-    Map<String, List<Region>> getRegions();
+    Map<String, List<Region>> getAllRegions();
 
-    Map<String, Set<String>> getRegionCities();
+    Map<String, Set<String>> getAllRegionCities();
 
     Set<String> getRegionCities(Collection<String> regions);
 

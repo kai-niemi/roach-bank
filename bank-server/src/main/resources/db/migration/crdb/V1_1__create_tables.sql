@@ -1,13 +1,13 @@
 -- RoachBank DDL for CockroachDB
 
-----------------------
--- Types
-----------------------
-
 drop type if exists account_type;
-drop type if exists transaction_type;
-
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
+
+drop sequence if exists account_name_sequence;
+create sequence if not exists account_name_sequence
+    start 1 increment by 64 cache 64;
+
+drop type if exists transaction_type;
 create type transaction_type as enum ('GEN');
 
 ----------------------
@@ -66,7 +66,7 @@ create table transaction_item
     currency              string         not null default 'USD',
     amount_money          string as (concat(amount::string, ' ', currency)) virtual,
     note                  string,
-    running_balance       decimal(19, 2),
+    running_balance       decimal(19, 2) not null,
     running_balance_money string as (concat(running_balance::string, ' ', currency)) virtual,
 
     primary key (transaction_id, account_id)

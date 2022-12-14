@@ -72,7 +72,7 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-            if (!cancelRequested) {
+            if (System.currentTimeMillis() - startTime >= duration.toMillis()) {
                 logger.info("Finihed '{}'", id);
             }
 
@@ -116,7 +116,7 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-            if (!cancelRequested) {
+            if (!Thread.interrupted() && !cancelRequested) {
                 logger.info("Finihed '{}'", id);
             }
 

@@ -30,7 +30,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public Map<String, List<Region>> getRegions() {
+    public Map<String, List<Region>> getAllRegions() {
         Map<String, List<Region>> result = new TreeMap<>();
 
         List<String> clouds = namedParameterJdbcTemplate
@@ -57,7 +57,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public Map<String, Set<String>> getRegionCities() {
+    public Map<String, Set<String>> getAllRegionCities() {
         Map<String, Set<String>> result = new TreeMap<>();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();

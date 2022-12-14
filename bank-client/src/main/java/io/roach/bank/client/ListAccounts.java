@@ -25,7 +25,7 @@ import static io.roach.bank.client.Constants.ACCOUNT_MODEL_PTR;
 
 @ShellComponent
 @ShellCommandGroup(Constants.METADATA_COMMANDS)
-public class Accounts extends AbstractCommand {
+public class ListAccounts extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 

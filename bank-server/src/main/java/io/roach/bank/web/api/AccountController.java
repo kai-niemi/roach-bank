@@ -49,7 +49,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    @Value("${roachbank.pushTimeoutSeconds}")
     private int queryTimeout;
 
     @Value("${roachbank.accountsPerCityLimit}")

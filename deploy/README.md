@@ -37,7 +37,7 @@ In the client CLI, connect to localhost:
 
 Create accounts:
 
-    create-accounts
+    accounts
 
 Transfer funds across local accounts:
 

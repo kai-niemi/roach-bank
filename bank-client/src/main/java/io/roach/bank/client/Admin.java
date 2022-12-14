@@ -1,9 +1,5 @@
 package io.roach.bank.client;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
@@ -13,7 +9,6 @@ import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.io.Resource;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.ExitRequest;
@@ -22,7 +17,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.commands.Quit;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.api.MessageModel;
@@ -33,7 +27,6 @@ import io.roach.bank.client.support.RestCommands;
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
 import static io.roach.bank.api.LinkRelations.TOGGLE_TRACE_LOG;
 import static io.roach.bank.api.LinkRelations.withCurie;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -57,17 +50,6 @@ public class Admin implements Quit.Command {
     public void uptime() {
         long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
         console.cyan("%s\n", DurationFormat.millisecondsToDisplayString(uptime));
-    }
-
-    @ShellMethod(value = "Print application YAML config")
-    public void printConfig() {
-        Resource resource = applicationContext.getResource("classpath:application.yml");
-        try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8)) {
-            System.out.println(FileCopyUtils.copyToString(reader));
-            System.out.flush();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     @ShellMethod(value = "Print system information", key = {"system-info", "si"})

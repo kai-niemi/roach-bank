@@ -32,7 +32,7 @@ public class CreateAccounts extends AbstractCommand {
     @Autowired
     private ExecutorTemplate executorTemplate;
 
-    @ShellMethod(value = "Create new accounts", key = {"create-accounts", "ca"})
+    @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
             @ShellOption(help = "create accounts for a time period", defaultValue = "") String duration,

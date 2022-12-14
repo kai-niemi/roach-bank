@@ -43,7 +43,7 @@ public class ReportWebSocketPublisher {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    @Value("${roachbank.pushTimeoutSeconds}")
     private int queryTimeout = 120;
 
     @Autowired
@@ -62,7 +62,7 @@ public class ReportWebSocketPublisher {
     @Autowired
     private CacheManager cacheManager;
 
-//    @Scheduled(fixedRateString = "${roachbank.reportPushInterval}", initialDelayString = "${roachbank.reportPushInterval}")
+    @Scheduled(fixedRateString = "${roachbank.reportPushInterval}", initialDelayString = "${roachbank.reportPushInterval}")
     public void publishReport() {
         Cache cache = cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY);
         ConcurrentHashMap map = (ConcurrentHashMap) cache.getNativeCache();
@@ -83,7 +83,7 @@ public class ReportWebSocketPublisher {
                 // Retrieve accounts per region concurrently with a collective timeout
                 List<Callable<Void>> tasks = Collections.synchronizedList(new ArrayList<>());
 
-                metadataRepository.getRegionCities().forEach((region, cities) -> {
+                metadataRepository.getAllRegionCities().forEach((region, cities) -> {
                     tasks.add(() -> {
                         selfProxy.computeSummaryAndPush(cities);
                         return null;

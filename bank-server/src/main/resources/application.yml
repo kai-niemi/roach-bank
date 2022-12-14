@@ -117,11 +117,25 @@ roachbank:
     validation-query: select 1
   # WS push permits per second rate limit
   pushPermitsPerSec: 4.0
-  # Interval of pushing cached balance reports (millis)
-  reportPushInterval: 10000
-  # Report query timeout (seconds)
-  reportQueryTimeoutSeconds: 120
+  # Interval of pushing cached balance reports (millis) (default: 1h since its unused)
+  reportPushInterval: 3600000
+  # Report / WS push query timeout (seconds)
+  pushTimeoutSeconds: 120
   # Default limit unless client specified
-  accountsPerCityLimit: 10
+  accountsPerCityLimit: 100
   # Load account by reference or hit database with SELECT (former drastically reduce contention)
   loadAccountByReference: false
+  # Account plan to run workload against
+  accountPlan:
+    # Clear accounts at startup
+    clearAtStartup: true
+    # Clear transactions transitively if clearAtStartup is true
+    clearTransitive: true
+    # Filter on region, empty implies all regions
+    region: ""
+    # Number of accounts per city (total: num_cities x numAccountsPerCity)
+    numAccountsPerCity: 1000
+    # Initial balance
+    initialBalance: "25000.00"
+    # Account currency
+    currency: "USD"

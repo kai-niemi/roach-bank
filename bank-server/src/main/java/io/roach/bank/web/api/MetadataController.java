@@ -54,7 +54,7 @@ public class MetadataController {
     @GetMapping(value = "/regions")
     @TransactionBoundary(readOnly = true)
     public Map<String, Set<String>> regionCities() {
-        return metadataRepository.getRegionCities();
+        return metadataRepository.getAllRegionCities();
     }
 
     @GetMapping(value = "/region-cities")

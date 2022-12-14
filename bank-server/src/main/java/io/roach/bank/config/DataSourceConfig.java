@@ -18,7 +18,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import io.cockroachdb.jdbc.CockroachProperty;
 import io.roach.bank.ProfileNames;
-import io.roach.bank.util.SpringApplicationContext;
 import net.ttddyy.dsproxy.listener.ChainListener;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -51,7 +50,8 @@ public class DataSourceConfig {
             ds.addDataSourceProperty(CockroachProperty.RETRY_TRANSIENT_ERRORS.getName(), "true");
             ds.addDataSourceProperty(CockroachProperty.RETRY_MAX_ATTEMPTS.getName(), "7");
             ds.addDataSourceProperty(CockroachProperty.RETRY_MAX_BACKOFF_TIME.getName(), "15000");
-            ds.addDataSourceProperty(CockroachProperty.RETRY_LISTENER_CLASSNAME.getName(), RetryListenerDelegate.class.getName());
+            ds.addDataSourceProperty(CockroachProperty.RETRY_LISTENER_CLASSNAME.getName(),
+                    RetryListenerDelegate.class.getName());
         }
 
         return ds;

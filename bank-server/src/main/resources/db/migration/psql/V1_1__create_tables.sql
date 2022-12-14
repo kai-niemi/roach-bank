@@ -2,9 +2,13 @@
 -- CREATE extension pgcrypto;
 
 drop type if exists account_type;
-drop type if exists transaction_type;
-
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
+
+drop sequence if exists account_name_sequence;
+create sequence if not exists account_name_sequence
+    start 1 increment by 64 cache 64;
+
+drop type if exists transaction_type;
 create type transaction_type as enum ('GEN');
 
 ----------------------
@@ -87,9 +91,9 @@ alter table account
 alter table account
     add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
 
--- alter table transaction_item
---     add constraint fk_txn_item_ref_transaction
---         foreign key (transaction_id) references transaction (id);
--- alter table transaction_item
---     add constraint fk_txn_item_ref_account
---         foreign key (account_id) references account (id);
+alter table transaction_item
+    add constraint fk_txn_item_ref_transaction
+        foreign key (transaction_id) references transaction (id);
+alter table transaction_item
+    add constraint fk_txn_item_ref_account
+        foreign key (account_id) references account (id);
