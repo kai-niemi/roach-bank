@@ -128,7 +128,7 @@ roachbank:
   # Account plan to run workload against
   accountPlan:
     # Clear accounts at startup
-    clearAtStartup: true
+    clearAtStartup: false
     # Clear transactions transitively if clearAtStartup is true
     clearTransitive: true
     # Filter on region, empty implies all regions
