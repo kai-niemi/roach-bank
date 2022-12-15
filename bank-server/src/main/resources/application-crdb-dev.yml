@@ -7,9 +7,10 @@ spring:
     enabled: true
     locations: classpath:db/crdb
   datasource:
-    url: jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable&retryTransientErrors=true&implicitSelectForUpdate=true
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:cockroachdb://192.168.1.99:26300/roach_bank?sslmode=disable&retryTransientErrors=true&implicitSelectForUpdate=true
+    driver-class-name: io.cockroachdb.jdbc.CockroachDriver
     username: root
 roachbank:
   health:
     validation-query: select node_id from [SHOW CLUSTER SESSIONS] limit 1
+

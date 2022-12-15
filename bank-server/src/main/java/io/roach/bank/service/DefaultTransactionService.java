@@ -34,6 +34,9 @@ public class DefaultTransactionService implements TransactionService {
     @Value("${roachbank.loadAccountByReference}")
     private boolean loadByReference;
 
+    @Value("${roachbank.loadAccountWithSFU}")
+    private boolean loadAccountWithSFU;
+
     @Override
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
@@ -66,7 +69,7 @@ public class DefaultTransactionService implements TransactionService {
         if (!loadByReference) {
             Set<UUID> accountIds = new HashSet<>();
             legs.forEach((accountId, value) -> accountIds.add(accountId));
-            accounts = accountRepository.findByIDs(accountIds, true);
+            accounts = accountRepository.findByIDs(accountIds, loadAccountWithSFU);
         } else {
             accounts = Collections.emptyList();
         }

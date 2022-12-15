@@ -44,15 +44,8 @@ public class DataSourceConfig {
                 .type(HikariDataSource.class).build();
 
         ds.addDataSourceProperty(PGProperty.REWRITE_BATCHED_INSERTS.getName(), "true");
-
-        if (environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER))) {
-            ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), "true");
-            ds.addDataSourceProperty(CockroachProperty.RETRY_TRANSIENT_ERRORS.getName(), "true");
-            ds.addDataSourceProperty(CockroachProperty.RETRY_MAX_ATTEMPTS.getName(), "7");
-            ds.addDataSourceProperty(CockroachProperty.RETRY_MAX_BACKOFF_TIME.getName(), "15000");
-            ds.addDataSourceProperty(CockroachProperty.RETRY_LISTENER_CLASSNAME.getName(),
-                    RetryListenerDelegate.class.getName());
-        }
+        ds.addDataSourceProperty(CockroachProperty.RETRY_LISTENER_CLASSNAME.getName(),
+                RetryListenerDelegate.class.getName());
 
         return ds;
     }

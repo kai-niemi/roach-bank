@@ -14,7 +14,7 @@ java -jar $FILE \
 
 fn_start_dev(){
 java -jar $FILE \
---spring.profiles.active=retry-driver,cdc-none,crdb-sleipner  \
+--spring.profiles.active=retry-driver,cdc-none,crdb-dev  \
 "$@"
 }
 

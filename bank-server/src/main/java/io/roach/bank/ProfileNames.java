@@ -61,29 +61,29 @@ public abstract class ProfileNames {
     public static final String JDBC = "!jpa";
 
     /**
-     * CockroachDB local.
+     * crdb-jdbc local.
      */
     public static final String CRDB_LOCAL = "crdb-local";
 
     /**
-     * CockroachDB dedicated cluster.
+     * crdb-jdbc dev.
      */
-    public static final String CRDB_ODIN = "crdb-odin";
+    public static final String CRDB_DEV = "crdb-dev";
 
     /**
-     * CockroachDB local self-hosted.
+     * crdb-jdbc dedicated/serverless.
      */
-    public static final String CRDB_SLEIPNER = "crdb-sleipner";
+    public static final String CRDB_CLOUD = "crdb-cloud";
 
     /**
-     * PSQL local self-hosted.
+     * pgjdbc driver local
      */
     public static final String PSQL_LOCAL = "psql-local";
 
     /**
-     * PSQL local self-hosted.
+     * pgjdbc driver dev
      */
-    public static final String PSQL_SLEIPNER = "psql-sleipner";
+    public static final String PSQL_DEV = "psql-dev";
 
     private ProfileNames() {
     }

@@ -16,7 +16,7 @@ public abstract class Constants {
 
     public static final String WORKLOAD_COMMANDS = "5. Workload Commands";
 
-    public static final String DEFAULT_DURATION = "60m";
+    public static final String DEFAULT_DURATION = "180m";
 
     public static final String EMPTY = "";
 

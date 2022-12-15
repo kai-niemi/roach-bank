@@ -111,8 +111,6 @@ server:
 #############################
 roachbank:
   health:
-    # CRDB Admin UI endpoint base URL
-    admin-endpoint: http://localhost:8080
     # Validation query for datasource health check
     validation-query: select 1
   # WS push permits per second rate limit
@@ -125,6 +123,8 @@ roachbank:
   accountsPerCityLimit: 100
   # Load account by reference or hit database with SELECT (former drastically reduce contention)
   loadAccountByReference: false
+  # Load account with SELECT FOR UPDATE
+  loadAccountWithSFU: false
   # Account plan to run workload against
   accountPlan:
     # Clear accounts at startup

@@ -42,13 +42,13 @@ public class SavepointRetryConfig {
                 "Cant have both RETRY_SAVEPOINT and RETRY_CLIENT");
     }
 
-    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_ODIN, ProfileNames.CRDB_SLEIPNER})
+    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
     @Bean
     public SavepointRetryAspect savepointTransactionAspect(PlatformTransactionManager transactionManager) {
         return new SavepointRetryAspect(transactionManager, "cockroach_restart");
     }
 
-    @Profile({ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_SLEIPNER})
+    @Profile({ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_DEV})
     @Bean
     public SavepointRetryAspect savepointTransactionAspectUnnamed(
             PlatformTransactionManager transactionManager) {
@@ -56,7 +56,7 @@ public class SavepointRetryConfig {
     }
 
     @Bean
-    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_ODIN, ProfileNames.CRDB_SLEIPNER})
+    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
     public TransactionBoundaryAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
         return new TransactionBoundaryAspect(jdbcTemplate);
     }

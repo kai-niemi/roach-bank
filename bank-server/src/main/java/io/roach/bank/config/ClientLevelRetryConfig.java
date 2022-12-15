@@ -40,7 +40,7 @@ public class ClientLevelRetryConfig {
     }
 
     @Bean
-    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_ODIN, ProfileNames.CRDB_SLEIPNER})
+    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
     public TransactionBoundaryAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
         return new TransactionBoundaryAspect(jdbcTemplate);
     }

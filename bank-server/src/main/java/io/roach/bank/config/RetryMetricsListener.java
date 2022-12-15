@@ -9,17 +9,14 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import io.cockroachdb.jdbc.retry.DefaultRetryListener;
 import io.cockroachdb.jdbc.retry.RetryListener;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.roach.bank.ProfileNames;
 
 @Component
-@Profile(ProfileNames.RETRY_DRIVER)
 public class RetryMetricsListener implements RetryListener {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
