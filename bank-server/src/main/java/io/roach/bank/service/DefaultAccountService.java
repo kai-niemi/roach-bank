@@ -5,13 +5,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
-import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
-import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;

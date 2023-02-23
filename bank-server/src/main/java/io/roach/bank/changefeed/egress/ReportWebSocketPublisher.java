@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,9 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
-import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
-import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
@@ -104,7 +104,7 @@ public class ReportWebSocketPublisher {
     }
 
     @TransactionBoundary(readOnly = true,
-            timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
+            timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
     public void computeSummaryAndPush(Set<String> cities) {
         cities.forEach(city -> {

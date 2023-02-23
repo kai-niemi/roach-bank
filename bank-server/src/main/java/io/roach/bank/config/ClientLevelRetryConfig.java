@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.data.cockroachdb.aspect.TransactionAttributesAspect;
+import org.springframework.data.cockroachdb.aspect.TransactionRetryAspect;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
 
-import io.cockroachdb.jdbc.spring.aspect.TransactionBoundaryAspect;
-import io.cockroachdb.jdbc.spring.aspect.TransactionRetryAspect;
 import io.roach.bank.ProfileNames;
 
 /**
@@ -35,13 +35,14 @@ public class ClientLevelRetryConfig {
     }
 
     @Bean
-    public TransactionRetryAspect transactionRetryAspect() {
-        return new TransactionRetryAspect();
+    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
+    public TransactionAttributesAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
+        return new TransactionAttributesAspect(jdbcTemplate);
     }
 
     @Bean
     @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
-    public TransactionBoundaryAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
-        return new TransactionBoundaryAspect(jdbcTemplate);
+    public TransactionRetryAspect transactionRetryAspect() {
+        return new TransactionRetryAspect();
     }
 }

@@ -7,13 +7,13 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.repository.MetadataRepository;

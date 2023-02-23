@@ -3,6 +3,9 @@ package io.roach.bank.web.api;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -13,9 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
-import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
-import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.TransactionItemModel;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.TransactionService;

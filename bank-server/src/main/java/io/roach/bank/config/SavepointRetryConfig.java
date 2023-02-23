@@ -8,12 +8,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.data.cockroachdb.aspect.SavepointRetryAspect;
+import org.springframework.data.cockroachdb.aspect.TransactionAttributesAspect;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
-import io.cockroachdb.jdbc.spring.aspect.SavepointRetryAspect;
-import io.cockroachdb.jdbc.spring.aspect.TransactionBoundaryAspect;
 import io.roach.bank.ProfileNames;
 
 /**
@@ -57,7 +57,7 @@ public class SavepointRetryConfig {
 
     @Bean
     @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
-    public TransactionBoundaryAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
-        return new TransactionBoundaryAspect(jdbcTemplate);
+    public TransactionAttributesAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
+        return new TransactionAttributesAspect(jdbcTemplate);
     }
 }

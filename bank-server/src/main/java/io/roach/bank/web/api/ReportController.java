@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.cockroachdb.jdbc.spring.annotations.TimeTravel;
-import io.cockroachdb.jdbc.spring.annotations.TransactionBoundary;
-import io.cockroachdb.jdbc.spring.aspect.TimeTravelMode;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.MessageModel;
@@ -51,7 +51,7 @@ public class ReportController {
 
     @GetMapping(value = "/account-summary")
     @TransactionBoundary(readOnly = true,
-            timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
+            timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
     public Collection<AccountSummary> getAccountSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
@@ -66,7 +66,7 @@ public class ReportController {
 
     @GetMapping(value = "/transaction-summary")
     @TransactionBoundary(readOnly = true,
-            timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
+            timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
     public Collection<TransactionSummary> getTransactionSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
