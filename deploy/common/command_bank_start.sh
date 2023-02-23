@@ -6,7 +6,8 @@ fn_start_server(){
   fn_echo_info_nl "Starting server.."
 
 fn_failcheck roachprod run $CLUSTER:$c <<EOF
-nohup ./bank-server.jar > /dev/null 2>&1 &
+chmod +x run_server.sh
+./run_server.sh
 EOF
 
   local url="http://$(roachprod ip $CLUSTER:$c --external):8090"

@@ -11,13 +11,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
 import com.zaxxer.hikari.HikariDataSource;
 
 import io.cockroachdb.jdbc.CockroachProperty;
-import io.roach.bank.ProfileNames;
+import io.roach.bank.health.RetryListenerDelegate;
 import net.ttddyy.dsproxy.listener.ChainListener;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;

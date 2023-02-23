@@ -1,4 +1,4 @@
-package io.roach.bank.config;
+package io.roach.bank.health;
 
 import java.sql.Connection;
 import java.sql.SQLException;
