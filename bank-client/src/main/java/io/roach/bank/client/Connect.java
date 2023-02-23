@@ -23,7 +23,7 @@ import io.roach.bank.client.support.ConnectionUpdatedEvent;
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
 public class Connect extends AbstractCommand {
-    public static final String DEFAULT_URL = "http://localhost:8090/api/";
+    public static final String DEFAULT_URL = "http://localhost:8090/api";
 
     private static boolean connected;
 
@@ -70,7 +70,7 @@ public class Connect extends AbstractCommand {
                 logger.warn(response.getBody());
             }
         } else {
-            logger.error("Connection failed: {}", entity.getStatusCode().getReasonPhrase());
+            logger.error("Connection failed: {}", entity.getStatusCode());
         }
     }
 }

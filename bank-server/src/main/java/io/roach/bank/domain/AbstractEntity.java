@@ -2,9 +2,9 @@ package io.roach.bank.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.PostLoad;
-import javax.persistence.PrePersist;
-import javax.persistence.Transient;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Transient;
 
 import org.springframework.data.domain.Persistable;
 

@@ -1,6 +1,6 @@
 package io.roach.bank.changefeed.ingress;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class KafkaChangeFeedConsumer {
     @KafkaListener(topics = TOPIC_ACCOUNTS, containerFactory = "accountListenerContainerFactory")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void accountChanged(@Payload AccountPayload event,
-                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                               @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
                                @Header(KafkaHeaders.OFFSET) int offset) {
         changeFeedPublisher.publish(event);
     }
@@ -51,7 +51,7 @@ public class KafkaChangeFeedConsumer {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Deprecated
     public void transactionCreated(@Payload TransactionChangeEvent event,
-                                   @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                                   @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
                                    @Header(KafkaHeaders.OFFSET) int offset) {
     }
 
@@ -59,7 +59,7 @@ public class KafkaChangeFeedConsumer {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Deprecated
     public void transactionLegCreated(@Payload TransactionItemChangeEvent event,
-                                      @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                                      @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
                                       @Header(KafkaHeaders.OFFSET) int offset) {
     }
 }

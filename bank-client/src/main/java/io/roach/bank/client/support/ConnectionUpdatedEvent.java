@@ -3,14 +3,14 @@ package io.roach.bank.client.support;
 import java.net.URI;
 
 import org.springframework.context.ApplicationEvent;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 public class ConnectionUpdatedEvent extends ApplicationEvent {
     private URI baseUri;
 
-    private HttpStatus httpStatus;
+    private HttpStatusCode httpStatus;
 
-    public ConnectionUpdatedEvent(Object source, URI baseUri, HttpStatus httpStatus) {
+    public ConnectionUpdatedEvent(Object source, URI baseUri, HttpStatusCode httpStatus) {
         super(source);
         this.baseUri = baseUri;
         this.httpStatus = httpStatus;
@@ -20,7 +20,7 @@ public class ConnectionUpdatedEvent extends ApplicationEvent {
         return baseUri;
     }
 
-    public HttpStatus getHttpStatus() {
+    public HttpStatusCode getHttpStatus() {
         return httpStatus;
     }
 }

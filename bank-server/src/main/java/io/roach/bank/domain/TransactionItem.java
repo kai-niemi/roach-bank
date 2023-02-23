@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.springframework.util.Assert;

@@ -1,6 +1,6 @@
 package io.roach.bank.service;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.aspectj.lang.annotation.AfterReturning;

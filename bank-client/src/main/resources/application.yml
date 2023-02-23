@@ -24,4 +24,4 @@ roachbank:
     # Total concurrent http connections
     maxTotal: -1
     # Total concurrent http connections per route (endpoint)
-    defaultMaxPerRoute: -1
+    maxConnPerRoute: -1

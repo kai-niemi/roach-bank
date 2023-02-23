@@ -37,21 +37,39 @@ spring:
           no-cache: true
           no-store: true
 #############################
-  jpa:
-    show-sql: false
-    open-in-view: false
   flyway:
     enabled: false
     connect-retries: 15
     clean-on-validation-error: true
     baseline-on-migrate: false
-#    clean-disabled: true
+  #    clean-disabled: true
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: io.cockroachdb.workload.common.jpa.CockroachDBDialect
+        connection:
+          provider_disables_autocommit: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+          batch_size: 128
+          fetch_size: 128
+          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+        hql:
+          bulk_id_strategy: org.hibernate.hql.spi.id.inline.CteValuesListBulkIdStrategy
+        cache:
+          use_minimal_puts: true
+          use_second_level_cache: false
   datasource:
     driver-class-name: io.cockroachdb.jdbc.CockroachDriver
     hikari:
       pool-name: roach-bank
       connection-init-sql: SELECT 1
-      connection-timeout: 30000
+      initialization-fail-timeout: -1
+      connection-timeout: 5000
       validation-timeout: 20000
       max-lifetime: 60000
       maximum-pool-size: 200

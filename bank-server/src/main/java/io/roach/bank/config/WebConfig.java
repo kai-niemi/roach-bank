@@ -1,4 +1,4 @@
-package io.roach.bank.web;
+package io.roach.bank.config;
 
 import java.util.Currency;
 import java.util.List;
@@ -82,8 +82,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(new FormHttpMessageConverter());
-        converters
-                .removeIf(httpMessageConverter -> httpMessageConverter instanceof Jaxb2RootElementHttpMessageConverter);
     }
 
     @Bean

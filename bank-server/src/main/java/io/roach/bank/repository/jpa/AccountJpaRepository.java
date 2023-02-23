@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.persistence.LockModeType;
-import javax.persistence.Tuple;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Tuple;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
