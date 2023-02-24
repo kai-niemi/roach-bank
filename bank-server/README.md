@@ -46,16 +46,18 @@ The default server configuration can be found in [application.yml](src/main/reso
 The config can be overridden at startup time through the command line and by activating Spring profiles, which are:
 
 Database type, one of:
-
-   * crdb-local - Enables CockroachDB features and db schema (default)
-   * psql-local - Enables PostgreSQL features and db schema
+    
+  * psql-local - Enables PG-JDBC connecting to localhost (default)
+  * psql-cloud - Enables PG-JDBC connecting to CockroachDB Cloud
+  * crdb-local - Enables CockroachDB JDCB driver connecting to localhost
+  * crdb-cloud - Enables CockroachDB JDCB driver connecting to CockroachDB Cloud 
 
 Retry strategy, one of:
 
-   * retry-none - Disable retries
-   * retry-driver - Enable JDBC driver level retries
-   * retry-client - Enables client-side retries with exponential backoff
+   * retry-client - Enables client-side retries with exponential backoff (default)
+   * retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
    * retry-savepoint - Enables client-side retries using savepoints
+   * retry-none - Disable retries
 
 Change data capture and websocket push events, one of:
 

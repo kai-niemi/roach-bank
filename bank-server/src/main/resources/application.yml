@@ -11,7 +11,7 @@ spring:
   application:
     name: roach-bank
   profiles:
-    active: retry-none,cdc-none,crdb-local
+    active: retry-client,cdc-none,psql-local
   output:
     ansi:
       enabled: ALWAYS
