@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
@@ -53,6 +54,7 @@ public class ReportController {
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
+    @Retryable
     public Collection<AccountSummary> getAccountSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
     ) {
@@ -68,6 +70,7 @@ public class ReportController {
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
+    @Retryable
     public Collection<TransactionSummary> getTransactionSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
     ) {

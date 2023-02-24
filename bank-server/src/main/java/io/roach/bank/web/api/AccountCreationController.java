@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.Affordances;
@@ -65,6 +66,7 @@ public class AccountCreationController {
 
     @PostMapping(value = "/form")
     @TransactionBoundary
+    @Retryable
     public HttpEntity<AccountModel> createOneAccount(@Valid @RequestBody AccountForm form) {
         UUID id = "auto".equals(form.getUuid()) ? UUID.randomUUID() : UUID.fromString(form.getUuid());
 

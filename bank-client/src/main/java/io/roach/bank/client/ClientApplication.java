@@ -22,7 +22,7 @@ import org.springframework.shell.Shell;
 import org.springframework.shell.jline.PromptProvider;
 import org.springframework.util.StringUtils;
 
-import io.roach.bank.client.support.ConnectionUpdatedEvent;
+import io.roach.bank.client.command.support.ConnectionUpdatedEvent;
 
 @Configuration
 @EnableAutoConfiguration

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jakarta.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +38,7 @@ import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.BadRequestException;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.FollowLocation;
+import jakarta.validation.Valid;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -64,6 +63,7 @@ public class TransactionFormController {
 
     @GetMapping("/form")
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public ResponseEntity<TransactionForm> getTransactionRequestForm(
             @RequestParam(value = "accountsPerRegion", defaultValue = "2", required = false) int accountsPerRegion,
             @RequestParam(value = "amount", defaultValue = "5.00", required = false) final String amount,
@@ -137,7 +137,6 @@ public class TransactionFormController {
         } catch (DataIntegrityViolationException e) {
             String msg = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
             if (msg.contains("duplicate key value")) {
-                logger.warn("Duplicate transaction request: {}", idempotencyKey);
                 return ResponseEntity.status(HttpStatus.OK)
                         .location(linkTo(methodOn(TransactionController.class)
                                 .getTransaction(idempotencyKey))

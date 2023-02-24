@@ -29,6 +29,8 @@
         <tag>HEAD</tag>
     </scm>
 
+    <inceptionYear>2021</inceptionYear>
+
     <modules>
         <module>bank-api</module>
         <module>bank-client</module>

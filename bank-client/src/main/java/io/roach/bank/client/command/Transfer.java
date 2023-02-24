@@ -1,13 +1,11 @@
-package io.roach.bank.client;
+package io.roach.bank.client.command;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +21,12 @@ import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.TransactionModel;
+import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.support.DurationFormat;
-import io.roach.bank.client.support.ExecutorTemplate;
-import io.roach.bank.client.support.RestCommands;
+import io.roach.bank.client.command.support.ExecutorTemplate;
+import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.util.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
 import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
@@ -35,15 +34,6 @@ import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
 @ShellComponent
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class Transfer extends AbstractCommand {
-    private static final ThreadLocalRandom random = ThreadLocalRandom.current();
-
-    private static final List<String> QUOTES = Arrays.asList(
-            "Cockroaches can eat anything",
-            "Roaches can live up to a week without their head",
-            "There are more than 4,000 species of cockroaches worldwide",
-            "Cockroaches can run up to three miles in an hour"
-    );
-
     @Autowired
     private RestCommands restCommands;
 
@@ -61,7 +51,7 @@ public class Transfer extends AbstractCommand {
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "execution iterations (precedence over duration if >0)", defaultValue = "0")
-                    int iterations,
+            int iterations,
             @ShellOption(help = "number of threads per city", defaultValue = "1") int concurrency,
             @ShellOption(help = "fake test run", defaultValue = "false") boolean fake
     ) {
@@ -84,7 +74,7 @@ public class Transfer extends AbstractCommand {
         double max = Double.parseDouble(maxAmount);
 
         accounts.forEach((city, accountModels) -> {
-            IntStream.rangeClosed(1,concurrency).forEach(value -> {
+            IntStream.rangeClosed(1, concurrency).forEach(value -> {
                 if (iterations > 0) {
                     executorTemplate.runAsync(city + " (transfer) " + iterations,
                             () -> transferFunds(transferLink, city, accountModels, min, max, legs, fake),
@@ -133,7 +123,7 @@ public class Transfer extends AbstractCommand {
             builder.addLeg()
                     .withId(account.getId())
                     .withAmount(value % 2 == 0 ? transferAmount.negate() : transferAmount)
-                    .withNote(RandomData.selectRandom(QUOTES))
+                    .withNote(CockroachFacts.nextFact())
                     .then();
         });
 

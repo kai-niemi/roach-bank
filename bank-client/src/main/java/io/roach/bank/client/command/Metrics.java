@@ -1,18 +1,18 @@
-package io.roach.bank.client;
+package io.roach.bank.client.command;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.ansi.AnsiColor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import io.roach.bank.client.support.CallMetrics;
+import io.roach.bank.client.command.support.CallMetrics;
+import jakarta.annotation.PostConstruct;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -23,7 +23,7 @@ public class Metrics extends AbstractCommand {
     private ScheduledExecutorService scheduledExecutorService;
 
     @Autowired
-    @Qualifier("jobExecutor")
+    @Qualifier("workloadExecutor")
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
@@ -37,21 +37,21 @@ public class Metrics extends AbstractCommand {
     @ShellMethod(value = "Reset call metrics", key = {"reset-metrics", "rm"})
     public void resetStats() {
         callMetrics.reset();
-        console.green("Metrics reset\n");
+        console.successf("Metrics reset\n");
     }
 
-    @ShellMethod(value = "Toggle console metrics", key = {"toggle-metrics", "tm"})
+    @ShellMethod(value = "Toggle console metrics", key = {"toggle-metrics", "m"})
     public void toggleMetrics() {
         printMetrics = !printMetrics;
-        console.green("Metrics printing is %s\n", printMetrics ? "on" : "off");
+        console.successf("Metrics printing is %s", printMetrics ? "on" : "off");
     }
 
     private Runnable callMetricsPrinter() {
         return () -> {
             if (printMetrics && threadPoolTaskExecutor.getActiveCount() > 0) {
-                console.cyan("%s", callMetrics.prettyPrintHeader());
-                console.white("%s", callMetrics.prettyPrintBody());
-                console.green("%s", callMetrics.prettyPrintFooter());
+                console.otherf(AnsiColor.BRIGHT_GREEN, "%s\n", callMetrics.prettyPrintHeader());
+                console.otherf(AnsiColor.BRIGHT_YELLOW, "%s\n", callMetrics.prettyPrintBody());
+                console.otherf(AnsiColor.BRIGHT_MAGENTA, "%s\n", callMetrics.prettyPrintFooter());
             }
         };
     }

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
@@ -18,6 +19,7 @@ import io.roach.bank.repository.AccountRepository;
 
 @Service
 @TransactionBoundary
+@Retryable
 public class DefaultAccountService implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
@@ -25,6 +27,7 @@ public class DefaultAccountService implements AccountService {
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
         return accountRepository.findPageByCity(cities, page);
     }
@@ -32,12 +35,14 @@ public class DefaultAccountService implements AccountService {
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public List<Account> findTopAccountsByCity(String city, int limit) {
         return accountRepository.findByCity(city, limit);
     }
 
     @Override
     @TransactionBoundary(readOnly = true)
+    @Retryable
     public Account getAccountById(UUID id) {
         return accountRepository.getAccountById(id)
                 .orElseThrow(() -> new NoSuchAccountException(id));
@@ -45,6 +50,7 @@ public class DefaultAccountService implements AccountService {
 
     @Override
     @TransactionBoundary(readOnly = true)
+    @Retryable
     public Money getBalance(UUID id) {
         return accountRepository.getBalance(id);
     }
@@ -52,6 +58,7 @@ public class DefaultAccountService implements AccountService {
     @Override
     @TransactionBoundary(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public Money getBalanceSnapshot(UUID id) {
         return accountRepository.getBalanceSnapshot(id);
     }

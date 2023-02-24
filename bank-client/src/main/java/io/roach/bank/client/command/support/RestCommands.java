@@ -1,4 +1,4 @@
-package io.roach.bank.client.support;
+package io.roach.bank.client.command.support;
 
 import java.net.URI;
 import java.util.*;
@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
-import io.roach.bank.client.Constants;
+import io.roach.bank.client.command.Constants;
 
 import static io.roach.bank.api.LinkRelations.*;
 

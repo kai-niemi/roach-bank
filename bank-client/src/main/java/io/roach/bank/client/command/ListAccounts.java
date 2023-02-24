@@ -1,4 +1,4 @@
-package io.roach.bank.client;
+package io.roach.bank.client.command;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,12 +16,12 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.client.support.RestCommands;
+import io.roach.bank.client.command.support.RestCommands;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_LIST_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
 import static io.roach.bank.api.LinkRelations.withCurie;
-import static io.roach.bank.client.Constants.ACCOUNT_MODEL_PTR;
+import static io.roach.bank.client.command.Constants.ACCOUNT_PAGE_MODEL_PTR;
 
 @ShellComponent
 @ShellCommandGroup(Constants.METADATA_COMMANDS)
@@ -41,13 +41,13 @@ public class ListAccounts extends AbstractCommand {
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_LIST_REL))
                 .withTemplateParameters(parameters)
-                .toObject(ACCOUNT_MODEL_PTR);
+                .toObject(ACCOUNT_PAGE_MODEL_PTR);
 
         outer_loop:
         for (; ; ) {
-            console.cyan(">> Page %s\n", Objects.requireNonNull(accountPage).getMetadata());
+            console.infof(">> Page %s", Objects.requireNonNull(accountPage).getMetadata());
 
-            console.yellow("%15s|%10s|%8s|%15s|%10s|%10s| %s\n",
+            console.successf("%15s|%10s|%8s|%15s|%10s|%10s| %s",
                     "Name",
                     "Desc",
                     "Type",
@@ -57,7 +57,7 @@ public class ListAccounts extends AbstractCommand {
                     "Link");
 
             for (AccountModel accountModel : accountPage) {
-                console.yellow("%15s|%10s|%8s|%15s|%10s|%10s| %s\n",
+                console.successf("%15s|%10s|%8s|%15s|%10s|%10s| %s",
                         accountModel.getName(),
                         accountModel.getDescription(),
                         accountModel.getAccountType(),
@@ -76,29 +76,29 @@ public class ListAccounts extends AbstractCommand {
 
             innner_loop:
             for (; ; ) {
-                console.cyan("%s\n", sb.toString());
+                console.infof("%s", sb.toString());
                 Scanner s = new Scanner(System.in);
                 if (s.hasNext()) {
                     switch (s.next()) {
                         case "N":
                         case "n":
                             accountPage = restCommands.follow(accountPage.getNextLink())
-                                    .toObject(ACCOUNT_MODEL_PTR);
+                                    .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "P":
                         case "p":
                             accountPage = restCommands.follow(accountPage.getPreviousLink())
-                                    .toObject(ACCOUNT_MODEL_PTR);
+                                    .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "F":
                         case "f":
                             accountPage = restCommands.follow(accountPage.getLink(IanaLinkRelations.FIRST))
-                                    .toObject(ACCOUNT_MODEL_PTR);
+                                    .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "L":
                         case "l":
                             accountPage = restCommands.follow(accountPage.getLink(IanaLinkRelations.LAST))
-                                    .toObject(ACCOUNT_MODEL_PTR);
+                                    .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "C":
                         case "c":

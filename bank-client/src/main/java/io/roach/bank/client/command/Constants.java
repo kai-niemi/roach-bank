@@ -1,6 +1,7 @@
-package io.roach.bank.client;
+package io.roach.bank.client.command;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 
 import io.roach.bank.api.AccountModel;
@@ -30,8 +31,12 @@ public abstract class Constants {
 
     public static final String DEFAULT_ACCOUNT_LIMIT = "-1";
 
-    public static final ParameterizedTypeReference<PagedModel<AccountModel>> ACCOUNT_MODEL_PTR
-            = new ParameterizedTypeReference<PagedModel<AccountModel>>() {
+    public static final ParameterizedTypeReference<CollectionModel<AccountModel>> ACCOUNT_MODEL_PTR
+            = new ParameterizedTypeReference<>() {
+    };
+
+    public static final ParameterizedTypeReference<PagedModel<AccountModel>> ACCOUNT_PAGE_MODEL_PTR
+            = new ParameterizedTypeReference<>() {
     };
 
     private Constants() {

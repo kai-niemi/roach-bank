@@ -37,8 +37,7 @@ public class DriverRetryConfig {
     }
 
     @Bean
-    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
-    public TransactionAttributesAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
+    public TransactionAttributesAspect transactionAttributesAspect(JdbcTemplate jdbcTemplate) {
         return new TransactionAttributesAspect(jdbcTemplate);
     }
 }

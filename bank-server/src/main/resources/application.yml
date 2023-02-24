@@ -141,7 +141,7 @@ roachbank:
   accountsPerCityLimit: 100
   # Load account by reference or hit database with SELECT (former drastically reduce contention)
   loadAccountByReference: false
-  # Load account with SELECT FOR UPDATE
+  # Read accounts with SELECT FOR UPDATE
   loadAccountWithSFU: false
   # Account plan to run workload against
   accountPlan:

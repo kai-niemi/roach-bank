@@ -1,4 +1,4 @@
-package io.roach.bank.client;
+package io.roach.bank.client.command;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,9 +15,9 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.client.support.DurationFormat;
-import io.roach.bank.client.support.ExecutorTemplate;
-import io.roach.bank.client.support.RestCommands;
+import io.roach.bank.client.command.support.ExecutorTemplate;
+import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.util.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_BATCH_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
@@ -69,7 +69,8 @@ public class CreateAccounts extends AbstractCommand {
                 };
 
                 if (StringUtils.hasLength(duration)) {
-                    executorTemplate.runAsync(city + " (create) " + duration, worker, DurationFormat.parseDuration(duration));
+                    executorTemplate.runAsync(city + " (accounts) " + duration, worker,
+                            DurationFormat.parseDuration(duration));
 
                     logger.info("Creating accounts in '{}' for duration of {}", city, duration);
                 } else {

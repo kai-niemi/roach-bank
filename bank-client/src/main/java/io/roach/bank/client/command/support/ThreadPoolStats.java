@@ -1,4 +1,4 @@
-package io.roach.bank.client.support;
+package io.roach.bank.client.command.support;
 
 import java.util.concurrent.ThreadPoolExecutor;
 

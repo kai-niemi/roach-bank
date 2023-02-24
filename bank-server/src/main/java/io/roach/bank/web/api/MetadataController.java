@@ -7,6 +7,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,12 +54,14 @@ public class MetadataController {
 
     @GetMapping(value = "/regions")
     @TransactionBoundary(readOnly = true)
+    @Retryable
     public Map<String, Set<String>> regionCities() {
         return metadataRepository.getAllRegionCities();
     }
 
     @GetMapping(value = "/region-cities")
     @TransactionBoundary(readOnly = true)
+    @Retryable
     public Set<String> regionCities(
             @RequestParam(name = "regions", required = false, defaultValue = "") List<String> regions) {
         return metadataRepository.getRegionCities(regions);
@@ -66,6 +69,7 @@ public class MetadataController {
 
     @GetMapping(value = "/gateway-region")
     @TransactionBoundary(readOnly = true)
+    @Retryable
     public ResponseEntity<String> gatewayRegion() {
         return ResponseEntity.ok(metadataRepository.getGatewayRegion());
     }

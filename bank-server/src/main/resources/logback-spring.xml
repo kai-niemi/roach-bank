@@ -18,6 +18,12 @@
     <logger name="org.springframework.transaction" level="INFO"/>
     <logger name="org.springframework.web" level="WARN"/>
 
+    <!-- Use TRACE level to see SQL statements and bindings -->
+    <logger name="io.roach.bank.SQL_TRACE" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ASYNC_FILE" />
+    </logger>
+
     <springProfile name="verbose">
         <logger name="io.cockroachdb.jdbc" level="DEBUG">
             <appender-ref ref="CONSOLE" />
@@ -25,12 +31,6 @@
         </logger>
 
         <logger name="io.cockroachdb.jdbc.retry" level="DEBUG">
-            <appender-ref ref="CONSOLE" />
-            <appender-ref ref="ASYNC_FILE" />
-        </logger>
-
-        <!-- Use TRACE level to see SQL statements and bindings -->
-        <logger name="io.roach.bank.SQL_TRACE" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="ASYNC_FILE" />
         </logger>

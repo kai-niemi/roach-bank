@@ -1,7 +1,5 @@
 package io.roach.bank.config;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +13,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Transaction management configuration that puts a savepoint
@@ -42,22 +41,13 @@ public class SavepointRetryConfig {
                 "Cant have both RETRY_SAVEPOINT and RETRY_CLIENT");
     }
 
-    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
     @Bean
     public SavepointRetryAspect savepointTransactionAspect(PlatformTransactionManager transactionManager) {
         return new SavepointRetryAspect(transactionManager, "cockroach_restart");
     }
 
-    @Profile({ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_DEV})
     @Bean
-    public SavepointRetryAspect savepointTransactionAspectUnnamed(
-            PlatformTransactionManager transactionManager) {
-        return new SavepointRetryAspect(transactionManager, null);
-    }
-
-    @Bean
-    @Profile({ProfileNames.CRDB_LOCAL, ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
-    public TransactionAttributesAspect transactionBoundaryAspect(JdbcTemplate jdbcTemplate) {
+    public TransactionAttributesAspect transactionAttributesAspect(JdbcTemplate jdbcTemplate) {
         return new TransactionAttributesAspect(jdbcTemplate);
     }
 }

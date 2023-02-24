@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
@@ -106,6 +107,7 @@ public class ReportWebSocketPublisher {
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
+    @Retryable
     public void computeSummaryAndPush(Set<String> cities) {
         cities.forEach(city -> {
             AccountSummary accountSummary = reportingRepository.accountSummary(city);

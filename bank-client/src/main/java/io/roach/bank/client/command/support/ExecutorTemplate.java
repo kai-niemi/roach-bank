@@ -1,4 +1,4 @@
-package io.roach.bank.client.support;
+package io.roach.bank.client.command.support;
 
 import java.time.Duration;
 import java.util.LinkedList;
@@ -6,9 +6,8 @@ import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import jakarta.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
+
+import jakarta.annotation.PreDestroy;
 
 @Component
 public class ExecutorTemplate {
@@ -27,21 +27,19 @@ public class ExecutorTemplate {
 
     private final Map<String, AtomicInteger> workers = new ConcurrentHashMap<>();
 
-    private final LinkedList<ListenableFuture<Void>> futures = new LinkedList<>();
+    private final LinkedList<Future<Void>> futures = new LinkedList<>();
 
     private volatile boolean cancelRequested;
 
-    @Qualifier("jobExecutor")
+    @Qualifier("workloadExecutor")
     @Autowired
     private ThreadPoolTaskExecutor threadPoolExecutor;
 
     @Autowired
     private CallMetrics callMetrics;
 
-    public ListenableFuture<Void> runAsync(String id, Runnable runnable, Duration duration) {
-        logger.info("Started '{}' to run for {}", id, duration);
-
-        ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
+    public Future<Void> runAsync(String id, Runnable runnable, Duration duration) {
+        Future<Void> future = threadPoolExecutor.submitListenable(() -> {
             final long startTime = System.currentTimeMillis();
 
             AtomicInteger activeWorkers = workers.computeIfAbsent(id, i -> new AtomicInteger());
@@ -60,9 +58,13 @@ public class ExecutorTemplate {
                 try {
                     runnable.run();
                     context.after(callTime, null);
-                } catch (HttpClientErrorException | HttpServerErrorException e) {
+                } catch (HttpClientErrorException.Conflict e) { // Serialization conflict rippled through
                     context.after(callTime, e);
                     backoffDelay(++fails, e);
+                } catch (HttpServerErrorException e) {
+                    context.after(callTime, e);
+                    logger.error("Server error - cancelling prematurely", e);
+                    break;
                 } catch (Exception e) {
                     context.after(callTime, e);
                     logger.error("Uncategorized error - cancelling prematurely", e);
@@ -79,13 +81,12 @@ public class ExecutorTemplate {
             return null;
         });
         futures.add(future);
+        logger.info("Started '{}' to run for {}", id, duration);
         return future;
     }
 
-    public ListenableFuture<Void> runAsync(String id, Runnable runnable, int iterations) {
-        logger.info("Started '{}' to run {} times", id, iterations);
-
-        ListenableFuture<Void> future = threadPoolExecutor.submitListenable(() -> {
+    public Future<Void> runAsync(String id, Runnable runnable, int iterations) {
+        Future<Void> future = threadPoolExecutor.submitListenable(() -> {
             AtomicInteger activeWorkers = workers.computeIfAbsent(id, i -> new AtomicInteger());
             activeWorkers.incrementAndGet();
 
@@ -98,14 +99,18 @@ public class ExecutorTemplate {
                     break;
                 }
 
-                for (int fails=0; fails<10; fails++) {
+                for (int fails = 0; fails < 10; fails++) {
                     final long callTime = context.before();
                     try {
                         runnable.run();
                         context.after(callTime, null);
-                    } catch (HttpClientErrorException | HttpServerErrorException e) {
+                    } catch (HttpClientErrorException.Conflict e) { // Serialization conflict rippled through
                         context.after(callTime, e);
                         backoffDelay(++fails, e);
+                    } catch (HttpServerErrorException e) {
+                        context.after(callTime, e);
+                        logger.error("Server error - cancelling prematurely", e);
+                        break loop;
                     } catch (Exception e) {
                         context.after(callTime, e);
                         logger.error("Uncategorized error - cancelling", e);
@@ -123,6 +128,7 @@ public class ExecutorTemplate {
             return null;
         });
         futures.add(future);
+        logger.info("Started '{}' to run {} times", id, iterations);
         return future;
     }
 
@@ -150,7 +156,7 @@ public class ExecutorTemplate {
         while (!futures.isEmpty()) {
             logger.debug("Cancelling {} futures", futures.size());
 
-            ListenableFuture<Void> future = futures.pop();
+            Future<Void> future = futures.pop();
             future.cancel(true);
             try {
                 future.get();

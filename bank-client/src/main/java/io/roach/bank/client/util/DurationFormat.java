@@ -1,4 +1,4 @@
-package io.roach.bank.client.support;
+package io.roach.bank.client.util;
 
 import java.time.Duration;
 import java.util.Locale;

@@ -1,4 +1,4 @@
-package io.roach.bank.client;
+package io.roach.bank.client.command;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -20,9 +20,9 @@ import org.springframework.shell.standard.commands.Quit;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.api.MessageModel;
-import io.roach.bank.client.support.Console;
-import io.roach.bank.client.support.DurationFormat;
-import io.roach.bank.client.support.RestCommands;
+import io.roach.bank.client.command.support.Console;
+import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.util.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
 import static io.roach.bank.api.LinkRelations.TOGGLE_TRACE_LOG;
@@ -49,43 +49,43 @@ public class Admin implements Quit.Command {
     @ShellMethod(value = "Print application uptime")
     public void uptime() {
         long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
-        console.cyan("%s\n", DurationFormat.millisecondsToDisplayString(uptime));
+        console.infof("%s", DurationFormat.millisecondsToDisplayString(uptime));
     }
 
     @ShellMethod(value = "Print system information", key = {"system-info", "si"})
     public void systemInfo() {
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-        console.yellow(">> OS\n");
-        console.cyan(" Arch: %s | OS: %s | Version: %s\n", os.getArch(), os.getName(), os.getVersion());
-        console.cyan(" Available processors: %d\n", os.getAvailableProcessors());
-        console.cyan(" Load avg: %f\n", os.getSystemLoadAverage());
+        console.successf(">> OS");
+        console.infof(" Arch: %s | OS: %s | Version: %s", os.getArch(), os.getName(), os.getVersion());
+        console.infof(" Available processors: %d", os.getAvailableProcessors());
+        console.infof(" Load avg: %f", os.getSystemLoadAverage());
 
         RuntimeMXBean r = ManagementFactory.getRuntimeMXBean();
-        console.yellow(">> Runtime\n");
-        console.cyan(" Uptime: %s\n", r.getUptime());
-        console.cyan(" VM name: %s | Vendor: %s | Version: %s\n", r.getVmName(), r.getVmVendor(), r.getVmVersion());
+        console.successf(">> Runtime");
+        console.infof(" Uptime: %s", r.getUptime());
+        console.infof(" VM name: %s | Vendor: %s | Version: %s", r.getVmName(), r.getVmVendor(), r.getVmVersion());
 
         ThreadMXBean t = ManagementFactory.getThreadMXBean();
-        console.yellow(">> Runtime\n");
-        console.cyan(" Peak threads: %d\n", t.getPeakThreadCount());
-        console.cyan(" Thread #: %d\n", t.getThreadCount());
-        console.cyan(" Total started threads: %d\n", t.getTotalStartedThreadCount());
+        console.successf(">> Runtime");
+        console.infof(" Peak threads: %d", t.getPeakThreadCount());
+        console.infof(" Thread #: %d", t.getThreadCount());
+        console.infof(" Total started threads: %d", t.getTotalStartedThreadCount());
 
         Arrays.stream(t.getAllThreadIds()).sequential().forEach(value -> {
-            console.cyan(" Thread (%d): %s %s\n", value,
+            console.infof(" Thread (%d): %s %s", value,
                     t.getThreadInfo(value).getThreadName(),
                     t.getThreadInfo(value).getThreadState().toString()
             );
         });
 
         MemoryMXBean m = ManagementFactory.getMemoryMXBean();
-        console.yellow(">> Memory\n");
-        console.cyan(" Heap: %s\n", m.getHeapMemoryUsage().toString());
-        console.cyan(" Non-heap: %s\n", m.getNonHeapMemoryUsage().toString());
-        console.cyan(" Pending GC: %s\n", m.getObjectPendingFinalizationCount());
+        console.successf(">> Memory");
+        console.infof(" Heap: %s", m.getHeapMemoryUsage().toString());
+        console.infof(" Non-heap: %s", m.getNonHeapMemoryUsage().toString());
+        console.infof(" Pending GC: %s", m.getObjectPendingFinalizationCount());
     }
 
-    @ShellMethod(value = "Toggle SQL trace logging (server side)", key = {"sql-trace"})
+    @ShellMethod(value = "Toggle SQL trace logging (server side)", key = {"trace"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void toggleSqlTraceLogging() {
         Link submitLink = restCommands.fromRoot()
@@ -99,9 +99,9 @@ public class Admin implements Quit.Command {
                 .post(Link.of(builder.build().toUriString()), MessageModel.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            console.yellow("Unexpected HTTP status: %s\n", response.toString());
+            console.successf("Unexpected HTTP status: %s", response.toString());
         } else {
-            console.green("%s\n", response.getBody().getMessage());
+            console.errorf("%s", response.getBody().getMessage());
         }
     }
 }

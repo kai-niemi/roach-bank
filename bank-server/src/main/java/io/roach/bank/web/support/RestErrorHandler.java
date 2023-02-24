@@ -7,6 +7,7 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.hateoas.mediatype.problem.Problem;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -205,5 +206,13 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
                 .withTitle(ex.getLocalizedMessage())
                 .withDetail(Objects.toString(ex.getCause()))
                 .withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    @ExceptionHandler({TransientDataAccessException.class})
+    public ResponseEntity<Object> handleTransientDataAccessException(TransientDataAccessException ex) {
+        return wrap(Problem.create()
+                .withTitle(ex.getLocalizedMessage())
+                .withDetail(Objects.toString(ex.getCause()))
+                .withStatus(HttpStatus.CONFLICT));
     }
 }

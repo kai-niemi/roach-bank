@@ -214,13 +214,14 @@ public class AdminController {
     }
 
     private boolean toggleLogLevel(String name, Level traceLevel) {
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.LoggerContext loggerContext = (ch.qos.logback.classic.LoggerContext) LoggerFactory
+                .getILoggerFactory();
         ch.qos.logback.classic.Logger logger = loggerContext.getLogger(name);
-        if (logger.getLevel().isGreaterOrEqual(Level.INFO)) {
+        if (logger.getLevel().isGreaterOrEqual(ch.qos.logback.classic.Level.DEBUG)) {
             logger.setLevel(traceLevel);
             return true;
         } else {
-            logger.setLevel(Level.INFO);
+            logger.setLevel(Level.DEBUG);
             return false;
         }
     }

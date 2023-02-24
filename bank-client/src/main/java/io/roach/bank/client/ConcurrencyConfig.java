@@ -1,4 +1,4 @@
-package io.roach.bank.client.config;
+package io.roach.bank.client;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,19 +11,17 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import io.roach.bank.client.support.CallMetrics;
-
 @Configuration
 @EnableAsync
 public class ConcurrencyConfig implements AsyncConfigurer {
     @Override
-    @Bean(name = "jobExecutor")
+    @Bean(name = "workloadExecutor")
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 8);
         executor.setMaxPoolSize(300);
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadNamePrefix("worker");
+        executor.setThreadNamePrefix("workload");
         return executor;
     }
 
@@ -35,10 +33,5 @@ public class ConcurrencyConfig implements AsyncConfigurer {
     @Bean(destroyMethod = "shutdown")
     public ScheduledExecutorService scheduledExecutor() {
         return Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-    }
-
-    @Bean
-    public CallMetrics callMetrics() {
-        return new CallMetrics();
     }
 }

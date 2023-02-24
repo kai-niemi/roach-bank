@@ -80,6 +80,8 @@ public abstract class ProfileNames {
      */
     public static final String PSQL_LOCAL = "psql-local";
 
+    public static final String PSQL_CLOUD = "psql-cloud";
+
     /**
      * pgjdbc driver dev
      */
