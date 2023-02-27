@@ -6,13 +6,13 @@
 
 title="CockroachDB single region deployment (AWS)"
 # CRDB release version
-releaseversion="v22.2.0"
+releaseversion="v22.2.5"
 # Number of node instances in total including clients
-nodes="4"
+nodes="12"
 # Nodes hosting CRDB
-crdbnodes="1-3"
+crdbnodes="1-9"
 # Array of client nodes (must match size of regions)
-clients=(4)
+clients=(10,11,12)
 # Array of regions localities (must match zone names)
 regions=('eu-central-1')
 # AWS/GCE cloud (aws|gce)
@@ -22,7 +22,15 @@ zones="\
 eu-central-1a,\
 eu-central-1b,\
 eu-central-1c,\
-eu-central-1a"
+eu-central-1a,\
+eu-central-1b,\
+eu-central-1c,\
+eu-central-1a,\
+eu-central-1b,\
+eu-central-1c,\
+eu-central-1a,\
+eu-central-1b,\
+eu-central-1c"
 
 # AWS/GCE machine types
 machinetypes="c5d.4xlarge"
