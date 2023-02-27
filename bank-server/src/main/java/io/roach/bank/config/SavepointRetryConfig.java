@@ -45,9 +45,4 @@ public class SavepointRetryConfig {
     public SavepointRetryAspect savepointTransactionAspect(PlatformTransactionManager transactionManager) {
         return new SavepointRetryAspect(transactionManager, "cockroach_restart");
     }
-
-    @Bean
-    public TransactionAttributesAspect transactionAttributesAspect(JdbcTemplate jdbcTemplate) {
-        return new TransactionAttributesAspect(jdbcTemplate);
-    }
 }

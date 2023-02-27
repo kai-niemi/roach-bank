@@ -19,6 +19,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -83,16 +84,13 @@ public class TransactionFormController {
         });
 
         if (accounts.isEmpty()) {
-            throw new MetadataException("No accounts matching regions: "
-                    + StringUtils.collectionToCommaDelimitedString(regions));
+            throw new BadRequestException(
+                    "No accounts matching regions: " + StringUtils.collectionToCommaDelimitedString(regions));
         }
 
-        TransactionForm.Builder formBuilder = TransactionForm.builder()
-                .withUUID(UUID.randomUUID())
-                .withCity(accounts.iterator().next().getCity())
-                .withBookingDate(LocalDate.now())
-                .withTransferDate(LocalDate.now())
-                .withTransactionType("GEN");
+        TransactionForm.Builder formBuilder = TransactionForm.builder().withUUID(UUID.randomUUID())
+                .withCity(accounts.iterator().next().getCity()).withBookingDate(LocalDate.now())
+                .withTransferDate(LocalDate.now()).withTransactionType("GEN");
 
         AtomicBoolean flip = new AtomicBoolean();
 
@@ -101,20 +99,13 @@ public class TransactionFormController {
             if (flip.getAndSet(!flip.get())) {
                 a = a.negate();
             }
-            formBuilder.addLeg()
-                    .withId(account.getId())
-                    .withAmount(a)
-                    .withNote(CockroachFacts.nextFact())
-                    .then();
+            formBuilder.addLeg().withId(account.getId()).withAmount(a).withNote(CockroachFacts.nextFact()).then();
         });
 
 
-        Link affordances = Affordances.of(linkTo(methodOn(getClass())
-                        .getTransactionRequestForm(accountsPerRegion, amount, regions))
-                        .withSelfRel()
-                        .andAffordance(afford(methodOn(getClass())
-                                .submitTransactionForm(null))))
-                .toLink();
+        Link affordances = Affordances.of(
+                linkTo(methodOn(getClass()).getTransactionRequestForm(accountsPerRegion, amount, regions)).withSelfRel()
+                        .andAffordance(afford(methodOn(getClass()).submitTransactionForm(null)))).toLink();
 
         return ResponseEntity.ok().body(formBuilder.build().add(affordances));
     }
@@ -126,9 +117,7 @@ public class TransactionFormController {
         UUID idempotencyKey = form.getUuid();
 
         try {
-            Link selfLink = linkTo(methodOn(TransactionController.class)
-                    .getTransaction(idempotencyKey))
-                    .withSelfRel();
+            Link selfLink = linkTo(methodOn(TransactionController.class).getTransaction(idempotencyKey)).withSelfRel();
             Transaction entity = bankService.createTransaction(idempotencyKey, form);
             if (FollowLocation.ofCurrentRequest()) {
                 return ResponseEntity.created(selfLink.toUri()).body(transactionResourceAssembler.toModel(entity));
@@ -137,10 +126,9 @@ public class TransactionFormController {
         } catch (DataIntegrityViolationException e) {
             String msg = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
             if (msg.contains("duplicate key value")) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return ResponseEntity.status(HttpStatus.OK)
-                        .location(linkTo(methodOn(TransactionController.class)
-                                .getTransaction(idempotencyKey))
-                                .toUri())
+                        .location(linkTo(methodOn(TransactionController.class).getTransaction(idempotencyKey)).toUri())
                         .build();
             }
             throw e;

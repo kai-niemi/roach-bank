@@ -5,7 +5,7 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
@@ -23,7 +24,7 @@ import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.TransactionRepository;
 
 @Service
-@Transactional(propagation = Propagation.MANDATORY)
+@Transactional(propagation = Propagation.SUPPORTS)
 public class DefaultTransactionService implements TransactionService {
     @Autowired
     private AccountRepository accountRepository;
@@ -31,17 +32,15 @@ public class DefaultTransactionService implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    @Value("${roachbank.loadAccountByReference}")
-    private boolean loadByReference;
+    @Value("${roachbank.updateRunningBalance}")
+    private boolean updateRunningBalance;
 
-    @Value("${roachbank.loadAccountWithSFU}")
-    private boolean loadAccountWithSFU;
+    @Value("${roachbank.selectForUpdate}")
+    private boolean selectForUpdate;
 
     @Override
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
-        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
-            throw new IllegalStateException("No transaction context - check Spring profile settings");
-        }
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
 
         // Short-circuit
         if (transactionForm.isFake()) {
@@ -66,10 +65,11 @@ public class DefaultTransactionService implements TransactionService {
 
         List<Account> accounts;
 
-        if (!loadByReference) {
+        // Updating running balance requires one additional read per account
+        if (updateRunningBalance) {
             Set<UUID> accountIds = new HashSet<>();
             legs.forEach((accountId, value) -> accountIds.add(accountId));
-            accounts = accountRepository.findByIDs(accountIds, loadAccountWithSFU);
+            accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
         } else {
             accounts = Collections.emptyList();
         }
@@ -77,27 +77,20 @@ public class DefaultTransactionService implements TransactionService {
         legs.forEach((accountId, value) -> {
             final Money amount = value.getFirst();
 
-            Account account;
-            Money runningBalance;
-
-            // Get by reference to avoid SELECT but no running balance
-            if (loadByReference) {
-                account = accountRepository.getAccountByReference(accountId);
-                runningBalance = Money.zero(Money.USD);
-            } else {
-                account = accounts.stream()
-                        .filter(a -> a.getId().equals(accountId))
-                        .findFirst()
-                        .orElseThrow(() -> new NoSuchAccountException(accountId));
-                runningBalance = account.getBalance();
-            }
+            Account account = updateRunningBalance
+                    ? accounts.stream()
+                    .filter(a -> a.getId().equals(accountId))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchAccountException(accountId))
+                    // Get by reference/proxy that avoids reading from the DB
+                    : accountRepository.getAccountByReference(accountId);
 
             transactionBuilder
                     .andItem()
                     .withAccount(account)
                     .withAmount(amount)
                     .withNote(value.getSecond())
-                    .withRunningBalance(runningBalance)
+                    .withRunningBalance(updateRunningBalance ? account.getBalance() : Money.zero(amount.getCurrency()))
                     .then();
 
             balanceUpdates.add(Pair.of(accountId, amount.getAmount()));
@@ -105,7 +98,7 @@ public class DefaultTransactionService implements TransactionService {
 
         try {
             accountRepository.updateBalances(balanceUpdates);
-        } catch (IncorrectResultSizeDataAccessException e) {
+        } catch (NonTransientDataAccessException e) {
             throw new NegativeBalanceException("Negative balance check failed", e);
         }
 
@@ -149,8 +142,9 @@ public class DefaultTransactionService implements TransactionService {
     }
 
     @Override
-    public TransactionItem getItemById(TransactionItem.Id id) {
-        return transactionRepository.getTransactionItemById(id);
+    public TransactionItem findItemById(UUID transactionId, UUID accountId) {
+        return transactionRepository.findTransactionItemById(
+                TransactionItem.Id.of(accountId, transactionId));
     }
 
     @Override
@@ -160,6 +154,7 @@ public class DefaultTransactionService implements TransactionService {
 
     @Override
     public void deleteAll() {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
         transactionRepository.deleteAll();
     }
 }

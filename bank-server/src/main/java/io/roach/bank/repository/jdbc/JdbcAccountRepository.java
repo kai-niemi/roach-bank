@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.service.NegativeBalanceException;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -56,7 +58,7 @@ public class JdbcAccountRepository implements AccountRepository {
     public Account createAccount(Account account) {
         jdbcTemplate.update("INSERT INTO account "
                         + "(id, city, balance, currency, name, description, type, closed, allow_negative, updated) "
-                        + "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                        + "VALUES(?,?,?,?,?,?,?::account_type,?,?,?)",
                 account.getId(),
                 account.getCity(),
                 account.getBalance().getAmount(),
@@ -105,35 +107,29 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
-        int[] rowsAffected = jdbcTemplate.batchUpdate(
-                "UPDATE account "
-                        + "SET "
-                        + "   balance = balance + ?,"
-                        + "   updated = clock_timestamp() "
-                        + "WHERE id = ? "
-                        + "   AND closed=false "
-                        + "   AND (balance + ?) * abs(allow_negative-1) >= 0",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Pair<UUID, BigDecimal> entry = balanceUpdates.get(i);
-                        ps.setBigDecimal(1, entry.getSecond());
-                        ps.setObject(2, entry.getFirst());
-                        ps.setBigDecimal(3, entry.getSecond());
-                    }
+        int rows = jdbcTemplate.update(
+                "UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp() "
+                        + "FROM "
+                        + "(select unnest(?) as id, unnest(?) as balance) as data_table "
+                        + "WHERE account.id=data_table.id "
+                        + "AND account.closed=false "
+                        + "AND (account.balance + data_table.balance) * abs(account.allow_negative-1) >= 0",
+                ps -> {
+                    List<UUID> ids = new ArrayList<>();
+                    List<BigDecimal> balances = new ArrayList<>();
 
-                    @Override
-                    public int getBatchSize() {
-                        return balanceUpdates.size();
-                    }
+                    balanceUpdates.forEach(pair -> {
+                        ids.add(pair.getFirst());
+                        balances.add(pair.getSecond());
+                    });
+                    ps.setArray(1, ps.getConnection()
+                            .createArrayOf("UUID", ids.toArray()));
+                    ps.setArray(2, ps.getConnection()
+                            .createArrayOf("DECIMAL", balances.toArray()));
                 });
-
-        // Check invariant on neg balance
-        Arrays.stream(rowsAffected)
-                .filter(i -> i != 1)
-                .forEach(i -> {
-                    throw new IncorrectResultSizeDataAccessException(1, i);
-                });
+        if (rows != balanceUpdates.size()) {
+            throw new IncorrectResultSizeDataAccessException(balanceUpdates.size(), rows);
+        }
     }
 
     @Override

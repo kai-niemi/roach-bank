@@ -61,29 +61,42 @@ public abstract class ProfileNames {
     public static final String JDBC = "!jpa";
 
     /**
-     * crdb-jdbc local.
+     * crdb-jdbc driver local.
      */
     public static final String CRDB_LOCAL = "crdb-local";
 
     /**
-     * crdb-jdbc dev.
+     * crdb-jdbc driver dev.
      */
     public static final String CRDB_DEV = "crdb-dev";
 
     /**
-     * crdb-jdbc dedicated/serverless.
+     * crdb-jdbc driver dedicated/serverless.
      */
     public static final String CRDB_CLOUD = "crdb-cloud";
 
     /**
-     * pgjdbc driver local
+     * pg-jdbc driver local.
+     */
+    public static final String PGJDBC_LOCAL = "pgjdbc-local";
+
+    /**
+     * pg-jdbc driver dev.
+     */
+    public static final String PGJDBC_DEV = "pgjdbc-dev";
+
+    /**
+     * pg-jdbc driver dedicated/serverless.
+     */
+    public static final String PGJDBC_CLOUD = "pgjdbc-cloud";
+
+    /**
+     * PostgreSQL local
      */
     public static final String PSQL_LOCAL = "psql-local";
 
-    public static final String PSQL_CLOUD = "psql-cloud";
-
     /**
-     * pgjdbc driver dev
+     * PostgreSQL dev
      */
     public static final String PSQL_DEV = "psql-dev";
 

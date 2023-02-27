@@ -1,4 +1,11 @@
--- RoachBank DDL for CockroachDB
+-- RoachBank DDL for PostgreSQL 10+
+CREATE EXTENSION if not exists pgcrypto;
+
+CREATE FUNCTION gateway_region() RETURNS text
+    AS $$ select 'europe_west1' $$
+    LANGUAGE SQL
+    IMMUTABLE
+    RETURNS NULL ON NULL INPUT;
 
 drop type if exists account_type;
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
@@ -15,9 +22,9 @@ create type transaction_type as enum ('GEN');
 
 create table region
 (
-    cloud  string not null,
-    name   string not null,
-    cities string not null,
+    cloud  varchar(256) not null,
+    name   varchar(256) not null,
+    cities varchar(256) not null,
 
     primary key (name)
 );
@@ -29,12 +36,11 @@ create table region
 create table account
 (
     id             uuid           not null default gen_random_uuid(),
-    city           string         not null,
+    city           varchar(256)   not null,
     balance        decimal(19, 2) not null,
-    currency       string         not null default 'USD',
-    balance_money  string as (concat(balance::string, ' ', currency)) virtual,
-    name           string(128) not null,
-    description    string(256) null,
+    currency       varchar(3)     not null default 'USD',
+    name           varchar(128)   not null,
+    description    varchar(512)   null,
     type           account_type   not null,
     closed         boolean        not null default false,
     allow_negative integer        not null default 0,
@@ -43,14 +49,14 @@ create table account
     primary key (id)
 );
 
-create index on account (city) storing (balance, currency);
+create index on account (city);
 
 create table transaction
 (
     id               uuid             not null default gen_random_uuid(),
-    city             string           not null,
-    booking_date     date             not null default current_date(),
-    transfer_date    date             not null default current_date(),
+    city             varchar(256)     not null,
+    booking_date     date             not null default CURRENT_DATE,
+    transfer_date    date             not null default CURRENT_DATE,
     transaction_type transaction_type not null,
 
     primary key (id)
@@ -58,27 +64,25 @@ create table transaction
 
 create table transaction_item
 (
-    transaction_id        uuid           not null,
-    account_id            uuid           not null,
-    city                  string         not null,
-    amount                decimal(19, 2) not null,
-    currency              string         not null default 'USD',
-    amount_money          string as (concat(amount::string, ' ', currency)) virtual,
-    note                  string,
-    running_balance       decimal(19, 2) not null,
-    running_balance_money string as (concat(running_balance::string, ' ', currency)) virtual,
+    transaction_id  uuid           not null,
+    account_id      uuid           not null,
+    city            varchar(256)   not null,
+    amount          decimal(19, 2) not null,
+    currency        varchar(256)   not null default 'USD',
+    note            varchar(512),
+    running_balance decimal(19, 2) not null,
 
     primary key (transaction_id, account_id)
 );
 
 create table outbox
 (
-    id             uuid        not null default gen_random_uuid(),
-    create_time    timestamptz not null default clock_timestamp(),
-    aggregate_type string      not null,
-    aggregate_id   string      not null,
-    event_type     string      not null,
-    payload        jsonb       not null,
+    id             uuid         not null default gen_random_uuid(),
+    create_time    timestamptz  not null default clock_timestamp(),
+    aggregate_type varchar(256) not null,
+    aggregate_id   varchar(256) not null,
+    event_type     varchar(256) not null,
+    payload        jsonb        not null,
 
     primary key (id)
 );

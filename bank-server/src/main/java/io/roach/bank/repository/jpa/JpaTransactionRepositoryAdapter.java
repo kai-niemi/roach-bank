@@ -27,7 +27,7 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
 
     @Override
     public Transaction createTransaction(Transaction transaction) {
-        transaction.getItems().forEach(transactionItem -> itemRepository.save(transactionItem));
+        itemRepository.saveAll(transaction.getItems());
         return transactionRepository.save(transaction);
     }
 
@@ -42,8 +42,8 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    public TransactionItem getTransactionItemById(TransactionItem.Id id) {
-        return itemRepository.getById(id);
+    public TransactionItem findTransactionItemById(TransactionItem.Id id) {
+        return itemRepository.getReferenceById(id);
     }
 
     @Override

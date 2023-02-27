@@ -5,66 +5,59 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
 
 @Service
-@TransactionBoundary
-@Retryable
+@Transactional(propagation = Propagation.SUPPORTS)
 public class DefaultAccountService implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
     @Override
-    @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
-    @Retryable
+    public Account createAccount(Account account) {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
+        return accountRepository.createAccount(account);
+    }
+
+    @Override
     public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
         return accountRepository.findPageByCity(cities, page);
     }
 
     @Override
-    @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
-    @Retryable
     public List<Account> findTopAccountsByCity(String city, int limit) {
         return accountRepository.findByCity(city, limit);
     }
 
     @Override
-    @TransactionBoundary(readOnly = true)
-    @Retryable
     public Account getAccountById(UUID id) {
         return accountRepository.getAccountById(id)
                 .orElseThrow(() -> new NoSuchAccountException(id));
     }
 
     @Override
-    @TransactionBoundary(readOnly = true)
-    @Retryable
     public Money getBalance(UUID id) {
         return accountRepository.getBalance(id);
     }
 
     @Override
-    @TransactionBoundary(
-            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
-    @Retryable
     public Money getBalanceSnapshot(UUID id) {
         return accountRepository.getBalanceSnapshot(id);
     }
 
     @Override
     public Account openAccount(UUID id) {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
         accountRepository.openAccount(id);
         return accountRepository.getAccountById(id)
                 .orElseThrow(() -> new NoSuchAccountException(id));
@@ -72,6 +65,7 @@ public class DefaultAccountService implements AccountService {
 
     @Override
     public Account closeAccount(UUID id) {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
         accountRepository.closeAccount(id);
         return accountRepository.getAccountById(id)
                 .orElseThrow(() -> new NoSuchAccountException(id));
@@ -79,6 +73,7 @@ public class DefaultAccountService implements AccountService {
 
     @Override
     public void deleteAll() {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
         accountRepository.deleteAll();
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.cockroachdb.aspect.TransactionAttributesAspect;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -36,5 +38,16 @@ public class JdbcTransactionManagerConfig implements TransactionManagementConfig
     @Override
     public PlatformTransactionManager annotationDrivenTransactionManager() {
         return new DataSourceTransactionManager(dataSource);
+    }
+
+    /**
+     * Only for CRDB not PSQL.
+     */
+    @Bean
+    @Profile({
+            ProfileNames.PGJDBC_LOCAL, ProfileNames.PGJDBC_DEV, ProfileNames.PGJDBC_CLOUD, ProfileNames.CRDB_LOCAL,
+            ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
+    public TransactionAttributesAspect transactionAttributesAspect(JdbcTemplate jdbcTemplate) {
+        return new TransactionAttributesAspect(jdbcTemplate);
     }
 }

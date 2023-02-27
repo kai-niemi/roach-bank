@@ -84,11 +84,10 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
     @Override
     public Transaction findTransactionById(UUID id) {
-        List<Transaction> list = this.jdbcTemplate.query(
+        return DataAccessUtils.singleResult(this.jdbcTemplate.query(
                 "SELECT * FROM transaction WHERE id=?",
                 (rs, rowNum) -> mapToTransaction(rs),
-                id);
-        return DataAccessUtils.singleResult(list);
+                id));
     }
 
     private Transaction mapToTransaction(ResultSet rs) throws SQLException {
@@ -97,12 +96,17 @@ public class JdbcTransactionRepository implements TransactionRepository {
         String transactionType = rs.getString("transaction_type");
         LocalDate bookingDate = rs.getDate("booking_date").toLocalDate();
         LocalDate transferDate = rs.getDate("transfer_date").toLocalDate();
+
+        // N+1
+        List<TransactionItem> items = findTransactionItems(transactionId);
+
         return Transaction.builder()
                 .withId(transactionId)
                 .withCity(city)
                 .withTransactionType(transactionType)
                 .withBookingDate(bookingDate)
                 .withTransferDate(transferDate)
+                .withItems(items)
                 .build();
     }
 
@@ -146,15 +150,21 @@ public class JdbcTransactionRepository implements TransactionRepository {
         return DataAccessUtils.singleResult(results);
     }
 
-    @Override
-    public TransactionItem getTransactionItemById(TransactionItem.Id id) {
-        List<TransactionItem> list = this.jdbcTemplate.query(
+    private List<TransactionItem> findTransactionItems(UUID id) {
+        return  this.jdbcTemplate.query(
+                "SELECT * FROM transaction_item WHERE transaction_id=?",
+                (rs, rowNum) -> readTransactionItem(rs),
+                id
+        );
+    }
+
+    public TransactionItem findTransactionItemById(TransactionItem.Id id) {
+        return DataAccessUtils.requiredSingleResult(this.jdbcTemplate.query(
                 "SELECT * FROM transaction_item WHERE transaction_id=? "
                         + "AND account_id=? ",
                 (rs, rowNum) -> readTransactionItem(rs),
                 id.getTransactionId(), id.getAccountId()
-        );
-        return DataAccessUtils.requiredSingleResult(list);
+        ));
     }
 
     private TransactionItem readTransactionItem(ResultSet rs) throws SQLException {

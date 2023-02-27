@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 import javax.sql.DataSource;
 
@@ -15,11 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +31,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import io.roach.bank.api.ConnectionPoolConfig;
 import io.roach.bank.api.ConnectionPoolSize;
 import io.roach.bank.api.LinkRelations;
@@ -146,15 +144,15 @@ public class AdminController {
     }
 
     @PostMapping(value = "/clear")
-    @Async
-    public Future<?> clearAll() {
-        logger.warn("Deleting all transactions");
+    @TransactionBoundary
+    public ResponseEntity<String> clearAll() {
+        logger.warn("Deleting all transactions..");
         transactionService.deleteAll();
 
-        logger.warn("Deleting all accounts");
+        logger.warn("Deleting all accounts..");
         accountService.deleteAll();
 
-        return null;
+        return ResponseEntity.ok("All transactions and accounts deleted");
     }
 
     @GetMapping(value = "/pool-size")
@@ -173,8 +171,8 @@ public class AdminController {
     public ResponseEntity<MessageModel> setConnectionPoolSize(
             @RequestParam(value = "size", defaultValue = "50") int size) {
         hikariDataSource.setMaximumPoolSize(size);
-        hikariDataSource.setMinimumIdle(size / 2);
-        logger.info("Setting max pool size to {} min idle to {}", size, size / 2);
+        hikariDataSource.setMinimumIdle(size);
+        logger.info("Setting pool size to {}", size);
         return ResponseEntity.ok(new MessageModel("ok")
                 .add(linkTo(methodOn(getClass())
                         .getConnectionPoolConfig())

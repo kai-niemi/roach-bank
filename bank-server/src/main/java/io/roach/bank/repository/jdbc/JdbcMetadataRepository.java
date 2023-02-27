@@ -94,13 +94,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
     @Override
     public String getGatewayRegion() {
-        String version = namedParameterJdbcTemplate.queryForObject("select version()",
-                Collections.emptyMap(),
-                String.class);
-        if (version.contains("CockroachDB")) {
-            return namedParameterJdbcTemplate
-                    .queryForObject("SELECT gateway_region()", Collections.emptyMap(), String.class);
-        }
-        return "europe-west1";
+        return namedParameterJdbcTemplate
+                .queryForObject("SELECT gateway_region()", Collections.emptyMap(), String.class);
     }
 }

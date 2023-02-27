@@ -43,6 +43,19 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 @Controller
 public class RestErrorHandler extends ResponseEntityExceptionHandler implements ErrorController {
+    private ResponseEntity<Object> wrap(Problem problem) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+
+        if (problem.getStatus().is5xxServerError()) {
+            logger.error(problem);
+        } else {
+            logger.warn(problem);
+        }
+
+        return createResponseEntity(problem, headers, Objects.requireNonNull(problem.getStatus()), null);
+    }
+
     @RequestMapping("/error")
     public ResponseEntity<Object> handleError(HttpServletRequest request) {
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
@@ -55,12 +68,6 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
         return wrap(Problem.create()
                 .withStatus(httpStatus)
                 .withTitle(httpStatus.getReasonPhrase()));
-    }
-
-    protected ResponseEntity<Object> wrap(Problem problem) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
-        return createResponseEntity(problem, headers, Objects.requireNonNull(problem.getStatus()), null);
     }
 
     @ExceptionHandler({Exception.class})

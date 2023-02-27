@@ -12,6 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.cockroachdb.annotations.Retryable;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +42,7 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.AccountService;
+import io.roach.bank.service.AccountServiceFacade;
 import io.roach.bank.util.TimeBoundExecution;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -54,6 +59,9 @@ public class AccountController {
 
     @Value("${roachbank.accountsPerCityLimit}")
     private int accountsPerCityLimit;
+
+    @Autowired
+    private AccountServiceFacade accountServiceFacade;
 
     @Autowired
     private AccountService accountService;
@@ -126,7 +134,7 @@ public class AccountController {
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
         cities.forEach(city -> tasks.add(() -> {
-            accounts.addAll(accountService.findTopAccountsByCity(city, limitFinal));
+            accounts.addAll(accountServiceFacade.findTopAccountsByCity(city, limitFinal));
             return null;
         }));
 
@@ -138,6 +146,9 @@ public class AccountController {
     }
 
     @GetMapping(value = "/list")
+    @TransactionBoundary(
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public PagedModel<AccountModel> listAccounts(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
@@ -149,16 +160,23 @@ public class AccountController {
     }
 
     @GetMapping(value = "/{id}")
+    @TransactionBoundary(readOnly = true)
+    @Retryable
     public AccountModel getAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.getAccountById(id));
     }
 
     @GetMapping(value = "/{id}/balance")
+    @TransactionBoundary(readOnly = true)
+    @Retryable
     public Money getAccountBalance(@PathVariable("id") UUID id) {
         return accountService.getBalance(id);
     }
 
     @GetMapping(value = "/{id}/balance-snapshot")
+    @TransactionBoundary(
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public Money getAccountBalanceSnapshot(@PathVariable("id") UUID id) {
         return accountService.getBalanceSnapshot(id);
     }

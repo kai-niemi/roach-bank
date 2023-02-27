@@ -24,5 +24,10 @@ public abstract class AbstractEntity<T extends Serializable> implements Persista
     @PostLoad
     void markNotNew() {
         this.isNew = false;
+        onCreate();
+    }
+
+    protected void onCreate() {
+
     }
 }

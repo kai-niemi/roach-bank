@@ -21,7 +21,7 @@ public class IndexController {
     @GetMapping
     public ResponseEntity<MessageModel> index() {
         MessageModel index = new MessageModel();
-        index.setMessage("Welcome to text-only Bank. You are in a dark, cold lobby.");
+        index.setMessage("Welcome to text-only Roach Bank. You are in a dark, cold lobby.");
 
         index.add(linkTo(methodOn(AccountController.class)
                 .index())

@@ -1,5 +1,7 @@
 package io.roach.bank.config;
 
+import java.sql.Connection;
+
 import javax.sql.DataSource;
 
 import org.postgresql.PGProperty;
@@ -47,6 +49,11 @@ public class DataSourceConfig {
             ds.addDataSourceProperty(CockroachProperty.RETRY_CONNECTION_ERRORS.getName(), "true");
             ds.addDataSourceProperty(CockroachProperty.RETRY_TRANSIENT_ERRORS.getName(), "true");
             ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), "true");
+        }
+
+        // https://stackoverflow.com/questions/851758/java-enums-jpa-and-postgres-enums-how-do-i-make-them-work-together/43125099#43125099
+        if (environment.acceptsProfiles(Profiles.of(ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_DEV))) {
+            ds.addDataSourceProperty("stringtype","unspecified");
         }
 
         return ds;

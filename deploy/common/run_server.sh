@@ -4,6 +4,6 @@ nohup java -jar bank-server.jar \
 --spring.datasource.password= \
 --spring.profiles.active=retry-driver,cdc-none,crdb-local,verbose \
 --roachbank.accountsPerCityLimit=10 \
---roachbank.loadAccountByReference=false \
---roachbank.loadAccountWithSFU=false \
+--roachbank.updateRunningBalance=false \
+--roachbank.selectForUpdate=false \
 > /dev/null 2>&1 &

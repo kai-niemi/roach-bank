@@ -39,8 +39,7 @@ public class TransactionItemController {
     public PagedModel<TransactionItemModel> getTransactionItems(
             @PathVariable("transactionId") UUID transactionId,
             @PageableDefault(size = 5) Pageable page) {
-        Page<TransactionItem> entities = bankService.findItemsByTransactionId(
-                transactionId, page);
+        Page<TransactionItem> entities = bankService.findItemsByTransactionId(transactionId, page);
         return transactionItemPagedResourcesAssembler
                 .toModel(entities, transactionItemResourceAssembler);
     }
@@ -51,7 +50,6 @@ public class TransactionItemController {
     public TransactionItemModel getTransactionLeg(
             @PathVariable("transactionId") UUID transactionId,
             @PathVariable("accountId") UUID accountId) {
-        TransactionItem.Id id = TransactionItem.Id.of(accountId, transactionId);
-        return transactionItemResourceAssembler.toModel(bankService.getItemById(id));
+        return transactionItemResourceAssembler.toModel(bankService.findItemById(transactionId, accountId));
     }
 }

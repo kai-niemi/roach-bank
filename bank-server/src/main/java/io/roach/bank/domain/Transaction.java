@@ -153,6 +153,11 @@ public class Transaction extends AbstractEntity<UUID> {
             return this;
         }
 
+        public Builder withItems(List<TransactionItem> items) {
+            this.items.addAll(items);
+            return this;
+        }
+
         public TransactionItem.Builder andItem() {
             return TransactionItem.builder(this, items::add);
         }

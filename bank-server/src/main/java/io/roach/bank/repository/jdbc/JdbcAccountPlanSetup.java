@@ -1,14 +1,10 @@
 package io.roach.bank.repository.jdbc;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.IntStream;
 
-import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -24,6 +20,7 @@ import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.config.AccountPlan;
 import io.roach.bank.repository.MetadataRepository;
+import jakarta.annotation.PostConstruct;
 
 @Repository
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -60,10 +57,8 @@ public class JdbcAccountPlanSetup {
             clearAccounts();
         }
 
-        int n = Objects.requireNonNull(
-                jdbcTemplate.queryForObject("select count(1) from account limit 1", Integer.class));
-        if (n == 0) {
-            logger.info("Creating account plan: {}", accountPlan);
+        if (jdbcTemplate.queryForList("select 1 from account limit 1", Integer.class).isEmpty()) {
+            logger.info("Creating new account plan: {}", accountPlan);
             cities.parallelStream().forEach(this::createAccounts);
             logger.info("Creating {} accounts total", (accountPlan.getNumAccountsPerCity() * cities.size()));
         } else {
@@ -88,27 +83,21 @@ public class JdbcAccountPlanSetup {
 
         jdbcTemplate.update(
                 "INSERT INTO account (id, city, balance, currency, name, type, closed, allow_negative, updated) "
-                        + "SELECT gen_random_uuid(),?,?,?,?,?,false,0,? "
-                        + "FROM generate_series(1, ?)",
+                        + "SELECT gen_random_uuid(),"
+                        + " ?,"
+                        + " ?,"
+                        + " ?,"
+                        + " (select concat('user:', no::text)),"
+                        + " ?::account_type,"
+                        + " false,"
+                        + " 0,"
+                        + " ? "
+                        + "FROM generate_series(1, ?) no",
                 city,
                 balance.getAmount(),
                 balance.getCurrency().getCurrencyCode(),
-                "user:" + nextNameSequence(),
                 AccountType.ASSET.getCode(),
                 LocalDate.now(),
                 accountPlan.getNumAccountsPerCity());
-    }
-
-    private final List<Integer> sequenceBatch = new ArrayList<>();
-
-    private int nextNameSequence() {
-        if (sequenceBatch.isEmpty()) {
-            int nextNum = Objects.requireNonNull(
-                    jdbcTemplate.queryForObject("select nextval('account_name_sequence')", Integer.class));
-            IntStream.rangeClosed(1, 64).forEach(value -> {
-                sequenceBatch.add(nextNum + value);
-            });
-        }
-        return sequenceBatch.remove(0);
     }
 }

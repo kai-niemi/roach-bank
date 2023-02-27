@@ -38,11 +38,11 @@ spring:
           no-store: true
 #############################
   flyway:
-    enabled: false
+    enabled: true
     connect-retries: 15
     clean-on-validation-error: true
-    baseline-on-migrate: false
-  #    clean-disabled: true
+    baseline-on-migrate: true
+    clean-disabled: false
   jpa:
     open-in-view: false
     properties:
@@ -73,7 +73,9 @@ spring:
       validation-timeout: 20000
       max-lifetime: 60000
       maximum-pool-size: 200
-      minimum-idle: 200
+      minimum-idle: 25
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+#      transaction-isolation: TRANSACTION_SERIALIZABLE
 #############################
 logging:
   pattern:
@@ -116,16 +118,19 @@ server:
   http:
     port: 8090
   port: 8443
-  error:
-    whitelabel:
-      enabled: false
-    include-stacktrace: always
   ssl:
     key-store: classpath:cert/bank.p12
     key-store-password: secret
     key-store-type: pkcs12
     key-alias: bank
     key-password: secret
+  gzip:
+    enabled: true
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: always
+    include-message: always
 #############################
 roachbank:
   health:
@@ -139,10 +144,10 @@ roachbank:
   pushTimeoutSeconds: 120
   # Default limit unless client specified
   accountsPerCityLimit: 100
-  # Load account by reference or hit database with SELECT (former drastically reduce contention)
-  loadAccountByReference: false
+  # Set running balance on transaction legs by reading account state (increases contention)
+  updateRunningBalance: true
   # Read accounts with SELECT FOR UPDATE
-  loadAccountWithSFU: false
+  selectForUpdate: true
   # Account plan to run workload against
   accountPlan:
     # Clear accounts at startup
