@@ -32,7 +32,7 @@ import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.repository.ReportingRepository;
-import io.roach.bank.util.TimeBoundExecution;
+import io.roach.bank.util.ConcurrencyUtils;
 
 @Service
 public class ReportWebSocketPublisher {
@@ -91,7 +91,7 @@ public class ReportWebSocketPublisher {
                     });
                 });
 
-                TimeBoundExecution.runConcurrently(tasks, queryTimeout, TimeUnit.SECONDS);
+                ConcurrencyUtils.runConcurrentlyAndWait(tasks, queryTimeout, TimeUnit.SECONDS);
             } finally {
                 // Send empty message to mark completion
                 simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, "");

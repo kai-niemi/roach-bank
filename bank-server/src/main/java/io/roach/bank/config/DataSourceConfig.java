@@ -24,7 +24,6 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Configuration
-@DependsOn("springApplicationContext")
 public class DataSourceConfig {
     public static final String SQL_TRACE_LOGGER = "io.roach.bank.SQL_TRACE";
 

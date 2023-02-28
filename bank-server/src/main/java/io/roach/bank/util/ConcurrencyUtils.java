@@ -1,12 +1,13 @@
 package io.roach.bank.util;
 
 import java.lang.reflect.UndeclaredThrowableException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,40 +16,10 @@ import org.slf4j.LoggerFactory;
  * Utility for submitting concurrent workers with a collective timeout and
  * graceful cancellation.
  */
-public abstract class TimeBoundExecution {
-    private static final Logger logger = LoggerFactory.getLogger(TimeBoundExecution.class);
+public abstract class ConcurrencyUtils {
+    private static final Logger logger = LoggerFactory.getLogger(ConcurrencyUtils.class);
 
-    private TimeBoundExecution() {
-    }
-
-    static String millisecondsToDisplayString(long timeMillis) {
-        double seconds = (timeMillis / 1000.0) % 60;
-        int minutes = (int) ((timeMillis / 60000) % 60);
-        int hours = (int) ((timeMillis / 3600000));
-
-        StringBuilder sb = new StringBuilder();
-        if (hours > 0) {
-            sb.append(String.format("%dh", hours));
-        }
-        if (hours > 0 || minutes > 0) {
-            sb.append(String.format("%dm", minutes));
-        }
-        if (hours == 0 && seconds > 0) {
-            sb.append(String.format(Locale.US, "%.1fs", seconds));
-        }
-        return sb.toString();
-    }
-
-    static <V> long executionTime(Callable<V> task) {
-        try {
-            long start = System.nanoTime();
-            task.call();
-            long millis = Duration.ofNanos(System.nanoTime() - start).toMillis();
-            logger.debug("{} completed in {}", task, millisecondsToDisplayString(millis));
-            return millis;
-        } catch (Exception e) {
-            throw new UndeclaredThrowableException(e);
-        }
+    private ConcurrencyUtils() {
     }
 
     public static <V> V run(Callable<V> task, long timeout, TimeUnit timeUnit)
@@ -74,12 +45,12 @@ public abstract class TimeBoundExecution {
         }
     }
 
-    public static <V> void runConcurrently(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit) {
-        runConcurrently(tasks, timeout, timeUnit, null);
+    public static <V> void runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit) {
+        runConcurrentlyAndWait(tasks, timeout, timeUnit, null);
     }
 
-    public static <V> void runConcurrently(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit,
-                                           Consumer<V> consumer) {
+    public static <V> void runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit,
+                                                  Consumer<V> consumer) {
         ScheduledExecutorService cancellation = Executors.newSingleThreadScheduledExecutor();
 
         ExecutorService execution = new ThreadPoolExecutor(ForkJoinPool.getCommonPoolParallelism(),
@@ -107,9 +78,9 @@ public abstract class TimeBoundExecution {
                     return result;
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    logger.warn("Task interrupt: " + e.toString());
+                    logger.warn("Task interrupt: " + e);
                 } catch (CancellationException e) {
-                    logger.warn("Task cancellation: " + e.toString());
+                    logger.warn("Task cancellation: " + e);
                 } catch (ExecutionException e) {
                     logger.error("Task fail", e);
                 }
@@ -127,5 +98,59 @@ public abstract class TimeBoundExecution {
             execution.shutdown();
             cancellation.shutdown();
         }
+    }
+
+    /**
+     * Run a set of tasks using a bounded thread pool and awaits completion.
+     *
+     * @param numThreads max number of threads
+     * @param tasks number of tasks
+     * @param factoryFn task factory function
+     * @param completionFn task completion function
+     * @param exceptionFn task exception function
+     * @param <V> task type
+     */
+    public static <V> void runConcurrentlyAndWait(int numThreads,
+                                                  int tasks,
+                                                  Supplier<Callable<V>> factoryFn,
+                                                  Consumer<V> completionFn,
+                                                  Function<Throwable, ? extends V> exceptionFn) {
+        // Bounded executor
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(numThreads / 2, numThreads,
+                0L, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(numThreads));
+        executor.setRejectedExecutionHandler((runnable, exec) -> {
+            try {
+                exec.getQueue().put(runnable);
+                if (exec.isShutdown()) {
+                    throw new RejectedExecutionException(
+                            "Task " + runnable + " rejected from " + exec);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RejectedExecutionException("", e);
+            }
+        });
+
+        List<CompletableFuture<V>> allFutures = new ArrayList<>();
+
+        IntStream.rangeClosed(1, tasks).forEach(value -> {
+            CompletableFuture<V> future = CompletableFuture.supplyAsync(() -> {
+                        try {
+                            V v = factoryFn.get().call();
+                            completionFn.accept(v);
+                            return v;
+                        } catch (Exception e) {
+                            throw new IllegalStateException(e);
+                        }
+                    }, executor)
+                    .exceptionallyAsync(exceptionFn);
+            allFutures.add(future);
+        });
+
+        CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[] {}))
+                .join();
+
+        executor.shutdown();
     }
 }

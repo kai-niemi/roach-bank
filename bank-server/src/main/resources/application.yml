@@ -11,7 +11,7 @@ spring:
   application:
     name: roach-bank
   profiles:
-    active: retry-client,cdc-none,psql-local
+    active: pgjdbc-local,retry-client,cdc-none
   output:
     ansi:
       enabled: ALWAYS
@@ -71,11 +71,20 @@ spring:
       initialization-fail-timeout: -1
       connection-timeout: 5000
       validation-timeout: 20000
-      max-lifetime: 60000
+      # 3m
+      max-lifetime: 180000
+      # 1m
+      idle-timeout: 60000
       maximum-pool-size: 200
       minimum-idle: 25
       transaction-isolation: TRANSACTION_READ_COMMITTED
 #      transaction-isolation: TRANSACTION_SERIALIZABLE
+# Hikari defaults:
+#    private static final long CONNECTION_TIMEOUT = SECONDS.toMillis(30);
+#    private static final long VALIDATION_TIMEOUT = SECONDS.toMillis(5);
+#    private static final long IDLE_TIMEOUT = MINUTES.toMillis(10);
+#    private static final long MAX_LIFETIME = MINUTES.toMillis(30);
+
 #############################
 logging:
   pattern:
@@ -144,10 +153,10 @@ roachbank:
   pushTimeoutSeconds: 120
   # Default limit unless client specified
   accountsPerCityLimit: 100
+  # Read accounts with SELECT FOR UPDATE
+  selectForUpdate: false
   # Set running balance on transaction legs by reading account state (increases contention)
   updateRunningBalance: true
-  # Read accounts with SELECT FOR UPDATE
-  selectForUpdate: true
   # Account plan to run workload against
   accountPlan:
     # Clear accounts at startup

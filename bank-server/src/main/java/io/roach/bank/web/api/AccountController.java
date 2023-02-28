@@ -43,7 +43,7 @@ import io.roach.bank.domain.Account;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.service.AccountServiceFacade;
-import io.roach.bank.util.TimeBoundExecution;
+import io.roach.bank.util.ConcurrencyUtils;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -138,7 +138,7 @@ public class AccountController {
             return null;
         }));
 
-        TimeBoundExecution.runConcurrently(tasks, queryTimeout, TimeUnit.SECONDS);
+        ConcurrencyUtils.runConcurrentlyAndWait(tasks, queryTimeout, TimeUnit.SECONDS);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Client-side caching
