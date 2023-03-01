@@ -34,7 +34,7 @@ fn_stage_lb() {
     fn_echo_info_nl "Stage client ${CLUSTER}:$c"
 
     fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq update'
-    fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-8-jre-headless htop dstat haproxy'
+    fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-17-jre-headless htop dstat haproxy'
     fn_failcheck roachprod run ${CLUSTER}:$c "./cockroach gen haproxy --insecure --host $(roachprod ip $CLUSTER:1 --external) --locality=region=$region"
     fn_failcheck roachprod run ${CLUSTER}:$c 'nohup haproxy -f haproxy.cfg > /dev/null 2>&1 &'
   done

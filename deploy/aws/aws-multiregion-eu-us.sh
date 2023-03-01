@@ -37,4 +37,4 @@ functionsdir="../common"
 
 source "${functionsdir}/core_functions.sh"
 
-command_main.sh
+main.sh

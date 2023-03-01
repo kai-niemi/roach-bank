@@ -38,15 +38,15 @@ if fn_prompt_yes_no "1/5: Create CRDB cluster?" Y; then
   01_create_cluster.sh
 fi
 
-if fn_prompt_yes_no "2/5: Deploy Bank servers?" Y; then
+if fn_prompt_yes_no "2/5: Deploy Bank Servers?" Y; then
   02_deploy_servers.sh
 fi
 
-if fn_prompt_yes_no "3/5: Deploy Bank clients?" Y; then
+if fn_prompt_yes_no "3/5: Deploy Bank Clients?" Y; then
   03_deploy_clients.sh
 fi
 
-if fn_prompt_yes_no "4/5: Start Bank servers?" Y; then
+if fn_prompt_yes_no "4/5: Start Bank Servers?" Y; then
   04_start_servers.sh
 fi
 
