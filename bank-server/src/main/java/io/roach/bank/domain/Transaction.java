@@ -6,13 +6,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+
+import org.hibernate.annotations.DynamicInsert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
  */
 @Entity
 @Table(name = "transaction")
+@DynamicInsert
 public class Transaction extends AbstractEntity<UUID> {
     //    @Column(name = "id", updatable = false)
     @Id
@@ -147,6 +150,11 @@ public class Transaction extends AbstractEntity<UUID> {
 
         public Builder withTransferDate(LocalDate transferDate) {
             this.transferDate = transferDate;
+            return this;
+        }
+
+        public Builder withItems(List<TransactionItem> items) {
+            this.items.addAll(items);
             return this;
         }
 

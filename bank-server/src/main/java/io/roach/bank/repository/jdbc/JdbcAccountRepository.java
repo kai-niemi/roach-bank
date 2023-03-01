@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -21,28 +22,26 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.annotation.TransactionMandatory;
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.util.Pair;
+import io.roach.bank.service.NegativeBalanceException;
 
 @Repository
-@TransactionMandatory
+@Transactional(propagation = Propagation.MANDATORY)
 @Profile(ProfileNames.JDBC)
 public class JdbcAccountRepository implements AccountRepository {
     private JdbcTemplate jdbcTemplate;
@@ -59,7 +58,7 @@ public class JdbcAccountRepository implements AccountRepository {
     public Account createAccount(Account account) {
         jdbcTemplate.update("INSERT INTO account "
                         + "(id, city, balance, currency, name, description, type, closed, allow_negative, updated) "
-                        + "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                        + "VALUES(?,?,?,?,?,?,?::account_type,?,?,?)",
                 account.getId(),
                 account.getCity(),
                 account.getBalance().getAmount(),
@@ -75,7 +74,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
         Assert.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Expected no transaction");
 
@@ -108,35 +107,29 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
-        int[] rowsAffected = jdbcTemplate.batchUpdate(
-                "UPDATE account "
-                        + "SET "
-                        + "   balance = balance + ?,"
-                        + "   updated = clock_timestamp() "
-                        + "WHERE id = ? "
-                        + "   AND closed=false "
-                        + "   AND (balance + ?) * abs(allow_negative-1) >= 0",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Pair<UUID, BigDecimal> entry = balanceUpdates.get(i);
-                        ps.setBigDecimal(1, entry.getRight());
-                        ps.setObject(2, entry.getLeft());
-                        ps.setBigDecimal(3, entry.getRight());
-                    }
+        int rows = jdbcTemplate.update(
+                "UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp() "
+                        + "FROM "
+                        + "(select unnest(?) as id, unnest(?) as balance) as data_table "
+                        + "WHERE account.id=data_table.id "
+                        + "AND account.closed=false "
+                        + "AND (account.balance + data_table.balance) * abs(account.allow_negative-1) >= 0",
+                ps -> {
+                    List<UUID> ids = new ArrayList<>();
+                    List<BigDecimal> balances = new ArrayList<>();
 
-                    @Override
-                    public int getBatchSize() {
-                        return balanceUpdates.size();
-                    }
+                    balanceUpdates.forEach(pair -> {
+                        ids.add(pair.getFirst());
+                        balances.add(pair.getSecond());
+                    });
+                    ps.setArray(1, ps.getConnection()
+                            .createArrayOf("UUID", ids.toArray()));
+                    ps.setArray(2, ps.getConnection()
+                            .createArrayOf("DECIMAL", balances.toArray()));
                 });
-
-        // Check invariant on neg balance
-        Arrays.stream(rowsAffected)
-                .filter(i -> i != 1)
-                .forEach(i -> {
-                    throw new IncorrectResultSizeDataAccessException(1, i);
-                });
+        if (rows != balanceUpdates.size()) {
+            throw new IncorrectResultSizeDataAccessException(balanceUpdates.size(), rows);
+        }
     }
 
     @Override
@@ -171,57 +164,6 @@ public class JdbcAccountRepository implements AccountRepository {
         }
     }
 
-    @Override
-    public Page<Account> findAccountsByCity(Set<String> cities, Pageable pageable) {
-        String sql =
-                "SELECT * "
-                        + "FROM account "
-                        + "WHERE city IN (:cities) "
-                        + "ORDER BY id, city "
-                        + "LIMIT :limit OFFSET :offset ";
-
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("cities", cities)
-                .addValue("limit", pageable.getPageSize())
-                .addValue("offset", pageable.getOffset());
-
-        List<Account> accounts = this.namedParameterJdbcTemplate
-                .query(sql, parameters, (rs, rowNum) -> readAccount(rs));
-
-        return new PageImpl<>(accounts, pageable, countAll(parameters));
-    }
-
-    private Long countAll(MapSqlParameterSource params) {
-        return this.namedParameterJdbcTemplate.queryForObject(
-                "SELECT count(id) FROM account WHERE city IN (:cities)",
-                params, Long.class);
-    }
-
-    @Override
-    public List<Account> findTopAccountsByCity(String city, int limit) {
-        return this.namedParameterJdbcTemplate.query(
-                "SELECT * FROM account WHERE city=:city "
-                        + "ORDER BY id,city "
-                        + "LIMIT (:limit)",
-                new MapSqlParameterSource()
-                        .addValue("city", city)
-                        .addValue("limit", limit),
-                (rs, rowNum) -> readAccount(rs));
-    }
-
-    @Override
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public List<Account> findAccountsById(Set<UUID> ids) {
-        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
-
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("ids", ids);
-
-        return this.namedParameterJdbcTemplate.query(
-                "SELECT * FROM account WHERE id in (:ids)",
-                parameters,
-                (rs, rowNum) -> readAccount(rs));
-    }
 
     @Override
     public Account getAccountByReference(UUID id) {
@@ -242,7 +184,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Money getAccountBalance(UUID id) {
+    public Money getBalance(UUID id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency FROM account WHERE id=?",
                 (rs, rowNum) -> Money.of(rs.getString(1), rs.getString(2)),
@@ -251,7 +193,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Money getBalanceSnapshot(UUID id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT balance,currency "
@@ -280,5 +222,56 @@ public class JdbcAccountRepository implements AccountRepository {
     @Override
     public void deleteAll() {
         jdbcTemplate.execute("TRUNCATE TABLE account");
+    }
+
+    @Override
+    public Page<Account> findPageByCity(Set<String> cities, Pageable pageable) {
+        String sql =
+                "SELECT * "
+                        + "FROM account "
+                        + "WHERE city IN (:cities) "
+                        + "ORDER BY id, city "
+                        + "LIMIT :limit OFFSET :offset ";
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("cities", cities)
+                .addValue("limit", pageable.getPageSize())
+                .addValue("offset", pageable.getOffset());
+
+        List<Account> accounts = this.namedParameterJdbcTemplate
+                .query(sql, parameters, (rs, rowNum) -> readAccount(rs));
+
+        return new PageImpl<>(accounts, pageable, countAll(parameters));
+    }
+
+    private Long countAll(MapSqlParameterSource params) {
+        return this.namedParameterJdbcTemplate.queryForObject(
+                "SELECT count(id) FROM account WHERE city IN (:cities)",
+                params, Long.class);
+    }
+
+    @Override
+    public List<Account> findByCity(String city, int limit) {
+        return this.namedParameterJdbcTemplate.query(
+                "SELECT * FROM account WHERE city=:city "
+                        + "ORDER BY id,city "
+                        + "LIMIT (:limit)",
+                new MapSqlParameterSource()
+                        .addValue("city", city)
+                        .addValue("limit", limit),
+                (rs, rowNum) -> readAccount(rs));
+    }
+
+    @Override
+    public List<Account> findByIDs(Set<UUID> ids, boolean locking) {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("ids", ids);
+
+        return this.namedParameterJdbcTemplate.query(
+                "SELECT * FROM account WHERE id in (:ids)" + (locking ? " FOR UPDATE" : ""),
+                parameters,
+                (rs, rowNum) -> readAccount(rs));
     }
 }

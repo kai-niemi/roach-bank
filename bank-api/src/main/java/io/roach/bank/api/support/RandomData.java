@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class RandomData {
-    private static final ThreadLocalRandom random = ThreadLocalRandom.current();
+    public static final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     private static final char[] VOWELS = "aeiou".toCharArray();
 

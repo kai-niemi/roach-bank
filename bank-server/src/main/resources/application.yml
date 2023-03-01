@@ -11,7 +11,7 @@ spring:
   application:
     name: roach-bank
   profiles:
-    active: retry-default,cdc-default,crdb-local
+    active: pgjdbc-local,retry-client,cdc-none
   output:
     ansi:
       enabled: ALWAYS
@@ -37,25 +37,54 @@ spring:
           no-cache: true
           no-store: true
 #############################
-  jpa:
-    show-sql: false
-    open-in-view: false
   flyway:
-    enabled: false
+    enabled: true
     connect-retries: 15
     clean-on-validation-error: true
-    baseline-on-migrate: false
-#    clean-disabled: true
+    baseline-on-migrate: true
+    clean-disabled: false
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: io.cockroachdb.workload.common.jpa.CockroachDBDialect
+        connection:
+          provider_disables_autocommit: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+          batch_size: 128
+          fetch_size: 128
+          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+        hql:
+          bulk_id_strategy: org.hibernate.hql.spi.id.inline.CteValuesListBulkIdStrategy
+        cache:
+          use_minimal_puts: true
+          use_second_level_cache: false
   datasource:
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: io.cockroachdb.jdbc.CockroachDriver
     hikari:
       pool-name: roach-bank
       connection-init-sql: SELECT 1
-      connection-timeout: 30000
+      initialization-fail-timeout: -1
+      connection-timeout: 5000
       validation-timeout: 20000
-      max-lifetime: 60000
-      maximum-pool-size: 80
-      minimum-idle: 80
+      # 3m
+      max-lifetime: 180000
+      # 1m
+      idle-timeout: 60000
+      maximum-pool-size: 200
+      minimum-idle: 25
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+#      transaction-isolation: TRANSACTION_SERIALIZABLE
+# Hikari defaults:
+#    private static final long CONNECTION_TIMEOUT = SECONDS.toMillis(30);
+#    private static final long VALIDATION_TIMEOUT = SECONDS.toMillis(5);
+#    private static final long IDLE_TIMEOUT = MINUTES.toMillis(10);
+#    private static final long MAX_LIFETIME = MINUTES.toMillis(30);
+
 #############################
 logging:
   pattern:
@@ -98,28 +127,47 @@ server:
   http:
     port: 8090
   port: 8443
-  error:
-    whitelabel:
-      enabled: false
-    include-stacktrace: always
   ssl:
     key-store: classpath:cert/bank.p12
     key-store-password: secret
     key-store-type: pkcs12
     key-alias: bank
     key-password: secret
+  gzip:
+    enabled: true
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: always
+    include-message: always
 #############################
 roachbank:
   health:
-    # CRDB Admin UI endpoint base URL
-    admin-endpoint: http://localhost:8080
     # Validation query for datasource health check
     validation-query: select 1
   # WS push permits per second rate limit
-  pushPermitsPerSec: 4.0
-  # Interval of pushing cached balance reports (millis)
-  reportPushInterval: 10000
-  # Report query timeout (seconds)
-  reportQueryTimeoutSeconds: 120
+  pushPermitsPerSec: 10.0
+  # Interval of pushing cached balance reports (millis) (default: 1h since its unused)
+  reportPushInterval: 3600000
+  # Report / WS push query timeout (seconds)
+  pushTimeoutSeconds: 120
   # Default limit unless client specified
   accountsPerCityLimit: 100
+  # Read accounts with SELECT FOR UPDATE
+  selectForUpdate: false
+  # Set running balance on transaction legs by reading account state (increases contention)
+  updateRunningBalance: true
+  # Account plan to run workload against
+  accountPlan:
+    # Clear accounts at startup
+    clearAtStartup: false
+    # Clear transactions transitively if clearAtStartup is true
+    clearTransitive: true
+    # Filter on region, empty implies all regions
+    region: ""
+    # Number of accounts per city (total: num_cities x numAccountsPerCity)
+    numAccountsPerCity: 1000
+    # Initial balance
+    initialBalance: "25000.00"
+    # Account currency
+    currency: "USD"

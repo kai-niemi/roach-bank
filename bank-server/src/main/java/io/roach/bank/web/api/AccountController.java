@@ -12,6 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.cockroachdb.annotations.Retryable;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,6 +26,8 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,30 +35,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.service.AccountService;
-import io.roach.bank.util.TimeBoundExecution;
-import io.roach.bank.api.MessageModel;
+import io.roach.bank.service.AccountServiceFacade;
+import io.roach.bank.util.ConcurrencyUtils;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/api/account")
-@TransactionNotAllowed
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    @Value("${roachbank.pushTimeoutSeconds}")
     private int queryTimeout;
 
     @Value("${roachbank.accountsPerCityLimit}")
     private int accountsPerCityLimit;
+
+    @Autowired
+    private AccountServiceFacade accountServiceFacade;
 
     @Autowired
     private AccountService accountService;
@@ -125,11 +134,11 @@ public class AccountController {
         // Retrieve accounts per region concurrently with a collective timeout
         List<Callable<Void>> tasks = new ArrayList<>();
         cities.forEach(city -> tasks.add(() -> {
-            accounts.addAll(accountService.findTopAccountsByCity(city, limitFinal));
+            accounts.addAll(accountServiceFacade.findTopAccountsByCity(city, limitFinal));
             return null;
         }));
 
-        TimeBoundExecution.runConcurrently(tasks, queryTimeout, TimeUnit.SECONDS);
+        ConcurrencyUtils.runConcurrentlyAndWait(tasks, queryTimeout, TimeUnit.SECONDS);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Client-side caching
@@ -137,6 +146,9 @@ public class AccountController {
     }
 
     @GetMapping(value = "/list")
+    @TransactionBoundary(
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public PagedModel<AccountModel> listAccounts(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
@@ -148,16 +160,23 @@ public class AccountController {
     }
 
     @GetMapping(value = "/{id}")
+    @TransactionBoundary(readOnly = true)
+    @Retryable
     public AccountModel getAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.getAccountById(id));
     }
 
     @GetMapping(value = "/{id}/balance")
+    @TransactionBoundary(readOnly = true)
+    @Retryable
     public Money getAccountBalance(@PathVariable("id") UUID id) {
         return accountService.getBalance(id);
     }
 
     @GetMapping(value = "/{id}/balance-snapshot")
+    @TransactionBoundary(
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public Money getAccountBalanceSnapshot(@PathVariable("id") UUID id) {
         return accountService.getBalanceSnapshot(id);
     }

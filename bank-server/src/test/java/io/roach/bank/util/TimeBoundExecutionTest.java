@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionTimedOutException;
 
-import static io.roach.bank.util.TimeBoundExecution.executionTime;
+import static io.roach.bank.util.TimeUtils.executionTime;
 
 @Disabled("for now")
 public class TimeBoundExecutionTest {
@@ -54,10 +54,10 @@ public class TimeBoundExecutionTest {
     @Test
     public void whenRunningSingleTasks_withinTime_thenSucceed() {
         try {
-            Integer v1 = TimeBoundExecution
+            Integer v1 = ConcurrencyUtils
                     .run(() -> doMassiveCompute_AndSucceed(1, 1000), 10, TimeUnit.SECONDS);
             Assertions.assertEquals(v1, 1);
-            Integer v2 = TimeBoundExecution
+            Integer v2 = ConcurrencyUtils
                     .run(() -> doMassiveCompute_AndSucceed(2, 1000), 10, TimeUnit.SECONDS);
             Assertions.assertEquals(v2, 4);
         } catch (TimeoutException e) {
@@ -68,9 +68,9 @@ public class TimeBoundExecutionTest {
     @Test
     public void whenRunningSingleTasks_thatTimeout_thenFail() {
         Assertions.assertThrows(TimeoutException.class, () -> {
-            TimeBoundExecution.run(() -> doMassiveCompute_AndSucceed(1, 10000), 5, TimeUnit.SECONDS);
+            ConcurrencyUtils.run(() -> doMassiveCompute_AndSucceed(1, 10000), 5, TimeUnit.SECONDS);
             Assertions.fail("Must not succeed");
-            TimeBoundExecution.run(() -> doMassiveCompute_AndSucceed(2, 10000), 5, TimeUnit.SECONDS);
+            ConcurrencyUtils.run(() -> doMassiveCompute_AndSucceed(2, 10000), 5, TimeUnit.SECONDS);
             Assertions.fail("Must not succeed");
         });
     }
@@ -84,7 +84,7 @@ public class TimeBoundExecutionTest {
         }
 
         long time = executionTime(() -> {
-            TimeBoundExecution.runConcurrently(tasks, 10, TimeUnit.SECONDS);
+            ConcurrencyUtils.runConcurrentlyAndWait(tasks, 10, TimeUnit.SECONDS);
             return null;
         });
         Assertions.assertTrue(time <= 15_000, "" + time);
@@ -99,7 +99,7 @@ public class TimeBoundExecutionTest {
         }
 
         long time = executionTime(() -> {
-            TimeBoundExecution.runConcurrently(tasks, 10, TimeUnit.SECONDS, result -> {
+            ConcurrencyUtils.runConcurrentlyAndWait(tasks, 10, TimeUnit.SECONDS, result -> {
                 logger.debug("Result ({})", result);
             });
             return null;
@@ -120,7 +120,7 @@ public class TimeBoundExecutionTest {
         }
 
         long time = executionTime(() -> {
-            TimeBoundExecution.runConcurrently(tasks, 10, TimeUnit.SECONDS);
+            ConcurrencyUtils.runConcurrentlyAndWait(tasks, 10, TimeUnit.SECONDS);
             return null;
         });
         Assertions.assertTrue(time <= 15_000, "" + time);
@@ -140,7 +140,7 @@ public class TimeBoundExecutionTest {
         tasks.add(() -> doMassiveCompute_AndBlock(2));
 
         long time = executionTime(() -> {
-            TimeBoundExecution.runConcurrently(tasks, 10, TimeUnit.SECONDS);
+            ConcurrencyUtils.runConcurrentlyAndWait(tasks, 10, TimeUnit.SECONDS);
             return null;
         });
         Assertions.assertTrue(time <= 15_000, "" + time);

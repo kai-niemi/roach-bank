@@ -1,0 +1,18 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/psql
+  datasource:
+    url: jdbc:postgresql://192.168.1.99:5432/roach_bank
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: root
+roachbank:
+  health:
+    validation-query: select 1
+
+

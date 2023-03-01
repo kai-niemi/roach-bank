@@ -2,7 +2,6 @@ package io.roach.bank.repository.jdbc;
 
 import java.math.BigDecimal;
 import java.util.Currency;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -13,17 +12,18 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.ReportingRepository;
 
 @Repository
-@TransactionMandatory
+@Transactional(propagation = Propagation.MANDATORY)
 public class JdbcReportingRepository implements ReportingRepository {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

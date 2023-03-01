@@ -14,7 +14,7 @@ public interface TransactionService {
 
     Transaction findById(UUID id);
 
-    TransactionItem getItemById(TransactionItem.Id id);
+    TransactionItem findItemById(UUID transactionId, UUID accountId);
 
     Page<Transaction> find(Pageable page);
 

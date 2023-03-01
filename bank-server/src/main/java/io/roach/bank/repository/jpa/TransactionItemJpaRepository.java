@@ -8,11 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.domain.TransactionItem;
 
-@TransactionMandatory
+@Transactional(propagation = Propagation.MANDATORY)
 public interface TransactionItemJpaRepository extends JpaRepository<TransactionItem, TransactionItem.Id>,
         JpaSpecificationExecutor<TransactionItem> {
 

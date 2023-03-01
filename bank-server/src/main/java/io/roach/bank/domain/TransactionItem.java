@@ -5,8 +5,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,6 +23,7 @@ import io.roach.bank.api.support.Money;
  */
 @Entity
 @Table(name = "transaction_item")
+@DynamicInsert
 public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
     @EmbeddedId
     private Id id = new Id();
@@ -59,6 +61,16 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
     @JsonIgnore
     private Transaction transaction;
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "amount",
+                    column = @Column(name = "running_balance", nullable = false, updatable = false)),
+            @AttributeOverride(name = "currency",
+                    column = @Column(name = "currency", length = 3, nullable = false, insertable = false,
+                            updatable = false))
+    })
+    private Money runningBalance;
+
     protected TransactionItem() {
     }
 
@@ -78,6 +90,10 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
                 Objects.requireNonNull(account.getId()),
                 Objects.requireNonNull(transaction.getId()));
         return this;
+    }
+
+    public Account getAccount() {
+        return account;
     }
 
     public String getCity() {
@@ -102,6 +118,14 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+
+    public Money getRunningBalance() {
+        return runningBalance;
+    }
+
+    public void setRunningBalance(Money runningBalance) {
+        this.runningBalance = runningBalance;
     }
 
     @Override
@@ -175,6 +199,8 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
         private Money amount;
 
+        private Money runningBalance;
+
         private Account account;
 
         private String note;
@@ -186,6 +212,11 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
         public Builder withAmount(Money amount) {
             this.amount = amount;
+            return this;
+        }
+
+        public Builder withRunningBalance(Money runningBalance) {
+            this.runningBalance = runningBalance;
             return this;
         }
 
@@ -205,6 +236,7 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
             TransactionItem transactionItem = new TransactionItem();
             transactionItem.setAccount(account);
             transactionItem.setAmount(amount);
+            transactionItem.setRunningBalance(runningBalance);
             transactionItem.setNote(note);
 
             callback.accept(transactionItem);

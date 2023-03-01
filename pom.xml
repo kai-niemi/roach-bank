@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.5</version>
+        <version>3.0.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -13,13 +13,14 @@
 
     <groupId>io.roach.bank</groupId>
     <artifactId>bank-parent</artifactId>
-    <version>1.0.3.BUILD-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <properties>
+        <spring.boot.version>3.0.3</spring.boot.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.scm.id>github.com</project.scm.id>
-        <spring.boot.version>2.7.5</spring.boot.version>
     </properties>
 
     <scm>
@@ -27,6 +28,8 @@
         <developerConnection>scm:git:https://github.com/kai-niemi/roach-bank.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+
+    <inceptionYear>2021</inceptionYear>
 
     <modules>
         <module>bank-api</module>
@@ -40,7 +43,7 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
-            
+
         </resources>
 
         <pluginManagement>
@@ -48,7 +51,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -62,7 +65,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.0.0-M9</version>
                 <configuration>
                     <!-- Only run unit tests -->
                     <excludes>
@@ -74,10 +77,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -89,11 +88,17 @@
                         <fileset>
                             <directory>${basedir}</directory>
                             <includes>
-                                <include>*.log</include>
+                                <include>.log</include>
                                 <include>*.gz</include>
                                 <include>*.tmp</include>
                                 <include>*.csv</include>
                                 <include>*.sql</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/.log</directory>
+                            <includes>
+                                <include>*</include>
                             </includes>
                         </fileset>
                     </filesets>
@@ -134,6 +139,13 @@
                         <artifactId>junit-vintage-engine</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.shell</groupId>
+                <artifactId>spring-shell-dependencies</artifactId>
+                <version>3.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

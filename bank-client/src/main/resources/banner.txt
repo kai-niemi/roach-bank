@@ -1,7 +1,7 @@
-──▄──▄────▄▀        ___                __     ___            __  
+${AnsiColor.BRIGHT_YELLOW}                                             C O C K R O A C H D B
+──▄──▄────▄▀        ___                __     ___            __
 ───▀▄─█─▄▀▄▄▄      / _ \___  ___ _____/ /    / _ )___ ____  / /__
 ▄██▄████▄██▄▀█▄   / , _/ _ \/ _ `/ __/ _ \  / _  / _ `/ _ \/  '_/
 ─▀▀─█▀█▀▄▀███▀   /_/|_|\___/\_,_/\__/_//_/ /____/\_,_/_//_/_/\_\ 
-──▄▄▀─█──▀▄▄     CLIENT
-
-${application.formatted-version} powered by Spring Boot ${spring-boot.formatted-version}
+──▄▄▀─█──▀▄▄     ${AnsiColor.BRIGHT_GREEN}${application.title}${application.formatted-version} powered by Spring Boot${spring-boot.formatted-version}
+                 Active profiles: ${spring.profiles.active}${AnsiColor.DEFAULT}

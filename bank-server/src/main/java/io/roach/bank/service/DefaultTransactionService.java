@@ -1,22 +1,20 @@
 package io.roach.bank.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
-import io.roach.bank.annotation.TransactionMandatory;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -24,9 +22,9 @@ import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.TransactionRepository;
-import io.roach.bank.util.Pair;
 
 @Service
+@Transactional(propagation = Propagation.SUPPORTS)
 public class DefaultTransactionService implements TransactionService {
     @Autowired
     private AccountRepository accountRepository;
@@ -34,19 +32,23 @@ public class DefaultTransactionService implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Value("${roachbank.updateRunningBalance}")
+    private boolean updateRunningBalance;
+
+    @Value("${roachbank.selectForUpdate}")
+    private boolean selectForUpdate;
+
     @Override
-    @TransactionMandatory
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
-        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
-            throw new IllegalStateException("No transaction context - check Spring profile settings");
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
+
+        // Short-circuit
+        if (transactionForm.isFake()) {
+            return Transaction.builder().withId(id).build();
         }
 
         if (transactionForm.getAccountLegs().size() < 2) {
-            throw new BadRequestException("Must have at least two account items");
-        }
-
-        if (transactionForm.isSmokeTest()) {
-            return Transaction.builder().withId(id).build();
+            throw new BadRequestException("Must have at least two account legs");
         }
 
         // Coalesce multi-legged transactions
@@ -57,21 +59,38 @@ public class DefaultTransactionService implements TransactionService {
                 .withBookingDate(transactionForm.getBookingDate())
                 .withTransferDate(transactionForm.getTransferDate());
 
-        final List<Pair<UUID,BigDecimal>> balanceUpdates = new ArrayList<>();
+        final List<Pair<UUID, BigDecimal>> balanceUpdates = new ArrayList<>();
 
         final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
 
-        legs.forEach((accountId, value) -> {
-            final Money amount = value.getLeft();
+        List<Account> accounts;
 
-            // Get by reference to avoid SELECT
-            Account account = accountRepository.getAccountByReference(accountId);
+        // Updating running balance requires one additional read per account
+        if (updateRunningBalance) {
+            Set<UUID> accountIds = new HashSet<>();
+            legs.forEach((accountId, value) -> accountIds.add(accountId));
+            accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
+        } else {
+            accounts = Collections.emptyList();
+        }
+
+        legs.forEach((accountId, value) -> {
+            final Money amount = value.getFirst();
+
+            Account account = updateRunningBalance
+                    ? accounts.stream()
+                    .filter(a -> a.getId().equals(accountId))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchAccountException(accountId))
+                    // Get by reference/proxy that avoids reading from the DB
+                    : accountRepository.getAccountByReference(accountId);
 
             transactionBuilder
                     .andItem()
                     .withAccount(account)
                     .withAmount(amount)
-                    .withNote(value.getRight())
+                    .withNote(value.getSecond())
+                    .withRunningBalance(updateRunningBalance ? account.getBalance() : Money.zero(amount.getCurrency()))
                     .then();
 
             balanceUpdates.add(Pair.of(accountId, amount.getAmount()));
@@ -79,7 +98,7 @@ public class DefaultTransactionService implements TransactionService {
 
         try {
             accountRepository.updateBalances(balanceUpdates);
-        } catch (IncorrectResultSizeDataAccessException e) {
+        } catch (NonTransientDataAccessException e) {
             throw new NegativeBalanceException("Negative balance check failed", e);
         }
 
@@ -95,7 +114,7 @@ public class DefaultTransactionService implements TransactionService {
             legs.compute(leg.getId(),
                     (key, amount) -> (amount == null)
                             ? Pair.of(leg.getAmount(), leg.getNote())
-                            : Pair.of(amount.getLeft().plus(leg.getAmount()), leg.getNote()));
+                            : Pair.of(amount.getFirst().plus(leg.getAmount()), leg.getNote()));
             amounts.compute(leg.getAmount().getCurrency(),
                     (currency, amount) -> (amount == null)
                             ? leg.getAmount().getAmount() : leg.getAmount().getAmount().add(amount));
@@ -113,32 +132,29 @@ public class DefaultTransactionService implements TransactionService {
     }
 
     @Override
-    @TransactionMandatory
     public Page<Transaction> find(Pageable page) {
         return transactionRepository.findTransactions(page);
     }
 
     @Override
-    @TransactionMandatory
     public Transaction findById(UUID id) {
         return transactionRepository.findTransactionById(id);
     }
 
     @Override
-    @TransactionMandatory
-    public TransactionItem getItemById(TransactionItem.Id id) {
-        return transactionRepository.getTransactionItemById(id);
+    public TransactionItem findItemById(UUID transactionId, UUID accountId) {
+        return transactionRepository.findTransactionItemById(
+                TransactionItem.Id.of(accountId, transactionId));
     }
 
     @Override
-    @TransactionMandatory
     public Page<TransactionItem> findItemsByTransactionId(UUID transactionId, Pageable page) {
         return transactionRepository.findTransactionItems(transactionId, page);
     }
 
     @Override
-    @TransactionMandatory
     public void deleteAll() {
+        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
         transactionRepository.deleteAll();
     }
 }

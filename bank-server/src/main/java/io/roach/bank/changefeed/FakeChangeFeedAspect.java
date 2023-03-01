@@ -1,6 +1,6 @@
 package io.roach.bank.changefeed;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import io.roach.bank.AdvisorOrder;
 import io.roach.bank.ProfileNames;
-import io.roach.bank.aspect.AdvisorOrder;
 import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 import io.roach.bank.domain.Transaction;
 
@@ -25,7 +25,7 @@ import io.roach.bank.domain.Transaction;
 @Aspect
 @Component
 @Order(AdvisorOrder.CHANGE_FEED_ADVISOR)
-@Profile(ProfileNames.CDC_DEFAULT)
+@Profile(ProfileNames.CDC_NONE)
 public class FakeChangeFeedAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -37,7 +37,8 @@ public class FakeChangeFeedAspect {
         logger.info("Bootstrapping AOP-driven (fake) change feed publisher");
     }
 
-    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))", returning = "transaction")
+    @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))",
+            returning = "transaction")
     public void doAfterTransaction(Transaction transaction) {
         changeFeedPublisher.publish(transaction);
     }

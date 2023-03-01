@@ -16,6 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.cockroachdb.annotations.Retryable;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,15 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.repository.ReportingRepository;
-import io.roach.bank.util.TimeBoundExecution;
+import io.roach.bank.util.ConcurrencyUtils;
 
 @Service
 public class ReportWebSocketPublisher {
@@ -43,7 +44,7 @@ public class ReportWebSocketPublisher {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    @Value("${roachbank.pushTimeoutSeconds}")
     private int queryTimeout = 120;
 
     @Autowired
@@ -83,15 +84,14 @@ public class ReportWebSocketPublisher {
                 // Retrieve accounts per region concurrently with a collective timeout
                 List<Callable<Void>> tasks = Collections.synchronizedList(new ArrayList<>());
 
-                metadataRepository.getRegionCities().forEach((region, cities) -> {
+                metadataRepository.getAllRegionCities().forEach((region, cities) -> {
                     tasks.add(() -> {
-                        logger.trace("Processing {}", region);
-                        selfProxy.computeSummaryAndPush(region, cities);
+                        selfProxy.computeSummaryAndPush(cities);
                         return null;
                     });
                 });
 
-                TimeBoundExecution.runConcurrently(tasks, queryTimeout, TimeUnit.SECONDS);
+                ConcurrencyUtils.runConcurrentlyAndWait(tasks, queryTimeout, TimeUnit.SECONDS);
             } finally {
                 // Send empty message to mark completion
                 simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, "");
@@ -105,10 +105,10 @@ public class ReportWebSocketPublisher {
     }
 
     @TransactionBoundary(readOnly = true,
-            timeTravel = @TimeTravel(mode = TimeTravelMode.SNAPSHOT_READ, interval = "-10s"),
-            vectorize = TransactionBoundary.Vectorize.off,
+            timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
-    public void computeSummaryAndPush(String region, Set<String> cities) {
+    @Retryable
+    public void computeSummaryAndPush(Set<String> cities) {
         cities.forEach(city -> {
             AccountSummary accountSummary = reportingRepository.accountSummary(city);
             simpMessagingTemplate.convertAndSend(TOPIC_ACCOUNT_SUMMARY, accountSummary);

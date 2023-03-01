@@ -4,6 +4,12 @@ spring:
   output:
     ansi:
       enabled: always
+  shell:
+    history:
+      name: "bank-client-shell.history"
+    command:
+      script:
+        enabled: false
 logging:
   file:
     name: .log/client.log
@@ -14,10 +20,8 @@ logging:
     rollingpolicy:
       max-history: 5
 roachbank:
-  history:
-    file: .log/.clienthistory
   http:
     # Total concurrent http connections
     maxTotal: -1
     # Total concurrent http connections per route (endpoint)
-    defaultMaxPerRoute: -1
+    maxConnPerRoute: -1

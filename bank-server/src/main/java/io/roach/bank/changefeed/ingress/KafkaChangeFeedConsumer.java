@@ -1,6 +1,6 @@
 package io.roach.bank.changefeed.ingress;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,13 +11,14 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TransactionNotAllowed;
+import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.changefeed.model.TransactionChangeEvent;
 import io.roach.bank.changefeed.model.TransactionItemChangeEvent;
-import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
 
 @Service
 @Profile(ProfileNames.CDC_KAFKA)
@@ -39,26 +40,26 @@ public class KafkaChangeFeedConsumer {
     }
 
     @KafkaListener(topics = TOPIC_ACCOUNTS, containerFactory = "accountListenerContainerFactory")
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void accountChanged(@Payload AccountPayload event,
-                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                               @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
                                @Header(KafkaHeaders.OFFSET) int offset) {
         changeFeedPublisher.publish(event);
     }
 
     @KafkaListener(topics = TOPIC_TRANSACTIONS, containerFactory = "transactionListenerContainerFactory")
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Deprecated
     public void transactionCreated(@Payload TransactionChangeEvent event,
-                                   @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                                   @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
                                    @Header(KafkaHeaders.OFFSET) int offset) {
     }
 
     @KafkaListener(topics = TOPIC_TRANSACTION_LEGS, containerFactory = "transactionLegListenerContainerFactory")
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Deprecated
     public void transactionLegCreated(@Payload TransactionItemChangeEvent event,
-                                      @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                                      @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
                                       @Header(KafkaHeaders.OFFSET) int offset) {
     }
 }

@@ -5,14 +5,19 @@ package io.roach.bank;
  */
 public abstract class ProfileNames {
     /**
-     * Adopt server-side expontential backoff retrys on serialization errors.
-     */
-    public static final String RETRY_DEFAULT = "retry-default";
-
-    /**
      * Propagate transaction retry's to clients on serialization errors.
      */
     public static final String RETRY_NONE = "retry-none";
+
+    /**
+     * Handle serialization errors at JDBC drive-level
+     */
+    public static final String RETRY_DRIVER = "retry-driver";
+
+    /**
+     * Handle serialization errors at app/client level
+     */
+    public static final String RETRY_CLIENT = "retry-client";
 
     /**
      * Adopt server-side savepoint rollback retrys on serialization errors.
@@ -23,7 +28,7 @@ public abstract class ProfileNames {
     /**
      * Websocket/STOMP events via AOP interceptors (dual-write)
      */
-    public static final String CDC_DEFAULT = "cdc-default";
+    public static final String CDC_NONE = "cdc-none";
 
     /**
      * Websocket/STOMP events via Kafka listeners via CRDB kafka sink.
@@ -56,31 +61,44 @@ public abstract class ProfileNames {
     public static final String JDBC = "!jpa";
 
     /**
-     * CockroachDB local.
+     * crdb-jdbc driver local.
      */
     public static final String CRDB_LOCAL = "crdb-local";
 
     /**
-     * CockroachDB dedicated cluster.
+     * crdb-jdbc driver dev.
      */
-    public static final String CRDB_ODIN = "crdb-odin";
+    public static final String CRDB_DEV = "crdb-dev";
 
     /**
-     * CockroachDB local self-hosted.
+     * crdb-jdbc driver dedicated/serverless.
      */
-    public static final String CRDB_SLEIPNER = "crdb-sleipner";
+    public static final String CRDB_CLOUD = "crdb-cloud";
 
     /**
-     *
-     * PSQL local self-hosted.
+     * pg-jdbc driver local.
+     */
+    public static final String PGJDBC_LOCAL = "pgjdbc-local";
+
+    /**
+     * pg-jdbc driver dev.
+     */
+    public static final String PGJDBC_DEV = "pgjdbc-dev";
+
+    /**
+     * pg-jdbc driver dedicated/serverless.
+     */
+    public static final String PGJDBC_CLOUD = "pgjdbc-cloud";
+
+    /**
+     * PostgreSQL local
      */
     public static final String PSQL_LOCAL = "psql-local";
 
     /**
-     *
-     * PSQL local self-hosted.
+     * PostgreSQL dev
      */
-    public static final String PSQL_SLEIPNER = "psql-sleipner";
+    public static final String PSQL_DEV = "psql-dev";
 
     private ProfileNames() {
     }

@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Currency;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

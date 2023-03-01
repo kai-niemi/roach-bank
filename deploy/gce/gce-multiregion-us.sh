@@ -6,7 +6,7 @@
 
 title="CockroachDB 3-region US deployment"
 # CRDB release version
-releaseversion="v22.1.11"
+releaseversion="v22.2.5"
 # Number of node instances in total including clients
 nodes="12"
 # Nodes hosting CRDB
@@ -41,4 +41,4 @@ functionsdir="../common"
 
 source "${functionsdir}/core_functions.sh"
 
-main.sh
+command_main.sh

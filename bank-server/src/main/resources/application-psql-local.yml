@@ -2,16 +2,15 @@ spring:
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
-    locations: classpath:db/migration/psql,classpath:db/migration/common
+    locations: classpath:db/psql
   datasource:
     url: jdbc:postgresql://localhost:5432/roach_bank
+    driver-class-name: org.postgresql.Driver
     username: postgres
     password: root
-    hikari:
-      transaction-isolation: TRANSACTION_SERIALIZABLE
 roachbank:
   health:
     validation-query: select 1

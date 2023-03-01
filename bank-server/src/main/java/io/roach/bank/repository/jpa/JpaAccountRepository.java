@@ -1,10 +1,7 @@
 package io.roach.bank.repository.jpa;
 
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,34 +9,28 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Tuple;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.Assert;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
-import io.roach.bank.annotation.TransactionMandatory;
-import io.roach.bank.annotation.TransactionNotAllowed;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.util.Pair;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 
 @Service
-@TransactionMandatory
+@Transactional(propagation = Propagation.MANDATORY)
 @Profile(ProfileNames.JPA)
 public class JpaAccountRepository implements AccountRepository {
     @Autowired
@@ -69,52 +60,20 @@ public class JpaAccountRepository implements AccountRepository {
 
     @Override
     public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
-        int[] rowsAffected = jdbcTemplate.batchUpdate(
-                "UPDATE account "
-                        + "SET "
-                        + "   balance = balance + ?,"
-                        + "   updated = clock_timestamp() "
-                        + "WHERE id = ? "
-                        + "   AND closed=false "
-                        + "   AND (balance + ?) * abs(allow_negative-1) >= 0",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Pair<UUID, BigDecimal> entry = balanceUpdates.get(i);
-                        ps.setBigDecimal(1, entry.getRight());
-                        ps.setObject(2, entry.getLeft());
-                        ps.setBigDecimal(3, entry.getRight());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return balanceUpdates.size();
-                    }
-                });
-
-        // Check invariant on neg balance
-        Arrays.stream(rowsAffected)
-                .filter(i -> i != 1)
-                .forEach(i -> {
-                    throw new IncorrectResultSizeDataAccessException(1, i);
-                });
-
-//        balanceUpdates.forEach(pair -> {
-//            Query q = entityManager.createNativeQuery("UPDATE account"
-//                    + " SET "
-//                    + "   balance = balance + ?,"
-//                    + "   updated = clock_timestamp()"
-//                    + " WHERE id = ?"
-//                    + "   AND closed=false"
-//                    + "   AND (balance + ?) * abs(allow_negative-1) >= 0");
-//            q.setParameter(1, pair.getRight());
-//            q.setParameter(2, pair.getLeft());
-//            q.setParameter(3, pair.getRight());
-//            int r = q.executeUpdate();
-//            if (r != 1) {
-//                throw new IncorrectResultSizeDataAccessException(1, r);
-//            }
-//        });
+        balanceUpdates.forEach(pair -> {
+            Query q = entityManager.createQuery("UPDATE Account a"
+                    + " SET"
+                    + "   a.balance.amount = a.balance.amount + ?2"
+                    + " WHERE a.id = ?1"
+                    + "   AND a.closed=false"
+                    + "   AND (a.balance.amount + ?2) * abs(a.allowNegative-1) >= 0");
+            q.setParameter(1, pair.getFirst());
+            q.setParameter(2, pair.getSecond());
+            int r = q.executeUpdate();
+            if (r != 1) {
+                throw new IncorrectResultSizeDataAccessException(1, r);
+            }
+        });
     }
 
     @Override
@@ -144,12 +103,12 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Money getAccountBalance(UUID id) {
+    public Money getBalance(UUID id) {
         return accountRepository.findBalanceById(id);
     }
 
     @Override
-    @TransactionNotAllowed
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Money getBalanceSnapshot(UUID id) {
         Tuple tuple = accountRepository.findBalanceSnapshot(id.toString());
         return Money.of(
@@ -158,21 +117,21 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
-    public List<Account> findAccountsById(Set<UUID> ids) {
-        Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
-        return accountRepository.findAll(ids);
+    public List<Account> findByIDs(Set<UUID> ids, boolean locking) {
+        return locking
+                ? accountRepository.findAllWithLock(ids)
+                : accountRepository.findAll(ids);
     }
 
     @Override
-    public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
+    public Page<Account> findPageByCity(Set<String> cities, Pageable page) {
         return accountRepository.findAll(page, new ArrayList<>(cities));
     }
 
     @Override
-    public List<Account> findTopAccountsByCity(String city, int limit) {
+    public List<Account> findByCity(String city, int limit) {
         return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.city=?1",
-                Account.class)
+                        Account.class)
                 .setParameter(1, city)
                 .setMaxResults(limit)
                 .getResultList();

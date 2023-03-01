@@ -3,20 +3,12 @@ package io.roach.bank.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
+import jakarta.persistence.*;
 
 /**
  * Represents a monetary account like asset, liability, expense, capital accounts and so forth.
@@ -25,6 +17,8 @@ import io.roach.bank.api.support.Money;
  */
 @Entity
 @Table(name = "account")
+@DynamicInsert
+@DynamicUpdate
 public class Account extends AbstractEntity<UUID> {
     @Id
     private UUID id;
@@ -40,7 +34,7 @@ public class Account extends AbstractEntity<UUID> {
     private String description;
 
     @Convert(converter = AccountTypeConverter.class)
-    @Column(updatable = false, nullable = false)
+    @Column(name = "type", updatable = false, nullable = false)
     private AccountType accountType;
 
     @Column(name = "updated")
@@ -67,11 +61,16 @@ public class Account extends AbstractEntity<UUID> {
         return new Builder();
     }
 
-    @PrePersist
+    @Override
     protected void onCreate() {
         if (updated == null) {
             updated = LocalDateTime.now();
         }
+    }
+
+    @PostUpdate
+    protected void onUpdate() {
+        updated = LocalDateTime.now();
     }
 
     @Override

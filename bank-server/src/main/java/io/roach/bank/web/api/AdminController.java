@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 import javax.sql.DataSource;
 
@@ -15,13 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,16 +31,15 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import io.roach.bank.api.ConnectionPoolConfig;
 import io.roach.bank.api.ConnectionPoolSize;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.config.DataSourceConfig;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.ConnectionPoolConfigFactory;
 import io.roach.bank.web.support.ConnectionPoolSizeFactory;
-import io.roach.bank.api.MessageModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -100,7 +96,7 @@ public class AdminController {
                 "system.cpu.usage", "system.load.average.1m").forEach(key -> {
             index.add(
                     Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator", "metrics", key)
-                            .buildAndExpand().toUriString()).withRel(LinkRelations.ACTUATOR_REL)
+                                    .buildAndExpand().toUriString()).withRel(LinkRelations.ACTUATOR_REL)
                             .withTitle("Metrics endpoint"));
         });
 
@@ -148,15 +144,15 @@ public class AdminController {
     }
 
     @PostMapping(value = "/clear")
-    @Async
-    public Future<?> clearAll() {
-        logger.warn("Deleting all transactions");
+    @TransactionBoundary
+    public ResponseEntity<String> clearAll() {
+        logger.warn("Deleting all transactions..");
         transactionService.deleteAll();
 
-        logger.warn("Deleting all accounts");
+        logger.warn("Deleting all accounts..");
         accountService.deleteAll();
 
-        return null;
+        return ResponseEntity.ok("All transactions and accounts deleted");
     }
 
     @GetMapping(value = "/pool-size")
@@ -175,8 +171,8 @@ public class AdminController {
     public ResponseEntity<MessageModel> setConnectionPoolSize(
             @RequestParam(value = "size", defaultValue = "50") int size) {
         hikariDataSource.setMaximumPoolSize(size);
-        hikariDataSource.setMinimumIdle(size / 2);
-        logger.info("Setting max pool size to {} min idle to {}", size, size / 2);
+        hikariDataSource.setMinimumIdle(size);
+        logger.info("Setting pool size to {}", size);
         return ResponseEntity.ok(new MessageModel("ok")
                 .add(linkTo(methodOn(getClass())
                         .getConnectionPoolConfig())
@@ -216,13 +212,14 @@ public class AdminController {
     }
 
     private boolean toggleLogLevel(String name, Level traceLevel) {
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.LoggerContext loggerContext = (ch.qos.logback.classic.LoggerContext) LoggerFactory
+                .getILoggerFactory();
         ch.qos.logback.classic.Logger logger = loggerContext.getLogger(name);
-        if (logger.getLevel().isGreaterOrEqual(Level.INFO)) {
+        if (logger.getLevel().isGreaterOrEqual(ch.qos.logback.classic.Level.DEBUG)) {
             logger.setLevel(traceLevel);
             return true;
         } else {
-            logger.setLevel(Level.INFO);
+            logger.setLevel(Level.DEBUG);
             return false;
         }
     }

@@ -5,6 +5,10 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.Retryable;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,16 +23,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.annotation.TimeTravel;
-import io.roach.bank.annotation.TimeTravelMode;
-import io.roach.bank.annotation.TransactionBoundary;
 import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.NoSuchTransactionException;
 import io.roach.bank.service.TransactionService;
-import io.roach.bank.api.MessageModel;
 import io.roach.bank.web.support.ZoomExpression;
 
 import static io.roach.bank.api.LinkRelations.TRANSACTION_ITEMS_REL;
@@ -76,7 +77,7 @@ public class TransactionController {
 
         index.add(Link.of(UriTemplate.of(linkTo(TransactionFormController.class)
                         .toUriComponentsBuilder().path(
-                                "/form/{?limit,amount,regions}")  // RFC-6570 template
+                                "/form{?limit,amount,regions}")  // RFC-6570 template
                         .build().toUriString()),
                 LinkRelations.TRANSACTION_FORM_REL
         ).withTitle("Form template for creating a transfer request"));
@@ -85,7 +86,8 @@ public class TransactionController {
     }
 
     @GetMapping(value = "/list")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ))
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @Retryable
     public PagedModel<TransactionModel> listTransactions(@PageableDefault(size = 5) Pageable page) {
         return pagedTransactionResourceAssembler
                 .toModel(bankService.find(page), transactionResourceAssembler);
@@ -93,8 +95,8 @@ public class TransactionController {
 
     @GetMapping(value = "/{id}")
     @TransactionBoundary(readOnly = true)
-    public TransactionModel getTransaction(
-            @PathVariable("id") UUID id) {
+    @Retryable
+    public TransactionModel getTransaction(@PathVariable("id") UUID id) {
         Transaction entity = bankService.findById(id);
         if (entity == null) {
             throw new NoSuchTransactionException(id.toString());

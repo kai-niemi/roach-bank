@@ -37,7 +37,7 @@ and have the same name but suffixed with `.conf` rather than `.jar`.
 
 Example:    
 
-    RUN_ARGS="--spring.datasource.url=jdbc:postgresql://192.168.1.99:26300/roach_bank?sslmode=disable --server.port=8088"
+    RUN_ARGS="--spring.datasource.url=jdbc:cockroachdb://192.168.1.99:26257/roach_bank?sslmode=disable --server.port=8088"
     PID_FOLDER=/tmp
 
 ## Configuration
@@ -46,19 +46,22 @@ The default server configuration can be found in [application.yml](src/main/reso
 The config can be overridden at startup time through the command line and by activating Spring profiles, which are:
 
 Database type, one of:
-
-   * crdb-local - Enables CockroachDB features and db schema (default)
-   * psql-local - Enables PostgreSQL features and db schema
+    
+  * psql-local - Enables PG-JDBC connecting to localhost (default)
+  * psql-cloud - Enables PG-JDBC connecting to CockroachDB Cloud
+  * crdb-local - Enables CockroachDB JDCB driver connecting to localhost
+  * crdb-cloud - Enables CockroachDB JDCB driver connecting to CockroachDB Cloud 
 
 Retry strategy, one of:
 
-   * retry-default - Enables retryable transactions with exponential backoff for concurrency errors (default)
-   * retry-savepoint - Enables retryable transactions using savepoints
-   * retry-none - Enables default Spring declarative transaction management without any retrys
+   * retry-client - Enables client-side retries with exponential backoff (default)
+   * retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
+   * retry-savepoint - Enables client-side retries using savepoints
+   * retry-none - Disable retries
 
 Change data capture and websocket push events, one of:
 
-   * cdc-default - Enables synthetic CDC events (via AOP) for websocket push (default)
+   * cdc-none - Enables synthetic CDC events (via AOP) for websocket push (default)
    * cdc-kafka - Enables Kafka subscriptions of CDC events for websocket push (requires CRDB, CDC, Kafka)
    * cdc-http - Enables HTTP subscriptions of CDC events for websocket push (requires CRDB and CDC)
  
@@ -73,20 +76,20 @@ Note: Some features including CDC requires a CockroachDB enterprise license (tri
 Profiles are set during startup with following command line parameter:
 
     java -jar target/bank-server.jar \
-    --spring.datasource.url=jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable \
+    --spring.datasource.url=jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=retry-default,cdc-default,crdb-local  \
+    --spring.profiles.active=retry-none,cdc-none,crdb-local  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8090
 
 PostgreSQL example:
 
     java -jar target/bank-server.jar \
-    --spring.datasource.url=jdbc:postgresql://localhost:5432/roach_bank \
+    --spring.datasource.url=jdbc:cockroachdb://localhost:5432/roach_bank \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=retry-default,cdc-default,psql-local  \
+    --spring.profiles.active=retry-none,cdc-none,psql-local  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8090
     
