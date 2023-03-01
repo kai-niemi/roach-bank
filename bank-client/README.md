@@ -45,12 +45,6 @@ Query the balance of random accounts in the local region:
 
     balance --duration 5m30s --follower-reads
 
-## Generate CSV import files
-
-Generate 50M accounts for all regions:
-
-    gen-csv --accounts 50000000
-
 ## Configuration
 
 All parameters in `application.yaml` can be overridden via CLI. See 

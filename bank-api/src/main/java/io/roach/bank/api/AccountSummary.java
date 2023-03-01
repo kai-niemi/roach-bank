@@ -8,7 +8,7 @@ public class AccountSummary {
 
     private Currency currency;
 
-    private int numberOfAccounts;
+    private long numberOfAccounts;
 
     private BigDecimal totalBalance;
 
@@ -32,11 +32,11 @@ public class AccountSummary {
         this.currency = currency;
     }
 
-    public int getNumberOfAccounts() {
+    public long getNumberOfAccounts() {
         return numberOfAccounts;
     }
 
-    public void setNumberOfAccounts(int numberOfAccounts) {
+    public void setNumberOfAccounts(long numberOfAccounts) {
         this.numberOfAccounts = numberOfAccounts;
     }
 

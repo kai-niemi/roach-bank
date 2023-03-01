@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 public class AccountPlan {
     private boolean clearAtStartup;
 
-    private boolean clearTransitive;
-
     private String region;
 
     private int numAccountsPerCity;
@@ -24,14 +22,6 @@ public class AccountPlan {
 
     public void setClearAtStartup(boolean clearAtStartup) {
         this.clearAtStartup = clearAtStartup;
-    }
-
-    public boolean isClearTransitive() {
-        return clearTransitive;
-    }
-
-    public void setClearTransitive(boolean clearTransitive) {
-        this.clearTransitive = clearTransitive;
     }
 
     public String getRegion() {
@@ -70,7 +60,6 @@ public class AccountPlan {
     public String toString() {
         return "AccountPlan{" +
                 "clearAtStartup=" + clearAtStartup +
-                ", clearTransitive=" + clearTransitive +
                 ", region='" + region + '\'' +
                 ", numAccountsPerCity=" + numAccountsPerCity +
                 ", initialBalance='" + initialBalance + '\'' +

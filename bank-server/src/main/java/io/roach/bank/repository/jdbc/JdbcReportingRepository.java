@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
+import io.roach.bank.ProfileNames;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
@@ -24,6 +26,7 @@ import io.roach.bank.repository.ReportingRepository;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
+@Profile(ProfileNames.JDBC)
 public class JdbcReportingRepository implements ReportingRepository {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

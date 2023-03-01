@@ -70,42 +70,65 @@ by default.
 
 - [SQL files](../bank-server/src/main/resources/db) 
 
-## Transaction Workflow (Current)
+## Transaction Workflow (default)
 
-Each monetary transaction creates a transaction (1) with legs (2) for each account update, and finally updates 
-the balance on each account (3). As an extra safety guarantee, a schema CHECK constraint will ensure balances 
-don't end up negative, unless allowed for that account.
+Each monetary transaction creates a transaction record (1) and one leg (2) for each account update, and 
+also updates the cached balance on each account (3). A CHECK constraint ensures that balances 
+don't end up negative, unless allowed for that account (using `allow_negative` column). 
 
-    (1) INSERT INTO transaction (id,city,balance,currency,name,..);
-    
-    -- for each leg (batch)
-    (2) INSERT INTO transaction_item (city,transaction_id,..);
-    
-    -- for each account (batch)
-    (3) UPDATE account SET balance=balance+? WHERE id=? AND (balance+?)*abs(allow_negative-1)>=0;
+The `UPDATE .. FROM` with array unnesting is a workaround for the lack of batch update's over the wire.
+PG-JDBC doesn't actually batch UPDATE statements, only INSERTs with rewrites.
 
-In this workflow the initial read with/without a lock is made redundant since the invariant check
-is done through the final UPDATE. An UPDATE takes an implicit lock at the read part in
-CockroachDB (configurable).
+In this workflow, the initial balance check on the accounts is redundant since the invariant check
+is performed by looking at the rows affected on the final UPDATE. An UPDATE also takes an implicit lock  
+in the read part in CockroachDB (configurable) which will reduce retries.
 
-## Transaction Workflow (Old) 
+```sql
+-- (1) header
+INSERT INTO transaction (id,city,balance,currency,name,..);
+-- (2) for each leg (batch)
+INSERT INTO transaction_item (city,transaction_id,..);
+-- (3) for each account (batch)
+UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp()
+FROM (select unnest(?) as id, unnest(?) as balance) as data_table
+WHERE account.id=data_table.id
+  AND account.closed=false
+  AND (account.balance + data_table.balance) * abs(account.allow_negative-1) >= 0
+```
 
-Each monetary transaction first reads the current balance of the accounts involved using pessimistic locks (1), 
-then creates a transaction (2) with legs (3) for each account update, and finally updates the balance on each 
-account (4). As an extra safety guarantee, a schema CHECK constraint will ensure balances don't end up negative, 
-unless allowed for that account.
+The CHECK constraints:
 
-    (1) SELECT .. FROM account WHERE id IN (..) AND city IN (..) FOR UPDATE;
-    
-    (2) INSERT INTO transaction (id,city,balance,currency,name,..);
-    
-    -- for each leg (batch)
-    (3) INSERT INTO transaction_item (city,transaction_id,..);
-    
-    -- for each account (batch)
-    (4) UPDATE account SET balance=? WHERE id=? AND (?)*abs(allow_negative-1)>=0;
+````sql
+alter table account
+    add constraint check_account_allow_negative check (allow_negative between 0 and 1);
+alter table account
+    add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
+````
+
+## Transaction Workflow (alternative) 
+                            
+The alternative worklflow will perform an initial balance check and optionally use select-for-update locks.
+The benefit here is that the running balance of the accounts can be stored on the transaction legs. 
+Other than that, the end result is the same.
+
+The atlternative workflow exist only to force more contention and retries for observation.
+
+```sql
+-- (1) initial query for all involved accounts (lock is optional)
+SELECT .. FROM account WHERE id IN (..) AND city IN (..) /* FOR UPDATE */;
+-- (2) header 
+INSERT INTO transaction (id,city,balance,currency,name,..);
+-- (3) for each leg (notice running_balance)
+INSERT INTO transaction_item (city,transaction_id,running_balance,..);
+-- (4) for each account (batch)
+UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp()
+FROM (select unnest(?) as id, unnest(?) as balance) as data_table
+WHERE account.id=data_table.id
+  AND account.closed=false
+  AND (account.balance + data_table.balance) * abs(account.allow_negative-1) >= 0
+```
 
 ### Transaction Retry Strategy
 
-Any database running in serializable is exposed to transient retry errors. These errors are detected
-and handled via Spring/CGLIB proxies with an exponential backoff. 
+Any database running in serializable is exposed to transient retry errors on contended workloads. 
+These errors are detected and handled via Spring/CGLIB proxies with an exponential backoff. 

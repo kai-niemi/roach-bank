@@ -6,7 +6,7 @@ spring:
       enabled: always
   shell:
     history:
-      name: "bank-client-shell.history"
+      name: .log/client.history
     command:
       script:
         enabled: false

@@ -77,8 +77,9 @@ spring:
       idle-timeout: 60000
       maximum-pool-size: 200
       minimum-idle: 25
-      transaction-isolation: TRANSACTION_READ_COMMITTED
-#      transaction-isolation: TRANSACTION_SERIALIZABLE
+      transaction-isolation: TRANSACTION_SERIALIZABLE
+#      transaction-isolation: TRANSACTION_READ_COMMITTED
+
 # Hikari defaults:
 #    private static final long CONNECTION_TIMEOUT = SECONDS.toMillis(30);
 #    private static final long VALIDATION_TIMEOUT = SECONDS.toMillis(5);
@@ -101,7 +102,7 @@ info:
     artifact: io.roach.bank.server
     name: Roach Bank
     description: Accounting ledger based on Spring Boot and CockroachDB
-    version: 1.0.0
+    version: 2.0.0
     app-label: Roach Bank
 #############################
 management:
@@ -153,16 +154,14 @@ roachbank:
   pushTimeoutSeconds: 120
   # Default limit unless client specified
   accountsPerCityLimit: 100
-  # Read accounts with SELECT FOR UPDATE
-  selectForUpdate: false
   # Set running balance on transaction legs by reading account state (increases contention)
-  updateRunningBalance: true
+  updateRunningBalance: false
+  # Read accounts with SELECT FOR UPDATE (when updateRunningBalance=true)
+  selectForUpdate: false
   # Account plan to run workload against
   accountPlan:
-    # Clear accounts at startup
+    # CAUTION: Clear accounts and transactions at startup
     clearAtStartup: false
-    # Clear transactions transitively if clearAtStartup is true
-    clearTransitive: true
     # Filter on region, empty implies all regions
     region: ""
     # Number of accounts per city (total: num_cities x numAccountsPerCity)

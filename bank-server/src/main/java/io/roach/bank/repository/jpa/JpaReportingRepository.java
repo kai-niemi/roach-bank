@@ -10,6 +10,8 @@ import jakarta.persistence.Tuple;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -20,8 +22,9 @@ import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.repository.ReportingRepository;
 
-@Profile(ProfileNames.JPA)
+@Repository
 @Transactional(propagation = Propagation.MANDATORY)
+@Profile(ProfileNames.JPA)
 public class JpaReportingRepository implements ReportingRepository {
     @Autowired
     private AccountJpaRepository accountRepository;
@@ -38,11 +41,11 @@ public class JpaReportingRepository implements ReportingRepository {
             stream.forEach(o -> {
                 AccountSummary summary = new AccountSummary();
                 summary.setCity(city);
-                summary.setNumberOfAccounts(o.get(0, Integer.class));
-                summary.setTotalBalance(o.get(1, BigDecimal.class));
-                summary.setMinBalance(o.get(2, BigDecimal.class));
-                summary.setMaxBalance(o.get(3, BigDecimal.class));
-                summary.setCurrency(Currency.getInstance(o.get(4, String.class)));
+                summary.setNumberOfAccounts(o.get(0, Long.class));
+                summary.setTotalBalance(o.get(2, BigDecimal.class));
+                summary.setMinBalance(o.get(3, BigDecimal.class));
+                summary.setMaxBalance(o.get(4, BigDecimal.class));
+                summary.setCurrency(o.get(5, Currency.class));
 
                 result.add(summary);
             });
@@ -61,9 +64,14 @@ public class JpaReportingRepository implements ReportingRepository {
             stream.forEach(o -> {
                 TransactionSummary summary = new TransactionSummary();
                 summary.setCity(city);
-                summary.setNumberOfTransactions(o.get(0, Integer.class));
-                summary.setNumberOfLegs(o.get(1, Integer.class));
-                summary.setTotalTurnover(o.get(2, BigDecimal.class));
+                summary.setNumberOfTransactions(o.get(0, Long.class));
+                summary.setNumberOfLegs(o.get(1, Long.class));
+
+                BigDecimal sum = o.get(2, BigDecimal.class);
+                summary.setTotalTurnover(sum != null ? sum : BigDecimal.ZERO);
+
+                BigDecimal checksum = o.get(3, BigDecimal.class);
+                summary.setTotalCheckSum(checksum != null ? checksum : BigDecimal.ZERO);
 
                 result.add(summary);
             });

@@ -46,30 +46,31 @@ The default server configuration can be found in [application.yml](src/main/reso
 The config can be overridden at startup time through the command line and by activating Spring profiles, which are:
 
 Database type, one of:
-    
-  * psql-local - Enables PG-JDBC connecting to localhost (default)
-  * psql-cloud - Enables PG-JDBC connecting to CockroachDB Cloud
-  * crdb-local - Enables CockroachDB JDCB driver connecting to localhost
-  * crdb-cloud - Enables CockroachDB JDCB driver connecting to CockroachDB Cloud 
+
+* crdb-local - Use CockroachDB JDBC driver connecting to localhost (default)
+* crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud
+* pgjdbc-local - Use PostgreSQL JDBC driver connecting to localhost
+* pgjdbc-cloud - Use PostgreSQL JDBC driver connecting to CockroachDB Cloud
+* psql-local - Use PostgreSQL JDBC driver connecting to PostgreSQL on localhost 
 
 Retry strategy, one of:
 
-   * retry-client - Enables client-side retries with exponential backoff (default)
-   * retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
-   * retry-savepoint - Enables client-side retries using savepoints
-   * retry-none - Disable retries
+* retry-client - Enables client-side retries with exponential backoff (default)
+* retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
+* retry-savepoint - Enables client-side retries using savepoints
+* retry-none - Disable retries
 
 Change data capture and websocket push events, one of:
 
-   * cdc-none - Enables synthetic CDC events (via AOP) for websocket push (default)
-   * cdc-kafka - Enables Kafka subscriptions of CDC events for websocket push (requires CRDB, CDC, Kafka)
-   * cdc-http - Enables HTTP subscriptions of CDC events for websocket push (requires CRDB and CDC)
+* cdc-none - Enables synthetic CDC events (via AOP) for websocket push (default)
+* cdc-kafka - Enables Kafka subscriptions of CDC events for websocket push (requires CRDB, CDC, Kafka)
+* cdc-http - Enables HTTP subscriptions of CDC events for websocket push (requires CRDB and CDC)
  
 Optional:
 
-   * jpa - Enables JPA repositories over JDBC (default)
-   * outbox - Enables writing transfer requests to a transactional outbox table
-   * dev - Enables debug features for Thymeleaf 
+* jpa - Enables JPA repositories over JDBC
+* outbox - Enables writing transfer requests to a transactional outbox table
+* dev - Enables debug features for Thymeleaf 
    
 Note: Some features including CDC requires a CockroachDB enterprise license (trial).
 
@@ -87,8 +88,8 @@ PostgreSQL example:
 
     java -jar target/bank-server.jar \
     --spring.datasource.url=jdbc:cockroachdb://localhost:5432/roach_bank \
-    --spring.datasource.username=root \
-    --spring.datasource.password= \
+    --spring.datasource.username=postgres \
+    --spring.datasource.password=root \
     --spring.profiles.active=retry-none,cdc-none,psql-local  \
     --spring.kafka.bootstrap-servers=localhost:9092 \
     --server.port=8090

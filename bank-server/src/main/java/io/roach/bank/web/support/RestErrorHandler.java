@@ -46,14 +46,18 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
     private ResponseEntity<Object> wrap(Problem problem) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
-
-        if (problem.getStatus().is5xxServerError()) {
-            logger.error(problem);
-        } else {
-            logger.warn(problem);
-        }
-
         return createResponseEntity(problem, headers, Objects.requireNonNull(problem.getStatus()), null);
+    }
+
+    private ResponseEntity<Object> wrap(Problem problem, Exception ex) {
+        if (problem.getStatus().is5xxServerError()) {
+            logger.error("Server error", ex);
+        } else if (problem.getStatus().is4xxClientError()) {
+            logger.warn("Client error", ex);
+        } else {
+            logger.warn("Unascribed error", ex);
+        }
+        return wrap(problem);
     }
 
     @RequestMapping("/error")
@@ -211,15 +215,15 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
     public ResponseEntity<Object> handleDataAccessException(DataAccessException ex) {
         return wrap(Problem.create()
                 .withTitle(ex.getLocalizedMessage())
-                .withDetail(Objects.toString(ex.getCause()))
-                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+                .withDetail(ex.toString())
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR), ex);
     }
 
     @ExceptionHandler({TransientDataAccessException.class})
     public ResponseEntity<Object> handleTransientDataAccessException(TransientDataAccessException ex) {
         return wrap(Problem.create()
                 .withTitle(ex.getLocalizedMessage())
-                .withDetail(Objects.toString(ex.getCause()))
-                .withStatus(HttpStatus.CONFLICT));
+                .withDetail(ex.toString())
+                .withStatus(HttpStatus.CONFLICT), ex);
     }
 }

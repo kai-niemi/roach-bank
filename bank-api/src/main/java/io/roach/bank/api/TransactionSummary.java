@@ -5,9 +5,9 @@ import java.math.BigDecimal;
 public class TransactionSummary {
     private String city;
 
-    private int numberOfTransactions;
+    private long numberOfTransactions;
 
-    private int numberOfLegs;
+    private long numberOfLegs;
 
     private BigDecimal totalTurnover;
 
@@ -21,19 +21,19 @@ public class TransactionSummary {
         this.city = city;
     }
 
-    public int getNumberOfTransactions() {
+    public long getNumberOfTransactions() {
         return numberOfTransactions;
     }
 
-    public void setNumberOfTransactions(int numberOfTransactions) {
+    public void setNumberOfTransactions(long numberOfTransactions) {
         this.numberOfTransactions = numberOfTransactions;
     }
 
-    public int getNumberOfLegs() {
+    public long getNumberOfLegs() {
         return numberOfLegs;
     }
 
-    public void setNumberOfLegs(int numberOfLegs) {
+    public void setNumberOfLegs(long numberOfLegs) {
         this.numberOfLegs = numberOfLegs;
     }
 

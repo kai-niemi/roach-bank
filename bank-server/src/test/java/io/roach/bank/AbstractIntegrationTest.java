@@ -28,8 +28,8 @@ import io.roach.bank.service.TransactionServiceFacade;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(classes = TestApplication.class)
 @Tag("integration-test")
-//@ActiveProfiles({ProfileNames.PGJDBC_DEV, ProfileNames.RETRY_CLIENT, ProfileNames.CDC_NONE, "integrationtest"})
-@ActiveProfiles({ProfileNames.PSQL_DEV, ProfileNames.RETRY_CLIENT, ProfileNames.CDC_NONE, "integrationtest"})
+@ActiveProfiles({ProfileNames.CRDB_DEV, ProfileNames.RETRY_DRIVER, ProfileNames.CDC_NONE, "integrationtest"})
+//@ActiveProfiles({ProfileNames.PSQL_DEV, ProfileNames.RETRY_CLIENT, ProfileNames.CDC_NONE, "integrationtest"})
 public abstract class AbstractIntegrationTest {
     @Autowired
     protected TransactionService transactionService;

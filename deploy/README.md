@@ -4,7 +4,6 @@ Deployment tutorial for setting up a full-stack demo using either a single or mu
 
 ## Prerequisites
 
-- JDK8+ with 1.8 language level
 - [Roachprod](https://github.com/cockroachdb/cockroach/tree/master/pkg/cmd/roachprod) - a Cockroach Labs internal
   tool for ramping AWS/GCE/Azure VM clusters 
 - You will need the AWS/GCE/AZ client SDK, and an account

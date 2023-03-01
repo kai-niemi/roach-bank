@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 
-@Service
+@Repository
 @Transactional(propagation = Propagation.MANDATORY)
 @Profile(ProfileNames.JPA)
 public class JpaAccountRepository implements AccountRepository {
@@ -130,7 +131,7 @@ public class JpaAccountRepository implements AccountRepository {
 
     @Override
     public List<Account> findByCity(String city, int limit) {
-        return entityManager.createQuery("SELECT a FROM Account a WHERE a.id.city=?1",
+        return entityManager.createQuery("SELECT a FROM Account a WHERE a.city=?1",
                         Account.class)
                 .setParameter(1, city)
                 .setMaxResults(limit)

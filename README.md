@@ -80,12 +80,19 @@ Architecture overview:
 
 ## Prerequisites
 
-- JDK8+ with 1.8 language level 
-- [Maven 3](https://maven.apache.org/download.cgi) for building the project (optional, embedded)  
+- Java 17
+    - https://openjdk.org/projects/jdk/17/
+    - https://www.oracle.com/java/technologies/downloads/#java17
+- Maven 3+ (optional, embedded wrapper available)
+    - https://maven.apache.org/
 
-OpenJDK installation on Ubuntu:
+Install the JDK (Ubuntu example):
 
-    sudo apt-get -qq install -y openjdk-8-jdk
+    sudo apt-get install openjdk-17-jdk
+
+Confirm the installation by running:
+
+    java --version
 
 ## Subprojects
 
@@ -95,9 +102,11 @@ OpenJDK installation on Ubuntu:
 
 ## Supported Databases
 
-Both CockroachDB 20.2+ and PostgreSQL 9.1+ are supported. The database type can be selected 
-at start-up time by activating the appropriate profile (see below). Table schema and
-initial data (account plan) creation is automatic through Flyway. 
+Supported databases are CockroachDB 22.1+ and PostgreSQL 10+. 
+The database type can be selected at start-up time by activating 
+the appropriate profile (see `run-server.sh`). 
+
+Creation of the table schema and initial account plan is automatic. 
 
 ### CockroachDB Notes
 
@@ -117,9 +126,6 @@ Set an enterprise license (optional):
 Create the database:
 
     CREATE database roach_bank;
-
-If an error message says `function gen_random_uuid() does not exist` then run:
-
     CREATE extension pgcrypto;
 
 ## Building and running from codebase
@@ -135,9 +141,9 @@ To build and deploy to your local Maven repo, execute:
 
 Quick start:
 
-    chmod +x bank-server.sh
-    chmod +x bank-client.sh
-    ./bank-server.sh
-    ./bank-client.sh
+    chmod +x run-server.sh
+    chmod +x run-client.sh
+    ./run-server.sh
+    ./run-client.sh
 
 See [server](bank-server/README.md) and [client](bank-client/README.md) for more details.

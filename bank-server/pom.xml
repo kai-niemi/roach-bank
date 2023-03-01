@@ -228,9 +228,24 @@
     <profiles>
         <profile>
             <id>it</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>unit-test | integration-test | functional-test</groups>
+                            <includes>
+                                <include>**/*Test.java</include>
+                            </includes>
+                            <argLine>
+                                -Dspring.profiles.active=pgjdbc-local,retry-client,cdc-none
+                                -Dtest.datasources.crdb.url=jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable
+                            </argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>

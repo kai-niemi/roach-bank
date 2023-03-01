@@ -2,7 +2,7 @@ spring:
   jpa:
     properties:
       hibernate:
-        dialect: io.roach.bank.repository.jpa.CockroachDBDialect
+        dialect: org.hibernate.dialect.CockroachDialect
   flyway:
     enabled: true
     locations: classpath:db/crdb

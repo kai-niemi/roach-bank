@@ -10,7 +10,7 @@
     <logger name="org.springframework.transaction.interceptor" level="WARN"/>
     <logger name="org.springframework.web" level="WARN"/>
 
-    <logger name="io.roach.bank" level="DEBUG" additivity="false">
+    <logger name="io.roach.bank" level="TRACE" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 

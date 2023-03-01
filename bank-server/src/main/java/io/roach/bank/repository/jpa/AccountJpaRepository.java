@@ -52,6 +52,7 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
     @Query(value = "select "
             + "  count (distinct t.id), "
             + "  count (t.id), "
+            + "  sum (abs(ti.amount.amount)), "
             + "  sum (ti.amount.amount) "
             + "from Transaction t join TransactionItem ti "
             + "where ti.city = ?1")

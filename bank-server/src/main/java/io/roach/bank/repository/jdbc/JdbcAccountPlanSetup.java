@@ -2,7 +2,6 @@ package io.roach.bank.repository.jdbc;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -67,18 +66,18 @@ public class JdbcAccountPlanSetup {
     }
 
     public void clearAccounts() {
-        if (accountPlan.isClearTransitive()) {
-            jdbcTemplate.execute("truncate table transaction_item CASCADE");
-            jdbcTemplate.execute("truncate table transaction CASCADE");
-        }
-        jdbcTemplate.execute("truncate table account" + (accountPlan.isClearTransitive() ? " CASCADE" : ""));
+        jdbcTemplate.execute("truncate table transaction_item CASCADE");
+        jdbcTemplate.execute("truncate table transaction CASCADE");
+        jdbcTemplate.execute("truncate table account CASCADE");
     }
 
     public void createAccounts(String city) {
         Money balance = Money.of(accountPlan.getInitialBalance(), accountPlan.getCurrency());
 
-        logger.info("Creating {} accounts for {} with balance {} (total {})",
-                accountPlan.getNumAccountsPerCity(), city, balance,
+        logger.info("Creating {} accounts for city '{}' with initial balance {} (total {})",
+                accountPlan.getNumAccountsPerCity(),
+                city,
+                balance,
                 balance.multiply(accountPlan.getNumAccountsPerCity()));
 
         jdbcTemplate.update(
@@ -87,7 +86,7 @@ public class JdbcAccountPlanSetup {
                         + " ?,"
                         + " ?,"
                         + " ?,"
-                        + " (select concat('user:', no::text)),"
+                        + " (concat('user:', no::text)),"
                         + " ?::account_type,"
                         + " false,"
                         + " 0,"

@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,7 +37,6 @@ import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.service.NegativeBalanceException;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -127,6 +125,7 @@ public class JdbcAccountRepository implements AccountRepository {
                     ps.setArray(2, ps.getConnection()
                             .createArrayOf("DECIMAL", balances.toArray()));
                 });
+
         if (rows != balanceUpdates.size()) {
             throw new IncorrectResultSizeDataAccessException(balanceUpdates.size(), rows);
         }
