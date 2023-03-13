@@ -191,5 +191,14 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+
+        <repository>
+            <id>github</id>
+            <name>Cockroach Labs Maven Packages</name>
+            <url>https://maven.pkg.github.com/cockroachlabs-field/cockroachdb-jdbc</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 </project>

@@ -86,14 +86,17 @@ public class JdbcReportingRepository implements ReportingRepository {
                         + "  count(distinct t.id), "
                         + "  count(ti.transaction_id), "
                         + "  sum(abs(ti.amount)), "
-                        + "  sum(ti.amount) "
+                        + "  sum(ti.amount), "
+                        + "  ti.currency "
                         + "FROM transaction t "
                         + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
-                        + "WHERE ti.city = :city",
+                        + "WHERE ti.city = :city "
+                        + "GROUP BY ti.city, ti.currency",
                 parameters,
                 (rs, rowNum) -> {
                     TransactionSummary summary = new TransactionSummary();
                     summary.setCity(city);
+                    summary.setCurrency(Currency.getInstance(rs.getString(5)));
                     summary.setNumberOfTransactions(rs.getInt(1));
                     summary.setNumberOfLegs(rs.getInt(2));
 

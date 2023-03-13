@@ -44,8 +44,8 @@ public class ReportWebSocketPublisher {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Value("${roachbank.pushTimeoutSeconds}")
-    private int queryTimeout = 120;
+    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    private int reportQueryTimeoutSeconds = 120;
 
     @Autowired
     @Lazy
@@ -63,7 +63,9 @@ public class ReportWebSocketPublisher {
     @Autowired
     private CacheManager cacheManager;
 
-    @Scheduled(fixedRateString = "${roachbank.reportPushInterval}", initialDelayString = "${roachbank.reportPushInterval}")
+    @Scheduled(fixedRateString = "${roachbank.reportPushInterval}",
+            initialDelayString = "${roachbank.reportPushInterval}",
+            timeUnit = TimeUnit.SECONDS)
     public void publishReport() {
         Cache cache = cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY);
         ConcurrentHashMap map = (ConcurrentHashMap) cache.getNativeCache();
@@ -84,14 +86,16 @@ public class ReportWebSocketPublisher {
                 // Retrieve accounts per region concurrently with a collective timeout
                 List<Callable<Void>> tasks = Collections.synchronizedList(new ArrayList<>());
 
-                metadataRepository.getAllRegionCities().forEach((region, cities) -> {
+                Set<String> cities = metadataRepository.getRegionCities(Collections.emptyList());
+
+                cities.forEach(city -> {
                     tasks.add(() -> {
-                        selfProxy.computeSummaryAndPush(cities);
+                        selfProxy.computeSummaryAndPush(city);
                         return null;
                     });
                 });
 
-                ConcurrencyUtils.runConcurrentlyAndWait(tasks, queryTimeout, TimeUnit.SECONDS);
+                ConcurrencyUtils.runConcurrentlyAndWait(tasks, reportQueryTimeoutSeconds, TimeUnit.SECONDS);
             } finally {
                 // Send empty message to mark completion
                 simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, "");
@@ -108,14 +112,11 @@ public class ReportWebSocketPublisher {
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionBoundary.Priority.low)
     @Retryable
-    public void computeSummaryAndPush(Set<String> cities) {
-        cities.forEach(city -> {
-            AccountSummary accountSummary = reportingRepository.accountSummary(city);
-            simpMessagingTemplate.convertAndSend(TOPIC_ACCOUNT_SUMMARY, accountSummary);
+    public void computeSummaryAndPush(String city) {
+        AccountSummary accountSummary = reportingRepository.accountSummary(city);
+        simpMessagingTemplate.convertAndSend(TOPIC_ACCOUNT_SUMMARY, accountSummary);
 
-            TransactionSummary transactionSummary = reportingRepository.transactionSummary(city);
-            simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, transactionSummary);
-        });
-
+        TransactionSummary transactionSummary = reportingRepository.transactionSummary(city);
+        simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, transactionSummary);
     }
 }

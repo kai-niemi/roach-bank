@@ -29,11 +29,6 @@
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="ASYNC_FILE" />
         </logger>
-
-        <logger name="io.cockroachdb.jdbc.retry" level="DEBUG">
-            <appender-ref ref="CONSOLE" />
-            <appender-ref ref="ASYNC_FILE" />
-        </logger>
     </springProfile>
 
     <logger name="io.roach.bank" level="INFO" additivity="false">

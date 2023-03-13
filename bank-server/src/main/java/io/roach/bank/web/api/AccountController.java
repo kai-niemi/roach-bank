@@ -54,8 +54,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${roachbank.pushTimeoutSeconds}")
-    private int queryTimeout;
+    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    private int reportQueryTimeoutSeconds;
 
     @Value("${roachbank.accountsPerCityLimit}")
     private int accountsPerCityLimit;
@@ -138,7 +138,7 @@ public class AccountController {
             return null;
         }));
 
-        ConcurrencyUtils.runConcurrentlyAndWait(tasks, queryTimeout, TimeUnit.SECONDS);
+        ConcurrencyUtils.runConcurrentlyAndWait(tasks, reportQueryTimeoutSeconds, TimeUnit.SECONDS);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Client-side caching

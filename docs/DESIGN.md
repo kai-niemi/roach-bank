@@ -1,7 +1,7 @@
 # Design Notes
 
 Roach Bank is based on a typical lightweight, self-contained and stateless Spring Boot application architecture. 
-It provides two distinct server implementations; JPA via Hibernate and plain JDBC, both included in a single
+It provides two distinct data access implementations; JPA via Hibernate and plain JDBC, both included in a single
 self-contained executable JAR artifact with an embedded Jetty servlet container. 
 
 Key architectural mechanisms and realizations:

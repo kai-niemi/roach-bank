@@ -46,6 +46,8 @@ public class CallMetrics {
     public String prettyPrintHeader() {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
+
+        pw.println();
         pw.printf(Locale.US,
                 HEADER_PATTERN,
                 "metric",
@@ -87,9 +89,6 @@ public class CallMetrics {
     }
 
     public String prettyPrintFooter() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-
         // Aggregate
         int concurrencySum = metrics.values().stream().mapToInt(Context::concurrency).sum();
 
@@ -107,6 +106,9 @@ public class CallMetrics {
         int successSum = metrics.values().stream().mapToInt(Context::successfulCalls).sum();
         int failSum = metrics.values().stream().mapToInt(Context::failedCalls).sum();
 
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+
         pw.printf(Locale.US,
                 FOOTER_PATTERN,
                 "sum/avg",
@@ -122,10 +124,7 @@ public class CallMetrics {
                 successSum,
                 failSum
         );
-
         pw.println();
-        pw.flush();
-
         return sw.toString();
     }
 

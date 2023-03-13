@@ -47,7 +47,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        dialect: io.cockroachdb.workload.common.jpa.CockroachDBDialect
+        dialect: org.hibernate.dialect.CockroachDialect
         connection:
           provider_disables_autocommit: false
         jdbc:
@@ -148,10 +148,10 @@ roachbank:
     validation-query: select 1
   # WS push permits per second rate limit
   pushPermitsPerSec: 10.0
-  # Interval of pushing cached balance reports (millis) (default: 1h since its unused)
-  reportPushInterval: 3600000
+  # Interval of pushing cached balance reports (seconds)
+  reportPushInterval: 120
   # Report / WS push query timeout (seconds)
-  pushTimeoutSeconds: 120
+  reportQueryTimeoutSeconds: 120
   # Default limit unless client specified
   accountsPerCityLimit: 100
   # Set running balance on transaction legs by reading account state (increases contention)
@@ -165,7 +165,7 @@ roachbank:
     # Filter on region, empty implies all regions
     region: ""
     # Number of accounts per city (total: num_cities x numAccountsPerCity)
-    numAccountsPerCity: 1000
+    numAccountsPerCity: 100
     # Initial balance
     initialBalance: "25000.00"
     # Account currency

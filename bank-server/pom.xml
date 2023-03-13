@@ -135,11 +135,6 @@
         <!-- DB -->
         <!-- ======================================================== -->
         <dependency>
-            <groupId>io.cockroachdb.jdbc</groupId>
-            <artifactId>cockroachdb-jdbc-driver</artifactId>
-            <version>0.9.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>io.cockroachdb</groupId>
             <artifactId>spring-data-cockroachdb</artifactId>
             <version>0.9.0-SNAPSHOT</version>

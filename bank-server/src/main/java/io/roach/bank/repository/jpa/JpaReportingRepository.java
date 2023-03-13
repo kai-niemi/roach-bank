@@ -64,6 +64,7 @@ public class JpaReportingRepository implements ReportingRepository {
             stream.forEach(o -> {
                 TransactionSummary summary = new TransactionSummary();
                 summary.setCity(city);
+                summary.setCurrency(Currency.getInstance(o.get(4,String.class)));
                 summary.setNumberOfTransactions(o.get(0, Long.class));
                 summary.setNumberOfLegs(o.get(1, Long.class));
 

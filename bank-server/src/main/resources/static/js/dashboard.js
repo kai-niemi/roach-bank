@@ -6,7 +6,9 @@ var BankDashboard = function (settings) {
 BankDashboard.prototype = {
     init: function () {
         this.container = this.getElement(this.settings.elements.container);
+        this.reportContainer = this.getElement(this.settings.elements.reportContainer);
         this.accountSpinner = this.getElement(this.settings.elements.accountSpinner);
+        this.refreshButton = this.getElement(this.settings.elements.refreshButton);
         this.loadInitialState();
         this.addWebsocketListener();
     },
@@ -18,7 +20,6 @@ BankDashboard.prototype = {
         const urlParams = new URLSearchParams(queryString);
 
         var limit=10;
-
         if (urlParams.has('limit')) {
             limit = urlParams.get('limit');
         }
@@ -34,6 +35,10 @@ BankDashboard.prototype = {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
         }
+
+        $.get(this.settings.endpoints.regionCities, function (data) {
+            _this.createReportElements(data);
+        });
     },
 
     getElement: function (id) {
@@ -88,12 +93,75 @@ BankDashboard.prototype = {
         this.container.append(accounts);
     },
 
+    createReportElements: function (data) {
+        var _this = this, report;
+
+        report = data.map(function (city) {
+            return $('<tr>')
+                    .append(
+                            $('<th>')
+                                    .attr('scope', 'row')
+                                    .text(city)
+                    )
+                    .append(
+                            $('<td>')
+                                    .attr('id', city + "-total-accounts")
+                                    .text("0")
+                    )
+                    .append(
+                            $('<td>')
+                                    .attr('id', city + "-total-transactions")
+                                    .text("0")
+                    )
+                    .append(
+                            $('<td>')
+                                    .attr('id', city + "-total-transaction-legs")
+                                    .text("0")
+                    )
+                    .append(
+                            $('<td>')
+                                    .attr('id', city + "-total-balance")
+                                    .text(_this.formatMoney("0.00", "USD"))
+                    )
+                    .append(
+                            $('<td>')
+                                    .attr('id', city + "-total-turnover")
+                                    .text(_this.formatMoney("0.00", "USD"))
+                    )
+                    .append(
+                            $('<td>')
+                                    .attr('id', city + "-total-checksum")
+                                    .text(_this.formatMoney("0.00", "USD"))
+                    )
+        });
+
+        this.reportContainer.append(report);
+    },
+
     addWebsocketListener: function () {
         var socket = new SockJS(this.settings.endpoints.socket),
                 stompClient = Stomp.over(socket),
                 _this = this;
 
         stompClient.connect({}, function (frame) {
+            stompClient.subscribe(_this.settings.topics.reportAccountSummary, function (report) {
+                var event = JSON.parse(report.body);
+
+                sessionStorage.setItem("account-summary-" + event.currency, event.maxBalance);
+
+                _this.handleAccountSummaryUpdate(event);
+            });
+
+            stompClient.subscribe(_this.settings.topics.reportTransactionSummary, function (report) {
+                if (report.body == "") {
+                    _this.refreshButton.prop("disabled", false);
+                    _this.refreshButton.text("Refresh Now");
+                } else {
+                    var event = JSON.parse(report.body);
+                    _this.handleTransactionSummaryUpdate(event);
+                }
+            });
+
             stompClient.subscribe(_this.settings.topics.accounts, function (account) {
                 var event = JSON.parse(account.body); // batch
 
@@ -116,12 +184,44 @@ BankDashboard.prototype = {
         var m = _this.formatMoney(balance, currency);
         account.find('.amount').text(m);
 
-        setTimeout( function(){
+        setTimeout(function(){
             account.css("background-color", original_color);
         }, 1500);
     },
 
-    boxSize: function (amount,currency) {
+    handleAccountSummaryUpdate: function (accountSummary) {
+        var _this = this;
+
+        console.log(accountSummary);
+
+        var totalAccountSuffix = _this.getElement(accountSummary.city + _this.settings.elements.totalAccountSuffix);
+        var totalBalanceSuffix = _this.getElement(accountSummary.city + _this.settings.elements.totalBalanceSuffix);
+
+        totalAccountSuffix.text(_this.formatNumber(accountSummary.numberOfAccounts));
+        totalBalanceSuffix.text(_this.formatMoney(accountSummary.totalBalance, accountSummary.currency));
+    },
+
+    handleTransactionSummaryUpdate: function (transactionSummary) {
+        var _this = this;
+
+        console.log(transactionSummary);
+
+        var totalTransactionsSuffix = _this.getElement(
+                transactionSummary.city + _this.settings.elements.totalTransactionsSuffix);
+        var totalTransactionLegsSuffix = _this.getElement(
+                transactionSummary.city + _this.settings.elements.totalTransactionLegsSuffix);
+        var totalTurnoverSuffix = _this.getElement(
+                transactionSummary.city + _this.settings.elements.totalTurnoverSuffix);
+        var totalChecksumSuffix = _this.getElement(
+                transactionSummary.city + _this.settings.elements.totalChecksumSuffix);
+
+        totalTransactionsSuffix.text(_this.formatNumber(transactionSummary.numberOfTransactions));
+        totalTransactionLegsSuffix.text(_this.formatNumber(transactionSummary.numberOfLegs));
+        totalTurnoverSuffix.text(_this.formatMoney(transactionSummary.totalTurnover, transactionSummary.currency));
+        totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
+    },
+
+    boxSize: function (amount, currency) {
         var size=50;
         return {
             width: size + 'px',
@@ -156,6 +256,13 @@ BankDashboard.prototype = {
             currency: currency,
         });
         return formatter.format(number);
+    },
+
+    formatNumber: function (number) {
+        var formatter = new Intl.NumberFormat('en-US', {
+            maximumSignificantDigits: 3
+        });
+        return formatter.format(number);
     }
 };
 
@@ -163,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
     new BankDashboard({
         endpoints: {
             topAccounts: '/api/account/top',
+            regionCities: '/api/metadata/region-cities',
             socket: '/roach-bank'
         },
 
@@ -174,7 +282,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         elements: {
             container: 'dashboard-container',
-            accountSpinner: 'account-spinner'
+            accountSpinner: 'account-spinner',
+            refreshButton: 'refresh-button',
+            reportContainer: 'report-container',
+
+            totalAccountSuffix: '-total-accounts',
+            totalTransactionsSuffix: '-total-transactions',
+            totalTransactionLegsSuffix: '-total-transaction-legs',
+            totalBalanceSuffix: '-total-balance',
+            totalTurnoverSuffix: '-total-turnover',
+            totalChecksumSuffix: '-total-checksum'
         },
 
         regionColors: {

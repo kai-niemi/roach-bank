@@ -1,10 +1,13 @@
 package io.roach.bank.web.support;
 
 import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.SQLException;
 import java.util.Objects;
 
+import org.postgresql.util.PSQLState;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessException;
@@ -15,6 +18,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -211,12 +215,26 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
                 .withProperties(sb.toString()));
     }
 
-    @ExceptionHandler({DataAccessException.class})
-    public ResponseEntity<Object> handleDataAccessException(DataAccessException ex) {
-        return wrap(Problem.create()
-                .withTitle(ex.getLocalizedMessage())
-                .withDetail(ex.toString())
-                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR), ex);
+    /**
+     * Exception thrown at commit or rollback, check SQL state code.
+     */
+    @ExceptionHandler({TransactionSystemException.class})
+    public ResponseEntity<Object> handleTransactionSystemException(TransactionSystemException ex) {
+        Throwable throwable = NestedExceptionUtils.getMostSpecificCause(ex);
+        if (throwable instanceof SQLException && PSQLState.SERIALIZATION_FAILURE
+                .getState().equals(((SQLException) throwable).getSQLState())) {
+            return wrap(Problem.create()
+                    .withTitle(ex.getLocalizedMessage())
+                    .withDetail(ex.toString())
+                    .withProperties(PSQLState.SERIALIZATION_FAILURE
+                            .getState().equals(((SQLException) throwable).getSQLState()))
+                    .withStatus(HttpStatus.CONFLICT), ex);
+        } else {
+            return wrap(Problem.create()
+                    .withTitle(ex.getLocalizedMessage())
+                    .withDetail(ex.toString())
+                    .withStatus(HttpStatus.INTERNAL_SERVER_ERROR), ex);
+        }
     }
 
     @ExceptionHandler({TransientDataAccessException.class})
@@ -225,5 +243,13 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
                 .withTitle(ex.getLocalizedMessage())
                 .withDetail(ex.toString())
                 .withStatus(HttpStatus.CONFLICT), ex);
+    }
+
+    @ExceptionHandler({DataAccessException.class})
+    public ResponseEntity<Object> handleDataAccessException(DataAccessException ex) {
+        return wrap(Problem.create()
+                .withTitle(ex.getLocalizedMessage())
+                .withDetail(ex.toString())
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR), ex);
     }
 }

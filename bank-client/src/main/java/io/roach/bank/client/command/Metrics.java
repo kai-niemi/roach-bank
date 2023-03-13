@@ -49,9 +49,9 @@ public class Metrics extends AbstractCommand {
     private Runnable callMetricsPrinter() {
         return () -> {
             if (printMetrics && threadPoolTaskExecutor.getActiveCount() > 0) {
-                console.otherf(AnsiColor.BRIGHT_GREEN, "%s\n", callMetrics.prettyPrintHeader());
-                console.otherf(AnsiColor.BRIGHT_YELLOW, "%s\n", callMetrics.prettyPrintBody());
-                console.otherf(AnsiColor.BRIGHT_MAGENTA, "%s\n", callMetrics.prettyPrintFooter());
+                console.otherf(AnsiColor.BRIGHT_GREEN, "%s", callMetrics.prettyPrintHeader());
+                console.otherf(AnsiColor.BRIGHT_YELLOW, "%s", callMetrics.prettyPrintBody());
+                console.otherf(AnsiColor.BRIGHT_MAGENTA, "%s", callMetrics.prettyPrintFooter());
             }
         };
     }
