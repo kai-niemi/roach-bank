@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.3</version>
+        <version>3.0.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -16,7 +16,7 @@
     <version>2.0.0-SNAPSHOT</version>
 
     <properties>
-        <spring.boot.version>3.0.3</spring.boot.version>
+        <spring.boot.version>3.0.4</spring.boot.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -143,9 +143,19 @@
             <dependency>
                 <groupId>org.springframework.shell</groupId>
                 <artifactId>spring-shell-dependencies</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.shell</groupId>
+                <artifactId>spring-shell-starter</artifactId>
+                <version>3.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cockroachdb</groupId>
+                <artifactId>spring-data-cockroachdb</artifactId>
+                <version>1.0.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

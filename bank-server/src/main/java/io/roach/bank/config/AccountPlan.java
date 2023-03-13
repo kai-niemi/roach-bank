@@ -10,7 +10,7 @@ public class AccountPlan {
 
     private String region;
 
-    private int numAccountsPerCity;
+    private int accountsPerCity;
 
     private String initialBalance;
 
@@ -32,12 +32,12 @@ public class AccountPlan {
         this.region = region;
     }
 
-    public int getNumAccountsPerCity() {
-        return numAccountsPerCity;
+    public int getAccountsPerCity() {
+        return accountsPerCity;
     }
 
-    public void setNumAccountsPerCity(int numAccountsPerCity) {
-        this.numAccountsPerCity = numAccountsPerCity;
+    public void setAccountsPerCity(int accountsPerCity) {
+        this.accountsPerCity = accountsPerCity;
     }
 
     public String getInitialBalance() {
@@ -61,7 +61,7 @@ public class AccountPlan {
         return "AccountPlan{" +
                 "clearAtStartup=" + clearAtStartup +
                 ", region='" + region + '\'' +
-                ", numAccountsPerCity=" + numAccountsPerCity +
+                ", accountsPerCity=" + accountsPerCity +
                 ", initialBalance='" + initialBalance + '\'' +
                 ", currency='" + currency + '\'' +
                 '}';

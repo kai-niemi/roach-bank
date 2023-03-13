@@ -1,5 +1,8 @@
 package io.roach.bank.changefeed.egress;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +31,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 import io.roach.bank.api.AccountSummary;
+import io.roach.bank.api.ReportUpdate;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.MetadataRepository;
@@ -39,6 +43,8 @@ public class ReportWebSocketPublisher {
     public static final String TOPIC_ACCOUNT_SUMMARY = "/topic/account-summary";
 
     public static final String TOPIC_TRANSACTION_SUMMARY = "/topic/transaction-summary";
+
+    public static final String TOPIC_REPORT_UPDATE = "/topic/report-update";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -96,6 +102,15 @@ public class ReportWebSocketPublisher {
                 });
 
                 ConcurrencyUtils.runConcurrentlyAndWait(tasks, reportQueryTimeoutSeconds, TimeUnit.SECONDS);
+
+                ReportUpdate reportUpdate = new ReportUpdate() ;
+                reportUpdate.setLastUpdatedAt(LocalDateTime.now());
+                reportUpdate.setNumCities(cities.size());
+                reportUpdate.setMessage("Last updated " + LocalDateTime.now()
+                        .atOffset(ZoneOffset.UTC)
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+                simpMessagingTemplate.convertAndSend(TOPIC_REPORT_UPDATE, reportUpdate);
             } finally {
                 // Send empty message to mark completion
                 simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, "");

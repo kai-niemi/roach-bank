@@ -32,9 +32,6 @@ public class DefaultTransactionService implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    @Value("${roachbank.updateRunningBalance}")
-    private boolean updateRunningBalance;
-
     @Value("${roachbank.selectForUpdate}")
     private boolean selectForUpdate;
 
@@ -61,39 +58,29 @@ public class DefaultTransactionService implements TransactionService {
 
         final List<Pair<UUID, BigDecimal>> balanceUpdates = new ArrayList<>();
 
-        final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
+        // Could load by ref to avoid the SELECTs, but we need the running balance
+        // for front-end reporting push events.
+        Set<UUID> accountIds = new HashSet<>();
+        Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
+        legs.forEach((accountId, value) -> accountIds.add(accountId));
 
-        List<Account> accounts;
+        List<Account> accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
 
-        // Updating running balance requires one additional read per account
-        if (updateRunningBalance) {
-            Set<UUID> accountIds = new HashSet<>();
-            legs.forEach((accountId, value) -> accountIds.add(accountId));
-            accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
-        } else {
-            accounts = Collections.emptyList();
-        }
-
-        legs.forEach((accountId, value) -> {
-            final Money amount = value.getFirst();
-
-            Account account = updateRunningBalance
-                    ? accounts.stream()
+        legs.forEach((accountId, pair) -> {
+            Account account = accounts.stream()
                     .filter(a -> a.getId().equals(accountId))
                     .findFirst()
-                    .orElseThrow(() -> new NoSuchAccountException(accountId))
-                    // Get by reference/proxy that avoids reading from the DB
-                    : accountRepository.getAccountByReference(accountId);
+                    .orElseThrow(() -> new NoSuchAccountException(accountId));
 
             transactionBuilder
                     .andItem()
                     .withAccount(account)
-                    .withAmount(amount)
-                    .withNote(value.getSecond())
-                    .withRunningBalance(updateRunningBalance ? account.getBalance() : Money.zero(amount.getCurrency()))
+                    .withAmount(pair.getFirst())
+                    .withNote(pair.getSecond())
+                    .withRunningBalance(account.getBalance())
                     .then();
 
-            balanceUpdates.add(Pair.of(accountId, amount.getAmount()));
+            balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
         });
 
         try {

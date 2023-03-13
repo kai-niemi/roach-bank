@@ -59,7 +59,7 @@ public class JdbcAccountPlanSetup {
         if (jdbcTemplate.queryForList("select 1 from account limit 1", Integer.class).isEmpty()) {
             logger.info("Creating new account plan: {}", accountPlan);
             cities.parallelStream().forEach(this::createAccounts);
-            logger.info("Creating {} accounts total", (accountPlan.getNumAccountsPerCity() * cities.size()));
+            logger.info("Creating {} accounts total", (accountPlan.getAccountsPerCity() * cities.size()));
         } else {
             logger.info("Account plan already exist");
         }
@@ -75,10 +75,10 @@ public class JdbcAccountPlanSetup {
         Money balance = Money.of(accountPlan.getInitialBalance(), accountPlan.getCurrency());
 
         logger.info("Creating {} accounts for city '{}' with initial balance {} (total {})",
-                accountPlan.getNumAccountsPerCity(),
+                accountPlan.getAccountsPerCity(),
                 city,
                 balance,
-                balance.multiply(accountPlan.getNumAccountsPerCity()));
+                balance.multiply(accountPlan.getAccountsPerCity()));
 
         jdbcTemplate.update(
                 "INSERT INTO account (id, city, balance, currency, name, type, closed, allow_negative, updated) "
@@ -97,6 +97,6 @@ public class JdbcAccountPlanSetup {
                 balance.getCurrency().getCurrencyCode(),
                 AccountType.ASSET.getCode(),
                 LocalDate.now(),
-                accountPlan.getNumAccountsPerCity());
+                accountPlan.getAccountsPerCity());
     }
 }

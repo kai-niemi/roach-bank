@@ -30,9 +30,10 @@
                      height="33"
                      src="../static/images/logo_white-32px.png"
                      th:src="@{/images/logo_mark_white.png}">
-            Roach Bank
+                Roach Bank
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
+                    aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -62,7 +63,7 @@
                     <!-- -->
                     <li class="nav-item dropdown" th:each="item, iStat : ${region_groups}">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-                           aria-expanded="false" > Regions (<span th:text="${item.key}"/>) </a>
+                           aria-expanded="false"> Regions (<span th:text="${item.key}"/>) </a>
 
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li th:each="region : ${item.value}">
@@ -80,7 +81,9 @@
                             <li><h6 class="dropdown-header">Region (gateway)</h6></li>
                             <li><a class="dropdown-item" th:href="@{/}" th:text="${gateway_region}"></a></li>
                             <li><a class="dropdown-item" th:href="@{?region=*}">all (*)</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><h6 class="dropdown-header">Accounts per city</h6></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=10)}">10</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=50)}">50</a></li>
@@ -92,8 +95,8 @@
                     <!-- -->
                     <li class="nav-item">
                         <a class="nav-link disabled" th:switch="${view_gateway}">
-                          <span th:case="true" class="text-info" th:text="${view_region}"></span>
-                          <span th:case="false" class="text-warning" th:text="${view_region}"></span>
+                            <span th:case="true" class="text-info" th:text="${view_region}"></span>
+                            <span th:case="false" class="text-warning" th:text="${view_region}"></span>
                         </a>
                     </li>
                 </ul>
@@ -119,7 +122,9 @@
     </svg>
 
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:">
+            <use xlink:href="#info-fill"/>
+        </svg>
         <span th:text="${randomFact}"/>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -147,10 +152,13 @@
                 title="Refresh account and transaction history" onclick="refreshReport()">Refresh Now
         </button>
 
+        <span id="notification-badge" class="badge rounded-pill bg-info text-dark"></span>
+
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 </main>
 
+<!-- Main container -->
 <div id="dashboard-container">
     <div id="account-spinner" class="text-center">
         <div class="spinner-border" role="status">
@@ -163,124 +171,129 @@
 
 <hr class="col-xs-12"/>
 
-<footer class="container py-2">
-    <div class="row">
-        <div class="col-12 col-md">
-            <img class="d-inline-block align-content-center"
-                 width="48" height="48" src="../static/images/logo_mark_black.png"
-                 th:src="@{/images/logo_mark_black.png}"
-            ></a>
-            <small class="d-block mb-3 text-muted">A CockroachDB powered accounting ledger using the double-entry
-                bookkeeping principle</small>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <footer class="container py-2">
+        <div class="row">
+            <div class="col-12 col-md">
+                <img class="d-inline-block align-content-center"
+                     width="48" height="48" src="../static/images/logo_mark_black.png"
+                     th:src="@{/images/logo_mark_black.png}"
+                ></a>
+                <small class="d-block mb-3 text-muted">A CockroachDB powered accounting ledger using the double-entry
+                    bookkeeping principle</small>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Get Started</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="https://university.cockroachlabs.com/catalog">Online Training</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html">Install
+                        CockroachDB</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html">Start
+                        a Local Cluster</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html">Learn
+                        CockroachDB SQL</a></li>
+                    <li><a class="text-muted"
+                           href="https://www.cockroachlabs.com/docs/stable/build-an-app-with-cockroachdb.html">Hello,
+                        World!</a></li>
+                    <li><a class="text-muted"
+                           href="https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html">Explore
+                        Capabilities</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Develop</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-client-drivers.html">Client
+                        Drivers</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/connection-parameters.html">Connection
+                        Parameters</a></li>
+                    <li><a class="text-muted"
+                           href="https://www.cockroachlabs.com/docs/stable/performance-best-practices-overview.html">SQL
+                        Best Practices</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-statements.html">SQL
+                        Statements</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/data-types.html">SQL Data
+                        Types</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-tuning-with-explain.html">SQL
+                        Tuning</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Deployment</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted"
+                           href="https://www.cockroachlabs.com/docs/stable/recommended-production-settings.html">Production
+                        Checklist</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/topology-patterns.html">Topology
+                        Patterns</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/manual-deployment.html">Manual
+                        Deployment</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/orchestration.html">Orchestration</a>
+                    </li>
+                    <li><a class="text-muted"
+                           href="https://www.cockroachlabs.com/docs/stable/performance.html">Performance</a></li>
+                    <li><a class="text-muted"
+                           href="https://www.cockroachlabs.com/docs/stable/upgrade-cockroach-version.html">Rolling
+                        Upgrade</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>FAQs</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted"
+                           href="https://www.cockroachlabs.com/docs/stable/frequently-asked-questions.html">Product FAQs</a>
+                    </li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-faqs.html">SQL FAQs</a>
+                    </li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Operational
+                        FAQs</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Availability
+                        FAQs</a></li>
+                    <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/licensing-faqs.html">Licensing
+                        FAQs</a></li>
+                </ul>
+            </div>
         </div>
-        <div class="col-6 col-md">
-            <h5>Get Started</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="https://university.cockroachlabs.com/catalog">Online Training</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html">Install
-                    CockroachDB</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/start-a-local-cluster.html">Start
-                    a Local Cluster</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/learn-cockroachdb-sql.html">Learn
-                    CockroachDB SQL</a></li>
-                <li><a class="text-muted"
-                       href="https://www.cockroachlabs.com/docs/stable/build-an-app-with-cockroachdb.html">Hello,
-                    World!</a></li>
-                <li><a class="text-muted"
-                       href="https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html">Explore
-                    Capabilities</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>Develop</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/install-client-drivers.html">Client
-                    Drivers</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/connection-parameters.html">Connection
-                    Parameters</a></li>
-                <li><a class="text-muted"
-                       href="https://www.cockroachlabs.com/docs/stable/performance-best-practices-overview.html">SQL
-                    Best Practices</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-statements.html">SQL
-                    Statements</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/data-types.html">SQL Data
-                    Types</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-tuning-with-explain.html">SQL
-                    Tuning</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>Deployment</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted"
-                       href="https://www.cockroachlabs.com/docs/stable/recommended-production-settings.html">Production
-                    Checklist</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/topology-patterns.html">Topology
-                    Patterns</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/manual-deployment.html">Manual
-                    Deployment</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/orchestration.html">Orchestration</a>
-                </li>
-                <li><a class="text-muted"
-                       href="https://www.cockroachlabs.com/docs/stable/performance.html">Performance</a></li>
-                <li><a class="text-muted"
-                       href="https://www.cockroachlabs.com/docs/stable/upgrade-cockroach-version.html">Rolling
-                    Upgrade</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>FAQs</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="text-muted"
-                       href="https://www.cockroachlabs.com/docs/stable/frequently-asked-questions.html">Product FAQs</a>
-                </li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/sql-faqs.html">SQL FAQs</a>
-                </li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Operational
-                    FAQs</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/operational-faqs.html">Availability
-                    FAQs</a></li>
-                <li><a class="text-muted" href="https://www.cockroachlabs.com/docs/stable/licensing-faqs.html">Licensing
-                    FAQs</a></li>
-            </ul>
+    </footer>
+
+    <hr class="col-xs-12"/>
+
+    <div class="container py-2">
+        <div class="row">
+            <div class="col">
+                <a href="https://spring.io/projects/spring-boot">
+                    <img class="img-fluid" th:src="@{/images/logo_springboot.png}"></a>
+            </div>
+            <div class="col">
+                <a href="https://spring.io/projects/spring-data">
+                    <img class="img-fluid" th:src="@{/images/logo_spring_data.png}"></a>
+            </div>
+            <div class="col">
+                <a href="https://spring.io/projects/spring-hateoas">
+                    <img class="img-fluid" th:src="@{/images/logo_spring_rest.png}"></a>
+            </div>
+            <div class="col">
+                <a href="https://hibernate.org/">
+                    <img class="img-fluid" th:src="@{/images/logo_hibernate.png}"></a>
+            </div>
+            <div class="col">
+                <a href="https://maven.apache.org/">
+                    <img class="img-fluid" th:src="@{/images/logo_maven.png}"></a>
+            </div>
+            <div class="col">
+                <a href="https://www.java.com/">
+                    <img class="img-fluid" th:src="@{/images/logo_java.png}"></a>
+            </div>
+            <div class="col">
+                <a href="https://openjdk.java.net/">
+                    <img class="img-fluid" th:src="@{/images/logo_open_jdk.png}"></a>
+            </div>
         </div>
     </div>
-</footer>
 
-<hr class="col-xs-12"/>
-
-<div class="container py-2">
-    <div class="row">
-        <div class="col">
-            <a href="https://spring.io/projects/spring-boot">
-                <img class="img-fluid" th:src="@{/images/logo_springboot.png}"></a>
-        </div>
-        <div class="col">
-            <a href="https://spring.io/projects/spring-data">
-                <img class="img-fluid" th:src="@{/images/logo_spring_data.png}"></a>
-        </div>
-        <div class="col">
-            <a href="https://spring.io/projects/spring-hateoas">
-                <img class="img-fluid" th:src="@{/images/logo_spring_rest.png}"></a>
-        </div>
-        <div class="col">
-            <a href="https://hibernate.org/">
-                <img class="img-fluid" th:src="@{/images/logo_hibernate.png}"></a>
-        </div>
-        <div class="col">
-            <a href="https://maven.apache.org/">
-                <img class="img-fluid" th:src="@{/images/logo_maven.png}"></a>
-        </div>
-        <div class="col">
-            <a href="https://www.java.com/">
-                <img class="img-fluid" th:src="@{/images/logo_java.png}"></a>
-        </div>
-        <div class="col">
-            <a href="https://openjdk.java.net/">
-                <img class="img-fluid" th:src="@{/images/logo_open_jdk.png}"></a>
-        </div>
-    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
         crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"

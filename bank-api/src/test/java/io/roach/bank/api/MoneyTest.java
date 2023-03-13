@@ -11,6 +11,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MoneyTest {
+    public double interpolate(double x1, double y1, double x2, double y2, double x) {
+        if (x2 <= x1) {
+            return y1;
+        }
+        if (x > x2) {
+            return y2;
+        }
+        if (x < x1) {
+            return y1;
+        }
+        return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
+    }
+
+    @Test
+    public void interpolate() {
+        System.out.println(interpolate(2400, 50, 9500, 250, 9600));
+        System.out.println(interpolate(22095, 50, 27136, 250, 23000));
+        System.out.println(interpolate(22095, 50, 22099, 250, 22300));
+        System.out.println(interpolate(4460, 50, 5329.5, 250, 3739.08));
+//        Box size for city riga (min balance: 4460 max balance: 5329.5 current balance: 3739.08) is -115.82403680276022px
+    }
+
     @Test
     public void whenBinaryArithmetics_thenSucceed() {
         assertEquals(

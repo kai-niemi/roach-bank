@@ -57,8 +57,8 @@ public class AccountController {
     @Value("${roachbank.reportQueryTimeoutSeconds}")
     private int reportQueryTimeoutSeconds;
 
-    @Value("${roachbank.accountsPerCityLimit}")
-    private int accountsPerCityLimit;
+    @Value("${roachbank.accountsPerCity}")
+    private int accountsPerCity;
 
     @Autowired
     private AccountServiceFacade accountServiceFacade;
@@ -127,7 +127,7 @@ public class AccountController {
             logger.warn("No cities matching regions: {}", regions);
         }
 
-        final int limitFinal = limit <= 0 ? this.accountsPerCityLimit : limit;
+        final int limitFinal = limit <= 0 ? this.accountsPerCity : limit;
 
         final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
 

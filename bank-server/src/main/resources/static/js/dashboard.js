@@ -9,6 +9,8 @@ BankDashboard.prototype = {
         this.reportContainer = this.getElement(this.settings.elements.reportContainer);
         this.accountSpinner = this.getElement(this.settings.elements.accountSpinner);
         this.refreshButton = this.getElement(this.settings.elements.refreshButton);
+        this.notificationBadge = this.getElement(this.settings.elements.notificationBadge);
+
         this.loadInitialState();
         this.addWebsocketListener();
     },
@@ -30,15 +32,17 @@ BankDashboard.prototype = {
             $.get(this.settings.endpoints.topAccounts+"?limit="+limit+"&regions="+region, function (data) {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
+            $.get(this.settings.endpoints.regionCities+"?regions="+region, function (data) {
+                _this.createReportElements(data);
+            });
         } else {
             $.get(this.settings.endpoints.topAccounts+"?limit="+limit, function (data) {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
+            $.get(this.settings.endpoints.regionCities, function (data) {
+                _this.createReportElements(data);
+            });
         }
-
-        $.get(this.settings.endpoints.regionCities, function (data) {
-            _this.createReportElements(data);
-        });
     },
 
     getElement: function (id) {
@@ -58,7 +62,7 @@ BankDashboard.prototype = {
                     .attr('data-toggle', 'tooltip')
                     .attr('title', account._links.self.href)
                     .addClass('box')
-                    .css(_this.boxSize(account.balance.amount, account.balance.currency))
+                    .css(_this.boxSize(account.city, account.balance.amount))
                     .css({
                         background: _this.boxColor(account.city)
                     })
@@ -147,7 +151,8 @@ BankDashboard.prototype = {
             stompClient.subscribe(_this.settings.topics.reportAccountSummary, function (report) {
                 var event = JSON.parse(report.body);
 
-                sessionStorage.setItem("account-summary-" + event.currency, event.maxBalance);
+                sessionStorage.setItem("account-minBalance-" + event.city, event.minBalance);
+                sessionStorage.setItem("account-maxBalance-" + event.city, event.maxBalance);
 
                 _this.handleAccountSummaryUpdate(event);
             });
@@ -162,37 +167,46 @@ BankDashboard.prototype = {
                 }
             });
 
+            stompClient.subscribe(_this.settings.topics.reportUpdate, function (report) {
+                var event = JSON.parse(report.body);
+
+                _this.notificationBadge.text(event.message);
+            });
+
             stompClient.subscribe(_this.settings.topics.accounts, function (account) {
                 var event = JSON.parse(account.body); // batch
 
                 event.map(function (item) {
                     var accountElt = _this.getElement(item.id);
                     if (accountElt) {
-                        _this.handleAccountBalanceUpdate(accountElt, item.city, item.currency, item.balance);
+                        _this.handleAccountBalanceUpdate(accountElt, item);
                     }
                 });
             });
         });
     },
 
-    handleAccountBalanceUpdate: function (account, city, currency, balance) {
+    handleAccountBalanceUpdate: function (accountElt, item) {
         var _this = this;
+        var city = item.city;
+        var balance = item.balance;
+        var currency = item.currency;
 
-        var original_color = _this.boxColor(city);
-        account.css("background-color", "white");
-
-        var m = _this.formatMoney(balance, currency);
-        account.find('.amount').text(m);
+        accountElt.find('.amount').text(_this.formatMoney(balance, currency));
+        accountElt.css(_this.boxSize(city, balance));
+        accountElt.css({
+            background: "white",
+        })
 
         setTimeout(function(){
-            account.css("background-color", original_color);
+            accountElt.css({
+                background: _this.boxColor(city)
+            });
         }, 1500);
     },
 
     handleAccountSummaryUpdate: function (accountSummary) {
         var _this = this;
-
-        console.log(accountSummary);
 
         var totalAccountSuffix = _this.getElement(accountSummary.city + _this.settings.elements.totalAccountSuffix);
         var totalBalanceSuffix = _this.getElement(accountSummary.city + _this.settings.elements.totalBalanceSuffix);
@@ -203,8 +217,6 @@ BankDashboard.prototype = {
 
     handleTransactionSummaryUpdate: function (transactionSummary) {
         var _this = this;
-
-        console.log(transactionSummary);
 
         var totalTransactionsSuffix = _this.getElement(
                 transactionSummary.city + _this.settings.elements.totalTransactionsSuffix);
@@ -221,12 +233,46 @@ BankDashboard.prototype = {
         totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
     },
 
-    boxSize: function (amount, currency) {
-        var size=50;
+    // Linear interpolation for box size
+    interpolate: function (x1, y1, x2, y2, x) {
+        if (x2 <= x1) {
+            return y1;
+        }
+        if (x > x2) {
+            return y2;
+        }
+        if (x < x1) {
+            return y1;
+        }
+        return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
+    },
+
+    boxSize: function (city, balance) {
+        var minSize=50;
+        var maxSize=150;
+
+        var minBalance = sessionStorage.getItem("account-minBalance-" + city);
+        if (minBalance == null) {
+            minBalance = balance;
+        }
+
+        var maxBalance = sessionStorage.getItem("account-maxBalance-" + city);
+        if (maxBalance == null) {
+            maxBalance = balance;
+        }
+
+        var size = this.interpolate(minBalance, minSize, maxBalance, maxSize, balance);
+
+        console.log("Box size for city " + city
+                + " (min balance: " + minBalance
+                + " max balance: " + maxBalance
+                + " current balance: " + balance
+                + ") is " + size + "px");
+
         return {
             width: size + 'px',
             height: size + 'px',
-            lineHeight: size + 'px',
+            lineHeight: size + 'px'
         }
     },
 
@@ -246,7 +292,6 @@ BankDashboard.prototype = {
             var a=1;
             return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255, a].join(',') + ')';
         }
-        // console.log("WARN: bad color hex " + hex);
         return "rgba(1,0.5,1,1)";
     },
 
@@ -277,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
         topics: {
             reportAccountSummary: '/topic/account-summary',
             reportTransactionSummary: '/topic/transaction-summary',
+            reportUpdate: '/topic/report-update',
             accounts: '/topic/accounts'
         },
 
@@ -285,6 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
             accountSpinner: 'account-spinner',
             refreshButton: 'refresh-button',
             reportContainer: 'report-container',
+            notificationBadge: 'notification-badge',
 
             totalAccountSuffix: '-total-accounts',
             totalTransactionsSuffix: '-total-transactions',

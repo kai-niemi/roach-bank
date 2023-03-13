@@ -153,9 +153,7 @@ roachbank:
   # Report / WS push query timeout (seconds)
   reportQueryTimeoutSeconds: 120
   # Default limit unless client specified
-  accountsPerCityLimit: 100
-  # Set running balance on transaction legs by reading account state (increases contention)
-  updateRunningBalance: false
+  accountsPerCity: 10
   # Read accounts with SELECT FOR UPDATE (when updateRunningBalance=true)
   selectForUpdate: false
   # Account plan to run workload against
@@ -164,9 +162,9 @@ roachbank:
     clearAtStartup: false
     # Filter on region, empty implies all regions
     region: ""
-    # Number of accounts per city (total: num_cities x numAccountsPerCity)
-    numAccountsPerCity: 100
+    # Number of accounts per city (total: num_cities x accountsPerCity)
+    accountsPerCity: 1000
     # Initial balance
-    initialBalance: "25000.00"
+    initialBalance: "5000.00"
     # Account currency
     currency: "USD"

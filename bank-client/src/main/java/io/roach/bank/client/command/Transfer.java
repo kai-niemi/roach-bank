@@ -40,12 +40,10 @@ public class Transfer extends AbstractCommand {
     @Autowired
     private ExecutorTemplate executorTemplate;
 
-    // transfer --limit --amount 150.00 --locking
     @ShellMethod(value = "Transfer funds between accounts", key = {"t", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
-            @ShellOption(help = "min amount", defaultValue = "0.50") final String minAmount,
-            @ShellOption(help = "max amount", defaultValue = "10.00") final String maxAmount,
+            @ShellOption(help = "amount range (min/max)", defaultValue = "5.00-15.00") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
@@ -70,19 +68,16 @@ public class Transfer extends AbstractCommand {
                 .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
                 .asTemplatedLink();
 
-        double min = Double.parseDouble(minAmount);
-        double max = Double.parseDouble(maxAmount);
-
         accounts.forEach((city, accountModels) -> {
             IntStream.rangeClosed(1, concurrency).forEach(value -> {
                 if (iterations > 0) {
                     executorTemplate.runAsync(city + " (transfer) " + iterations,
-                            () -> transferFunds(transferLink, city, accountModels, min, max, legs, fake),
+                            () -> transferFunds(transferLink, city, accountModels, amount, legs, fake),
                             iterations
                     );
                 } else {
                     executorTemplate.runAsync(city + " (transfer) " + duration,
-                            () -> transferFunds(transferLink, city, accountModels, min, max, legs, fake),
+                            () -> transferFunds(transferLink, city, accountModels, amount, legs, fake),
                             DurationFormat.parseDuration(duration)
                     );
                 }
@@ -93,10 +88,13 @@ public class Transfer extends AbstractCommand {
     private void transferFunds(Link link,
                                String city,
                                List<AccountModel> accounts,
-                               double minAmount,
-                               double maxAmount,
+                               String amount,
                                int legs,
                                boolean fake) {
+        String parts[] = amount.split("-");
+        String minAmount = parts.length > 1 ? parts[0] : amount;
+        String maxAmount = parts.length > 1 ? parts[1] : amount;
+
         Money transferAmount = RandomData
                 .randomMoneyBetween(minAmount, maxAmount, accounts.get(0).getBalance().getCurrency());
 
