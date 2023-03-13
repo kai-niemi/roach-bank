@@ -153,6 +153,22 @@
                 <version>3.0.1</version>
             </dependency>
             <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>31.1-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ttddyy</groupId>
+                <artifactId>datasource-proxy</artifactId>
+                <version>1.8.1</version>
+            </dependency>
+            <dependency>
                 <groupId>io.cockroachdb</groupId>
                 <artifactId>spring-data-cockroachdb</artifactId>
                 <version>1.0.0</version>

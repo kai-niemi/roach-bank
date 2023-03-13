@@ -26,7 +26,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
         </dependency>
         
         <!-- ======================================================== -->
@@ -155,7 +154,6 @@
         <dependency>
             <groupId>net.ttddyy</groupId>
             <artifactId>datasource-proxy</artifactId>
-            <version>1.8.1</version>
         </dependency>
         
         <!-- ======================================================== -->

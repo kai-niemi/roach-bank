@@ -18,7 +18,6 @@
             <artifactId>bank-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.shell</groupId>
             <artifactId>spring-shell-starter</artifactId>
@@ -27,7 +26,6 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
         </dependency>
-
         <!-- TEST -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
