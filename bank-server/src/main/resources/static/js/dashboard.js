@@ -57,12 +57,14 @@ BankDashboard.prototype = {
         accounts = data.map(function (account) {
             var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : account.city);
 
+            var city = account.city.replace(/\s/g, "_");
+
             return $('<div>')
                     .attr('id', account.id)
                     .attr('data-toggle', 'tooltip')
                     .attr('title', account._links.self.href)
                     .addClass('box')
-                    .css(_this.boxSize(account.city, account.balance.amount))
+                    .css(_this.boxSize(city, account.balance.amount))
                     .css({
                         background: _this.boxColor(account.city)
                     })
@@ -101,6 +103,7 @@ BankDashboard.prototype = {
         var _this = this, report;
 
         report = data.map(function (city) {
+            city = city.replace(/\s/g, "_");
             return $('<tr>')
                     .append(
                             $('<th>')
@@ -151,10 +154,11 @@ BankDashboard.prototype = {
             stompClient.subscribe(_this.settings.topics.reportAccountSummary, function (report) {
                 var event = JSON.parse(report.body);
 
-                sessionStorage.setItem("account-minBalance-" + event.city, event.minBalance);
-                sessionStorage.setItem("account-maxBalance-" + event.city, event.maxBalance);
+                var city = event.city.replace(/\s/g, "_");
+                sessionStorage.setItem("account-minBalance-" + city, event.minBalance);
+                sessionStorage.setItem("account-maxBalance-" + city, event.maxBalance);
 
-                _this.handleAccountSummaryUpdate(event);
+                _this.handleAccountSummaryUpdate(city, event);
             });
 
             stompClient.subscribe(_this.settings.topics.reportTransactionSummary, function (report) {
@@ -163,7 +167,9 @@ BankDashboard.prototype = {
                     _this.refreshButton.text("Refresh Now");
                 } else {
                     var event = JSON.parse(report.body);
-                    _this.handleTransactionSummaryUpdate(event);
+
+                    var city = event.city.replace(/\s/g, "_");
+                    _this.handleTransactionSummaryUpdate(city,event);
                 }
             });
 
@@ -188,7 +194,7 @@ BankDashboard.prototype = {
 
     handleAccountBalanceUpdate: function (accountElt, item) {
         var _this = this;
-        var city = item.city;
+        var city = item.city.replace(/\s/g, "_");
         var balance = item.balance;
         var currency = item.currency;
 
@@ -205,27 +211,27 @@ BankDashboard.prototype = {
         }, 1500);
     },
 
-    handleAccountSummaryUpdate: function (accountSummary) {
+    handleAccountSummaryUpdate: function (city, accountSummary) {
         var _this = this;
 
-        var totalAccountSuffix = _this.getElement(accountSummary.city + _this.settings.elements.totalAccountSuffix);
-        var totalBalanceSuffix = _this.getElement(accountSummary.city + _this.settings.elements.totalBalanceSuffix);
+        var totalAccountSuffix = _this.getElement(city + _this.settings.elements.totalAccountSuffix);
+        var totalBalanceSuffix = _this.getElement(city + _this.settings.elements.totalBalanceSuffix);
 
         totalAccountSuffix.text(_this.formatNumber(accountSummary.numberOfAccounts));
         totalBalanceSuffix.text(_this.formatMoney(accountSummary.totalBalance, accountSummary.currency));
     },
 
-    handleTransactionSummaryUpdate: function (transactionSummary) {
+    handleTransactionSummaryUpdate: function (city, transactionSummary) {
         var _this = this;
 
         var totalTransactionsSuffix = _this.getElement(
-                transactionSummary.city + _this.settings.elements.totalTransactionsSuffix);
+                city + _this.settings.elements.totalTransactionsSuffix);
         var totalTransactionLegsSuffix = _this.getElement(
-                transactionSummary.city + _this.settings.elements.totalTransactionLegsSuffix);
+                city + _this.settings.elements.totalTransactionLegsSuffix);
         var totalTurnoverSuffix = _this.getElement(
-                transactionSummary.city + _this.settings.elements.totalTurnoverSuffix);
+                city + _this.settings.elements.totalTurnoverSuffix);
         var totalChecksumSuffix = _this.getElement(
-                transactionSummary.city + _this.settings.elements.totalChecksumSuffix);
+                city + _this.settings.elements.totalChecksumSuffix);
 
         totalTransactionsSuffix.text(_this.formatNumber(transactionSummary.numberOfTransactions));
         totalTransactionLegsSuffix.text(_this.formatNumber(transactionSummary.numberOfLegs));

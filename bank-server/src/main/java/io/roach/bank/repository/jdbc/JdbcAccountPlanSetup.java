@@ -43,13 +43,7 @@ public class JdbcAccountPlanSetup {
     public void init() {
         Set<String> regions = StringUtils.commaDelimitedListToSet(accountPlan.getRegion());
 
-        Set<String> cities;
-        if (regions.isEmpty()) {
-            cities = new HashSet<>();
-            metadataRepository.getAllRegionCities().values().forEach(cities::addAll);
-        } else {
-            cities = metadataRepository.getRegionCities(regions);
-        }
+        Set<String> cities = metadataRepository.getRegionCities(regions);
 
         if (accountPlan.isClearAtStartup()) {
             logger.info("Clear existing account plan");

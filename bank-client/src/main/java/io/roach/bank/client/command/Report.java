@@ -28,8 +28,8 @@ public class Report extends AbstractCommand {
 
     @ShellMethod(value = "Report account summary", key = {"report-accounts", "ra"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void reportAccounts(
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
+    public void reportAccounts(@ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
+            valueProvider = RegionProvider.class) String regions
     ) {
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("regions", StringUtils.commaDelimitedListToSet(regions));
@@ -45,8 +45,8 @@ public class Report extends AbstractCommand {
 
     @ShellMethod(value = "Report transaction summary", key = {"report-transactions", "rt"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void reportTransactions(
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
+    public void reportTransactions(@ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
+            valueProvider = RegionProvider.class) String regions
     ) {
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("regions", StringUtils.commaDelimitedListToSet(regions));

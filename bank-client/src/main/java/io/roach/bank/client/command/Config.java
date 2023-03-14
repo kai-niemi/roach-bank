@@ -34,8 +34,8 @@ public class Config extends AbstractCommand {
     @ShellMethod(value = "List cities", key = {"list-cities"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegionCities(
-            @ShellOption(help = "region names (gateway region if omitted)", defaultValue = "") String regions) {
-        console.successf("Gateway: %s", restCommands.getGatewayRegion());
+            @ShellOption(help = "region names (gateway region if omitted)", defaultValue = "",
+                    valueProvider = RegionProvider.class) String regions) {
         console.infof("-- region '%s' cities --", regions);
         restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)).forEach(s -> {
             console.successf("%s", s);

@@ -11,8 +11,3 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: root
-roachbank:
-  health:
-    validation-query: select 1
-
-

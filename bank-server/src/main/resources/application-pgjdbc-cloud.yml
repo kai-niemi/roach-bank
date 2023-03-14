@@ -11,6 +11,3 @@ spring:
     username: guest
     password: UqhyOq3l_M8Yn_Uq0S4VvA
     driver-class-name: org.postgresql.Driver
-roachbank:
-  health:
-    validation-query: select node_id from [SHOW CLUSTER SESSIONS] limit 1

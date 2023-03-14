@@ -5,6 +5,8 @@ import java.util.*;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,6 +18,9 @@ import io.roach.bank.repository.MetadataRepository;
 @Repository
 public class JdbcMetadataRepository implements MetadataRepository {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    @Value("${roachbank.gatewayRegion}")
+    private String gatewayRegion;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
@@ -52,7 +57,6 @@ public class JdbcMetadataRepository implements MetadataRepository {
     @Override
     public Map<String, Set<String>> getAllRegionCities() {
         Map<String, Set<String>> result = new TreeMap<>();
-
         MapSqlParameterSource parameters = new MapSqlParameterSource();
 
         this.namedParameterJdbcTemplate.query(
@@ -66,11 +70,26 @@ public class JdbcMetadataRepository implements MetadataRepository {
         return result;
     }
 
+    public Set<String> getAllCities() {
+        Set<String> cities = new TreeSet<>();
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+
+        this.namedParameterJdbcTemplate.query(
+                "SELECT cities FROM region order by region",
+                parameters,
+                (rs, rowNum) -> {
+                    cities.addAll(StringUtils.commaDelimitedListToSet(rs.getString(1)));
+                    return null;
+                });
+
+        return cities;
+    }
+
     @Override
     public Set<String> getRegionCities(Collection<String> regions) {
         List<String> regionList = new ArrayList<>(regions);
         if (regionList.isEmpty()) {
-            regionList.add(getGatewayRegion());
+            regionList.add("*"); // Include all if empty
         }
 
         Set<String> cities = new TreeSet<>();
@@ -94,7 +113,14 @@ public class JdbcMetadataRepository implements MetadataRepository {
 
     @Override
     public String getGatewayRegion() {
-        return namedParameterJdbcTemplate
-                .queryForObject("SELECT gateway_region()", Collections.emptyMap(), String.class);
+        try {
+            return namedParameterJdbcTemplate
+                    .queryForObject("SELECT name FROM region WHERE name=gateway_region()",
+                            Collections.emptyMap(),
+                            String.class);
+
+        } catch (EmptyResultDataAccessException e) {
+            return gatewayRegion;
+        }
     }
 }

@@ -46,7 +46,8 @@ public class Transfer extends AbstractCommand {
             @ShellOption(help = "amount range (min/max)", defaultValue = "5.00-15.00") final String amount,
             @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
+            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
+                    valueProvider = RegionProvider.class) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "execution iterations (precedence over duration if >0)", defaultValue = "0")
             int iterations,

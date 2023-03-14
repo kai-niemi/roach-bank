@@ -10,8 +10,3 @@ spring:
     url: jdbc:postgresql://192.168.1.99:26257/roach_bank?sslmode=disable
     driver-class-name: org.postgresql.Driver
     username: root
-roachbank:
-  health:
-    validation-query: select node_id from [SHOW CLUSTER SESSIONS] limit 1
-
-

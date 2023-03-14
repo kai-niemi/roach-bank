@@ -168,6 +168,7 @@ public class ExecutorTemplate {
                 logger.error("", e.getCause());
             }
         }
+
         logger.debug("All futures cancelled");
         cancelRequested = false;
     }

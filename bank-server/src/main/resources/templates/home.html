@@ -61,7 +61,7 @@
                         </ul>
                     </li>
                     <!-- -->
-                    <li class="nav-item dropdown" th:each="item, iStat : ${region_groups}">
+                    <li class="nav-item dropdown" th:each="item, iStat : ${model.regionGroups}">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                            aria-expanded="false"> Regions (<span th:text="${item.key}"/>) </a>
 
@@ -79,24 +79,24 @@
                            aria-expanded="false">View</a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li><h6 class="dropdown-header">Region (gateway)</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/}" th:text="${gateway_region}"></a></li>
-                            <li><a class="dropdown-item" th:href="@{?region=*}">all (*)</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
+                            <li><a class="dropdown-item" th:href="@{/}">none (*)</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
                             <li><h6 class="dropdown-header">Accounts per city</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=10)}">10</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=50)}">50</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=100)}">100</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=200)}">200</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${view_region},limit=500)}">500</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=10)}">10</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=50)}">50</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=100)}">100</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=200)}">200</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=500)}">500</a></li>
                         </ul>
                     </li>
                     <!-- -->
                     <li class="nav-item">
-                        <a class="nav-link disabled" th:switch="${view_gateway}">
-                            <span th:case="true" class="text-info" th:text="${view_region}"></span>
-                            <span th:case="false" class="text-warning" th:text="${view_region}"></span>
+                        <a class="nav-link disabled" th:switch="${model.viewingGatewayRegion}">
+                            <span th:case="true" class="text-info" th:text="${model.viewRegion}"></span>
+                            <span th:case="false" class="text-warning" th:text="${model.viewRegion}"></span>
                         </a>
                     </li>
                 </ul>
@@ -125,7 +125,7 @@
         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:">
             <use xlink:href="#info-fill"/>
         </svg>
-        <span th:text="${randomFact}"/>
+        <span th:text="${model.randomFact}"/>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
@@ -149,7 +149,8 @@
         </table>
 
         <button type="submit" class="btn btn-sm btn-dark" data-toggle="tooltip" data-placement="right" id="refresh-button"
-                title="Refresh account and transaction history" onclick="refreshReport()">Refresh Now
+                title="Refresh account and transaction history"
+                th:data-parameter1="${model.viewRegion}" onclick="refreshReport(this.getAttribute('data-parameter1'))" )>Refresh Now
         </button>
 
         <span id="notification-badge" class="badge rounded-pill bg-info text-dark"></span>
@@ -309,10 +310,10 @@
 <script src="js/snow.js"></script>
 
 <script>
-    function refreshReport() {
+    function refreshReport(region) {
         $("#refresh-button").prop("disabled", true);
         $("#refresh-button").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`);
-        $(this).load("/refresh-report");
+        $(this).load("/api/report/refresh?region=" + region);
     }
 </script>
 

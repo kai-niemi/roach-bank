@@ -4,6 +4,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -45,37 +46,40 @@ public abstract class ConcurrencyUtils {
         }
     }
 
-    public static <V> void runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit) {
-        runConcurrentlyAndWait(tasks, timeout, timeUnit, null);
+    public static <V> int runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit) {
+        return runConcurrentlyAndWait(tasks, timeout, timeUnit, null);
     }
 
-    public static <V> void runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit,
+    public static <V> int runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit,
                                                   Consumer<V> consumer) {
-        ScheduledExecutorService cancellation = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService cancellationService = Executors.newSingleThreadScheduledExecutor();
 
-        ExecutorService execution = new ThreadPoolExecutor(ForkJoinPool.getCommonPoolParallelism(),
+        ExecutorService executorService = new ThreadPoolExecutor(ForkJoinPool.getCommonPoolParallelism(),
                 Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS,
                 new LinkedBlockingDeque<>(ForkJoinPool.getCommonPoolParallelism()));
 
-        List<CompletableFuture<V>> allFutures = new ArrayList<>();
+        List<CompletableFuture<Boolean>> allFutures = new ArrayList<>();
 
-        final long expirationTime = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+        long expirationTime = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+
+        AtomicInteger completions = new AtomicInteger();
 
         tasks.forEach(callable -> {
-            CompletableFuture<V> f = CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<Boolean> f = CompletableFuture.supplyAsync(() -> {
                 if (System.currentTimeMillis() > expirationTime) {
                     logger.warn("Task scheduled after expiration time: " + callable);
-                    return null;
+                    return false;
                 }
-                Future<V> future = execution.submit(callable);
+                Future<V> future = executorService.submit(callable);
                 long delay = Math.abs(expirationTime - System.currentTimeMillis());
-                cancellation.schedule(() -> future.cancel(true), delay, TimeUnit.MILLISECONDS);
+                cancellationService.schedule(() -> future.cancel(true), delay, TimeUnit.MILLISECONDS);
                 try {
                     V result = future.get();
                     if (consumer != null) {
                         consumer.accept(result);
                     }
-                    return result;
+                    completions.incrementAndGet();
+                    return true;
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     logger.warn("Task interrupt: " + e);
@@ -84,7 +88,7 @@ public abstract class ConcurrencyUtils {
                 } catch (ExecutionException e) {
                     logger.error("Task fail", e);
                 }
-                return null;
+                return false;
             });
             allFutures.add(f);
         });
@@ -92,12 +96,10 @@ public abstract class ConcurrencyUtils {
         try {
             CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[] {})).join();
         } finally {
-            if (logger.isTraceEnabled()) {
-                logger.trace(execution.toString());
-            }
-            execution.shutdown();
-            cancellation.shutdown();
+            executorService.shutdown();
+            cancellationService.shutdown();
         }
+        return completions.get();
     }
 
     /**

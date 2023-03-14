@@ -29,6 +29,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.ReportUpdate;
@@ -51,7 +52,7 @@ public class ReportWebSocketPublisher {
     private final ReentrantLock lock = new ReentrantLock();
 
     @Value("${roachbank.reportQueryTimeoutSeconds}")
-    private int reportQueryTimeoutSeconds = 120;
+    private int reportQueryTimeoutSeconds;
 
     @Autowired
     @Lazy
@@ -77,38 +78,37 @@ public class ReportWebSocketPublisher {
         ConcurrentHashMap map = (ConcurrentHashMap) cache.getNativeCache();
         // Only publish if cache is warm and no scan is already in progress
         if (!map.isEmpty() && !lock.isLocked()) {
-            publishSummaryAsync();
+            publishSummaryAsync(null);
         }
     }
 
     @Async
-    public void publishSummaryAsync() {
+    public void publishSummaryAsync(String viewRegion) {
         Assert.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "TX active");
 
         if (lock.tryLock()) {
             try {
-                logger.trace(">> Event publisher lock acquired");
-
-                // Retrieve accounts per region concurrently with a collective timeout
-                List<Callable<Void>> tasks = Collections.synchronizedList(new ArrayList<>());
-
-                Set<String> cities = metadataRepository.getRegionCities(Collections.emptyList());
-
+                Set<String> cities = metadataRepository.getRegionCities(
+                        StringUtils.hasLength(viewRegion) ? Collections.singleton(viewRegion) : Collections.emptySet());
+                List<Callable<Boolean>> tasks = Collections.synchronizedList(new ArrayList<>());
                 cities.forEach(city -> {
                     tasks.add(() -> {
                         selfProxy.computeSummaryAndPush(city);
-                        return null;
+                        return true;
                     });
                 });
 
-                ConcurrencyUtils.runConcurrentlyAndWait(tasks, reportQueryTimeoutSeconds, TimeUnit.SECONDS);
+                // Retrieve accounts per region concurrently with a collective timeout
+                int completions = ConcurrencyUtils.runConcurrentlyAndWait(tasks,
+                        reportQueryTimeoutSeconds, TimeUnit.SECONDS);
 
-                ReportUpdate reportUpdate = new ReportUpdate() ;
+                ReportUpdate reportUpdate = new ReportUpdate();
                 reportUpdate.setLastUpdatedAt(LocalDateTime.now());
                 reportUpdate.setNumCities(cities.size());
                 reportUpdate.setMessage("Last updated " + LocalDateTime.now()
                         .atOffset(ZoneOffset.UTC)
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                        + " - " + completions + " cities");
 
                 simpMessagingTemplate.convertAndSend(TOPIC_REPORT_UPDATE, reportUpdate);
             } finally {
@@ -116,10 +116,7 @@ public class ReportWebSocketPublisher {
                 simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, "");
 
                 lock.unlock();
-                logger.trace("<< Event publisher lock released");
             }
-        } else {
-            logger.trace("<< Event publisher lock already acquired");
         }
     }
 
@@ -128,10 +125,14 @@ public class ReportWebSocketPublisher {
             priority = TransactionBoundary.Priority.low)
     @Retryable
     public void computeSummaryAndPush(String city) {
+        logger.info("Compute report for city [{}]", city);
+
         AccountSummary accountSummary = reportingRepository.accountSummary(city);
+        logger.debug("Account summary for city [{}]: {}", city, accountSummary.toString());
         simpMessagingTemplate.convertAndSend(TOPIC_ACCOUNT_SUMMARY, accountSummary);
 
         TransactionSummary transactionSummary = reportingRepository.transactionSummary(city);
+        logger.debug("Transaction summary for city [{}]: {}", city, transactionSummary.toString());
         simpMessagingTemplate.convertAndSend(TOPIC_TRANSACTION_SUMMARY, transactionSummary);
     }
 }

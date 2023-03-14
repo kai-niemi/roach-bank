@@ -1,66 +1,49 @@
 package io.roach.bank.web;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.changefeed.egress.ReportWebSocketPublisher;
-import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.MetadataRepository;
 
 @Controller
 @RequestMapping("/")
 public class RootController {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private ReportWebSocketPublisher reportPublisher;
-
-    @Autowired
-    private CacheManager cacheManager;
-
     @Autowired
     private MetadataRepository metadataRepository;
 
-    @GetMapping()
-    public String homePage(@RequestParam(value = "region", required = false) String region, Model model) {
-        String gatewayRegion = metadataRepository.getGatewayRegion();
-
-        model.addAttribute("title", "Roach Bank - " + gatewayRegion);
-        model.addAttribute("randomFact", CockroachFacts.nextFact());
-        model.addAttribute("gateway_region", gatewayRegion);
-        model.addAttribute("region_groups", metadataRepository.getAllRegions());
-        model.addAttribute("view_region", StringUtils.hasLength(region) ? region : gatewayRegion);
-        model.addAttribute("view_gateway", !StringUtils.hasLength(region) || gatewayRegion.equalsIgnoreCase(region));
-
-        logger.debug("Attributes");
-        model.asMap().forEach((k, v) -> {
-            logger.debug("\t{}: {}", k, v);
-        });
-
-        return "home";
+    @ModelAttribute("viewModel")
+    public ViewModel viewModel() {
+        return new ViewModel();
     }
 
-    @GetMapping("/refresh-report")
-    public ResponseEntity<String> refreshReport(Model model) {
-        // Evict caches since its a user-initated request
-        cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY).clear();
-        cacheManager.getCache(CacheConfig.CACHE_TRANSACTION_REPORT_SUMMARY).clear();
+    @GetMapping
+    public String homePage(@RequestParam(value = "region", required = false) String region,
+                           @ModelAttribute ViewModel viewModel,
+                           Model model) {
+        if (viewModel == null) {
+            viewModel = new ViewModel();
+        }
 
-        reportPublisher.publishSummaryAsync();
+        String gatewayRegion = metadataRepository.getGatewayRegion();
 
-        return ResponseEntity.ok().build();
+        viewModel.setViewRegion(region);
+        viewModel.setViewingGatewayRegion(gatewayRegion.equalsIgnoreCase(region));
+        viewModel.setGatewayRegion(gatewayRegion);
+        viewModel.setRandomFact(CockroachFacts.nextFact());
+        viewModel.setRegionGroups(metadataRepository.getAllRegions());
+
+        model.addAttribute("model", viewModel);
+
+        return "home";
     }
 
     @GetMapping("/rels/{rel}")

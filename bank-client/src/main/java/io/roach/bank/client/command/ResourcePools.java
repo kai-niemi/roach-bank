@@ -35,7 +35,7 @@ public class ResourcePools extends AbstractCommand {
                 .follow(withCurie(POOL_SIZE_REL))
                 .toEntity(String.class);
 
-        console.infof("Connection pool size:\n");
+        console.infof("Connection pool size:");
         console.successf("%s", configResponse.getBody());
     }
 
@@ -68,7 +68,7 @@ public class ResourcePools extends AbstractCommand {
                 .follow(withCurie(POOL_CONFIG_REL))
                 .toEntity(String.class);
 
-        console.infof("Connection pool config:\n");
+        console.infof("Connection pool config:");
         console.successf("%s", response.getBody());
     }
 

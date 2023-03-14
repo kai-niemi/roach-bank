@@ -71,14 +71,11 @@ spring:
       initialization-fail-timeout: -1
       connection-timeout: 5000
       validation-timeout: 20000
-      # 3m
       max-lifetime: 180000
-      # 1m
       idle-timeout: 60000
       maximum-pool-size: 200
       minimum-idle: 25
       transaction-isolation: TRANSACTION_SERIALIZABLE
-#      transaction-isolation: TRANSACTION_READ_COMMITTED
 
 # Hikari defaults:
 #    private static final long CONNECTION_TIMEOUT = SECONDS.toMillis(30);
@@ -143,9 +140,8 @@ server:
     include-message: always
 #############################
 roachbank:
-  health:
-    # Validation query for datasource health check
-    validation-query: select 1
+  # Default region if the returned gateway_region() is not part of known regions
+  gatewayRegion: "eu-central-1"
   # WS push permits per second rate limit
   pushPermitsPerSec: 10.0
   # Interval of pushing cached balance reports (seconds)

@@ -29,16 +29,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackages = "io.roach")
 @ServletComponentScan
 public class ServerApplication {
-//    @Bean
-//    public Module module() {
-//        SimpleModule module = new SimpleModule("RoachBankModule", new Version(1, 0, 0, null, null, null));
-//        module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
-//        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
-//        module.addSerializer(LocalDate.class, new LocalDateSerializer());
-//        module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
-//        return module;
-//    }
-
     public static void main(String[] args) {
         new SpringApplicationBuilder(ServerApplication.class)
                 .logStartupInfo(false)

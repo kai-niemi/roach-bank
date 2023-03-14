@@ -38,13 +38,13 @@ public class Balance extends AbstractCommand {
             @ShellOption(help = "use follower reads", defaultValue = "false") boolean followerReads,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT)
             int limit,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions,
+            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
+                    valueProvider = RegionProvider.class) String regions,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "number of threads per city", defaultValue = "1") int concurrency
     ) {
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
                 StringUtils.commaDelimitedListToSet(regions), limit);
-
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching region(s): {}", regions);
         }

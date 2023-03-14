@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -81,32 +82,38 @@ public class JdbcReportingRepository implements ReportingRepository {
         parameters.addValue("city", city);
 
         // Break down per currency and use parallel queries
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT "
-                        + "  count(distinct t.id), "
-                        + "  count(ti.transaction_id), "
-                        + "  sum(abs(ti.amount)), "
-                        + "  sum(ti.amount), "
-                        + "  ti.currency "
-                        + "FROM transaction t "
-                        + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
-                        + "WHERE ti.city = :city "
-                        + "GROUP BY ti.city, ti.currency",
-                parameters,
-                (rs, rowNum) -> {
-                    TransactionSummary summary = new TransactionSummary();
-                    summary.setCity(city);
-                    summary.setCurrency(Currency.getInstance(rs.getString(5)));
-                    summary.setNumberOfTransactions(rs.getInt(1));
-                    summary.setNumberOfLegs(rs.getInt(2));
+        try {
+            return namedParameterJdbcTemplate.queryForObject(
+                    "SELECT "
+                            + "  count(distinct t.id), "
+                            + "  count(ti.transaction_id), "
+                            + "  sum(abs(ti.amount)), "
+                            + "  sum(ti.amount), "
+                            + "  ti.currency "
+                            + "FROM transaction t "
+                            + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
+                            + "WHERE ti.city = :city "
+                            + "GROUP BY ti.city, ti.currency",
+                    parameters,
+                    (rs, rowNum) -> {
+                        TransactionSummary summary = new TransactionSummary();
+                        summary.setCity(city);
+                        summary.setCurrency(Currency.getInstance(rs.getString(5)));
+                        summary.setNumberOfTransactions(rs.getInt(1));
+                        summary.setNumberOfLegs(rs.getInt(2));
 
-                    BigDecimal sum = rs.getBigDecimal(3);
-                    summary.setTotalTurnover(sum != null ? sum : BigDecimal.ZERO);
+                        BigDecimal sum = rs.getBigDecimal(3);
+                        summary.setTotalTurnover(sum != null ? sum : BigDecimal.ZERO);
 
-                    BigDecimal checksum = rs.getBigDecimal(4);
-                    summary.setTotalCheckSum(checksum != null ? checksum : BigDecimal.ZERO);
+                        BigDecimal checksum = rs.getBigDecimal(4);
+                        summary.setTotalCheckSum(checksum != null ? checksum : BigDecimal.ZERO);
 
-                    return summary;
-                });
+                        return summary;
+                    });
+        } catch (EmptyResultDataAccessException e) {
+            TransactionSummary summary = new TransactionSummary();
+            summary.setCity(city);
+            return summary;
+        }
     }
 }

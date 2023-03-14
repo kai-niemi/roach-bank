@@ -40,7 +40,8 @@ public class CreateAccounts extends AbstractCommand {
             @ShellOption(help = "batch size", defaultValue = "1024") int batchSize,
             @ShellOption(help = "batch statement size", defaultValue = "64") int statementSize,
             @ShellOption(help = "initial balance per account", defaultValue = "25000.00") String balance,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY) String regions
+            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
+                    valueProvider = RegionProvider.class) String regions
     ) {
         final Set<String> cities = new HashSet<>();
         cities.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));

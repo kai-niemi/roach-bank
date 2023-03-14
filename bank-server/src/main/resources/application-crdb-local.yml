@@ -11,6 +11,3 @@ spring:
     driver-class-name: io.cockroachdb.jdbc.CockroachDriver
     username: root
     password:
-roachbank:
-  health:
-    validation-query: select node_id from [SHOW CLUSTER SESSIONS] limit 1

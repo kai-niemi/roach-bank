@@ -12,7 +12,7 @@ VALUES ('aws','us-east-1', 'new york,boston,washington dc,miami,charlotte,atlant
        ('aws','eu-west-1', 'dublin,belfast,liverpool,manchester,glasgow'),
        ('aws','eu-west-2', 'london,birmingham,leeds,amsterdam,rotterdam,antwerp,hague,ghent,brussels'),
        ('aws','eu-west-3', 'madrid,barcelona,sintra,rome,milan,lyon,lisbon,toulouse,paris,cologne,seville,marseille,naples,turin,valencia,palermo'),
-       ('aws','eu-central-1', 'berlin,hamburg,munich,frankfurt,dusseldorf,leipzig,dortmund,essen,stuttgart,stockholm,copenhagen,helsinki,oslo,riga,tallinn'),
+       ('aws','eu-central-1', 'berlin,hamburg,munich,frankfurt,dusseldorf,leipzig,dortmund,essen,stuttgart'),
        ('aws','ap-northeast-1', 'hong kong,beijing,shanghai,tokyo'),
        ('aws','ap-northeast-2', 'hong kong,beijing,shanghai,tokyo'),
        ('aws','ap-northeast-3', 'hong kong,beijing,shanghai,tokyo'),
@@ -20,7 +20,7 @@ VALUES ('aws','us-east-1', 'new york,boston,washington dc,miami,charlotte,atlant
        ('aws','ap-southeast-2', 'singapore,jakarta,sydney,melbourne'),
        ('aws','ap-south-1', 'singapore,jakarta,sydney,melbourne'),
        ('aws','sa-east-1', 'sao paulo,rio de janeiro,salvador,buenos aires'),
-       ('aws','eu-north-1', 'stockholm'),
+       ('aws','eu-north-1', 'stockholm,copenhagen,helsinki,oslo,riga,tallinn'),
 
        ('azure','eastasia', 'hong kong,beijing,shanghai,tokyo'),
        ('azure','southeastasia', 'singapore,jakarta,sydney,melbourne'),

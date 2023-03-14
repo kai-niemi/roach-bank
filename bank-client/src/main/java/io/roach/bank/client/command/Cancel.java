@@ -19,7 +19,7 @@ public class Cancel extends AbstractCommand {
 
     @ShellMethod(value = "Cancel all workers", key = {"cancel", "x"})
     public void cancel() {
-        executorTemplate.cancelFutures();
         callMetrics.clear();
+        executorTemplate.cancelFutures();
     }
 }

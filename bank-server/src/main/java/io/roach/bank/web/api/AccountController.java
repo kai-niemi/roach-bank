@@ -124,7 +124,7 @@ public class AccountController {
     ) {
         final Set<String> cities = metadataRepository.getRegionCities(regions);
         if (cities.isEmpty()) {
-            logger.warn("No cities matching regions: {}", regions);
+            logger.warn("No cities found matching regions [{}]", regions);
         }
 
         final int limitFinal = limit <= 0 ? this.accountsPerCity : limit;

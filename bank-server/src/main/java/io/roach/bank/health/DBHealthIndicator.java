@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DBHealthIndicator extends DataSourceHealthIndicator {
     public DBHealthIndicator(@Autowired DataSource dataSource,
-                             @Value("${roachbank.health.validation-query}") String validationQuery) {
+                             @Value("${spring.datasource.hikari.connection-init-sql}") String validationQuery) {
         super(dataSource, validationQuery);
     }
 }

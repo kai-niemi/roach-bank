@@ -37,7 +37,7 @@ public class Metrics extends AbstractCommand {
     @ShellMethod(value = "Reset call metrics", key = {"reset-metrics", "rm"})
     public void resetStats() {
         callMetrics.reset();
-        console.successf("Metrics reset\n");
+        console.successf("Metrics was reset");
     }
 
     @ShellMethod(value = "Toggle console metrics", key = {"toggle-metrics", "m"})
