@@ -1,6 +1,4 @@
-[![Java CI](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/kai-niemi/roach-batch/actions/workflows/maven.yml)
-[![coverage](.github/badges/jacoco.svg)](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml)
-[![branches coverage](.github/badges/branches.svg)](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml)
+[![Java CI](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml)
 
 # Roach Bank
 
