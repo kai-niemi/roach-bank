@@ -1,6 +1,8 @@
 package io.roach.bank.client.command;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +28,10 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.provider.RegionProvider;
 import io.roach.bank.client.util.DurationFormat;
 
-import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
-import static io.roach.bank.api.LinkRelations.TRANSACTION_REL;
+import static io.roach.bank.api.LinkRelations.TRANSFER_FORM_REL;
 
 @ShellComponent
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
@@ -43,17 +45,29 @@ public class Transfer extends AbstractCommand {
     @ShellMethod(value = "Transfer funds between accounts", key = {"t", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
-            @ShellOption(help = "amount range (min/max)", defaultValue = "5.00-15.00") final String amount,
-            @ShellOption(help = "number of legs per transaction", defaultValue = "2") final int legs,
-            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP, defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
+            @ShellOption(help = "amount range (min/max)",
+                    defaultValue = "5.00-15.00") final String amount,
+            @ShellOption(help = "number of legs per transaction",
+                    defaultValue = "2") final int legs,
+            @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP,
+                    defaultValue = Constants.DEFAULT_ACCOUNT_LIMIT) int limit,
+            @ShellOption(help = Constants.REGIONS_HELP,
+                    defaultValue = Constants.EMPTY,
                     valueProvider = RegionProvider.class) String regions,
-            @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
-            @ShellOption(help = "execution iterations (precedence over duration if >0)", defaultValue = "0")
-            int iterations,
-            @ShellOption(help = "number of threads per city", defaultValue = "1") int concurrency,
-            @ShellOption(help = "fake test run", defaultValue = "false") boolean fake
+            @ShellOption(help = Constants.DURATION_HELP,
+                    defaultValue = Constants.DEFAULT_DURATION) String duration,
+            @ShellOption(help = "execution iterations (precedence over duration if >0)",
+                    defaultValue = "0") int iterations,
+            @ShellOption(help = "number of worker threads per city",
+                    defaultValue = "1") int concurrency,
+            @ShellOption(help = "fake test run",
+                    defaultValue = "false") boolean fake
     ) {
+        if (legs % 2 != 0) {
+            console.warnf("Account legs must be a multiple of 2");
+            return;
+        }
+
         Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
                 StringUtils.commaDelimitedListToSet(regions), limit);
         if (accounts.isEmpty()) {
@@ -61,12 +75,19 @@ public class Transfer extends AbstractCommand {
         }
 
         accounts.forEach((city, accountModels) -> {
-            logger.info("Found {} accounts in '{}'", accountModels.size(), city);
+            logger.info("Found {} accounts in city '{}'", accountModels.size(), city);
         });
 
+        final Map<String, Object> parameters = new HashMap<>();
+        if (regions.isEmpty()) {
+            parameters.put("regions", Collections.singleton(restCommands.getGatewayRegion()));
+        } else {
+            parameters.put("regions", StringUtils.commaDelimitedListToSet(regions));
+        }
+
         final Link transferLink = restCommands.fromRoot()
-                .follow(LinkRelations.withCurie(TRANSACTION_REL))
-                .follow(LinkRelations.withCurie(TRANSACTION_FORM_REL))
+                .follow(LinkRelations.withCurie(TRANSFER_FORM_REL))
+                .withTemplateParameters(parameters)
                 .asTemplatedLink();
 
         accounts.forEach((city, accountModels) -> {

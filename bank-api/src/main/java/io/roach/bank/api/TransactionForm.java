@@ -23,7 +23,7 @@ import io.roach.bank.api.support.LocalDateSerializer;
 import io.roach.bank.api.support.Money;
 
 import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
-import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
+import static io.roach.bank.api.LinkRelations.TRANSFER_FORM_REL;
 
 /**
  * Request form with a list of account forming a balanced multi-legged monetary transaction.
@@ -36,7 +36,7 @@ import static io.roach.bank.api.LinkRelations.TRANSACTION_FORM_REL;
  * It is possible to have legs with different account regions and currencies, as long as the
  * total balance for entries with the same currency is zero.
  */
-@Relation(value = CURIE_PREFIX + TRANSACTION_FORM_REL)
+@Relation(value = CURIE_PREFIX + TRANSFER_FORM_REL)
 @JsonPropertyOrder({"links"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionForm extends RepresentationModel<TransactionForm> {

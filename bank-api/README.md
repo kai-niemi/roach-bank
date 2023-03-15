@@ -57,7 +57,7 @@ Example of link relations at root level:
 
       Example:
 
-          curl -i -X GET http://localhost:8090/api/transaction
+          curl -i -X GET http://localhost:8090/api/transfer
 
 - roachbank:reporting
     - GET - Returns a reporting summary resource
@@ -68,12 +68,12 @@ Example of link relations at root level:
 
 Example of link relations under `roachbank:transaction`:
 
--  roachroachbank:form
+-  roachbank:form
     - GET - Returns a pre-populated transfer request form
     
       Example:
       
-          curl -X GET http://localhost:8090/api/transaction/form > form.json
+          curl -X GET http://localhost:8090/api/transfer/form > form.json
     
     - POST - Places a monetary transaction across at least two accounts. 
         - Body: a transfer request form where the sum of the transaction legs must
@@ -84,7 +84,7 @@ Example of link relations under `roachbank:transaction`:
         
       Example POST request:
     
-          curl -d "@form.json" -H "Content-Type:application/json" -X POST http://localhost:8090/api/transaction
+          curl -d "@form.json" -H "Content-Type:application/json" -X POST http://localhost:8090/api/transfer
 
 ### Errors
 

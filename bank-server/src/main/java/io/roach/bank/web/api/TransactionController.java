@@ -67,20 +67,13 @@ public class TransactionController {
                         .toUriComponentsBuilder().path(
                                 "/list/{?page,size}")  // RFC-6570 template
                         .build().toUriString()),
-                LinkRelations.TRANSACTION_LIST_REL
-        ).withTitle("Collection of transactions"));
+                LinkRelations.TRANSACTION_LIST_REL)
+                .withTitle("Collection of transactions"));
 
         index.add(linkTo(methodOn(TransactionController.class)
                 .listTransactions(PageRequest.of(0, 5, Sort.Direction.DESC, "id")))
-                .withRel(LinkRelations.TRANSACTION_LIST_REL
-                ).withTitle("Collection of transactions"));
-
-        index.add(Link.of(UriTemplate.of(linkTo(TransactionFormController.class)
-                        .toUriComponentsBuilder().path(
-                                "/form{?limit,amount,regions}")  // RFC-6570 template
-                        .build().toUriString()),
-                LinkRelations.TRANSACTION_FORM_REL
-        ).withTitle("Form template for creating a transfer request"));
+                .withRel(LinkRelations.TRANSACTION_LIST_REL)
+                .withTitle("Collection of transactions"));
 
         return index;
     }

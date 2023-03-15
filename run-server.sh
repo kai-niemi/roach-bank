@@ -7,21 +7,15 @@ if [ ! -f "$FILE" ]; then
 fi
 
 fn_start_local(){
-java -jar $FILE \
---spring.profiles.active=retry-none,cdc-none,crdb-local  \
-"$@"
+java -jar $FILE --spring.profiles.active=retry-driver,cdc-none,crdb-local "$@"
 }
 
 fn_start_dev(){
-java -jar $FILE \
---spring.profiles.active=retry-driver,cdc-none,crdb-dev  \
-"$@"
+java -jar $FILE --spring.profiles.active=retry-driver,cdc-none,crdb-dev "$@"
 }
 
-fn_start_custom(){
-java -jar $FILE \
---spring.profiles.active=retry-none,cdc-none,crdb-local  \
-"$@"
+fn_start_cloud(){
+java -jar $FILE --spring.profiles.active=retry-driver,cdc-none,crdb-cloud "$@"
 }
 
 ########################################
@@ -36,18 +30,18 @@ case "${getopt}" in
     dev)
         fn_start_dev "$*"
         ;;
-    custom)
-        fn_start_custom "$*"
+    cloud)
+        fn_start_cloud "$*"
         ;;
     *)
     if [ -n "${getopt}" ]; then
         echo -e "Unknown command: $0 ${getopt}"
     fi
     echo -e "Usage: $0 [command]"
-    echo -e "Commands"
+    echo -e "Commands:"
     {
         echo -e "local"
         echo -e "dev"
-        echo -e "custom"
+        echo -e "cloud"
     } | column -s $'\t' -t
 esac

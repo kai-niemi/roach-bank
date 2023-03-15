@@ -22,7 +22,7 @@ import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.TransactionService;
 
 @RestController
-@RequestMapping(value = "/api/transactionitem")
+@RequestMapping(value = "/api/transaction/item")
 public class TransactionItemController {
     @Autowired
     private TransactionService bankService;

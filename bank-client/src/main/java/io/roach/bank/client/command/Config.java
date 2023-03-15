@@ -9,6 +9,7 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.StringUtils;
 
 import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.provider.RegionProvider;
 
 @ShellComponent
 @ShellCommandGroup(Constants.METADATA_COMMANDS)

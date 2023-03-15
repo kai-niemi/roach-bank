@@ -1,5 +1,7 @@
 package io.roach.bank.web.api;
 
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.UriTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,13 @@ public class IndexController {
                 .index())
                 .withRel(LinkRelations.TRANSACTION_REL)
                 .withTitle("Transaction resource details")
+        );
+        index.add(Link.of(UriTemplate.of(linkTo(TransferFormController.class)
+                        .toUriComponentsBuilder().path(
+                                "/form{?limit,amount,regions}")  // RFC-6570 template
+                        .build().toUriString()),
+                LinkRelations.TRANSFER_FORM_REL)
+                .withTitle("Form template for creating a transfer request")
         );
         index.add(linkTo(methodOn(ReportController.class)
                 .index())

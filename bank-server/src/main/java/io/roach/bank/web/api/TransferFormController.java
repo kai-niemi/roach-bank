@@ -46,8 +46,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping(value = "/api/transaction")
-public class TransactionFormController {
+@RequestMapping(value = "/api/transfer")
+public class TransferFormController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -116,8 +116,14 @@ public class TransactionFormController {
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
         UUID idempotencyKey = form.getUuid();
 
+        if (form.getAccountLegs().size() % 2 != 0) {
+            throw new BadRequestException("Account legs must be a multiple of 2: "
+                    + form.getAccountLegs().size());
+        }
+
         try {
-            Link selfLink = linkTo(methodOn(TransactionController.class).getTransaction(idempotencyKey)).withSelfRel();
+            Link selfLink = linkTo(methodOn(TransactionController.class)
+                    .getTransaction(idempotencyKey)).withSelfRel();
             Transaction entity = bankService.createTransaction(idempotencyKey, form);
             if (FollowLocation.ofCurrentRequest()) {
                 return ResponseEntity.created(selfLink.toUri()).body(transactionResourceAssembler.toModel(entity));
@@ -128,7 +134,8 @@ public class TransactionFormController {
             if (msg.contains("duplicate key value")) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return ResponseEntity.status(HttpStatus.OK)
-                        .location(linkTo(methodOn(TransactionController.class).getTransaction(idempotencyKey)).toUri())
+                        .location(linkTo(methodOn(TransactionController.class)
+                                .getTransaction(idempotencyKey)).toUri())
                         .build();
             }
             throw e;

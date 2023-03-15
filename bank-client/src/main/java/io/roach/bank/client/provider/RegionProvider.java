@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client.provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class RegionProvider implements ValueProvider {
                 .displayText(gateway + " [GATEWAY]"));
 
         restCommands.getRegions().forEach((k, v) -> {
-            result.add(new CompletionProposal(k).displayText(k + " " + v));
+            result.add(new CompletionProposal(k).displayText(k));
         });
 
         return result;

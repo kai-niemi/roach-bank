@@ -13,7 +13,7 @@ public abstract class LinkRelations {
 
     public static final String TRANSACTION_ITEMS_REL = "transaction-item-list";
 
-    public static final String TRANSACTION_FORM_REL = "transaction-form";
+    public static final String TRANSFER_FORM_REL = "transfer-form";
 
     // Account rels
     public static final String ACCOUNT_REL = "account";
