@@ -25,7 +25,7 @@ public abstract class Constants {
 
     public static final String DURATION_HELP = "execution duration";
 
-    public static final String REGIONS_HELP = "comma separated list of regions (all if empty)";
+    public static final String REGIONS_HELP = "comma separated list of regions (gateway if empty)";
 
     public static final String ACCOUNT_LIMIT_HELP = "number of accounts per city (-1 means server default)";
 

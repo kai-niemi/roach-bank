@@ -3,6 +3,7 @@ package io.roach.bank.client.command;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,14 @@ public class Report extends AbstractCommand {
     public void reportAccounts(@ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
             valueProvider = RegionProvider.class) String regions
     ) {
+        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
+
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("regions", StringUtils.commaDelimitedListToSet(regions));
+        if (regionSet.isEmpty()) {
+            regionSet.add(restCommands.getGatewayRegion());
+            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+        }
+        parameters.put("regions", regionSet);
 
         ResponseEntity<List> accountSummary = restCommands.fromRoot()
                 .follow(LinkRelations.withCurie(REPORTING_REL))
@@ -49,8 +56,14 @@ public class Report extends AbstractCommand {
     public void reportTransactions(@ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
             valueProvider = RegionProvider.class) String regions
     ) {
+        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
+
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("regions", StringUtils.commaDelimitedListToSet(regions));
+        if (regionSet.isEmpty()) {
+            regionSet.add(restCommands.getGatewayRegion());
+            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+        }
+        parameters.put("regions", regionSet);
 
         ResponseEntity<List> transactionSummary = restCommands.fromRoot()
                 .follow(LinkRelations.withCurie(REPORTING_REL))

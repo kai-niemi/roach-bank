@@ -1,8 +1,10 @@
 package io.roach.bank.client.command;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +46,18 @@ public class Balance extends AbstractCommand {
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "number of threads per city", defaultValue = "1") int concurrency
     ) {
-        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
-                StringUtils.commaDelimitedListToSet(regions), limit);
+        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
+
+        final Map<String, Object> parameters = new HashMap<>();
+        if (regionSet.isEmpty()) {
+            regionSet.add(restCommands.getGatewayRegion());
+            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+        }
+        parameters.put("regions", regionSet);
+
+        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(regionSet, limit);
         if (accounts.isEmpty()) {
-            logger.warn("No cities found matching region(s): {}", regions);
+            logger.warn("No cities found matching region(s): {}", regionSet);
         }
 
         accounts.forEach((city, accountModels) -> {
@@ -60,7 +70,7 @@ public class Balance extends AbstractCommand {
                     .get()));
 
             IntStream.rangeClosed(1, concurrency).forEach(value -> {
-                executorTemplate.runAsync(city + " (balance) " + duration,
+                executorTemplate.runAsync(city + " (balance)",
                         () -> restCommands.get(RandomData.selectRandom(links)),
                         DurationFormat.parseDuration(duration));
             });

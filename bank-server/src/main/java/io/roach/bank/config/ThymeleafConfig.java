@@ -11,7 +11,7 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import io.roach.bank.ProfileNames;
 
 @Configuration
-@Profile(value = {ProfileNames.DEV})
+@Profile(value = {ProfileNames.DEBUG})
 public class ThymeleafConfig {
     @Autowired
     private ThymeleafProperties properties;

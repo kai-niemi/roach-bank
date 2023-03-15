@@ -68,22 +68,23 @@ public class Transfer extends AbstractCommand {
             return;
         }
 
-        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(
-                StringUtils.commaDelimitedListToSet(regions), limit);
+        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
+
+        final Map<String, Object> parameters = new HashMap<>();
+        if (regionSet.isEmpty()) {
+            regionSet.add(restCommands.getGatewayRegion());
+            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+        }
+        parameters.put("regions", regionSet);
+
+        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(regionSet, limit);
         if (accounts.isEmpty()) {
-            logger.warn("No cities found matching region(s): {}", regions);
+            logger.warn("No cities found matching region(s): {}", regionSet);
         }
 
         accounts.forEach((city, accountModels) -> {
             logger.info("Found {} accounts in city '{}'", accountModels.size(), city);
         });
-
-        final Map<String, Object> parameters = new HashMap<>();
-        if (regions.isEmpty()) {
-            parameters.put("regions", Collections.singleton(restCommands.getGatewayRegion()));
-        } else {
-            parameters.put("regions", StringUtils.commaDelimitedListToSet(regions));
-        }
 
         final Link transferLink = restCommands.fromRoot()
                 .follow(LinkRelations.withCurie(TRANSFER_FORM_REL))
@@ -93,12 +94,12 @@ public class Transfer extends AbstractCommand {
         accounts.forEach((city, accountModels) -> {
             IntStream.rangeClosed(1, concurrency).forEach(value -> {
                 if (iterations > 0) {
-                    executorTemplate.runAsync(city + " (transfer) " + iterations,
+                    executorTemplate.runAsync(city + " (transfer)",
                             () -> transferFunds(transferLink, city, accountModels, amount, legs, fake),
                             iterations
                     );
                 } else {
-                    executorTemplate.runAsync(city + " (transfer) " + duration,
+                    executorTemplate.runAsync(city + " (transfer)",
                             () -> transferFunds(transferLink, city, accountModels, amount, legs, fake),
                             DurationFormat.parseDuration(duration)
                     );

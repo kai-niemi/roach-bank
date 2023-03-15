@@ -201,14 +201,16 @@ BankDashboard.prototype = {
         accountElt.find('.amount').text(_this.formatMoney(balance, currency));
         accountElt.css(_this.boxSize(city, balance));
         accountElt.css({
-            background: "white",
+            background: "red",
+            color: "yellow"
         })
 
         setTimeout(function(){
             accountElt.css({
-                background: _this.boxColor(city)
+                background: _this.boxColor(city),
+                color: "#fff"
             });
-        }, 1500);
+        }, 500);
     },
 
     handleAccountSummaryUpdate: function (city, accountSummary) {
@@ -255,7 +257,7 @@ BankDashboard.prototype = {
 
     boxSize: function (city, balance) {
         var minSize=50;
-        var maxSize=150;
+        var maxSize=120;
 
         var minBalance = sessionStorage.getItem("account-minBalance-" + city);
         if (minBalance == null) {
@@ -269,11 +271,11 @@ BankDashboard.prototype = {
 
         var size = this.interpolate(minBalance, minSize, maxBalance, maxSize, balance);
 
-        console.log("Box size for city " + city
-                + " (min balance: " + minBalance
-                + " max balance: " + maxBalance
-                + " current balance: " + balance
-                + ") is " + size + "px");
+        // console.log("Box size for city " + city
+        //         + " (min balance: " + minBalance
+        //         + " max balance: " + maxBalance
+        //         + " current balance: " + balance
+        //         + ") is " + size + "px");
 
         return {
             width: size + 'px',

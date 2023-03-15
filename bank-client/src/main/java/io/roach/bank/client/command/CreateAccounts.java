@@ -1,6 +1,8 @@
 package io.roach.bank.client.command;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,8 +46,17 @@ public class CreateAccounts extends AbstractCommand {
             @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
                     valueProvider = RegionProvider.class) String regions
     ) {
+        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
+
+        final Map<String, Object> parameters = new HashMap<>();
+        if (regionSet.isEmpty()) {
+            regionSet.add(restCommands.getGatewayRegion());
+            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+        }
+        parameters.put("regions", regionSet);
+
         final Set<String> cities = new HashSet<>();
-        cities.addAll(restCommands.getRegionCities(StringUtils.commaDelimitedListToSet(regions)));
+        cities.addAll(restCommands.getRegionCities(regionSet));
 
         final Link submitLink = restCommands.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
@@ -71,7 +82,7 @@ public class CreateAccounts extends AbstractCommand {
                 };
 
                 if (StringUtils.hasLength(duration)) {
-                    executorTemplate.runAsync(city + " (accounts) " + duration, worker,
+                    executorTemplate.runAsync(city + " (accounts) ", worker,
                             DurationFormat.parseDuration(duration));
 
                     logger.info("Creating accounts in '{}' for duration of {}", city, duration);
@@ -79,7 +90,7 @@ public class CreateAccounts extends AbstractCommand {
                     int totAccounts = Integer.parseInt(totalAccounts.replace("_", ""));
                     int iterations = Math.max(1, totAccounts / batchSize / cities.size());
 
-                    executorTemplate.runAsync(city + " (create) " + iterations, worker, iterations);
+                    executorTemplate.runAsync(city + " (create account)", worker, iterations);
 
                     logger.info("Creating {} accounts in '{}' in {} iterations", city,
                             totAccounts / cities.size(), iterations);

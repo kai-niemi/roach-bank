@@ -43,7 +43,7 @@ public abstract class ProfileNames {
     /**
      * Use filesystem paths for Thymeleaf templates.
      */
-    public static final String DEV = "dev";
+    public static final String DEBUG = "debug";
 
     /**
      * Enable transactional outbox pattern.

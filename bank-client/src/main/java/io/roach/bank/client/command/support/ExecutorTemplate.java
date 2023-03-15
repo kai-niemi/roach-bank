@@ -13,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 
 import jakarta.annotation.PreDestroy;
 
@@ -58,13 +58,9 @@ public class ExecutorTemplate {
                 try {
                     runnable.run();
                     context.after(callTime, null);
-                } catch (HttpClientErrorException.Conflict e) { // Serialization conflict rippled through
+                } catch (RestClientException e) {
                     context.after(callTime, e);
                     backoffDelay(++fails, e);
-                } catch (HttpServerErrorException e) {
-                    context.after(callTime, e);
-                    logger.error("Server error - cancelling prematurely", e);
-                    break;
                 } catch (Exception e) {
                     context.after(callTime, e);
                     logger.error("Uncategorized error - cancelling prematurely", e);
@@ -74,9 +70,7 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-            if (System.currentTimeMillis() - startTime >= duration.toMillis()) {
-                logger.info("Finihed '{}'", id);
-            }
+            logger.info("Finihed '{}'", id);
 
             return null;
         });
@@ -92,38 +86,33 @@ public class ExecutorTemplate {
 
             CallMetrics.Context context = callMetrics.of(id, activeWorkers::get);
 
-            loop:
+            outerLoop:
             for (int i = 0; i < iterations; i++) {
                 if (Thread.interrupted() || cancelRequested) {
                     logger.warn("Cancelled '{}'", id);
                     break;
                 }
 
-                for (int fails = 0; fails < 10; fails++) {
+                for (int fails = 0; ; fails++) { // Repeat indefinately
                     final long callTime = context.before();
                     try {
                         runnable.run();
                         context.after(callTime, null);
-                    } catch (HttpClientErrorException.Conflict e) { // Serialization conflict rippled through
+                        break;
+                    } catch (RestClientException e) {
                         context.after(callTime, e);
                         backoffDelay(++fails, e);
-                    } catch (HttpServerErrorException e) {
-                        context.after(callTime, e);
-                        logger.error("Server error - cancelling prematurely", e);
-                        break loop;
                     } catch (Exception e) {
                         context.after(callTime, e);
-                        logger.error("Uncategorized error - cancelling", e);
-                        break loop;
+                        logger.error("Uncategorized error - cancelling prematurely", e);
+                        break outerLoop;
                     }
                 }
             }
 
             activeWorkers.decrementAndGet();
 
-            if (!Thread.interrupted() && !cancelRequested) {
-                logger.info("Finihed '{}'", id);
-            }
+            logger.info("Finihed '{}'", id);
 
             return null;
         });
@@ -132,13 +121,32 @@ public class ExecutorTemplate {
         return future;
     }
 
-    private void backoffDelay(int fails, HttpStatusCodeException httpStatusCodeException) {
+    private void backoffDelay(int fails, RestClientException ex) {
         try {
-            long backoffMillis = Math.min((long) (Math.pow(2, fails) + Math.random() * 1000), 5000);
-            logger.warn("{} - backing off {} ms: {}",
-                    httpStatusCodeException.getStatusCode(),
-                    backoffMillis,
-                    httpStatusCodeException.toString());
+            long backoffMillis = Math.min((long) (Math.pow(2, fails) + Math.random() * 1000), 10_000);
+            if (ex instanceof HttpStatusCodeException) {
+                HttpStatusCode code = ((HttpStatusCodeException) ex).getStatusCode();
+                if (code.is4xxClientError()) {
+                    logger.warn("HTTP client error {} - backing off {} ms due to: {}",
+                            code,
+                            backoffMillis,
+                            ex.getMessage());
+                } else if (code.is5xxServerError()) {
+                    logger.warn("HTTP server error {} - backing off {} ms due to: {}",
+                            code,
+                            backoffMillis,
+                            ex.getMessage());
+                } else {
+                    logger.warn("HTTP uncategorized error {} - backing off {} ms due to: {}",
+                            code,
+                            backoffMillis,
+                            ex.getMessage());
+                }
+            } else {
+                logger.warn("Communication error - backing off {} ms due to: {}",
+                        backoffMillis,
+                        ex.getMessage());
+            }
             Thread.sleep(backoffMillis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

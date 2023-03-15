@@ -142,8 +142,6 @@ server:
 roachbank:
   # Default region if the returned gateway_region() is not part of known regions
   gatewayRegion: "eu-central-1"
-  # WS push permits per second rate limit
-  pushPermitsPerSec: 10.0
   # Interval of pushing cached balance reports (seconds)
   reportPushInterval: 120
   # Report / WS push query timeout (seconds)
