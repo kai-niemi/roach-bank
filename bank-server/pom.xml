@@ -191,22 +191,8 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
-                    <executable>true</executable>
                     <mainClass>io.roach.bank.ServerApplication</mainClass>
-                    <layers>
-                        <enabled>true</enabled>
-                    </layers>
-                    <image>
-                        <name>docker.io/library/${project.artifactId}</name>
-                    </image>
                 </configuration>
             </plugin>
         </plugins>

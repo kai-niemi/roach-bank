@@ -58,6 +58,29 @@
                     <artifactId>maven-source-plugin</artifactId>
                     <version>3.2.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <executable>true</executable>
+                        <layers>
+                            <enabled>true</enabled>
+                        </layers>
+                        <image>
+                            <env>
+                                <BP_JVM_VERSION>17</BP_JVM_VERSION>
+                            </env>
+                            <name>docker.io/library/${project.artifactId}</name>
+                        </image>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
