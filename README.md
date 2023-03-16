@@ -53,16 +53,6 @@ Real accounting doesn't use negative numbers, but for simplicty this ledger does
 increasing value (credit), and a negative value means decreasing value (debit). A transaction is 
 considered balanced when the sum of the legs with the same currency equals zero.
 
-# Deployment
-
-See the [Deployment Guide](deploy/README.md) on how to deploy the ledger to a single or multi-region 
-AWS, GCE or Azure cluster. 
-
-When deployed in a multi-regional topology (like US-EU), the accounts and transactions needs to be 
-pinned/domiciled to each region for best performance. This is done through the [regional-by-row](https://www.cockroachlabs.com/docs/stable/multiregion-overview.html#regional-by-row-tables)
-topology in CockroachDB. This will provide low read and write latencies in each region, and also for 
-an entire region to be brought down without affecting forward progress in any of the other regions.
-
 # Design and Implementation
 
 See the [Design Notes](docs/DESIGN.md) for a complete overview of used architectural mechanisms.
@@ -74,7 +64,15 @@ Architecture overview:
 
 ![architecture](docs/diagram_architecture.png)
 
+# Subprojects
+
+- [api](bank-api/README.md) - API artifacts and message models
+- [client](bank-client/README.md) - Interactive service endpoint shell client for generating load
+- [server](bank-server/README.md) - Main service implementation
+
 # Project Setup
+
+Guide for cloning a building the bank deployment artfiacts.
 
 ## Prerequisites
 
@@ -84,32 +82,72 @@ Architecture overview:
 - Maven 3+ (optional, embedded wrapper available)
     - https://maven.apache.org/
 
-Install the JDK (Ubuntu example):
+Install the JDK (Linux):
 
-    sudo apt-get install openjdk-17-jdk
+```bash
+sudo apt-get -qq install -y openjdk-17-jdk
+```
+
+Install the JDK (macOS):
+
+```bash
+brew install openjdk@17 
+```
 
 Confirm the installation by running:
 
-    java --version
+```bash
+java -version
+```
 
-## Subprojects
+## Maven Configuration
 
-- [api](bank-api/README.md) - API artifacts and message models
-- [client](bank-client/README.md) - Interactive service endpoint shell client for generating load
-- [server](bank-server/README.md) - Main service implementation
+You need to authenticate to GitHub Packages by creating a personal access token (classic)
+that includes the `read:packages` scope. For more information, see [Authenticating to GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-to-github-packages).
+
+Then add your personal access token to the servers section in your Maven [settings.xml](https://maven.apache.org/settings.html).
+Note that the server and repository id's must match but doesnt need to have id `github`.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    ...
+    <servers>
+        <server>
+            <id>github</id>
+            <username>your-github-name</username>
+            <password>your-access-token</password>
+        </server>
+    </servers>
+    ...
+</settings>
+```
+
+The here are two locations where this file may be placed:
+
+- A user's home dir: `$user.dir/.m2/settings.xml` (default)
+- The Maven install dir: `$M2_HOME/conf/settings.xml`
+
+Now you should be able to build the project:
+
+```shell
+./mvnw clean install
+```
+
+If you get a HTTP 401 error, its likely due to the access token not being valid.
 
 ## Supported Databases
 
-Supported databases are CockroachDB 22.1+ and PostgreSQL 10+. 
-The database type can be selected at start-up time by activating 
-the appropriate profile (see `run-server.sh`). 
-
-Creation of the table schema and initial account plan is automatic. 
+Supported databases are CockroachDB 22.1+ and PostgreSQL 10+. The database type can 
+be selected at start-up time by activating the appropriate profile (see `run-server.sh`). 
+The creation of table schema and an initial account plan is fully automatic. 
 
 ### CockroachDB Notes
 
-A CockroachDB enterprise (trial) license is required for some demo features like 
-geo-partitioning and follower-reads.
+CockroachDB with a trial [enterprise license](https://www.cockroachlabs.com/docs/stable/licensing-faqs.html#obtain-a-license)
+is required due to the use of features like geo-partitioning and follower-reads.
 
 Create the database:
 
@@ -126,22 +164,30 @@ Create the database:
     CREATE database roach_bank;
     CREATE extension pgcrypto;
 
-## Building and running from codebase
+## Local Deployment
+                   
+For starting the server and client on the local machine.
 
-The application is built with [Maven 3.1+](https://maven.apache.org/download.cgi).
-Tanuki's Maven wrapper is included (mvnw). All 3rd party dependencies are available in public Maven repos.
-
-To build and deploy to your local Maven repo, execute:
-
-    ./mvnw clean install
-
-### Starting locally
-
-Quick start:
+### Server
 
     chmod +x run-server.sh
-    chmod +x run-client.sh
     ./run-server.sh
+
+### Client
+
+    chmod +x run-client.sh
     ./run-client.sh
 
-See [server](bank-server/README.md) and [client](bank-client/README.md) for more details.
+See [server](bank-server/README.md) and [client](bank-client/README.md) for more 
+options and details.
+
+## Cloud Deployment 
+
+See the [Deployment Guide](deploy/README.md) on how to deploy the ledger to a single or multi-region
+AWS, GCE or Azure cluster. 
+
+## Terms of Use
+
+See [MIT](LICENSE.txt) for terms and conditions.
+
+---
