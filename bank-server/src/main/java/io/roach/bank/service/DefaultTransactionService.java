@@ -39,8 +39,8 @@ public class DefaultTransactionService implements TransactionService {
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
         Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
 
-        // Short-circuit
-        if (transactionForm.isFake()) {
+        // Short-circuit for smoke testing
+        if (transactionForm.isSmokeTest()) {
             return Transaction.builder().withId(id).build();
         }
 

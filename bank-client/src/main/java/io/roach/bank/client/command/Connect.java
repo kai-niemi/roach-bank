@@ -5,6 +5,7 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;
@@ -23,8 +25,6 @@ import io.roach.bank.client.command.support.ConnectionUpdatedEvent;
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
 public class Connect extends AbstractCommand {
-    public static final String DEFAULT_URL = "http://localhost:8090/api";
-
     private static boolean connected;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -35,14 +35,20 @@ public class Connect extends AbstractCommand {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Value("${roachbank.default-url}")
+    private String defaultUrl;
+
     public static boolean isConnected() {
         return connected;
     }
 
-
     @ShellMethod(value = "Connect to API endpoint", key = {"connect", "c"})
     public void connect(@ShellOption(value = {"--url", "-u"},
-            help = "REST API base URI", defaultValue = DEFAULT_URL) String baseUrl) {
+            help = "REST API base URI (default is http://localhost:8090/api)",
+            defaultValue = ShellOption.NULL) String baseUrl) {
+        if (!StringUtils.hasLength(baseUrl)) {
+            baseUrl = defaultUrl;
+        }
 
         logger.info("Connecting to {}..", baseUrl);
 

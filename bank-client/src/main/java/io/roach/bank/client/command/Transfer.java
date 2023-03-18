@@ -1,7 +1,6 @@
 package io.roach.bank.client.command;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +45,7 @@ public class Transfer extends AbstractCommand {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
             @ShellOption(help = "amount range (min/max)",
-                    defaultValue = "5.00-15.00") final String amount,
+                    defaultValue = "0.50-15.00") final String amount,
             @ShellOption(help = "number of legs per transaction",
                     defaultValue = "2") final int legs,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP,
@@ -60,8 +59,8 @@ public class Transfer extends AbstractCommand {
                     defaultValue = "0") int iterations,
             @ShellOption(help = "number of worker threads per city",
                     defaultValue = "1") int concurrency,
-            @ShellOption(help = "fake test run",
-                    defaultValue = "false") boolean fake
+            @ShellOption(help = "enable smoke test (pass HTTP requests as no-ops server side)",
+                    defaultValue = "false") boolean smokeTest
     ) {
         if (legs % 2 != 0) {
             console.warnf("Account legs must be a multiple of 2");
@@ -95,12 +94,12 @@ public class Transfer extends AbstractCommand {
             IntStream.rangeClosed(1, concurrency).forEach(value -> {
                 if (iterations > 0) {
                     executorTemplate.runAsync(city + " (transfer)",
-                            () -> transferFunds(transferLink, city, accountModels, amount, legs, fake),
+                            () -> transferFunds(transferLink, city, accountModels, amount, legs, smokeTest),
                             iterations
                     );
                 } else {
                     executorTemplate.runAsync(city + " (transfer)",
-                            () -> transferFunds(transferLink, city, accountModels, amount, legs, fake),
+                            () -> transferFunds(transferLink, city, accountModels, amount, legs, smokeTest),
                             DurationFormat.parseDuration(duration)
                     );
                 }
@@ -113,7 +112,7 @@ public class Transfer extends AbstractCommand {
                                List<AccountModel> accounts,
                                String amount,
                                int legs,
-                               boolean fake) {
+                               boolean smokeTest) {
         String parts[] = amount.split("-");
         String minAmount = parts.length > 1 ? parts[0] : amount;
         String maxAmount = parts.length > 1 ? parts[1] : amount;
@@ -128,8 +127,8 @@ public class Transfer extends AbstractCommand {
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
 
-        if (fake) {
-            builder.withFakeFlag();
+        if (smokeTest) {
+            builder.withSmokeTest();
         }
 
         Set<UUID> trail = new HashSet<>();

@@ -53,7 +53,8 @@ public class JdbcAccountPlanSetup {
         if (jdbcTemplate.queryForList("select 1 from account limit 1", Integer.class).isEmpty()) {
             logger.info("Creating new account plan: {}", accountPlan);
             cities.parallelStream().forEach(this::createAccounts);
-            logger.info("Creating {} accounts total", (accountPlan.getAccountsPerCity() * cities.size()));
+            logger.info("Creating {} accounts total for {} cities",
+                    (accountPlan.getAccountsPerCity() * cities.size()), cities.size());
         } else {
             logger.info("Account plan already exist");
         }

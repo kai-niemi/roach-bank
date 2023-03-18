@@ -157,7 +157,7 @@ roachbank:
     # Filter on region, empty implies all regions
     region: ""
     # Number of accounts per city (total: num_cities x accountsPerCity)
-    accountsPerCity: 1000
+    accountsPerCity: 5000
     # Initial balance
     initialBalance: "5000.00"
     # Account currency

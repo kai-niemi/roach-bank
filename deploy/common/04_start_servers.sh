@@ -6,7 +6,7 @@ fn_start_server(){
   fn_echo_info_nl "Starting bank server.."
 
   fn_failcheck roachprod run $CLUSTER:$c 'chmod +x *.sh'
-  fn_failcheck roachprod run $CLUSTER:$c './run_server.sh'
+  fn_failcheck roachprod run $CLUSTER:$c './run_server.sh > /dev/null 2>&1 &'
 
   local url="http://$(roachprod ip $CLUSTER:$c --external):8090"
 

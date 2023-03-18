@@ -20,6 +20,7 @@ logging:
     rollingpolicy:
       max-history: 5
 roachbank:
+  default-url: http://localhost:8090/api
   http:
     # Total concurrent http connections
     maxTotal: -1
