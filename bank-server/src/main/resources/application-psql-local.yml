@@ -5,7 +5,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
-    locations: classpath:db/psql
+    locations: classpath:db/psql,classpath:db/common
   datasource:
     url: jdbc:postgresql://localhost:5432/roach_bank
     driver-class-name: org.postgresql.Driver

@@ -54,10 +54,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    @Value("${roachbank.report-query-timeout}")
     private int reportQueryTimeoutSeconds;
 
-    @Value("${roachbank.accountsPerCity}")
+    @Value("${roachbank.accounts-per-city}")
     private int accountsPerCity;
 
     @Autowired

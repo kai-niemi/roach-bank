@@ -10,14 +10,14 @@ java -jar bank-server.jar \
 --spring.datasource.username=root \
 --spring.datasource.password= \
 --spring.profiles.active="${spring_profile}" \
---roachbank.accountsPerCity=10 \
---roachbank.selectForUpdate=false "$*"
+--roachbank.accounts-per-city=10 \
+--roachbank.select-for-update=false "$*"
 
 #nohup java -jar bank-server.jar \
 #--spring.datasource.url="${db_url}" \
 #--spring.datasource.username=root \
 #--spring.datasource.password= \
 #--spring.profiles.active="${spring_profile}" \
-#--roachbank.accountsPerCity=10 \
-#--roachbank.selectForUpdate=false \
+#--roachbank.accounts-per-city=10 \
+#--roachbank.select-for-update=false \
 #> /dev/null 2>&1 &

@@ -6,8 +6,6 @@
 ##############################################
 
 spring:
-  main:
-    allow-bean-definition-overriding: true
   application:
     name: roach-bank
   profiles:
@@ -141,24 +139,25 @@ server:
 #############################
 roachbank:
   # Default region if the returned gateway_region() is not part of known regions
-  gatewayRegion: "eu-central-1"
+  gateway-region: "eu-central-1"
   # Interval of pushing cached balance reports (seconds)
-  reportPushInterval: 120
+  report-push-interval: 120
   # Report / WS push query timeout (seconds)
-  reportQueryTimeoutSeconds: 120
+  report-query-timeout: 120
   # Default limit unless client specified
-  accountsPerCity: 10
+  accounts-per-city: 10
   # Read accounts with SELECT FOR UPDATE (when updateRunningBalance=true)
-  selectForUpdate: false
+  select-for-update: false
   # Account plan to run workload against
-  accountPlan:
-    # CAUTION: Clear accounts and transactions at startup
-    clearAtStartup: false
+  account-plan:
+    # (CAUTION) Clear accounts and transactions at startup
+    clear-at-startup: false
     # Filter on region, empty implies all regions
     region: ""
-    # Number of accounts per city (total: num_cities x accountsPerCity)
-    accountsPerCity: 5000
-    # Initial balance
-    initialBalance: "5000.00"
+    # Number of accounts per city (see db/common/V1_2__load_metadata.sql)
+    # 5K ~= 500K accounts in total
+    accounts-per-city: 5000
+    # Initial balance per account in same currency
+    initial-balance: "5000.00"
     # Account currency
-    currency: "USD"
+    currency: USD

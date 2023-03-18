@@ -51,7 +51,7 @@ public class ReportWebSocketPublisher {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Value("${roachbank.reportQueryTimeoutSeconds}")
+    @Value("${roachbank.report-query-timeout}")
     private int reportQueryTimeoutSeconds;
 
     @Autowired
@@ -70,8 +70,8 @@ public class ReportWebSocketPublisher {
     @Autowired
     private CacheManager cacheManager;
 
-    @Scheduled(fixedRateString = "${roachbank.reportPushInterval}",
-            initialDelayString = "${roachbank.reportPushInterval}",
+    @Scheduled(fixedRateString = "${roachbank.report-push-interval}",
+            initialDelayString = "${roachbank.report-push-interval}",
             timeUnit = TimeUnit.SECONDS)
     public void publishReport() {
         Cache cache = cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY);

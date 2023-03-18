@@ -19,7 +19,7 @@ import io.roach.bank.repository.MetadataRepository;
 public class JdbcMetadataRepository implements MetadataRepository {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Value("${roachbank.gatewayRegion}")
+    @Value("${roachbank.gateway-region}")
     private String gatewayRegion;
 
     @Autowired

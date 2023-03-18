@@ -32,7 +32,7 @@ public class DefaultTransactionService implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    @Value("${roachbank.selectForUpdate}")
+    @Value("${roachbank.select-for-update}")
     private boolean selectForUpdate;
 
     @Override
