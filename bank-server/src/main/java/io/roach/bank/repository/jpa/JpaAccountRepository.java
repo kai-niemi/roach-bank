@@ -15,9 +15,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,18 +38,18 @@ public class JpaAccountRepository implements AccountRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @Override
-    public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
+    public List<UUID> createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
+        List<UUID> ids = new ArrayList<>();
         IntStream.rangeClosed(1, numAccounts).forEach(value -> {
             if (value > 0 && value % batchSize == 0) {
                 accountRepository.flush();
             }
             Account account = factory.get();
             accountRepository.save(account);
+            ids.add(account.getId());
         });
+        return ids;
     }
 
     @Override
@@ -94,7 +92,7 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Account getAccountByReference(UUID id) {
+    public Account getAccountReferenceById(UUID id) {
         return accountRepository.getReferenceById(id);
     }
 
@@ -118,14 +116,14 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findByIDs(Set<UUID> ids, boolean locking) {
-        return locking
+    public List<Account> findByIDs(Set<UUID> ids, boolean forUpdate) {
+        return forUpdate
                 ? accountRepository.findAllWithLock(ids)
                 : accountRepository.findAll(ids);
     }
 
     @Override
-    public Page<Account> findPageByCity(Set<String> cities, Pageable page) {
+    public Page<Account> findByCity(Set<String> cities, Pageable page) {
         return accountRepository.findAll(page, new ArrayList<>(cities));
     }
 

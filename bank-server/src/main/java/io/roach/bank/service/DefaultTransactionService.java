@@ -24,7 +24,7 @@ import io.roach.bank.repository.AccountRepository;
 import io.roach.bank.repository.TransactionRepository;
 
 @Service
-@Transactional(propagation = Propagation.SUPPORTS)
+@Transactional(propagation = Propagation.MANDATORY)
 public class DefaultTransactionService implements TransactionService {
     @Autowired
     private AccountRepository accountRepository;
@@ -34,6 +34,9 @@ public class DefaultTransactionService implements TransactionService {
 
     @Value("${roachbank.select-for-update}")
     private boolean selectForUpdate;
+
+    @Value("${roachbank.alternative-workflow}")
+    private boolean alternativeWorkflow;
 
     @Override
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
@@ -57,31 +60,50 @@ public class DefaultTransactionService implements TransactionService {
                 .withTransferDate(transactionForm.getTransferDate());
 
         final List<Pair<UUID, BigDecimal>> balanceUpdates = new ArrayList<>();
+        final Set<UUID> accountIds = new HashSet<>();
 
-        // Could load by ref to avoid the SELECTs, but we need the running balance
-        // for front-end reporting push events.
-        Set<UUID> accountIds = new HashSet<>();
-        Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
+        final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
+
         legs.forEach((accountId, value) -> accountIds.add(accountId));
 
-        List<Account> accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
+        if (alternativeWorkflow) {
+            legs.forEach((accountId, pair) -> {
+                // Load by reference and mark it to signal lazy-initialized attributes
+                Account account = accountRepository.getAccountReferenceById(accountId);
+                account.setByReference(true);
 
-        legs.forEach((accountId, pair) -> {
-            Account account = accounts.stream()
-                    .filter(a -> a.getId().equals(accountId))
-                    .findFirst()
-                    .orElseThrow(() -> new NoSuchAccountException(accountId));
+                transactionBuilder
+                        .andItem()
+                        .withAccount(account)
+                        .withAmount(pair.getFirst())
+                        .withNote(pair.getSecond())
+                        .withRunningBalance(Money.zero(
+                                pair.getFirst().getCurrency())) // Avoid looking up the account, so no running balance
+                        .then();
 
-            transactionBuilder
-                    .andItem()
-                    .withAccount(account)
-                    .withAmount(pair.getFirst())
-                    .withNote(pair.getSecond())
-                    .withRunningBalance(account.getBalance())
-                    .then();
+                balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
+            });
+        } else {
+            // Load to get the running balance and for front-end push events.
+            List<Account> accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
 
-            balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
-        });
+            legs.forEach((accountId, pair) -> {
+                Account account = accounts.stream()
+                        .filter(a -> a.getId().equals(accountId))
+                        .findFirst()
+                        .orElseThrow(() -> new NoSuchAccountException(accountId));
+
+                transactionBuilder
+                        .andItem()
+                        .withAccount(account)
+                        .withAmount(pair.getFirst())
+                        .withNote(pair.getSecond())
+                        .withRunningBalance(account.getBalance())
+                        .then();
+
+                balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
+            });
+        }
 
         try {
             accountRepository.updateBalances(balanceUpdates);

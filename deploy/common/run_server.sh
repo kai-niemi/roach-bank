@@ -10,7 +10,7 @@ java -jar bank-server.jar \
 --spring.datasource.username=root \
 --spring.datasource.password= \
 --spring.profiles.active="${spring_profile}" \
---roachbank.accounts-per-city=10 \
+--roachbank.default-account-limit=100 \
 --roachbank.select-for-update=false "$*"
 
 #nohup java -jar bank-server.jar \
@@ -18,6 +18,6 @@ java -jar bank-server.jar \
 #--spring.datasource.username=root \
 #--spring.datasource.password= \
 #--spring.profiles.active="${spring_profile}" \
-#--roachbank.accounts-per-city=10 \
+#--roachbank.default-account-limit=10 \
 #--roachbank.select-for-update=false \
 #> /dev/null 2>&1 &

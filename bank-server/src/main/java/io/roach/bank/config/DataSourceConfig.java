@@ -1,16 +1,14 @@
 package io.roach.bank.config;
 
-import java.sql.Connection;
-
 import javax.sql.DataSource;
 
 import org.postgresql.PGProperty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
@@ -30,6 +28,9 @@ public class DataSourceConfig {
     @Autowired
     private Environment environment;
 
+    @Value("${roachbank.select-for-update}")
+    private boolean selectForUpdate;
+
     @Bean
     @Primary
     @ConfigurationProperties("spring.datasource")
@@ -47,12 +48,12 @@ public class DataSourceConfig {
         if (environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER))) {
             ds.addDataSourceProperty(CockroachProperty.RETRY_CONNECTION_ERRORS.getName(), "true");
             ds.addDataSourceProperty(CockroachProperty.RETRY_TRANSIENT_ERRORS.getName(), "true");
-            ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), "true");
+            ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), selectForUpdate + "");
         }
 
         // https://stackoverflow.com/questions/851758/java-enums-jpa-and-postgres-enums-how-do-i-make-them-work-together/43125099#43125099
         if (environment.acceptsProfiles(Profiles.of(ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_DEV))) {
-            ds.addDataSourceProperty("stringtype","unspecified");
+            ds.addDataSourceProperty("stringtype", "unspecified");
         }
 
         return ds;

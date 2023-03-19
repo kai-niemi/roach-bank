@@ -26,7 +26,7 @@ public class AccountResourceAssembler
         resource.setCity(entity.getCity());
         resource.setName(entity.getName());
         resource.setBalance(entity.getBalance());
-        resource.setUpdated(entity.getUpdated());
+        resource.setUpdatedAt(entity.getUpdatedAt());
         resource.setStatus(entity.isClosed() ? AccountStatus.CLOSED : AccountStatus.OPEN);
         resource.setAllowNegativeBalance(entity.getAllowNegative() > 0);
         resource.setDescription(entity.getDescription());

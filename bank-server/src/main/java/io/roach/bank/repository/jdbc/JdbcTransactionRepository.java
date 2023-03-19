@@ -151,7 +151,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
     }
 
     private List<TransactionItem> findTransactionItems(UUID id) {
-        return  this.jdbcTemplate.query(
+        return this.jdbcTemplate.query(
                 "SELECT * FROM transaction_item WHERE transaction_id=?",
                 (rs, rowNum) -> readTransactionItem(rs),
                 id

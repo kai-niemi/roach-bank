@@ -15,11 +15,11 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 
 public interface AccountRepository {
-    void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize);
-
     Account createAccount(Account account);
 
-    Account getAccountByReference(UUID id);
+    List<UUID> createAccounts(Supplier<Account> factory, int numAccounts, int batchSize);
+
+    Account getAccountReferenceById(UUID id);
 
     Optional<Account> getAccountById(UUID id);
 
@@ -35,9 +35,9 @@ public interface AccountRepository {
 
     void deleteAll();
 
-    Page<Account> findPageByCity(Set<String> cities, Pageable page);
+    Page<Account> findByCity(Set<String> cities, Pageable page);
 
     List<Account> findByCity(String city, int limit);
 
-    List<Account> findByIDs(Set<UUID> ids, boolean locking);
+    List<Account> findByIDs(Set<UUID> ids, boolean forUpdate);
 }

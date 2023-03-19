@@ -71,6 +71,6 @@ public class MetadataController {
     @TransactionBoundary(readOnly = true)
     @Retryable
     public ResponseEntity<String> gatewayRegion() {
-        return ResponseEntity.ok(metadataRepository.getGatewayRegion());
+        return ResponseEntity.ok(metadataRepository.getDefaultGatewayRegion());
     }
 }

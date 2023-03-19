@@ -23,7 +23,7 @@ import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.TransactionSummary;
-import io.roach.bank.changefeed.egress.ReportWebSocketPublisher;
+import io.roach.bank.changefeed.egress.ReportPublisher;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.MetadataRepository;
 import io.roach.bank.repository.ReportingRepository;
@@ -43,7 +43,7 @@ public class ReportController {
     private MetadataRepository metadataRepository;
 
     @Autowired
-    private ReportWebSocketPublisher reportPublisher;
+    private ReportPublisher reportPublisher;
 
     @Autowired
     private CacheManager cacheManager;
@@ -100,7 +100,7 @@ public class ReportController {
     @GetMapping("/refresh")
     public ResponseEntity<String> refreshReport(@RequestParam(value = "region", required = false) String region,
                                                 Model model) {
-        // Evict caches since its a user-initated request
+        // Evict caches since it's a user-initated request
         cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY).clear();
         cacheManager.getCache(CacheConfig.CACHE_TRANSACTION_REPORT_SUMMARY).clear();
 

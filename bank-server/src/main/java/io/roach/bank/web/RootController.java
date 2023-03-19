@@ -1,6 +1,7 @@
 package io.roach.bank.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +27,7 @@ public class RootController {
     }
 
     @GetMapping
+    @TransactionBoundary
     public String homePage(@RequestParam(value = "region", required = false) String region,
                            @ModelAttribute ViewModel viewModel,
                            Model model) {
@@ -33,7 +35,7 @@ public class RootController {
             viewModel = new ViewModel();
         }
 
-        String gatewayRegion = metadataRepository.getGatewayRegion();
+        String gatewayRegion = metadataRepository.getDefaultGatewayRegion();
 
         viewModel.setViewRegion(region);
         viewModel.setViewingGatewayRegion(gatewayRegion.equalsIgnoreCase(region));

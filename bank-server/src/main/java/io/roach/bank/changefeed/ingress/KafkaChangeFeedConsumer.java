@@ -1,7 +1,5 @@
 package io.roach.bank.changefeed.ingress;
 
-import jakarta.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +13,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
+import io.roach.bank.changefeed.egress.WebSocketPublisher;
 import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.changefeed.model.TransactionChangeEvent;
 import io.roach.bank.changefeed.model.TransactionItemChangeEvent;
+import jakarta.annotation.PostConstruct;
 
 @Service
 @Profile(ProfileNames.CDC_KAFKA)
@@ -32,7 +31,7 @@ public class KafkaChangeFeedConsumer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private AccountChangeWebSocketPublisher changeFeedPublisher;
+    private WebSocketPublisher changeFeedPublisher;
 
     @PostConstruct
     public void init() {

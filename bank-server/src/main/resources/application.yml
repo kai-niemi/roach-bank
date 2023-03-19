@@ -137,17 +137,21 @@ server:
     include-stacktrace: always
     include-message: always
 #############################
+# Bank server config
+#############################
 roachbank:
   # Default region if the returned gateway_region() is not part of known regions
-  gateway-region: "eu-central-1"
+  default-gateway-region: "eu-central-1"
+  # Default accounts per city scan limit
+  default-account-limit: 10
   # Interval of pushing cached balance reports (seconds)
   report-push-interval: 120
   # Report / WS push query timeout (seconds)
   report-query-timeout: 120
-  # Default limit unless client specified
-  accounts-per-city: 10
-  # Read accounts with SELECT FOR UPDATE (when updateRunningBalance=true)
+  # SELECT using '.. FOR UPDATE' locks
   select-for-update: false
+  # Enable alternative low-contention transfer workflow (no running balance)
+  alternative-workflow: false
   # Account plan to run workload against
   account-plan:
     # (CAUTION) Clear accounts and transactions at startup
@@ -155,8 +159,7 @@ roachbank:
     # Filter on region, empty implies all regions
     region: ""
     # Number of accounts per city (see db/common/V1_2__load_metadata.sql)
-    # 5K ~= 500K accounts in total
-    accounts-per-city: 5000
+    accounts-per-city: 2000
     # Initial balance per account in same currency
     initial-balance: "5000.00"
     # Account currency

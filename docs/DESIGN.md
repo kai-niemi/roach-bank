@@ -89,7 +89,7 @@ INSERT INTO transaction (id,city,balance,currency,name,..);
 -- (2) for each leg (batch)
 INSERT INTO transaction_item (city,transaction_id,..);
 -- (3) for each account (batch)
-UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp()
+UPDATE account SET balance = account.balance + data_table.balance, updated_at=clock_timestamp()
 FROM (select unnest(?) as id, unnest(?) as balance) as data_table
 WHERE account.id=data_table.id
   AND account.closed=false
@@ -121,7 +121,7 @@ INSERT INTO transaction (id,city,balance,currency,name,..);
 -- (3) for each leg (notice running_balance)
 INSERT INTO transaction_item (city,transaction_id,running_balance,..);
 -- (4) for each account (batch)
-UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp()
+UPDATE account SET balance = account.balance + data_table.balance, updated_at=clock_timestamp()
 FROM (select unnest(?) as id, unnest(?) as balance) as data_table
 WHERE account.id=data_table.id
   AND account.closed=false

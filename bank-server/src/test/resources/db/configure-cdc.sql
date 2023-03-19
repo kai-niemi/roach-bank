@@ -6,7 +6,7 @@ CREATE CHANGEFEED FOR TABLE account INTO 'experimental-http://localhost:8090/api
 CREATE CHANGEFEED FOR TABLE account INTO 'webhook-https://localhost:8443/api/cdc/webhook/account?insecure_tls_skip_verify=true' with updated, resolved='5s';
 CREATE CHANGEFEED FOR TABLE account INTO 'webhook-https://192.168.1.113:8443/api/cdc/webhook/account?insecure_tls_skip_verify=true' with updated, resolved='5s';
 
-INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated_at) VALUES
     (gen_random_uuid(), 'stockholm', '100.00', 'SEK', 'test', 'A', false, 0, clock_timestamp());
 -- delete from account where id='18955dc6-400d-4bb9-96c0-125bbe95e4ab';
 

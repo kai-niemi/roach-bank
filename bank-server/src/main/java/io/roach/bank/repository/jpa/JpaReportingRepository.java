@@ -6,11 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.persistence.Tuple;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +18,7 @@ import io.roach.bank.ProfileNames;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.repository.ReportingRepository;
+import jakarta.persistence.Tuple;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -64,7 +62,7 @@ public class JpaReportingRepository implements ReportingRepository {
             stream.forEach(o -> {
                 TransactionSummary summary = new TransactionSummary();
                 summary.setCity(city);
-                summary.setCurrency(Currency.getInstance(o.get(4,String.class)));
+                summary.setCurrency(Currency.getInstance(o.get(4, String.class)));
                 summary.setNumberOfTransactions(o.get(0, Long.class));
                 summary.setNumberOfLegs(o.get(1, Long.class));
 

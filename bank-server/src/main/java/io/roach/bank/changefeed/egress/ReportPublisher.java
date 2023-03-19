@@ -40,7 +40,7 @@ import io.roach.bank.repository.ReportingRepository;
 import io.roach.bank.util.ConcurrencyUtils;
 
 @Service
-public class ReportWebSocketPublisher {
+public class ReportPublisher {
     public static final String TOPIC_ACCOUNT_SUMMARY = "/topic/account-summary";
 
     public static final String TOPIC_TRANSACTION_SUMMARY = "/topic/transaction-summary";
@@ -56,7 +56,7 @@ public class ReportWebSocketPublisher {
 
     @Autowired
     @Lazy
-    private ReportWebSocketPublisher selfProxy;
+    private ReportPublisher selfProxy;
 
     @Autowired
     private ReportingRepository reportingRepository;
@@ -88,10 +88,9 @@ public class ReportWebSocketPublisher {
 
         if (lock.tryLock()) {
             try {
-                Set<String> cities = metadataRepository.getRegionCities(
-                        StringUtils.hasLength(viewRegion) ? Collections.singleton(viewRegion) : Collections.emptySet());
                 List<Callable<Boolean>> tasks = Collections.synchronizedList(new ArrayList<>());
-                cities.forEach(city -> {
+
+                selfProxy.getCities(viewRegion).forEach(city -> {
                     tasks.add(() -> {
                         selfProxy.computeSummaryAndPush(city);
                         return true;
@@ -104,8 +103,8 @@ public class ReportWebSocketPublisher {
 
                 ReportUpdate reportUpdate = new ReportUpdate();
                 reportUpdate.setLastUpdatedAt(LocalDateTime.now());
-                reportUpdate.setNumCities(cities.size());
-                reportUpdate.setMessage("Last updated " + LocalDateTime.now()
+                reportUpdate.setNumCities(completions);
+                reportUpdate.setMessage("Last updated at " + LocalDateTime.now()
                         .atOffset(ZoneOffset.UTC)
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                         + " - " + completions + " cities");
@@ -118,6 +117,12 @@ public class ReportWebSocketPublisher {
                 lock.unlock();
             }
         }
+    }
+
+    @TransactionBoundary(readOnly = true)
+    public Set<String> getCities(String region) {
+        return metadataRepository.getRegionCities(
+                StringUtils.hasLength(region) ? Collections.singleton(region) : Collections.emptySet());
     }
 
     @TransactionBoundary(readOnly = true,

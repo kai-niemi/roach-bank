@@ -1,9 +1,7 @@
-package io.roach.bank.web.api;
+package io.roach.bank.changefeed.ingress;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.roach.bank.ProfileNames;
-import io.roach.bank.changefeed.egress.AccountChangeWebSocketPublisher;
+import io.roach.bank.changefeed.egress.WebSocketPublisher;
 import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.changefeed.model.ChangeFeedEvent;
+import jakarta.annotation.PostConstruct;
 
 @RestController
 @RequestMapping(value = "/api/cdc/webhook")
 @Profile(ProfileNames.CDC_HTTP)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class ChangeFeedController {
+public class WebHookController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final AtomicInteger counter = new AtomicInteger(0);
@@ -39,7 +38,7 @@ public class ChangeFeedController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private AccountChangeWebSocketPublisher changeFeedPublisher;
+    private WebSocketPublisher changeFeedPublisher;
 
     @PostConstruct
     public void init() {

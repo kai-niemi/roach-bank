@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.data.cockroachdb.aspect.SavepointRetryAspect;
-import org.springframework.data.cockroachdb.aspect.TransactionAttributesAspect;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 

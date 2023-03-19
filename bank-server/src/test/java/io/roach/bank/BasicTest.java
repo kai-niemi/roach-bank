@@ -17,9 +17,17 @@ import io.roach.bank.domain.Transaction;
 import static io.roach.bank.api.support.Money.SEK;
 import static io.roach.bank.api.support.Money.USD;
 
-public class BankBasicTest extends AbstractIntegrationTest {
+public class BasicTest extends AbstractIntegrationTest {
     @Test
-    @Order(2)
+    @Order(0)
+    @TransactionBoundary
+    @Commit
+    public void whenStartingTest_exepectInitalAccountsCreated() {
+        createInitialTestAccounts();
+    }
+
+    @Test
+    @Order(1)
     @TransactionBoundary
     @Commit
     public void whenFindingAccounts_expectInitialBalance() {
@@ -41,7 +49,7 @@ public class BankBasicTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(3)
+    @Order(2)
     @TransactionBoundary
     @Commit
     public void whenSubmitBalancedTransaction_expectSuccess() {
@@ -75,7 +83,7 @@ public class BankBasicTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(3)
     @TransactionBoundary
     @Commit
     public void whenSubmitBalancedMultiLeggedTransaction_expectSuccess() {

@@ -1,5 +1,5 @@
 -- 100K accounts
-import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
+import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated_at)
     CSV DATA (
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100k/account-1.csv',
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100k/account-2.csv',
@@ -14,7 +14,7 @@ import into account(id,city,balance,currency,name,description,type,closed,allow_
     );
 
 -- 1M accounts
-import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
+import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated_at)
     CSV DATA (
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/1m/account-1.csv',
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/1m/account-2.csv',
@@ -29,7 +29,7 @@ import into account(id,city,balance,currency,name,description,type,closed,allow_
     );
 
 -- 10M accounts
-import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
+import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated_at)
     CSV DATA (
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/10m/account-1.csv',
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/10m/account-2.csv',
@@ -44,7 +44,7 @@ import into account(id,city,balance,currency,name,description,type,closed,allow_
     );
 
 -- 100M accounts (about 10GiB)
-import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
+import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated_at)
     CSV DATA (
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100m/account-1.csv',
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100m/account-2.csv',
@@ -58,7 +58,7 @@ import into account(id,city,balance,currency,name,description,type,closed,allow_
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/100m/account-10.csv'
     );
 
-import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated)
+import into account(id,city,balance,currency,name,description,type,closed,allow_negative,updated_at)
     CSV DATA (
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/250m/account-1.csv',
     'https://roach-bank-demo.s3.eu-central-1.amazonaws.com/250m/account-2.csv',

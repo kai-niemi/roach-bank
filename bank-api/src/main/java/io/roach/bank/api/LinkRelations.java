@@ -22,9 +22,9 @@ public abstract class LinkRelations {
 
     public static final String ACCOUNT_TOP = "account-top";
 
-    public static final String ACCOUNT_FORM_REL = "account-form";
+    public static final String ACCOUNT_ONE_FORM_REL = "account-form";
 
-    public static final String ACCOUNT_BATCH_REL = "account-batch";
+    public static final String ACCOUNT_BATCH_FORM_REL = "account-batch";
 
     public static final String ACCOUNT_BALANCE_REL = "account-balance";
 

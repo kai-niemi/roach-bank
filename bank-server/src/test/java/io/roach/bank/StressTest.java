@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -29,7 +30,7 @@ import io.roach.bank.util.ConcurrencyUtils;
 
 import static io.roach.bank.api.support.Money.SEK;
 
-public class BankStressTest extends AbstractIntegrationTest {
+public class StressTest extends AbstractIntegrationTest {
     private static final int TOTAL_TRANSACTIONS = 5_000;
 
     private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors() * 4;
@@ -39,12 +40,22 @@ public class BankStressTest extends AbstractIntegrationTest {
     private final List<UUID> transactionIds = Collections.synchronizedList(new ArrayList<>());
 
     @Test
+    @Order(0)
+    @TransactionBoundary
+    @Commit
+    public void whenStartingTest_exepectInitalAccountsCreated() {
+        createInitialTestAccounts();
+    }
+
+    @Test
+    @Transactional
+    @Commit
     @Order(1)
     public void whenReadingBalance_expectEnoughFunds() {
-        Assertions.assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+        Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 
         IntStream.rangeClosed(1, 10).forEach(value -> {
-            Account account = accountServiceFacade.createAccount(
+            Account account = accountService.createAccount(
                     Account.builder()
                             .withGeneratedId()
                             .withCity("stockholm")
@@ -61,7 +72,7 @@ public class BankStressTest extends AbstractIntegrationTest {
 
     @Test
     @Order(2)
-    public void whenRunningConcurrently_expectNoErrors() {
+    public void whenTransferFundsConcurrently_expectNoErrors() {
         Assertions.assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 
         Callable<Transaction> callable = () -> {
@@ -91,6 +102,8 @@ public class BankStressTest extends AbstractIntegrationTest {
                     .withNote(CockroachFacts.nextFact())
                     .then();
 
+            Assertions.assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+
             return transactionServiceFacade.createTransaction(UUID.randomUUID(), formBuilder.build());
         };
 
@@ -109,7 +122,7 @@ public class BankStressTest extends AbstractIntegrationTest {
     @Transactional
     @Commit
     @Order(3)
-    public void whenWrappingTest_expectConsistentOutcome() {
+    public void whenSummarizingTransactions_expectConsistentOutcome() {
         Assertions.assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 
         Money origSum = Money.zero(SEK);

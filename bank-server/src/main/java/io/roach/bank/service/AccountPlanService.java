@@ -1,31 +1,31 @@
-package io.roach.bank.repository.jdbc;
+package io.roach.bank.service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
-
-import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.config.AccountPlan;
 import io.roach.bank.repository.MetadataRepository;
-import jakarta.annotation.PostConstruct;
 
-@Repository
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class JdbcAccountPlanSetup {
+@Service
+public class AccountPlanService {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -34,16 +34,11 @@ public class JdbcAccountPlanSetup {
     @Autowired
     private MetadataRepository metadataRepository;
 
-    @Autowired
-    public void setDataSource(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    @PostConstruct
-    public void init() {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED) // Implicit
+    public void setupAccountPlan() {
         Set<String> regions = StringUtils.commaDelimitedListToSet(accountPlan.getRegion());
 
-        Set<String> cities = metadataRepository.getRegionCities(regions);
+        Set<String> cities = transactionTemplate.execute(status -> metadataRepository.getRegionCities(regions));
 
         if (accountPlan.isClearAtStartup()) {
             logger.info("Clear existing account plan");
@@ -76,7 +71,7 @@ public class JdbcAccountPlanSetup {
                 balance.multiply(accountPlan.getAccountsPerCity()));
 
         jdbcTemplate.update(
-                "INSERT INTO account (id, city, balance, currency, name, type, closed, allow_negative, updated) "
+                "INSERT INTO account (id, city, balance, currency, name, type, closed, allow_negative, updated_at) "
                         + "SELECT gen_random_uuid(),"
                         + " ?,"
                         + " ?,"

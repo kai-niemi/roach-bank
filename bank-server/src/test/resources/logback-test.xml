@@ -4,13 +4,14 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
     <logger name="org.eclipse.jetty" level="WARN"/>
+
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.transaction" level="WARN"/>
     <logger name="org.springframework.transaction.support" level="WARN"/>
     <logger name="org.springframework.transaction.interceptor" level="WARN"/>
     <logger name="org.springframework.web" level="WARN"/>
 
-    <logger name="io.roach.bank" level="TRACE" additivity="false">
+    <logger name="io.roach.bank" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 

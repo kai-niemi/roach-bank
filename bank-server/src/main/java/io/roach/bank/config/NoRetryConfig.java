@@ -1,7 +1,5 @@
 package io.roach.bank.config;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -10,6 +8,7 @@ import org.springframework.core.env.Profiles;
 import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Configuration for normal Spring annotation-driven TX demarcation with

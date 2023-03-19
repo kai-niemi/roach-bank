@@ -5,14 +5,13 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import jakarta.persistence.*;
-
 import org.hibernate.annotations.DynamicInsert;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.roach.bank.api.support.Money;
+import jakarta.persistence.*;
 
 /**
  * Immutable transaction item/leg representing a single account balance update as part

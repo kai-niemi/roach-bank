@@ -18,7 +18,7 @@ ALTER TABLE account ADD COLUMN region crdb_internal_region AS (
         END
     ) STORED NOT NULL;
 
-INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated_at) VALUES
     (gen_random_uuid(), 'madrid', '100.00', 'SEK', 'test', 'A', false, 0, clock_timestamp()) returning id;
 
 SHOW RANGE FROM TABLE account FOR ROW ('europe-west3','0707ffe1-1d62-4946-9061-f9a5608ae702');

@@ -64,10 +64,10 @@ public class TransactionController {
                 .withTitle("Trasaction resource"));
 
         index.add(Link.of(UriTemplate.of(linkTo(TransactionController.class)
-                        .toUriComponentsBuilder().path(
-                                "/list/{?page,size}")  // RFC-6570 template
-                        .build().toUriString()),
-                LinkRelations.TRANSACTION_LIST_REL)
+                                .toUriComponentsBuilder().path(
+                                        "/list/{?page,size}")  // RFC-6570 template
+                                .build().toUriString()),
+                        LinkRelations.TRANSACTION_LIST_REL)
                 .withTitle("Collection of transactions"));
 
         index.add(linkTo(methodOn(TransactionController.class)

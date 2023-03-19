@@ -3,11 +3,8 @@
 drop type if exists account_type;
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 
-drop sequence if exists account_name_sequence;
-create sequence if not exists account_name_sequence start 1 increment by 1 cache 64;
-
 drop type if exists transaction_type;
-create type transaction_type as enum ('GEN');
+create type transaction_type as enum ('GEN','TMP','PAY');
 
 ----------------------
 -- Metadata
@@ -38,7 +35,7 @@ create table account
     type           account_type   not null,
     closed         boolean        not null default false,
     allow_negative integer        not null default 0,
-    updated        timestamptz    not null default clock_timestamp(),
+    updated_at     timestamptz    not null default clock_timestamp(),
 
     primary key (id)
 );
@@ -74,7 +71,7 @@ create table transaction_item
 create table outbox
 (
     id             uuid        not null default gen_random_uuid(),
-    create_time    timestamptz not null default clock_timestamp(),
+    created_at     timestamptz not null default clock_timestamp(),
     aggregate_type string      not null,
     aggregate_id   string      not null,
     event_type     string      not null,

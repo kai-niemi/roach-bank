@@ -14,5 +14,5 @@ public interface MetadataRepository {
 
     Set<String> getRegionCities(Collection<String> regions);
 
-    String getGatewayRegion();
+    String getDefaultGatewayRegion();
 }

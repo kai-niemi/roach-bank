@@ -7,7 +7,8 @@ if [ ! -f "$FILE" ]; then
 fi
 
 fn_start_local(){
-java -jar $FILE --spring.profiles.active=retry-driver,cdc-none,crdb-local "$@"
+#java -jar $FILE --spring.profiles.active=retry-driver,cdc-none,crdb-local "$@"
+java -jar $FILE --spring.profiles.active=pgjdbc-local,retry-client,cdc-none "$@"
 }
 
 fn_start_dev(){

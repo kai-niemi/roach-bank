@@ -1,9 +1,10 @@
 spring:
   main:
+    allow-bean-definition-overriding: true
     banner-mode: off
-#  datasource:
-#    url: jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable
+  datasource:
+    url: jdbc:postgresql://localhost:26257/roach_bank?sslmode=disable
 #    url: jdbc:postgresql://192.168.1.99:26257/roach_bank?sslmode=disable
-#    driver-class-name: org.postgresql.Driver
-#    username: root
-#    password:
+    driver-class-name: org.postgresql.Driver
+    username: root
+    password:

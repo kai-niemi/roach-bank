@@ -1,6 +1,5 @@
 package io.roach.bank.service;
 
-import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.aspectj.lang.annotation.AfterReturning;
@@ -25,6 +24,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.roach.bank.AdvisorOrder;
 import io.roach.bank.ProfileNames;
 import io.roach.bank.domain.Transaction;
+import jakarta.annotation.PostConstruct;
 
 @Aspect
 @Component

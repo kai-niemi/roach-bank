@@ -51,7 +51,7 @@ public abstract class ConcurrencyUtils {
     }
 
     public static <V> int runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit,
-                                                  Consumer<V> consumer) {
+                                                 Consumer<V> consumer) {
         ScheduledExecutorService cancellationService = Executors.newSingleThreadScheduledExecutor();
 
         ExecutorService executorService = new ThreadPoolExecutor(ForkJoinPool.getCommonPoolParallelism(),

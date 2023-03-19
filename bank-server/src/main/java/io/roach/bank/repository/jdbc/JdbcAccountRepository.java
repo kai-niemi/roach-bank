@@ -55,8 +55,8 @@ public class JdbcAccountRepository implements AccountRepository {
     @Override
     public Account createAccount(Account account) {
         jdbcTemplate.update("INSERT INTO account "
-                        + "(id, city, balance, currency, name, description, type, closed, allow_negative, updated) "
-                        + "VALUES(?,?,?,?,?,?,?::account_type,?,?,?)",
+                        + "(id, city, balance, currency, name, description, type, closed, allow_negative) "
+                        + "VALUES(?,?,?,?,?,?,?::account_type,?,?)",
                 account.getId(),
                 account.getCity(),
                 account.getBalance().getAmount(),
@@ -65,27 +65,29 @@ public class JdbcAccountRepository implements AccountRepository {
                 account.getDescription(),
                 account.getAccountType().getCode(),
                 account.isClosed(),
-                account.getAllowNegative(),
-                account.getUpdated()
+                account.getAllowNegative()
         );
         return account;
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
+    public List<UUID> createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
         Assert.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Expected no transaction");
+
+        List<UUID> ids = new ArrayList<>();
 
         // Implict transactions
         IntStream.rangeClosed(1, numAccounts / batchSize)
                 .forEach(batch -> jdbcTemplate.batchUpdate(
                         "INSERT INTO account "
-                                + "(city, balance, currency, name, description, type, closed, allow_negative) "
-                                + "VALUES(?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                                + "(id,city, balance, currency, name, description, type, closed, allow_negative) "
+                                + "VALUES(?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
                             @Override
                             public void setValues(PreparedStatement ps, int i) throws SQLException {
                                 Account account = factory.get();
                                 int idx = 1;
+                                ps.setObject(idx++, account.getId());
                                 ps.setString(idx++, account.getCity());
                                 ps.setBigDecimal(idx++, account.getBalance().getAmount());
                                 ps.setString(idx++, account.getBalance().getCurrency().getCurrencyCode());
@@ -93,7 +95,8 @@ public class JdbcAccountRepository implements AccountRepository {
                                 ps.setString(idx++, account.getDescription());
                                 ps.setString(idx++, account.getAccountType().getCode());
                                 ps.setBoolean(idx++, account.isClosed());
-                                ps.setInt(idx++, account.getAllowNegative());
+                                ps.setInt(idx, account.getAllowNegative());
+                                ids.add(account.getId());
                             }
 
                             @Override
@@ -101,12 +104,13 @@ public class JdbcAccountRepository implements AccountRepository {
                                 return batchSize;
                             }
                         }));
+        return ids;
     }
 
     @Override
     public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
         int rows = jdbcTemplate.update(
-                "UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp() "
+                "UPDATE account SET balance = account.balance + data_table.balance, updated_at=clock_timestamp() "
                         + "FROM "
                         + "(select unnest(?) as id, unnest(?) as balance) as data_table "
                         + "WHERE account.id=data_table.id "
@@ -165,8 +169,10 @@ public class JdbcAccountRepository implements AccountRepository {
 
 
     @Override
-    public Account getAccountByReference(UUID id) {
-        return Account.builder().withId(id).build();
+    public Account getAccountReferenceById(UUID id) {
+        return Account.builder()
+                .withId(id)
+                .build();
     }
 
     @Override
@@ -214,7 +220,7 @@ public class JdbcAccountRepository implements AccountRepository {
                 .withDescription(rs.getString("description"))
                 .withClosed(rs.getBoolean("closed"))
                 .withAllowNegative(rs.getInt("allow_negative") > 0)
-                .withUpdated(rs.getTimestamp("updated").toLocalDateTime())
+                .withUpdated(rs.getTimestamp("updated_at").toLocalDateTime())
                 .build();
     }
 
@@ -224,7 +230,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Page<Account> findPageByCity(Set<String> cities, Pageable pageable) {
+    public Page<Account> findByCity(Set<String> cities, Pageable pageable) {
         String sql =
                 "SELECT * "
                         + "FROM account "
@@ -262,14 +268,14 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findByIDs(Set<UUID> ids, boolean locking) {
+    public List<Account> findByIDs(Set<UUID> ids, boolean forUpdate) {
         Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", ids);
 
         return this.namedParameterJdbcTemplate.query(
-                "SELECT * FROM account WHERE id in (:ids)" + (locking ? " FOR UPDATE" : ""),
+                "SELECT * FROM account WHERE id in (:ids)" + (forUpdate ? " FOR UPDATE" : ""),
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
     }

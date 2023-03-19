@@ -38,13 +38,11 @@ public class AccountModel extends RepresentationModel<AccountModel> implements W
 
     private String currencyCode;
 
-    //    @JsonSerialize(using = MoneySerializer.class)
-//    @JsonDeserialize(using = MoneyDeserializer.class)
     private Money balance;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime updated;
+    private LocalDateTime updatedAt;
 
     private AccountStatus status;
 
@@ -118,12 +116,12 @@ public class AccountModel extends RepresentationModel<AccountModel> implements W
         this.balance = balance;
     }
 
-    public LocalDateTime getUpdated() {
-        return updated;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdated(LocalDateTime updated) {
-        this.updated = updated;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public AccountStatus getStatus() {
@@ -160,7 +158,7 @@ public class AccountModel extends RepresentationModel<AccountModel> implements W
                 ", accountType=" + accountType +
                 ", currencyCode='" + currencyCode + '\'' +
                 ", balance=" + balance +
-                ", updated=" + updated +
+                ", updatedAt=" + updatedAt +
                 ", status=" + status +
                 ", allowNegativeBalance=" + allowNegativeBalance +
                 '}';

@@ -19,6 +19,9 @@ logging:
   logback:
     rollingpolicy:
       max-history: 5
+#############################
+# Bank client config
+#############################
 roachbank:
   default-url: http://localhost:8090/api
   http:

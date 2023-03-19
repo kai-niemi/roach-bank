@@ -10,17 +10,20 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import io.roach.bank.domain.Region;
 import io.roach.bank.repository.MetadataRepository;
 
 @Repository
+@Transactional(propagation = Propagation.MANDATORY)
 public class JdbcMetadataRepository implements MetadataRepository {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Value("${roachbank.gateway-region}")
-    private String gatewayRegion;
+    @Value("${roachbank.default-gateway-region}")
+    private String defaultGatewayRegion;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
@@ -70,21 +73,6 @@ public class JdbcMetadataRepository implements MetadataRepository {
         return result;
     }
 
-    public Set<String> getAllCities() {
-        Set<String> cities = new TreeSet<>();
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-
-        this.namedParameterJdbcTemplate.query(
-                "SELECT cities FROM region order by region",
-                parameters,
-                (rs, rowNum) -> {
-                    cities.addAll(StringUtils.commaDelimitedListToSet(rs.getString(1)));
-                    return null;
-                });
-
-        return cities;
-    }
-
     @Override
     public Set<String> getRegionCities(Collection<String> regions) {
         List<String> regionList = new ArrayList<>(regions);
@@ -112,7 +100,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
     }
 
     @Override
-    public String getGatewayRegion() {
+    public String getDefaultGatewayRegion() {
         try {
             return namedParameterJdbcTemplate
                     .queryForObject("SELECT name FROM region WHERE name=gateway_region()",
@@ -120,7 +108,7 @@ public class JdbcMetadataRepository implements MetadataRepository {
                             String.class);
 
         } catch (EmptyResultDataAccessException e) {
-            return gatewayRegion;
+            return defaultGatewayRegion;
         }
     }
 }

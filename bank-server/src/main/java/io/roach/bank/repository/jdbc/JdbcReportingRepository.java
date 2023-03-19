@@ -50,27 +50,34 @@ public class JdbcReportingRepository implements ReportingRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("city", city);
 
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT "
-                        + "  count(a.id) tot_accounts, "
-                        + "  sum(a.balance) tot_balance, "
-                        + "  min(a.balance) min_balance, "
-                        + "  max(a.balance) max_balance, "
-                        + "  a.currency "
-                        + "FROM account a "
-                        + "WHERE a.city = :city "
-                        + "GROUP BY a.city, a.currency",
-                parameters,
-                (rs, rowNum) -> {
-                    AccountSummary summary = new AccountSummary();
-                    summary.setCity(city);
-                    summary.setNumberOfAccounts(rs.getInt(1));
-                    summary.setTotalBalance(rs.getBigDecimal(2));
-                    summary.setMinBalance(rs.getBigDecimal(3));
-                    summary.setMaxBalance(rs.getBigDecimal(4));
-                    summary.setCurrency(Currency.getInstance(rs.getString(5)));
-                    return summary;
-                });
+        try {
+            return namedParameterJdbcTemplate.queryForObject(
+                    "SELECT "
+                            + "  count(a.id) tot_accounts, "
+                            + "  sum(a.balance) tot_balance, "
+                            + "  min(a.balance) min_balance, "
+                            + "  max(a.balance) max_balance, "
+                            + "  a.currency "
+                            + "FROM account a "
+                            + "WHERE a.city = :city "
+                            + "GROUP BY a.city, a.currency "
+                            + "LIMIT 1", // Assuming single currency
+                    parameters,
+                    (rs, rowNum) -> {
+                        AccountSummary summary = new AccountSummary();
+                        summary.setCity(city);
+                        summary.setNumberOfAccounts(rs.getInt(1));
+                        summary.setTotalBalance(rs.getBigDecimal(2));
+                        summary.setMinBalance(rs.getBigDecimal(3));
+                        summary.setMaxBalance(rs.getBigDecimal(4));
+                        summary.setCurrency(Currency.getInstance(rs.getString(5)));
+                        return summary;
+                    });
+        } catch (EmptyResultDataAccessException e) {
+            AccountSummary summary = new AccountSummary();
+            summary.setCity(city);
+            return summary;
+        }
     }
 
     @Override
@@ -93,7 +100,8 @@ public class JdbcReportingRepository implements ReportingRepository {
                             + "FROM transaction t "
                             + "  JOIN transaction_item ti ON t.id=ti.transaction_id "
                             + "WHERE ti.city = :city "
-                            + "GROUP BY ti.city, ti.currency",
+                            + "GROUP BY ti.city, ti.currency "
+                            + "LIMIT 1", // Assuming single currency
                     parameters,
                     (rs, rowNum) -> {
                         TransactionSummary summary = new TransactionSummary();

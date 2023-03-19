@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}bank-server.log}"/>
-    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
 
     <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
         <discardingThreshold>0</discardingThreshold>
         <queueSize>256</queueSize>
-        <appender-ref ref="FILE" />
+        <appender-ref ref="FILE"/>
     </appender>
 
     <logger name="org.eclipse.jetty" level="WARN"/>
@@ -18,27 +18,38 @@
     <logger name="org.springframework.transaction" level="INFO"/>
     <logger name="org.springframework.web" level="WARN"/>
 
-    <!-- Use TRACE level to see SQL statements and bindings -->
-    <logger name="io.roach.bank.SQL_TRACE" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="ASYNC_FILE" />
-    </logger>
-
-    <springProfile name="verbose">
-        <logger name="io.cockroachdb.jdbc" level="DEBUG">
-            <appender-ref ref="CONSOLE" />
-            <appender-ref ref="ASYNC_FILE" />
+    <springProfile name="verbose | debug">
+        <logger name="io.roach.bank" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </logger>
+        <logger name="io.cockroachdb.jdbc" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </logger>
+        <logger name="io.roach.bank.SQL_TRACE" level="TRACE" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </logger>
+    </springProfile>
+    <springProfile name="!verbose &amp; !debug">
+        <logger name="io.roach.bank" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </logger>
+        <logger name="io.cockroachdb.jdbc" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </logger>
+        <logger name="io.roach.bank.SQL_TRACE" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
         </logger>
     </springProfile>
 
-    <logger name="io.roach.bank" level="INFO" additivity="false">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="ASYNC_FILE" />
-    </logger>
-
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="ASYNC_FILE" />
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
     </root>
 </configuration>
 

@@ -136,7 +136,8 @@ Now you should be able to build the project:
 ./mvnw clean install
 ```
 
-If you get a HTTP 401 error, its likely due to the access token not being valid.
+If you get a HTTP 401 error, verify that the access token is valid. You may also
+need to (2FA) authorize the token for the `cockroachlabs-field` organisation.
 
 ## Supported Databases
 

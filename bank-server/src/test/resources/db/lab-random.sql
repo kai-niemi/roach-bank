@@ -1,11 +1,11 @@
-INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated) VALUES
+INSERT INTO account (id,city,balance,currency,name,type,closed,allow_negative,updated_at) VALUES
     ('ea4bde66-de55-4e3f-bc00-1b2b8fa22bfe', 'stockholm', '100.00', 'SEK', 'test:1', 'A', false, 0, clock_timestamp()),
     ('3f50fdd1-97a2-407c-95da-e00bf0cae97b', 'stockholm', '100.00', 'SEK', 'test:2', 'A', false, 0, clock_timestamp()),
     ('ea4bde66-de55-4e3f-bc00-1b2b8fa22bfc', 'stockholm', '100.00', 'SEK', 'test:3', 'L', false, 1, clock_timestamp()),
     ('3f50fdd1-97a2-407c-95da-e00bf0cae97d', 'stockholm', '100.00', 'SEK', 'test:4', 'L', false, 1, clock_timestamp())
 ;
 
-UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp()
+UPDATE account SET balance = account.balance + data_table.balance, updated_at=clock_timestamp()
 FROM (SELECT
      unnest(ARRAY['ea4bde66-de55-4e3f-bc00-1b2b8fa22bfe'::UUID,'3f50fdd1-97a2-407c-95da-e00bf0cae97b'::UUID]) as id,
      unnest(ARRAY[50,-50]) as balance) as data_table
@@ -26,7 +26,7 @@ update account set balance=100.00 where id='3f50fdd1-97a2-407c-95da-e00bf0cae97b
 
 --
 
-UPDATE account SET balance = account.balance + data_table.balance, updated=clock_timestamp()
+UPDATE account SET balance = account.balance + data_table.balance, updated_at=clock_timestamp()
 FROM (SELECT
           unnest(ARRAY['ea4bde66-de55-4e3f-bc00-1b2b8fa22bfc'::UUID,'3f50fdd1-97a2-407c-95da-e00bf0cae97d'::UUID]) as id,
           unnest(ARRAY[50,-50]) as balance) as data_table

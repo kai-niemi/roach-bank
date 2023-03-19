@@ -19,6 +19,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +49,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/api/transfer")
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class TransferFormController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -64,7 +67,6 @@ public class TransferFormController {
 
     @GetMapping("/form")
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
-    @Retryable
     public ResponseEntity<TransactionForm> getTransactionRequestForm(
             @RequestParam(value = "accountsPerRegion", defaultValue = "2", required = false) int accountsPerRegion,
             @RequestParam(value = "amount", defaultValue = "5.00", required = false) final String amount,

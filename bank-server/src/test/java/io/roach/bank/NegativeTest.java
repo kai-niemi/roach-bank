@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 
 import io.roach.bank.api.TransactionForm;
@@ -14,7 +15,15 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.service.BadRequestException;
 
-public class BankNegativeTest extends AbstractIntegrationTest {
+public class NegativeTest extends AbstractIntegrationTest {
+    @Test
+    @Order(1)
+    @TransactionBoundary
+    @Commit
+    public void whenStartingTest_exepectInitalAccountsCreated() {
+        createInitialTestAccounts();
+    }
+
     @Test
     @TransactionBoundary
     @Rollback

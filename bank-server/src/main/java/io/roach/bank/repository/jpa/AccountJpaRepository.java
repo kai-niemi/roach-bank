@@ -5,9 +5,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.Tuple;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Tuple;
 
 @Transactional(propagation = Propagation.MANDATORY)
 public interface AccountJpaRepository extends JpaRepository<Account, UUID>,

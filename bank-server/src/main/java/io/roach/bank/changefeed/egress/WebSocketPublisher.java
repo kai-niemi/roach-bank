@@ -1,10 +1,7 @@
 package io.roach.bank.changefeed.egress;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -21,9 +18,6 @@ import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.roach.bank.changefeed.model.AccountPayload;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
-import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.web.api.AccountController;
 import jakarta.annotation.PostConstruct;
 
@@ -31,14 +25,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
-public class AccountChangeWebSocketPublisher {
+public class WebSocketPublisher {
     private static final int BATCH_SIZE = 20;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final BlockingQueue<AccountPayload> payloadBuffer = new ArrayBlockingQueue<>(BATCH_SIZE);
-
-    private final BlockingQueue<TransactionItem> transactionBuffer = new ArrayBlockingQueue<>(BATCH_SIZE);
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
@@ -97,29 +89,6 @@ public class AccountChangeWebSocketPublisher {
         if (accountPayload != null) {
             payloads.add(accountPayload);
             payloadBuffer.drainTo(payloads, BATCH_SIZE);
-        } else {
-            TransactionItem transactionItem = transactionBuffer.poll(500, TimeUnit.MILLISECONDS);
-            if (transactionItem != null) {
-                Set<TransactionItem> ids = new HashSet<>();
-                ids.add(transactionItem);
-                transactionBuffer.drainTo(ids, BATCH_SIZE);
-
-                ids.forEach(item -> {
-                    Account account = item.getAccount();
-
-                    AccountPayload.Fields fields = new AccountPayload.Fields();
-                    fields.setId(account.getId());
-                    fields.setCity(item.getCity());
-                    fields.setName(account.getName());
-                    fields.setBalance(account.getBalance().getAmount());
-                    fields.setCurrency(account.getBalance().getCurrency().getCurrencyCode());
-
-                    AccountPayload payload = new AccountPayload();
-                    payload.setAfter(fields);
-
-                    payloads.add(payload);
-                });
-            }
         }
 
         payloads.forEach(payload -> {
@@ -130,16 +99,6 @@ public class AccountChangeWebSocketPublisher {
         });
 
         return payloads;
-    }
-
-    public void publish(Transaction transaction) {
-        transaction.getItems().forEach(transactionItem -> {
-            if (transactionBuffer.offer(Objects.requireNonNull(transactionItem))) {
-                eventsQueued.increment();
-            } else {
-                eventsLost.increment();
-            }
-        });
     }
 
     public void publish(AccountPayload accountPayload) {

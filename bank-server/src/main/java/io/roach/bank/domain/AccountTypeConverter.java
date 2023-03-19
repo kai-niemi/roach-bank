@@ -2,10 +2,9 @@ package io.roach.bank.domain;
 
 import java.util.stream.Stream;
 
+import io.roach.bank.api.AccountType;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-
-import io.roach.bank.api.AccountType;
 
 @Converter(autoApply = true)
 public class AccountTypeConverter implements AttributeConverter<AccountType, String> {
