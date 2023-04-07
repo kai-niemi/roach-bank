@@ -1,4 +1,4 @@
-package io.roach.bank.web.api;
+package io.roach.bank.web;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;

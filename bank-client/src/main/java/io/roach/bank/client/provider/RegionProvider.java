@@ -1,14 +1,13 @@
 package io.roach.bank.client.provider;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.roach.bank.client.command.support.RestCommands;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.CompletionContext;
 import org.springframework.shell.CompletionProposal;
 import org.springframework.shell.standard.ValueProvider;
 
-import io.roach.bank.client.command.support.RestCommands;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegionProvider implements ValueProvider {
     @Autowired
@@ -23,7 +22,7 @@ public class RegionProvider implements ValueProvider {
         result.add(new CompletionProposal(gateway)
                 .displayText(gateway + " [GATEWAY]"));
 
-        restCommands.getRegions().forEach((k, v) -> {
+        restCommands.getRegions().forEach((k) -> {
             result.add(new CompletionProposal(k).displayText(k));
         });
 

@@ -35,13 +35,14 @@ public class RootController {
             viewModel = new ViewModel();
         }
 
-        String gatewayRegion = metadataRepository.getDefaultGatewayRegion();
+        String gatewayRegion = metadataRepository.getGatewayRegion();
 
         viewModel.setViewRegion(region);
         viewModel.setViewingGatewayRegion(gatewayRegion.equalsIgnoreCase(region));
         viewModel.setGatewayRegion(gatewayRegion);
         viewModel.setRandomFact(CockroachFacts.nextFact());
-        viewModel.setRegionGroups(metadataRepository.getAllRegions());
+
+        metadataRepository.listRegions().forEach(viewModel::addRegion);
 
         model.addAttribute("model", viewModel);
 

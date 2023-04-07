@@ -1,4 +1,4 @@
-package io.roach.bank.web.api;
+package io.roach.bank.web;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class TransferFormController {
 
         List<Account> accounts = new ArrayList<>();
 
-        metadataRepository.getRegionCities(regions).forEach(r -> {
+        metadataRepository.listCities(regions).forEach(r -> {
             accounts.addAll(accountRepository.findByCity(r, accountsPerRegion));
         });
 

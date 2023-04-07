@@ -1,14 +1,11 @@
 package io.roach.bank.repository.jdbc;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
-import javax.sql.DataSource;
-
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.domain.Transaction;
+import io.roach.bank.domain.TransactionItem;
+import io.roach.bank.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.support.DataAccessUtils;
@@ -21,12 +18,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
-import io.roach.bank.domain.TransactionItem;
-import io.roach.bank.repository.TransactionRepository;
+import javax.sql.DataSource;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)

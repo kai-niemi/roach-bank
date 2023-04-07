@@ -1,4 +1,4 @@
-package io.roach.bank.web.api;
+package io.roach.bank.web;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,9 +122,11 @@ public class AccountController {
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
-        final Set<String> cities = metadataRepository.getRegionCities(regions);
+        final Set<String> cities = metadataRepository.listCities(regions);
         if (cities.isEmpty()) {
             logger.warn("No cities found matching regions [{}]", regions);
+            return ResponseEntity.ok()
+                    .body(CollectionModel.empty(AccountModel.class));
         }
 
         final int limitFinal = limit <= 0 ? this.defaultAccountLimit : limit;
@@ -153,7 +155,7 @@ public class AccountController {
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
-        Set<String> cities = metadataRepository.getRegionCities(regions);
+        Set<String> cities = metadataRepository.listCities(regions);
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         return pagedResourcesAssembler
                 .toModel(accountService.findAccountsByCity(cities, pageable), accountResourceAssembler);

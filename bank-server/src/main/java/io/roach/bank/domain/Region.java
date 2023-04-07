@@ -1,20 +1,32 @@
 package io.roach.bank.domain;
 
+import jakarta.persistence.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.List;
 import java.util.Set;
 
+@Table("region")
 public class Region {
-    private String cloud;
-
+    @Column
     private String name;
 
+    @Column
+    private String provider;
+
+    @Column
+    private List<String> cityGroups;
+
+    @Transient
     private Set<String> cities;
 
-    public String getCloud() {
-        return cloud;
+    public String getProvider() {
+        return provider;
     }
 
-    public Region setCloud(String cloud) {
-        this.cloud = cloud;
+    public Region setProvider(String provider) {
+        this.provider = provider;
         return this;
     }
 
@@ -35,4 +47,14 @@ public class Region {
         this.cities = cities;
         return this;
     }
+
+    public List<String> getCityGroups() {
+        return cityGroups;
+    }
+
+    public Region setCityGroups(List<String> cityGroups) {
+        this.cityGroups = cityGroups;
+        return this;
+    }
 }
+

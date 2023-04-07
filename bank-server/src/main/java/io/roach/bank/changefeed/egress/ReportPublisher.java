@@ -121,7 +121,7 @@ public class ReportPublisher {
 
     @TransactionBoundary(readOnly = true)
     public Set<String> getCities(String region) {
-        return metadataRepository.getRegionCities(
+        return metadataRepository.listCities(
                 StringUtils.hasLength(region) ? Collections.singleton(region) : Collections.emptySet());
     }
 

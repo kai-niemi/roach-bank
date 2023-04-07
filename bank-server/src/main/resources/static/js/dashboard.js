@@ -32,14 +32,14 @@ BankDashboard.prototype = {
             $.get(this.settings.endpoints.topAccounts+"?limit="+limit+"&regions="+region, function (data) {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
-            $.get(this.settings.endpoints.regionCities+"?regions="+region, function (data) {
+            $.get(this.settings.endpoints.cities+"?regions="+region, function (data) {
                 _this.createReportElements(data);
             });
         } else {
             $.get(this.settings.endpoints.topAccounts+"?limit="+limit, function (data) {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
-            $.get(this.settings.endpoints.regionCities, function (data) {
+            $.get(this.settings.endpoints.cities, function (data) {
                 _this.createReportElements(data);
             });
         }
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function () {
     new BankDashboard({
         endpoints: {
             topAccounts: '/api/account/top',
-            regionCities: '/api/metadata/region-cities',
+            cities: '/api/metadata/cities',
             socket: '/roach-bank'
         },
 
@@ -403,6 +403,11 @@ document.addEventListener('DOMContentLoaded', function () {
             'las vegas': 'USA',
             'charlotte': 'USA',
             'miami': 'USA',
+            'dallas': 'USA',
+            'st louis': 'USA',
+            'houston': 'USA',
+            'nashville': 'USA',
+            'indianapolis': 'USA',
 
             'stockholm': 'SWE',
             'helsinki': 'FIN',
@@ -476,8 +481,6 @@ document.addEventListener('DOMContentLoaded', function () {
             'shanghai': 'CHN',
             'melbourne': 'AUS',
             'jakarta': 'IDN',
-            'tallinn': 'IDN',
-            'riga': 'IDN',
         }
     });
 });

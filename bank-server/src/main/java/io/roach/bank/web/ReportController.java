@@ -1,4 +1,4 @@
-package io.roach.bank.web.api;
+package io.roach.bank.web;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -73,7 +73,7 @@ public class ReportController {
     public Collection<AccountSummary> getAccountSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
     ) {
-        Set<String> cities = metadataRepository.getRegionCities(regions);
+        Set<String> cities = metadataRepository.listCities(regions);
         Collection<AccountSummary> result = new LinkedList<>();
         cities.forEach((city) -> {
             result.add(reportingRepository.accountSummary(city));
@@ -89,7 +89,7 @@ public class ReportController {
     public Collection<TransactionSummary> getTransactionSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
     ) {
-        Set<String> cities = metadataRepository.getRegionCities(regions);
+        Set<String> cities = metadataRepository.listCities(regions);
         Collection<TransactionSummary> result = new LinkedList<>();
         cities.forEach((city) -> {
             result.add(reportingRepository.transactionSummary(city));

@@ -38,7 +38,7 @@ public class AccountPlanService {
     public void setupAccountPlan() {
         Set<String> regions = StringUtils.commaDelimitedListToSet(accountPlan.getRegion());
 
-        Set<String> cities = transactionTemplate.execute(status -> metadataRepository.getRegionCities(regions));
+        Set<String> cities = transactionTemplate.execute(status -> metadataRepository.listCities(regions));
 
         if (accountPlan.isClearAtStartup()) {
             logger.info("Clear existing account plan");

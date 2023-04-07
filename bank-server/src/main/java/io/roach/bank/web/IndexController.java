@@ -1,4 +1,4 @@
-package io.roach.bank.web.api;
+package io.roach.bank.web;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.UriTemplate;

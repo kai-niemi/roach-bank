@@ -1,18 +1,23 @@
 package io.roach.bank.repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.roach.bank.domain.Region;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 public interface MetadataRepository {
-    Map<String, List<Region>> getAllRegions();
+    Region getRegion(String provider, String region);
 
-    Map<String, Set<String>> getAllRegionCities();
+    Region addRegion(String provider, String region, List<String> cityGroups);
 
-    Set<String> getRegionCities(Collection<String> regions);
+    void deleteRegion(String provider, String region);
 
-    String getDefaultGatewayRegion();
+    List<Region> listRegions();
+
+    Set<String> listCities(Collection<String> regions);
+
+    String getGatewayRegion();
+
+    List<Region> listDatabaseRegions();
 }

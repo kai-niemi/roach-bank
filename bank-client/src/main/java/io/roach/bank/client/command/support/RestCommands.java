@@ -70,11 +70,11 @@ public class RestCommands {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getRegions() {
-        Map<String, List<String>> result = fromRoot()
+    public List<String> getRegions() {
+        List<String> result = fromRoot()
                 .follow(LinkRelations.withCurie(META_REL))
-                .follow(LinkRelations.withCurie(REGIONS_REL))
-                .toObject(Map.class);
+                .follow(LinkRelations.withCurie(REGION_LIST_REL))
+                .toObject(List.class);
         return result;
     }
 

@@ -23,15 +23,6 @@ public class Config extends AbstractCommand {
         console.successf("%s", restCommands.getGatewayRegion());
     }
 
-    @ShellMethod(value = "List regions", key = {"list-regions"})
-    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void listRegions() {
-        console.infof("Available regions and cities:\n");
-        restCommands.getRegions().forEach((k, v) -> {
-            console.successf("%s: %s", k, v);
-        });
-    }
-
     @ShellMethod(value = "List cities", key = {"list-cities"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegionCities(

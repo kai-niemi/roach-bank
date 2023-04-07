@@ -40,11 +40,15 @@ public abstract class LinkRelations {
 
     // Meta
 
-    public static final String REGIONS_REL = "regions";
+    public static final String REGION_REL = "region";
 
-    public static final String REGION_CITIES_REL = "region-cities";
+    public static final String REGION_LIST_REL = "region-list";
+
+    public static final String REGION_CITIES_REL = "cities";
 
     public static final String GATEWAY_REGION_REL = "gateway-region";
+
+    public static final String DATABASE_REGIONS_REL = "database-regions";
 
 
     // Generic context-scoped link relations

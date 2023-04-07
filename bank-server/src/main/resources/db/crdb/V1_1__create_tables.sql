@@ -10,14 +10,32 @@ create type transaction_type as enum ('GEN','TMP','PAY');
 -- Metadata
 ----------------------
 
-create table region
+-- drop table region;
+-- drop table city;
+
+create table city
 (
-    cloud  string not null,
-    name   string not null,
-    cities string not null,
+    name       string   not null,
+    city_names string[] not null default ARRAY [],
 
     primary key (name)
 );
+
+COMMENT ON COLUMN city.name IS 'Name of city group';
+COMMENT ON COLUMN city.city_names IS 'Array of city names';
+
+create table region
+(
+    provider_name string   not null,
+    region_name   string   not null,
+    city_groups   string[] not null default ARRAY [],
+
+    primary key (provider_name, region_name)
+);
+
+COMMENT ON COLUMN region.provider_name IS 'Name of cloud provider';
+COMMENT ON COLUMN region.region_name IS 'Name of cloud region matching --locality';
+COMMENT ON COLUMN region.city_groups IS 'Array of city groups for given region';
 
 ----------------------
 -- Main tables
