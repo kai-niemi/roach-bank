@@ -44,7 +44,11 @@ public abstract class LinkRelations {
 
     public static final String REGION_LIST_REL = "region-list";
 
-    public static final String REGION_CITIES_REL = "cities";
+    public static final String CITY_GROUP_REL = "city-group";
+
+    public static final String CITY_GROUP_LIST_REL = "city-group-list";
+
+    public static final String REGION_CITY_LIST_REL = "city-list";
 
     public static final String GATEWAY_REGION_REL = "gateway-region";
 

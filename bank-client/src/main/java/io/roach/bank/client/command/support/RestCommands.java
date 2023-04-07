@@ -1,19 +1,21 @@
 package io.roach.bank.client.command.support;
 
-import java.net.URI;
-import java.util.*;
-
+import io.roach.bank.api.AccountModel;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.Region;
+import io.roach.bank.client.command.Constants;
 import org.springframework.context.event.EventListener;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.Traverson;
+import org.springframework.hateoas.server.core.TypeReferences;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.client.command.Constants;
+import java.net.URI;
+import java.util.*;
 
 import static io.roach.bank.api.LinkRelations.*;
 
@@ -70,37 +72,42 @@ public class RestCommands {
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> getRegions() {
-        List<String> result = fromRoot()
+    public Collection<Region> getRegions() {
+        TypeReferences.CollectionModelType<Region> collectionModelType =
+                new TypeReferences.CollectionModelType<>() {};
+
+        CollectionModel<Region> result = fromRoot()
                 .follow(LinkRelations.withCurie(META_REL))
-                .follow(LinkRelations.withCurie(REGION_LIST_REL))
-                .toObject(List.class);
-        return result;
+                .follow(LinkRelations.withCurie(DATABASE_REGIONS_REL))
+                .toObject(collectionModelType);
+
+        return result.getContent();
     }
 
     @SuppressWarnings("unchecked")
     public String getGatewayRegion() {
-        return fromRoot()
+        Map<String, String> rv = fromRoot()
                 .follow(LinkRelations.withCurie(META_REL))
                 .follow(LinkRelations.withCurie(GATEWAY_REGION_REL))
-                .toObject(String.class);
+                .toObject(Map.class);
+        return rv.getOrDefault("region", "???");
     }
 
     @SuppressWarnings("unchecked")
-    public Set<String> getRegionCities(Set<String> regions) {
+    public Collection<String> getRegionCities(Set<String> regions) {
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("regions", regions);
 
-        final Set<String> cities = new HashSet<>();
+        TypeReferences.CollectionModelType<String> collectionModelType =
+                new TypeReferences.CollectionModelType<>() {};
 
-        Objects.requireNonNull(fromRoot()
-                        .follow(LinkRelations.withCurie(META_REL))
-                        .follow(LinkRelations.withCurie(REGION_CITIES_REL))
-                        .withTemplateParameters(parameters)
-                        .toObject(Set.class))
-                .forEach(city -> cities.add((String) city));
+        CollectionModel<String> rv = fromRoot()
+                .follow(LinkRelations.withCurie(META_REL))
+                .follow(LinkRelations.withCurie(REGION_CITY_LIST_REL))
+                .withTemplateParameters(parameters)
+                .toObject(collectionModelType);
 
-        return cities;
+        return rv.getContent();
     }
 
     public Map<String, List<AccountModel>> getTopAccounts(Set<String> regions, int limit) {

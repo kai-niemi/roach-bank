@@ -1,11 +1,9 @@
 package io.roach.bank.web;
 
-import io.roach.bank.domain.Region;
+import io.roach.bank.api.Region;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class ViewModel {
     private String title;
@@ -18,7 +16,7 @@ public class ViewModel {
 
     private String randomFact;
 
-    private Map<String, List<Region>> regionGroups = new TreeMap<>();
+    private List<Region> regions = new ArrayList<>();
 
     public String getTitle() {
         return title;
@@ -60,11 +58,11 @@ public class ViewModel {
         this.randomFact = randomFact;
     }
 
-    public Map<String, List<Region>> getRegionGroups() {
-        return regionGroups;
+    public List<Region> getRegions() {
+        return regions;
     }
 
     public void addRegion(Region region) {
-        regionGroups.computeIfAbsent(region.getProvider(), regions -> new ArrayList<>()).add(region);
+        regions.add(region);
     }
 }

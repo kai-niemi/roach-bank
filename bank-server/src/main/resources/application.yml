@@ -140,8 +140,6 @@ server:
 # Bank server config
 #############################
 roachbank:
-  # Default region if the returned gateway_region() is not part of known regions
-  default-gateway-region: "eu-central-1"
   # Default accounts per city scan limit
   default-account-limit: 10
   # Interval of pushing cached balance reports (seconds)
@@ -156,10 +154,8 @@ roachbank:
   account-plan:
     # (CAUTION) Clear accounts and transactions at startup
     clear-at-startup: false
-    # Filter on region, empty implies all regions
-    region: ""
     # Number of accounts per city (see db/common/V1_2__load_metadata.sql)
-    accounts-per-city: 2000
+    accounts-per-city: 5000
     # Initial balance per account in same currency
     initial-balance: "5000.00"
     # Account currency

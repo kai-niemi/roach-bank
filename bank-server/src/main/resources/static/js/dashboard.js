@@ -33,14 +33,14 @@ BankDashboard.prototype = {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
             $.get(this.settings.endpoints.cities+"?regions="+region, function (data) {
-                _this.createReportElements(data);
+                _this.createReportElements(data['_embedded']['roachbank:stringList']);
             });
         } else {
             $.get(this.settings.endpoints.topAccounts+"?limit="+limit, function (data) {
                 _this.createAccountElements(data['_embedded']['roachbank:account-list']);
             });
             $.get(this.settings.endpoints.cities, function (data) {
-                _this.createReportElements(data);
+                _this.createReportElements(data['_embedded']['roachbank:stringList']);
             });
         }
     },

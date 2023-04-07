@@ -48,7 +48,11 @@ public class JpaReportingRepository implements ReportingRepository {
                 result.add(summary);
             });
         }
-
+        if (result.isEmpty()) {
+            AccountSummary summary = new AccountSummary();
+            summary.setCity(city);
+            return summary;
+        }
         return result.iterator().next();
     }
 
@@ -75,7 +79,11 @@ public class JpaReportingRepository implements ReportingRepository {
                 result.add(summary);
             });
         }
-
+        if (result.isEmpty()) {
+            TransactionSummary summary = new TransactionSummary();
+            summary.setCity(city);
+            return summary;
+        }
         return result.iterator().next();
     }
 }

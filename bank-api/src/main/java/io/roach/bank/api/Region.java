@@ -1,34 +1,22 @@
-package io.roach.bank.domain;
+package io.roach.bank.api;
 
 import jakarta.persistence.Transient;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.hateoas.server.core.Relation;
 
 import java.util.List;
 import java.util.Set;
 
-@Table("region")
+import static io.roach.bank.api.LinkRelations.*;
+
+@Relation(value = CURIE_PREFIX + REGION_REL,
+        collectionRelation = CURIE_PREFIX + REGION_LIST_REL)
 public class Region {
-    @Column
     private String name;
 
-    @Column
-    private String provider;
-
-    @Column
     private List<String> cityGroups;
 
     @Transient
     private Set<String> cities;
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public Region setProvider(String provider) {
-        this.provider = provider;
-        return this;
-    }
 
     public String getName() {
         return name;

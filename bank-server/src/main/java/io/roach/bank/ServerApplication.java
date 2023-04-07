@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import io.roach.bank.service.AccountPlanService;
+import io.roach.bank.service.AccountPlanBuilder;
 
 @Configuration
 @EnableAutoConfiguration(exclude = {
@@ -46,11 +46,11 @@ public class ServerApplication implements ApplicationRunner {
     }
 
     @Autowired
-    private AccountPlanService accountPlanService;
+    private AccountPlanBuilder accountPlanBuilder;
 
     @Override
     public void run(ApplicationArguments args) {
-        accountPlanService.setupAccountPlan();
+        accountPlanBuilder.setupAccountPlan();
         logger.info("RoachBank is open for business - lets invent some $$");
     }
 }

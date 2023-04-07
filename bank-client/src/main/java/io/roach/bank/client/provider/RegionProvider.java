@@ -23,7 +23,7 @@ public class RegionProvider implements ValueProvider {
                 .displayText(gateway + " [GATEWAY]"));
 
         restCommands.getRegions().forEach((k) -> {
-            result.add(new CompletionProposal(k).displayText(k));
+            result.add(new CompletionProposal(k.getName()).displayText(k.getName() + " " + k.getCities()));
         });
 
         return result;

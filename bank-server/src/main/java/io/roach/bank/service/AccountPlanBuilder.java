@@ -1,8 +1,9 @@
 package io.roach.bank.service;
 
-import java.time.LocalDate;
-import java.util.Set;
-
+import io.roach.bank.api.AccountType;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.config.AccountPlan;
+import io.roach.bank.repository.MetadataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.StringUtils;
 
-import io.roach.bank.api.AccountType;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.config.AccountPlan;
-import io.roach.bank.repository.MetadataRepository;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
 
 @Service
-public class AccountPlanService {
+public class AccountPlanBuilder {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -36,23 +35,33 @@ public class AccountPlanService {
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED) // Implicit
     public void setupAccountPlan() {
-        Set<String> regions = StringUtils.commaDelimitedListToSet(accountPlan.getRegion());
+        logger.info(">> Setup account plan: {}", accountPlan);
 
-        Set<String> cities = transactionTemplate.execute(status -> metadataRepository.listCities(regions));
+        transactionTemplate.executeWithoutResult(transactionStatus -> {
+            logger.info("Sychronizing regions");
+            metadataRepository.syncRegions();
+        });
 
         if (accountPlan.isClearAtStartup()) {
-            logger.info("Clear existing account plan");
+            logger.info("Clear existing accounts");
             clearAccounts();
         }
 
-        if (jdbcTemplate.queryForList("select 1 from account limit 1", Integer.class).isEmpty()) {
-            logger.info("Creating new account plan: {}", accountPlan);
-            cities.parallelStream().forEach(this::createAccounts);
-            logger.info("Creating {} accounts total for {} cities",
-                    (accountPlan.getAccountsPerCity() * cities.size()), cities.size());
+        boolean exist = transactionTemplate.execute(
+                status -> metadataRepository.doesAccountPlanExist());
+
+        if (exist) {
+            logger.info("Account plan already exist - skip");
         } else {
-            logger.info("Account plan already exist");
+            Set<String> cities = transactionTemplate.execute(
+                    status -> metadataRepository.listCities(Collections.emptySet()));
+            logger.info("Account plan not found - creating {} accounts for {} cities",
+                    (accountPlan.getAccountsPerCity() * cities.size()), cities.size());
+
+            cities.parallelStream().forEach(this::createAccounts);
         }
+
+        logger.info("<< Account plan ready: {}", accountPlan);
     }
 
     public void clearAccounts() {

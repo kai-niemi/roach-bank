@@ -1,7 +1,7 @@
 package io.roach.bank.web;
 
 import io.roach.bank.api.LinkRelations;
-import io.roach.bank.domain.Region;
+import io.roach.bank.api.Region;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
@@ -14,10 +14,9 @@ public class RegionResourceAssembler implements SimpleRepresentationModelAssembl
     @Override
     public void addLinks(EntityModel<Region> resource) {
         Region region = resource.getContent();
+
         resource.add(linkTo(methodOn(MetadataController.class)
-                .getRegion(region.getProvider(), region.getName())).withSelfRel()
-                .andAffordance(afford(methodOn(MetadataController.class)
-                        .deleteRegion(region.getProvider(), region.getName())))
+                .getRegion(region.getName())).withSelfRel()
         );
     }
 

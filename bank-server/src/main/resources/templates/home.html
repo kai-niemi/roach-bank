@@ -61,29 +61,35 @@
                         </ul>
                     </li>
                     <!-- -->
-                    <li class="nav-item dropdown" th:each="item, iStat : ${model.regionGroups}">
+                    <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-                           aria-expanded="false"> Regions (<span th:text="${item.key}"/>) </a>
+                           aria-expanded="false"> Region</a>
 
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li th:each="region : ${item.value}">
+                            <li><h6 class="dropdown-header">Gateway Region</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><h6 class="dropdown-header">All Regions</h6></li>
+
+                            <li th:each="region : ${model.regions}">
                                 <a th:href="@{/(region=${region.name})}"
                                    th:text="${region.name}"
                                    class="dropdown-item"/>
                             </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" th:href="@{/(region='*')}">All (*)</a></li>
                         </ul>
                     </li>
-                    <!-- -->
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                            aria-expanded="false">View</a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Region (gateway)</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
-                            <li><a class="dropdown-item" th:href="@{/}">all (*)</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
                             <li><h6 class="dropdown-header">Accounts per city</h6></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=10)}">10</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=50)}">50</a></li>
