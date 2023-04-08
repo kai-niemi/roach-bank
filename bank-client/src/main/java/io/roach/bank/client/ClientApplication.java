@@ -41,7 +41,7 @@ public class ClientApplication implements PromptProvider, ApplicationRunner {
     @Override
     public AttributedString getPrompt() {
         if (connection != null) {
-            return new AttributedString(connection + ":$ ", AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
+            return new AttributedString(connection + ":$ ", AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN));
         } else {
             return new AttributedString("disconnected:$ ", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
         }

@@ -12,7 +12,7 @@ import io.roach.bank.client.command.support.RestCommands;
 
 @ShellComponent
 @ShellCommandGroup(Constants.METADATA_COMMANDS)
-public class Config extends AbstractCommand {
+public class Metadata extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;
 
@@ -26,7 +26,7 @@ public class Config extends AbstractCommand {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegions() {
         restCommands.getRegions().forEach(r -> {
-            console.successf("%s - %s", r.getName(), r.getCities());
+            console.successf("%s - groups: %s cities: %s", r.getName(), r.getCityGroups(), r.getCities());
         });
     }
     @ShellMethod(value = "List region cities", key = {"list-cities","lc"})

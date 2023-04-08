@@ -198,6 +198,8 @@ BankDashboard.prototype = {
         var balance = item.balance;
         var currency = item.currency;
 
+        // console.log("UPDATE ACCOUNT: " + item.name);
+
         accountElt.find('.amount').text(_this.formatMoney(balance, currency));
         accountElt.css(_this.boxSize(city, balance));
         accountElt.css({
@@ -481,6 +483,13 @@ document.addEventListener('DOMContentLoaded', function () {
             'shanghai': 'CHN',
             'melbourne': 'AUS',
             'jakarta': 'IDN',
+
+            'calgary': 'CAN',
+            'edmonton': 'CAN',
+            'winnipeg': 'CAN',
+            'regina': 'CAN',
+            'brandon': 'CAN',
+            'dryden': 'CAN'
         }
     });
 });
