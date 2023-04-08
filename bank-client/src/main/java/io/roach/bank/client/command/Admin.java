@@ -22,7 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.client.command.support.Console;
 import io.roach.bank.client.command.support.RestCommands;
-import io.roach.bank.client.util.DurationFormat;
+import io.roach.bank.client.command.support.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
 import static io.roach.bank.api.LinkRelations.TOGGLE_TRACE_LOG;

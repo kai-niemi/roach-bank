@@ -27,8 +27,7 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.RestCommands;
-import io.roach.bank.client.provider.RegionProvider;
-import io.roach.bank.client.util.DurationFormat;
+import io.roach.bank.client.command.support.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.TRANSFER_FORM_REL;
 

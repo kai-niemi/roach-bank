@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import io.roach.bank.client.command.support.CallMetrics;
-import io.roach.bank.client.provider.RegionProvider;
+import io.roach.bank.client.command.RegionProvider;
 
 @Configuration
 public class AppConfig {

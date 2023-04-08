@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import io.roach.bank.api.AccountBatchForm;
 import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.RestCommands;
-import io.roach.bank.client.provider.RegionProvider;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_BATCH_FORM_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;

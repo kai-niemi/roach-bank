@@ -1,4 +1,4 @@
-package io.roach.bank.client.util;
+package io.roach.bank.client.command.support;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,4 +1,4 @@
-package io.roach.bank.client.provider;
+package io.roach.bank.client.command;
 
 import io.roach.bank.client.command.support.RestCommands;
 import org.springframework.beans.factory.annotation.Autowired;

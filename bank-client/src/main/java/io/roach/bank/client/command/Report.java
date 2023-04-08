@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.client.command.support.RestCommands;
-import io.roach.bank.client.provider.RegionProvider;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_SUMMARY_REL;
 import static io.roach.bank.api.LinkRelations.REPORTING_REL;
