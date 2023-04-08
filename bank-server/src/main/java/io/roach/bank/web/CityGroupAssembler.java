@@ -1,7 +1,6 @@
 package io.roach.bank.web;
 
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.Region;
+import io.roach.bank.api.CityGroup;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
@@ -10,27 +9,22 @@ import org.springframework.stereotype.Component;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @Component
-public class RegionResourceAssembler implements SimpleRepresentationModelAssembler<Region> {
+public class CityGroupAssembler implements SimpleRepresentationModelAssembler<CityGroup> {
     @Override
-    public void addLinks(EntityModel<Region> resource) {
-        Region region = resource.getContent();
+    public void addLinks(EntityModel<CityGroup> resource) {
+        CityGroup cityGroup = resource.getContent();
 
         resource.add(linkTo(methodOn(MetadataController.class)
-                .getRegion(region.getName())).withSelfRel()
+                .getCityGroup(cityGroup.getName())).withSelfRel()
                 .andAffordance(afford(methodOn(MetadataController.class)
-                        .updateRegion(null)))
-                .andAffordance(afford(methodOn(MetadataController.class)
-                        .deleteRegion(null)))
+                        .updateCityGroup(null)))
         );
     }
 
     @Override
-    public void addLinks(CollectionModel<EntityModel<Region>> resources) {
+    public void addLinks(CollectionModel<EntityModel<CityGroup>> resources) {
         resources.add(linkTo(methodOn(MetadataController.class)
-                .listRegions())
+                .listCityGroups())
                 .withSelfRel());
     }
-
 }
-
-

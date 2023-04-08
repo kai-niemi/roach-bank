@@ -8,21 +8,25 @@ import java.util.List;
 import java.util.Set;
 
 public interface MetadataRepository {
-    Region getRegionByName(String region);
-
-    Region createRegion(Region region);
-
     List<Region> listRegions();
 
     List<CityGroup> listCityGroups();
 
     Set<String> listCities(Collection<String> regions);
 
+    Region getRegionByName(String region);
+
+    Region createRegion(Region region);
+
+    Region updateRegion(Region region);
+
+    void deleteRegion(String region);
+
+    CityGroup getCityGroup(String name);
+
+    CityGroup updateCityGroup(CityGroup cityGroup);
+
     String getGatewayRegion();
-
-    List<Region> listDatabaseRegions();
-
-    void syncRegions();
 
     boolean doesAccountPlanExist();
 }

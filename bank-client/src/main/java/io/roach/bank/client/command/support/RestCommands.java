@@ -78,7 +78,7 @@ public class RestCommands {
 
         CollectionModel<Region> result = fromRoot()
                 .follow(LinkRelations.withCurie(META_REL))
-                .follow(LinkRelations.withCurie(DATABASE_REGIONS_REL))
+                .follow(LinkRelations.withCurie(REGION_LIST_REL))
                 .toObject(collectionModelType);
 
         return result.getContent();

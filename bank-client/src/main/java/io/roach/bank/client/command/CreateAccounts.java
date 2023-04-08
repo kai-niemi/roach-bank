@@ -1,9 +1,6 @@
 package io.roach.bank.client.command;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +31,7 @@ public class CreateAccounts extends AbstractCommand {
     @Autowired
     private ExecutorTemplate executorTemplate;
 
-    @ShellMethod(value = "Create new accounts", key = {"create-accounts"})
+    @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
             @ShellOption(help = "number of accounts", defaultValue = "50_000") String totalAccounts,
@@ -53,8 +50,7 @@ public class CreateAccounts extends AbstractCommand {
         }
         parameters.put("regions", regionSet);
 
-        final Set<String> cities = new HashSet<>();
-        cities.addAll(restCommands.getRegionCities(regionSet));
+        final Collection<String> cities = restCommands.getRegionCities(regionSet);
 
         logger.info("Cities found matching region(s) {}: {}", regionSet, cities);
 

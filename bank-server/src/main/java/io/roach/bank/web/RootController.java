@@ -43,7 +43,7 @@ public class RootController {
         viewModel.setGatewayRegion(gatewayRegion);
         viewModel.setRandomFact(CockroachFacts.nextFact());
 
-        metadataRepository.listDatabaseRegions().forEach(viewModel::addRegion);
+        metadataRepository.listRegions().forEach(viewModel::addRegion);
 
         model.addAttribute("model", viewModel);
 

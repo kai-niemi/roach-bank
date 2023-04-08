@@ -38,8 +38,14 @@ public class AccountPlanBuilder {
         logger.info(">> Setup account plan: {}", accountPlan);
 
         transactionTemplate.executeWithoutResult(transactionStatus -> {
-            logger.info("Sychronizing regions");
-            metadataRepository.syncRegions();
+            logger.info("Available regions:");
+            metadataRepository.listRegions().forEach(region -> {
+                logger.info("Name: {}\nCity Groups: {}\nCities: {}",
+                        region.getName(),
+                        region.getCityGroups(),
+                        region.getCities());
+
+            });
         });
 
         if (accountPlan.isClearAtStartup()) {
@@ -47,14 +53,14 @@ public class AccountPlanBuilder {
             clearAccounts();
         }
 
-        boolean exist = transactionTemplate.execute(
-                status -> metadataRepository.doesAccountPlanExist());
+        boolean exist = transactionTemplate.execute(status -> metadataRepository.doesAccountPlanExist());
 
         if (exist) {
             logger.info("Account plan already exist - skip");
         } else {
             Set<String> cities = transactionTemplate.execute(
                     status -> metadataRepository.listCities(Collections.emptySet()));
+
             logger.info("Account plan not found - creating {} accounts for {} cities",
                     (accountPlan.getAccountsPerCity() * cities.size()), cities.size());
 

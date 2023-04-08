@@ -52,8 +52,6 @@ public abstract class LinkRelations {
 
     public static final String GATEWAY_REGION_REL = "gateway-region";
 
-    public static final String DATABASE_REGIONS_REL = "database-regions";
-
 
     // Generic context-scoped link relations
 

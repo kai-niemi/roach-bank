@@ -2,6 +2,9 @@
 -- Region to city mapping metadata
 --
 -- DELETE  from city_group where 1=1;
+-- DELETE  from region where 1=1;
+-- select array_cat_agg(city_names) from city_group where name in ('us-west-1','us-west-2');
+
 INSERT into city_group
 VALUES ('us-east-1', string_to_array('new york,boston,washington dc,miami,charlotte,atlanta', ',')),
        ('us-east-2', string_to_array('chicago,st louis,indianapolis,nashville,dallas,houston,detroit',',')),
@@ -20,9 +23,6 @@ VALUES ('us-east-1', string_to_array('new york,boston,washington dc,miami,charlo
        ('sa-east-1', string_to_array('sao paulo,rio de janeiro,salvador,buenos aires',','))
 ;
 
--- select array_cat_agg(city_names) from city_group where name in ('us-west-1','us-west-2');
-
--- DELETE  from region where 1=1;
 INSERT into region
 VALUES ('aws-us-east-1', string_to_array('us-east-1',',')),
        ('aws-us-east-2', string_to_array('us-east-2',',')),

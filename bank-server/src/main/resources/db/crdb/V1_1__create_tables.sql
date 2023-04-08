@@ -26,13 +26,13 @@ COMMENT ON COLUMN city_group.city_names IS 'Array of city names';
 
 create table region
 (
-    region_name   string   not null,
-    city_groups   string[] not null default ARRAY [],
+    name        string   not null,
+    city_groups string[] not null default ARRAY [],
 
-    primary key (region_name)
+    primary key (name)
 );
 
-COMMENT ON COLUMN region.region_name IS 'Name of cloud region matching --locality';
+COMMENT ON COLUMN region.name IS 'Name of cloud region matching --locality';
 COMMENT ON COLUMN region.city_groups IS 'Array of city groups for given region';
 
 ----------------------
