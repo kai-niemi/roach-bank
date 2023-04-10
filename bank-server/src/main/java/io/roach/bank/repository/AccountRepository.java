@@ -37,7 +37,7 @@ public interface AccountRepository {
 
     Page<Account> findByCity(Set<String> cities, Pageable page);
 
-    List<Account> findByCity(String city, int limit);
+    List<Account> findByCity(Set<String> cities, int limit);
 
     List<Account> findByIDs(Set<UUID> ids, boolean forUpdate);
 }

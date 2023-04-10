@@ -18,6 +18,17 @@ public class Region {
     @Transient
     private Set<String> cities;
 
+    private boolean primary;
+
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    public Region setPrimary(boolean primary) {
+        this.primary = primary;
+        return this;
+    }
+
     public String getName() {
         return name;
     }
@@ -43,6 +54,13 @@ public class Region {
     public Region setCityGroups(List<String> cityGroups) {
         this.cityGroups = cityGroups;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Region{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }
 

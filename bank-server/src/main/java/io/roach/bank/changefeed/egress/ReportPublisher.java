@@ -35,7 +35,7 @@ import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.ReportUpdate;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.config.CacheConfig;
-import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.repository.RegionRepository;
 import io.roach.bank.repository.ReportingRepository;
 import io.roach.bank.util.ConcurrencyUtils;
 
@@ -62,7 +62,7 @@ public class ReportPublisher {
     private ReportingRepository reportingRepository;
 
     @Autowired
-    private MetadataRepository metadataRepository;
+    private RegionRepository metadataRepository;
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;

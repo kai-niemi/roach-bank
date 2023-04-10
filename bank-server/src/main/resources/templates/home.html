@@ -54,7 +54,7 @@
                                 <hr class="dropdown-divider">
                             </li>
                             <li><h6 class="dropdown-header">Reporting and metadata resources</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/api/metadata}">Metadata</a></li>
+                            <li><a class="dropdown-item" th:href="@{/api/config}">Configuration</a></li>
                             <li><a class="dropdown-item" th:href="@{/api/admin}">Admin</a></li>
                             <li><a class="dropdown-item" th:href="@{/api/report}">Reports</a></li>
                             <li><a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a></li>
@@ -91,11 +91,13 @@
                            aria-expanded="false">View</a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li><h6 class="dropdown-header">Accounts per city</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=10)}">10</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=1)}">1</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=5)}">5</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=50)}">50</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=100)}">100</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=200)}">200</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=500)}">500</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=150)}">150</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=350)}">350</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=750)}">750</a></li>
                         </ul>
                     </li>
                     <!-- -->

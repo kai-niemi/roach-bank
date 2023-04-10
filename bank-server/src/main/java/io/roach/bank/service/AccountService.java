@@ -16,7 +16,7 @@ public interface AccountService {
 
     List<UUID> createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize);
 
-    List<Account> findAccountsByCity(String city, int limit);
+    List<Account> findAccountsByCity(Set<String> cities, int limit);
 
     Page<Account> findAccountsByCity(Set<String> cities, Pageable page);
 

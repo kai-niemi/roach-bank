@@ -15,7 +15,7 @@ drop type if exists transaction_type;
 create type transaction_type as enum ('GEN','TMP','PAY');
 
 ----------------------
--- Metadata
+-- Configuration
 ----------------------
 
 create table region

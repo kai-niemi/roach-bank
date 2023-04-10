@@ -77,7 +77,7 @@ public class RestCommands {
                 new TypeReferences.CollectionModelType<>() {};
 
         CollectionModel<Region> result = fromRoot()
-                .follow(LinkRelations.withCurie(META_REL))
+                .follow(LinkRelations.withCurie(CONFIG_REGION_REL))
                 .follow(LinkRelations.withCurie(REGION_LIST_REL))
                 .toObject(collectionModelType);
 
@@ -87,7 +87,7 @@ public class RestCommands {
     @SuppressWarnings("unchecked")
     public String getGatewayRegion() {
         Map<String, String> rv = fromRoot()
-                .follow(LinkRelations.withCurie(META_REL))
+                .follow(LinkRelations.withCurie(CONFIG_REGION_REL))
                 .follow(LinkRelations.withCurie(GATEWAY_REGION_REL))
                 .toObject(Map.class);
         return rv.getOrDefault("region", "???");
@@ -102,8 +102,8 @@ public class RestCommands {
                 new TypeReferences.CollectionModelType<>() {};
 
         CollectionModel<String> rv = fromRoot()
-                .follow(LinkRelations.withCurie(META_REL))
-                .follow(LinkRelations.withCurie(REGION_CITY_LIST_REL))
+                .follow(LinkRelations.withCurie(CONFIG_CITY_GROUP_REL))
+                .follow(LinkRelations.withCurie(CITY_LIST_REL))
                 .withTemplateParameters(parameters)
                 .toObject(collectionModelType);
 

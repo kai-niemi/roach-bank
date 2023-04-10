@@ -24,7 +24,7 @@ import static io.roach.bank.api.LinkRelations.withCurie;
 import static io.roach.bank.client.command.Constants.ACCOUNT_PAGE_MODEL_PTR;
 
 @ShellComponent
-@ShellCommandGroup(Constants.METADATA_COMMANDS)
+@ShellCommandGroup(Constants.CONFIG_COMMANDS)
 public class ListAccounts extends AbstractCommand {
     @Autowired
     private RestCommands restCommands;

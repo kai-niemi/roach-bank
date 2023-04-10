@@ -1,7 +1,7 @@
 package io.roach.bank.web;
 
 import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.repository.RegionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/")
 public class RootController {
     @Autowired
-    private MetadataRepository metadataRepository;
+    private RegionRepository metadataRepository;
 
     @ModelAttribute("viewModel")
     public ViewModel viewModel() {

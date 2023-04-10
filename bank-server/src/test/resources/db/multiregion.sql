@@ -1,7 +1,11 @@
 SHOW REGIONS;
-ALTER DATABASE roach_bank PRIMARY REGION "eu-north-1";
-ALTER DATABASE roach_bank ADD REGION "eu-west-3";
-ALTER DATABASE roach_bank ADD REGION "eu-central-1";
+
+ALTER DATABASE roach_bank PRIMARY REGION "eu-central-1";
+ALTER DATABASE roach_bank ADD REGION "us-west-1";
+ALTER DATABASE roach_bank ADD REGION "eu-west-2";
+ALTER DATABASE roach_bank ADD REGION "eu-west-1";
+ALTER DATABASE roach_bank ADD REGION "us-east-1";
+ALTER DATABASE roach_bank ADD REGION "us-east-2";
 
 -- Pin replicas to regions by disabling NVRs (fast stale reads out of primary region)
 -- SET enable_multiregion_placement_policy=on;

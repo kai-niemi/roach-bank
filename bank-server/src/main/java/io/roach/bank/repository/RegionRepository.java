@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public interface MetadataRepository {
+public interface RegionRepository {
     List<Region> listRegions();
 
     List<CityGroup> listCityGroups();

@@ -1,14 +1,13 @@
 package io.roach.bank.repository.jpa;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
-
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.AccountRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -19,14 +18,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.AccountRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import jakarta.persistence.Tuple;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -128,12 +123,17 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findByCity(String city, int limit) {
-        return entityManager.createQuery("SELECT a FROM Account a WHERE a.city=?1",
-                        Account.class)
-                .setParameter(1, city)
-                .setMaxResults(limit)
-                .getResultList();
+    public List<Account> findByCity(Set<String> cities, int limit) {
+        // TODO! window function
+        List<Account> accounts = new ArrayList<>();
+        cities.forEach(city -> {
+            accounts.addAll(entityManager.createQuery("SELECT a FROM Account a WHERE a.city=?1",
+                            Account.class)
+                    .setParameter(1, city)
+                    .setMaxResults(limit)
+                    .getResultList());
+        });
+        return accounts;
     }
 
     @Override

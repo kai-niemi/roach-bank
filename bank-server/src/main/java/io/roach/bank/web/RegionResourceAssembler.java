@@ -15,22 +15,32 @@ public class RegionResourceAssembler implements SimpleRepresentationModelAssembl
     public void addLinks(EntityModel<Region> resource) {
         Region region = resource.getContent();
 
-        resource.add(linkTo(methodOn(MetadataController.class)
+        resource.add(linkTo(methodOn(RegionController.class)
                 .getRegion(region.getName())).withSelfRel()
-                .andAffordance(afford(methodOn(MetadataController.class)
+                .andAffordance(afford(methodOn(RegionController.class)
                         .updateRegion(null)))
-                .andAffordance(afford(methodOn(MetadataController.class)
+                .andAffordance(afford(methodOn(RegionController.class)
                         .deleteRegion(null)))
         );
+
+        region.getCityGroups().forEach(cg -> {
+            resource.add(linkTo(methodOn(CityGroupController.class)
+                    .getCityGroup(cg))
+                    .withRel(LinkRelations.CONFIG_CITY_GROUP_REL)
+            );
+        });
     }
 
     @Override
     public void addLinks(CollectionModel<EntityModel<Region>> resources) {
-        resources.add(linkTo(methodOn(MetadataController.class)
-                .listRegions())
+        resources.add(linkTo(methodOn(RegionController.class)
+                .index())
                 .withSelfRel());
+        resources.add(linkTo(methodOn(RegionController.class)
+                .gatewayRegion())
+                .withRel(LinkRelations.GATEWAY_REGION_REL)
+                .withTitle("Local gateway region"));
     }
-
 }
 
 

@@ -33,8 +33,8 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public List<Account> findAccountsByCity(String city, int limit) {
-        return accountRepository.findByCity(city, limit);
+    public List<Account> findAccountsByCity(Set<String> cities, int limit) {
+        return accountRepository.findByCity(cities, limit);
     }
 
     @Override

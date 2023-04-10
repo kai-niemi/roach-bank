@@ -25,7 +25,7 @@ import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.TransactionSummary;
 import io.roach.bank.changefeed.egress.ReportPublisher;
 import io.roach.bank.config.CacheConfig;
-import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.repository.RegionRepository;
 import io.roach.bank.repository.ReportingRepository;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -40,7 +40,7 @@ public class ReportController {
     private ReportingRepository reportingRepository;
 
     @Autowired
-    private MetadataRepository metadataRepository;
+    private RegionRepository metadataRepository;
 
     @Autowired
     private ReportPublisher reportPublisher;

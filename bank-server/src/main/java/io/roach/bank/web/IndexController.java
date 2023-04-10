@@ -47,15 +47,15 @@ public class IndexController {
                 .withRel(LinkRelations.REPORTING_REL)
                 .withTitle("Reporting resource details")
         );
-        index.add(linkTo(methodOn(MetadataController.class)
-                .index())
-                .withRel(LinkRelations.META_REL)
-                .withTitle("Metadata resource details")
-        );
         index.add(linkTo(methodOn(AdminController.class)
                 .index())
                 .withRel(LinkRelations.ADMIN_REL)
                 .withTitle("Admin resource details")
+        );
+        index.add(linkTo(methodOn(ConfigurationController.class)
+                .index())
+                .withRel(LinkRelations.CONFIG_INDEX_REL)
+                .withTitle("Configuration resource details")
         );
 
         return ResponseEntity.ok(index);

@@ -1,14 +1,13 @@
 package io.roach.bank.web;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import io.roach.bank.api.*;
+import io.roach.bank.api.support.CockroachFacts;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.service.AccountService;
+import io.roach.bank.web.support.FollowLocation;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,24 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import io.roach.bank.api.AccountBatchForm;
-import io.roach.bank.api.AccountForm;
-import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.AccountType;
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.MessageModel;
-import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.MetadataRepository;
-import io.roach.bank.service.AccountService;
-import io.roach.bank.util.ConcurrencyUtils;
-import io.roach.bank.web.support.FollowLocation;
-import jakarta.validation.Valid;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping(value = "/api/account")
@@ -76,7 +62,7 @@ public class AccountController {
     private PagedResourcesAssembler<Account> pagedResourcesAssembler;
 
     @Autowired
-    private MetadataRepository metadataRepository;
+    private RegionRepository metadataRepository;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -122,31 +108,23 @@ public class AccountController {
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
+        limit = limit <= 0 ? this.defaultAccountLimit : limit;
+
         final Set<String> cities = metadataRepository.listCities(regions);
         if (cities.isEmpty()) {
-            logger.warn("No cities found matching regions [{}]", regions);
+            logger.warn("No cities found matching regions {}", regions);
             return ResponseEntity.ok()
                     .body(CollectionModel.empty(AccountModel.class));
         }
+        logger.info("Found {} cities matching regions {}", cities, regions);
 
-        final int limitFinal = limit <= 0 ? this.defaultAccountLimit : limit;
+        List<Account> accounts = accountService.findAccountsByCity(cities, limit);
 
-        final List<Account> accounts = Collections.synchronizedList(new ArrayList<>());
-
-        // Retrieve accounts per region concurrently with a collective timeout
-        List<Callable<Void>> tasks = new ArrayList<>();
-        cities.forEach(city -> tasks.add(() -> {
-            transactionTemplate.executeWithoutResult(transactionStatus -> {
-                accounts.addAll(accountService.findAccountsByCity(city, limitFinal));
-            });
-            return null;
-        }));
-
-        ConcurrencyUtils.runConcurrentlyAndWait(tasks, reportQueryTimeoutSeconds, TimeUnit.SECONDS);
+        logger.info("Found {} accounts total using limit {} per city", accounts.size(), limit);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Client-side caching
-                .body(CollectionModel.of(accountResourceAssembler.toCollectionModel(accounts)));
+                .body(accountResourceAssembler.toCollectionModel(accounts));
     }
 
     @GetMapping(value = "/list")

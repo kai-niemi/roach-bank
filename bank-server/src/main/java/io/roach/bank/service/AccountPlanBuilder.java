@@ -3,7 +3,7 @@ package io.roach.bank.service;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.config.AccountPlan;
-import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.repository.RegionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class AccountPlanBuilder {
     private AccountPlan accountPlan;
 
     @Autowired
-    private MetadataRepository metadataRepository;
+    private RegionRepository metadataRepository;
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED) // Implicit
     public void setupAccountPlan() {
@@ -61,8 +61,8 @@ public class AccountPlanBuilder {
             Set<String> cities = transactionTemplate.execute(
                     status -> metadataRepository.listCities(Collections.emptySet()));
 
-            logger.info("Account plan not found - creating {} accounts for {} cities",
-                    (accountPlan.getAccountsPerCity() * cities.size()), cities.size());
+            logger.info("Account plan not found - creating {} accounts in cities: {}",
+                    accountPlan.getAccountsPerCity(), cities);
 
             cities.parallelStream().forEach(this::createAccounts);
         }

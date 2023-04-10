@@ -1,6 +1,7 @@
 package io.roach.bank.web;
 
 import io.roach.bank.api.CityGroup;
+import io.roach.bank.api.LinkRelations;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
@@ -14,17 +15,21 @@ public class CityGroupAssembler implements SimpleRepresentationModelAssembler<Ci
     public void addLinks(EntityModel<CityGroup> resource) {
         CityGroup cityGroup = resource.getContent();
 
-        resource.add(linkTo(methodOn(MetadataController.class)
+        resource.add(linkTo(methodOn(CityGroupController.class)
                 .getCityGroup(cityGroup.getName())).withSelfRel()
-                .andAffordance(afford(methodOn(MetadataController.class)
-                        .updateCityGroup(null)))
+                .andAffordance(afford(methodOn(CityGroupController.class)
+                        .updateCityGroup(cityGroup.getName(), null )))
         );
     }
 
     @Override
     public void addLinks(CollectionModel<EntityModel<CityGroup>> resources) {
-        resources.add(linkTo(methodOn(MetadataController.class)
-                .listCityGroups())
+        resources.add(linkTo(methodOn(CityGroupController.class)
+                .index())
                 .withSelfRel());
+        resources.add(linkTo(methodOn(CityGroupController.class)
+                .listCities(null))
+                .withRel(LinkRelations.CITY_LIST_REL)
+                .withTitle("List cities grouped by region(s)"));
     }
 }

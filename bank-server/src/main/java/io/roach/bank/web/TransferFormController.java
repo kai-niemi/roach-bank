@@ -3,6 +3,7 @@ package io.roach.bank.web;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,7 +38,7 @@ import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.repository.RegionRepository;
 import io.roach.bank.service.BadRequestException;
 import io.roach.bank.service.TransactionService;
 import io.roach.bank.web.support.FollowLocation;
@@ -60,7 +61,7 @@ public class TransferFormController {
     private AccountRepository accountRepository;
 
     @Autowired
-    private MetadataRepository metadataRepository;
+    private RegionRepository metadataRepository;
 
     @Autowired
     private TransactionResourceAssembler transactionResourceAssembler;
@@ -79,11 +80,8 @@ public class TransferFormController {
             throw new BadRequestException("Accounts per region must be a multiple of 2: " + accountsPerRegion);
         }
 
-        List<Account> accounts = new ArrayList<>();
-
-        metadataRepository.listCities(regions).forEach(r -> {
-            accounts.addAll(accountRepository.findByCity(r, accountsPerRegion));
-        });
+        Set<String> cities = metadataRepository.listCities(regions);
+        List<Account> accounts = accountRepository.findByCity(cities, accountsPerRegion);
 
         if (accounts.isEmpty()) {
             throw new BadRequestException(

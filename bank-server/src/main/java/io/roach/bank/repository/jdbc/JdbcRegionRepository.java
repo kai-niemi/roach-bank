@@ -2,7 +2,7 @@ package io.roach.bank.repository.jdbc;
 
 import io.roach.bank.api.CityGroup;
 import io.roach.bank.api.Region;
-import io.roach.bank.repository.MetadataRepository;
+import io.roach.bank.repository.RegionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,8 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Repository
-@Transactional(propagation = Propagation.MANDATORY)
-public class JdbcMetadataRepository implements MetadataRepository {
+@Transactional(propagation = Propagation.SUPPORTS)
+public class JdbcRegionRepository implements RegionRepository {
     private static final Pattern CLOUD_PREFIX
             = Pattern.compile("(aws|gcp|azure|az)-", Pattern.CASE_INSENSITIVE);
 
@@ -35,22 +35,27 @@ public class JdbcMetadataRepository implements MetadataRepository {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+
     @Override
     public List<Region> listRegions() {
         setupRegions(this);
         return this.namedParameterJdbcTemplate.query(
-                "SELECT region FROM [SHOW regions]",
+                "SELECT region,(primary_region_of[1]='roach_bank') as primary FROM [SHOW regions]",
                 Collections.emptyMap(),
-                (rs, rowNum) -> getRegionByName(rs.getString("region")));
+                (rs, rowNum) -> {
+                    Region r = getRegionByName(rs.getString("region"));
+                    r.setPrimary(rs.getBoolean(2));
+                    return r;
+                });
     }
 
-    private static List<Region> setupRegions(JdbcMetadataRepository jdbcMetadataRepository) {
-        return jdbcMetadataRepository.namedParameterJdbcTemplate.query(
+    private static List<Region> setupRegions(JdbcRegionRepository jdbcRegionRepository) {
+        return jdbcRegionRepository.namedParameterJdbcTemplate.query(
                 "SELECT region FROM [SHOW regions]",
                 Collections.emptyMap(),
                 (rs, rowNum) -> {
                     String name = rs.getString("region");
-                    Region r = jdbcMetadataRepository.getRegionByName(name);
+                    Region r = jdbcRegionRepository.getRegionByName(name);
                     if (r == null) {
                         List<String> cityGroups;
 
@@ -60,21 +65,21 @@ public class JdbcMetadataRepository implements MetadataRepository {
                             StringBuilder sb = new StringBuilder();
                             matcher.appendReplacement(sb, "");
                             matcher.appendTail(sb);
-                            CityGroup cityGroup = jdbcMetadataRepository.getCityGroup(sb.toString());
+                            CityGroup cityGroup = jdbcRegionRepository.getCityGroup(sb.toString());
                             cityGroups = Collections.singletonList(cityGroup.getName());
                         } else {
                             cityGroups = Collections.singletonList(name);
                         }
 
                         // Try first with single region name
-                        Set<String> cityNames = jdbcMetadataRepository.listCityNames(cityGroups);
+                        Set<String> cityNames = jdbcRegionRepository.listCityNames(cityGroups);
                         if (cityNames.isEmpty()) {
                             // Fallback to use all groups and cities
-                            cityGroups = jdbcMetadataRepository.listCityGroupNames();
-                            cityNames = jdbcMetadataRepository.listCityNames(cityGroups);
+                            cityGroups = jdbcRegionRepository.listCityGroupNames();
+                            cityNames = jdbcRegionRepository.listCityNames(cityGroups);
                         }
 
-                        r = jdbcMetadataRepository.createRegion(new Region()
+                        r = jdbcRegionRepository.createRegion(new Region()
                                 .setName(name)
                                 .setCityGroups(cityGroups)
                                 .setCities(cityNames)

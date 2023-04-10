@@ -11,7 +11,7 @@ public abstract class Constants {
 
     public static final String POOL_COMMANDS = "2. Resource Pool";
 
-    public static final String METADATA_COMMANDS = "3. Metadata Commands";
+    public static final String CONFIG_COMMANDS = "3. Configuration Commands";
 
     public static final String REPORTING_COMMANDS = "4. Reporting Commands";
 

@@ -1,9 +1,7 @@
 package io.roach.bank.web.support;
 
-import java.lang.reflect.UndeclaredThrowableException;
-import java.sql.SQLException;
-import java.util.Objects;
-
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
 import org.postgresql.util.PSQLState;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.boot.web.servlet.error.ErrorController;
@@ -12,11 +10,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.hateoas.mediatype.problem.Problem;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
@@ -34,8 +28,9 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.http.HttpServletRequest;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.SQLException;
+import java.util.Objects;
 
 /**
  * Centralized REST error handler. All HTTP exceptions should be routed to this handler
@@ -247,9 +242,11 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
 
     @ExceptionHandler({DataAccessException.class})
     public ResponseEntity<Object> handleDataAccessException(DataAccessException ex) {
+        Throwable cause = NestedExceptionUtils.getMostSpecificCause(ex);
         return wrap(Problem.create()
-                .withTitle(ex.getLocalizedMessage())
-                .withDetail(ex.toString())
-                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR), ex);
+                .withTitle(cause.getLocalizedMessage())
+                .withDetail(cause.toString())
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR),
+                ex);
     }
 }

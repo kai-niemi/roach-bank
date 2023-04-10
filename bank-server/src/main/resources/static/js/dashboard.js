@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
     new BankDashboard({
         endpoints: {
             topAccounts: '/api/account/top',
-            cities: '/api/metadata/cities',
+            cities: '/api/config/citygroup/cities',
             socket: '/roach-bank'
         },
 
@@ -403,6 +403,11 @@ document.addEventListener('DOMContentLoaded', function () {
             'washington dc': 'USA',
             'portland': 'USA',
             'las vegas': 'USA',
+            'eugene': 'USA',
+            'salem': 'USA',
+            'tacoma': 'USA',
+            'salt lake city': 'USA',
+            'san diego': 'USA',
             'charlotte': 'USA',
             'miami': 'USA',
             'dallas': 'USA',
@@ -410,6 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'houston': 'USA',
             'nashville': 'USA',
             'indianapolis': 'USA',
+            'bend': 'USA',
 
             'stockholm': 'SWE',
             'helsinki': 'FIN',
