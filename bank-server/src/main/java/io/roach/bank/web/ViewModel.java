@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ViewModel {
-    private String title;
+    private int limit;
 
     private String gatewayRegion;
 
@@ -18,12 +18,12 @@ public class ViewModel {
 
     private List<Region> regions = new ArrayList<>();
 
-    public String getTitle() {
-        return title;
+    public int getLimit() {
+        return limit;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 
     public String getGatewayRegion() {

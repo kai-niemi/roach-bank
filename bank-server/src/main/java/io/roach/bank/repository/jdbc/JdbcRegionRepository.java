@@ -4,6 +4,7 @@ import io.roach.bank.api.CityGroup;
 import io.roach.bank.api.Region;
 import io.roach.bank.repository.RegionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -16,15 +17,10 @@ import javax.sql.DataSource;
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
 public class JdbcRegionRepository implements RegionRepository {
-    private static final Pattern CLOUD_PREFIX
-            = Pattern.compile("(aws|gcp|azure|az)-", Pattern.CASE_INSENSITIVE);
-
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private JdbcTemplate jdbcTemplate;
@@ -38,53 +34,12 @@ public class JdbcRegionRepository implements RegionRepository {
 
     @Override
     public List<Region> listRegions() {
-        setupRegions(this);
         return this.namedParameterJdbcTemplate.query(
-                "SELECT region,(primary_region_of[1]='roach_bank') as primary FROM [SHOW regions]",
+                "SELECT region,(primary_region_of[1]='roach_bank') as primary FROM [SHOW regions] ORDER BY region",
                 Collections.emptyMap(),
                 (rs, rowNum) -> {
-                    Region r = getRegionByName(rs.getString("region"));
+                    Region r = getOrCreateRegionByName(rs.getString("region"));
                     r.setPrimary(rs.getBoolean(2));
-                    return r;
-                });
-    }
-
-    private static List<Region> setupRegions(JdbcRegionRepository jdbcRegionRepository) {
-        return jdbcRegionRepository.namedParameterJdbcTemplate.query(
-                "SELECT region FROM [SHOW regions]",
-                Collections.emptyMap(),
-                (rs, rowNum) -> {
-                    String name = rs.getString("region");
-                    Region r = jdbcRegionRepository.getRegionByName(name);
-                    if (r == null) {
-                        List<String> cityGroups;
-
-                        // Look for cloud prefix and remove it for matching city groups
-                        Matcher matcher = CLOUD_PREFIX.matcher(name);
-                        if (matcher.find()) {
-                            StringBuilder sb = new StringBuilder();
-                            matcher.appendReplacement(sb, "");
-                            matcher.appendTail(sb);
-                            CityGroup cityGroup = jdbcRegionRepository.getCityGroup(sb.toString());
-                            cityGroups = Collections.singletonList(cityGroup.getName());
-                        } else {
-                            cityGroups = Collections.singletonList(name);
-                        }
-
-                        // Try first with single region name
-                        Set<String> cityNames = jdbcRegionRepository.listCityNames(cityGroups);
-                        if (cityNames.isEmpty()) {
-                            // Fallback to use all groups and cities
-                            cityGroups = jdbcRegionRepository.listCityGroupNames();
-                            cityNames = jdbcRegionRepository.listCityNames(cityGroups);
-                        }
-
-                        r = jdbcRegionRepository.createRegion(new Region()
-                                .setName(name)
-                                .setCityGroups(cityGroups)
-                                .setCities(cityNames)
-                        );
-                    }
                     return r;
                 });
     }
@@ -116,50 +71,50 @@ public class JdbcRegionRepository implements RegionRepository {
     public Set<String> listCities(Collection<String> regions) {
         Set<String> cities = new TreeSet<>();
 
-        List<String> regionList = new ArrayList<>(regions);
-        if (regionList.isEmpty()) {
-            regionList.add("*"); // Include all if empty
+        if (regions.isEmpty()) {
+            listRegions().forEach(region -> {
+                cities.addAll(region.getCities());
+            });
+        } else {
+            regions.forEach(region -> {
+                Region r = findRegionByName(region);
+                cities.addAll(r.getCities());
+            });
         }
-
-        regionList.forEach(region -> {
-            MapSqlParameterSource parameters = new MapSqlParameterSource();
-            parameters.addValue("region", region.replace("*", "%"));
-
-            this.namedParameterJdbcTemplate.query(
-                    "SELECT city_groups FROM region where name like :region",
-                    parameters,
-                    (rs, rowNum) -> {
-                        Array array = rs.getArray("city_groups");
-                        String[] cityGroups = (String[]) array.getArray();
-                        cities.addAll(listCityNames(Arrays.asList(cityGroups)));
-                        return null;
-                    });
-        });
 
         return cities;
     }
 
     @Override
-    public Region getRegionByName(String region) {
+    public Region getOrCreateRegionByName(String region) {
+        try {
+            return findRegionByName(region);
+        } catch (EmptyResultDataAccessException e) {
+            Region defaultRegion = findRegionByName("default");
+            return createRegion(new Region()
+                    .setName(region)
+                    .setCityGroups(defaultRegion.getCityGroups())
+            );
+        }
+    }
+
+    private Region findRegionByName(String region) throws EmptyResultDataAccessException {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("name", region);
 
-        return this.namedParameterJdbcTemplate.query(
-                "SELECT city_groups FROM region WHERE name=:name",
+        return this.namedParameterJdbcTemplate.queryForObject(
+                "SELECT name,city_groups FROM region WHERE name = :name",
                 parameters,
-                rs -> {
-                    if (rs.next()) {
-                        Array array = rs.getArray("city_groups");
-                        String[] cityGroups = (String[]) array.getArray();
+                (rs, rowNum) -> {
+                    Array array = rs.getArray("city_groups");
+                    String[] cityGroups = (String[]) array.getArray();
 
-                        Region r = new Region();
-                        r.setName(region);
-                        r.setCityGroups(Arrays.asList(cityGroups));
-                        r.setCities(listCityNames(Arrays.asList(cityGroups)));
+                    Region r = new Region();
+                    r.setName(rs.getString("name"));
+                    r.setCityGroups(Arrays.asList(cityGroups));
+                    r.setCities(listCityNames(Arrays.asList(cityGroups)));
 
-                        return r;
-                    }
-                    return null;
+                    return r;
                 });
     }
 
@@ -242,14 +197,6 @@ public class JdbcRegionRepository implements RegionRepository {
 
         this.namedParameterJdbcTemplate.update("DELETE FROM region WHERE name=:region",
                 parameters);
-    }
-
-    private List<String> listCityGroupNames() {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        return namedParameterJdbcTemplate.queryForList(
-                "SELECT name FROM city_group ORDER BY name",
-                parameters,
-                String.class);
     }
 
     private Set<String> listCityNames(Collection<String> groupNames) {

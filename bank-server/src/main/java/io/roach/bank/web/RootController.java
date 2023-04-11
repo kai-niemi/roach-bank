@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/")
@@ -24,8 +23,8 @@ public class RootController {
     @GetMapping
     @TransactionBoundary
     public String homePage(@RequestParam(value = "region", required = false) String region,
+                           @RequestParam(value = "limit", defaultValue = "10") int limit,
                            @ModelAttribute ViewModel viewModel,
-                           RedirectAttributes redirectAttributes,
                            Model model) {
 
         if (viewModel == null) {
@@ -33,11 +32,8 @@ public class RootController {
         }
 
         String gatewayRegion = metadataRepository.getGatewayRegion();
-        if (region == null) {
-            redirectAttributes.addAttribute("region", gatewayRegion);
-            return "redirect:/";
-        }
 
+        viewModel.setLimit(limit);
         viewModel.setViewRegion(region);
         viewModel.setViewingGatewayRegion(gatewayRegion.equalsIgnoreCase(region));
         viewModel.setGatewayRegion(gatewayRegion);

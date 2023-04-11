@@ -8,7 +8,6 @@ import io.roach.bank.repository.RegionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.StringUtils;
@@ -105,7 +104,7 @@ public class MultiRegionController {
 
     @PutMapping(value = "/primary/{region}")
     public ResponseEntity<MessageModel> setPrimaryRegion(@PathVariable("region") String region) {
-        Region r = metadataRepository.getRegionByName(region);
+        Region r = metadataRepository.getOrCreateRegionByName(region);
         if (r == null) {
             throw new ObjectRetrievalFailureException(Region.class, region);
         }
@@ -120,7 +119,7 @@ public class MultiRegionController {
 
     @PutMapping(value = "/secondary/{region}")
     public ResponseEntity<MessageModel> setSecondaryRegion(@PathVariable("region") String region) {
-        Region r = metadataRepository.getRegionByName(region);
+        Region r = metadataRepository.getOrCreateRegionByName(region);
         if (r == null) {
             throw new ObjectRetrievalFailureException(Region.class, region);
         }
