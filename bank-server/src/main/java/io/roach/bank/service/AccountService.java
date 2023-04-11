@@ -14,7 +14,7 @@ import io.roach.bank.domain.Account;
 public interface AccountService {
     Account createAccount(Account account);
 
-    List<UUID> createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize);
+    List<UUID> createAccountBatch(Supplier<Account> factory, int batchSize);
 
     List<Account> findAccountsByCity(Set<String> cities, int limit);
 

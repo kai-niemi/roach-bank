@@ -29,9 +29,6 @@ public class AccountBatchForm extends RepresentationModel<AccountBatchForm> {
     private String currency;
 
     @NotNull
-    private Integer numAccounts;
-
-    @NotNull
     private Integer batchSize;
 
     public String getCity() {
@@ -64,14 +61,6 @@ public class AccountBatchForm extends RepresentationModel<AccountBatchForm> {
 
     public void setCurrency(String currency) {
         this.currency = currency;
-    }
-
-    public Integer getNumAccounts() {
-        return numAccounts;
-    }
-
-    public void setNumAccounts(Integer numAccounts) {
-        this.numAccounts = numAccounts;
     }
 
     public Integer getBatchSize() {

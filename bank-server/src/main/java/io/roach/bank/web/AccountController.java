@@ -1,13 +1,13 @@
 package io.roach.bank.web;
 
-import io.roach.bank.api.*;
-import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.RegionRepository;
-import io.roach.bank.service.AccountService;
-import io.roach.bank.web.support.FollowLocation;
-import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +32,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.roach.bank.api.AccountBatchForm;
+import io.roach.bank.api.AccountForm;
+import io.roach.bank.api.AccountModel;
+import io.roach.bank.api.AccountType;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
+import io.roach.bank.api.support.CockroachFacts;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.service.AccountService;
+import io.roach.bank.web.support.FollowLocation;
+import jakarta.validation.Valid;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/api/account")
@@ -225,11 +244,10 @@ public class AccountController {
         form.setPrefix("");
         form.setBalance("50000.00");
         form.setCurrency("USD");
-        form.setNumAccounts(1024);
         form.setBatchSize(128);
 
         form.add(Affordances.of(linkTo(methodOn(getClass()).getAccountBatchForm()).withSelfRel()
-                        .andAffordance(afford(methodOn(getClass()).createBatchAccounts(null))))
+                        .andAffordance(afford(methodOn(getClass()).createAccountBatch(null))))
                 .toLink());
 
         return ResponseEntity.ok(form);
@@ -239,7 +257,7 @@ public class AccountController {
 
     @PostMapping(value = "/batch/form")
     @TransactionBoundary
-    public HttpEntity<?> createBatchAccounts(@Valid @RequestBody AccountBatchForm form) {
+    public HttpEntity<?> createAccountBatch(@Valid @RequestBody AccountBatchForm form) {
         final Money money = Money.of(form.getBalance(), form.getCurrency());
 
         List<UUID> ids = accountService.createAccountBatch(() -> Account.builder()
@@ -250,7 +268,7 @@ public class AccountController {
                         .withBalance(money)
                         .withAccountType(AccountType.ASSET)
                         .build(),
-                form.getNumAccounts(), form.getBatchSize());
+                form.getBatchSize());
 
         List<Link> links = new ArrayList<>();
         ids.forEach(id -> links.add(linkTo(methodOn(getClass())

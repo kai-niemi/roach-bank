@@ -16,7 +16,7 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.command.support.BankClient;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_LIST_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
@@ -27,7 +27,7 @@ import static io.roach.bank.client.command.Constants.ACCOUNT_PAGE_MODEL_PTR;
 @ShellCommandGroup(Constants.CONFIG_COMMANDS)
 public class ListAccounts extends AbstractCommand {
     @Autowired
-    private RestCommands restCommands;
+    private BankClient bankClient;
 
     @ShellMethod(value = "List accounts using pagination", key = {"list-accounts"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
@@ -37,7 +37,7 @@ public class ListAccounts extends AbstractCommand {
         parameters.put("page", page);
         parameters.put("size", pageSize);
 
-        PagedModel<AccountModel> accountPage = restCommands.fromRoot()
+        PagedModel<AccountModel> accountPage = bankClient.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_LIST_REL))
                 .withTemplateParameters(parameters)
@@ -82,22 +82,22 @@ public class ListAccounts extends AbstractCommand {
                     switch (s.next()) {
                         case "N":
                         case "n":
-                            accountPage = restCommands.follow(accountPage.getNextLink())
+                            accountPage = bankClient.follow(accountPage.getNextLink())
                                     .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "P":
                         case "p":
-                            accountPage = restCommands.follow(accountPage.getPreviousLink())
+                            accountPage = bankClient.follow(accountPage.getPreviousLink())
                                     .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "F":
                         case "f":
-                            accountPage = restCommands.follow(accountPage.getLink(IanaLinkRelations.FIRST))
+                            accountPage = bankClient.follow(accountPage.getLink(IanaLinkRelations.FIRST))
                                     .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "L":
                         case "l":
-                            accountPage = restCommands.follow(accountPage.getLink(IanaLinkRelations.LAST))
+                            accountPage = bankClient.follow(accountPage.getLink(IanaLinkRelations.LAST))
                                     .toObject(ACCOUNT_PAGE_MODEL_PTR);
                             break innner_loop;
                         case "C":

@@ -12,7 +12,7 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.command.support.BankClient;
 import io.roach.bank.client.command.support.ThreadPoolStats;
 
 import static io.roach.bank.api.LinkRelations.*;
@@ -25,12 +25,12 @@ public class ResourcePools extends AbstractCommand {
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
-    private RestCommands restCommands;
+    private BankClient bankClient;
 
     @ShellMethod(value = "Get server connection pool size", key = {"get-pool-size", "gps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getPoolSize() {
-        ResponseEntity<String> configResponse = restCommands.fromRoot()
+        ResponseEntity<String> configResponse = bankClient.fromRoot()
                 .follow(withCurie(ADMIN_REL))
                 .follow(withCurie(POOL_SIZE_REL))
                 .toEntity(String.class);
@@ -45,7 +45,7 @@ public class ResourcePools extends AbstractCommand {
     ) {
         console.successf("Setting connection pool size to %d", size);
 
-        Link submitLink = restCommands.fromRoot()
+        Link submitLink = bankClient.fromRoot()
                 .follow(withCurie(ADMIN_REL))
                 .follow(withCurie(POOL_SIZE_REL))
                 .asLink();
@@ -53,7 +53,7 @@ public class ResourcePools extends AbstractCommand {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri())
                 .replaceQueryParam("size", size);
 
-        ResponseEntity<String> response = restCommands.post(Link.of(builder.build().toUriString()));
+        ResponseEntity<String> response = bankClient.post(Link.of(builder.build().toUriString()));
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             console.successf("Unexpected HTTP status: %s", response.toString());
@@ -63,7 +63,7 @@ public class ResourcePools extends AbstractCommand {
     @ShellMethod(value = "Get server connection pool config", key = {"get-pool-config", "gpc"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getPoolConfig() {
-        ResponseEntity<String> response = restCommands.fromRoot()
+        ResponseEntity<String> response = bankClient.fromRoot()
                 .follow(withCurie(ADMIN_REL))
                 .follow(withCurie(POOL_CONFIG_REL))
                 .toEntity(String.class);

@@ -150,6 +150,7 @@ public class MultiRegionController {
             logger.warn("Expected at least 3 regions - found {}", regions.size());
         }
 
+        multiRegionRepository.setPrimaryRegion(regions.iterator().next());
         multiRegionRepository.addDatabaseRegions(regions);
         multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
         multiRegionRepository.addRegionalByRowTable("account");

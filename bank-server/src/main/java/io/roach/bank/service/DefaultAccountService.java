@@ -28,8 +28,8 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    public List<UUID> createAccountBatch(Supplier<Account> factory, int numAccounts, int batchSize) {
-        return accountRepository.createAccounts(factory, numAccounts, batchSize);
+    public List<UUID> createAccountBatch(Supplier<Account> factory, int batchSize) {
+        return accountRepository.createAccounts(factory, batchSize);
     }
 
     @Override

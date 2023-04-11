@@ -20,7 +20,7 @@ import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.command.support.ExecutorTemplate;
-import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.command.support.BankClient;
 import io.roach.bank.client.command.support.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.withCurie;
@@ -29,7 +29,7 @@ import static io.roach.bank.api.LinkRelations.withCurie;
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class Balance extends AbstractCommand {
     @Autowired
-    private RestCommands restCommands;
+    private BankClient bankClient;
 
     @Autowired
     private ExecutorTemplate executorTemplate;
@@ -49,12 +49,12 @@ public class Balance extends AbstractCommand {
 
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
-            regionSet.add(restCommands. getGatewayRegion());
+            regionSet.add(bankClient. getGatewayRegion());
             console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
-        Map<String, List<AccountModel>> accounts = restCommands.getTopAccounts(regionSet, limit);
+        Map<String, List<AccountModel>> accounts = bankClient.getTopAccounts(regionSet, limit);
         if (accounts.isEmpty()) {
             logger.warn("No cities found matching region(s): {}", regionSet);
         }
@@ -70,7 +70,7 @@ public class Balance extends AbstractCommand {
 
             IntStream.rangeClosed(1, concurrency).forEach(value -> {
                 executorTemplate.runAsync(city + " (balance)",
-                        () -> restCommands.get(RandomData.selectRandom(links)),
+                        () -> bankClient.get(RandomData.selectRandom(links)),
                         DurationFormat.parseDuration(duration));
             });
         });

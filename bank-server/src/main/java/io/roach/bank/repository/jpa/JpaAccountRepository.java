@@ -1,13 +1,14 @@
 package io.roach.bank.repository.jpa;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.AccountRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import jakarta.persistence.Tuple;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -18,10 +19,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.AccountRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -34,12 +39,9 @@ public class JpaAccountRepository implements AccountRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<UUID> createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
+    public List<UUID> createAccounts(Supplier<Account> factory, int batchSize) {
         List<UUID> ids = new ArrayList<>();
-        IntStream.rangeClosed(1, numAccounts).forEach(value -> {
-            if (value > 0 && value % batchSize == 0) {
-                accountRepository.flush();
-            }
+        IntStream.rangeClosed(1, batchSize).forEach(value -> {
             Account account = factory.get();
             accountRepository.save(account);
             ids.add(account.getId());

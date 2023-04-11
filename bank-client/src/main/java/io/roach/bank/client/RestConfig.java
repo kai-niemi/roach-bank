@@ -17,7 +17,7 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.command.support.BankClient;
 
 @Configuration
 @EnableHypermediaSupport(type = {
@@ -60,7 +60,7 @@ public class RestConfig implements RestTemplateCustomizer {
     }
 
     @Bean
-    public RestCommands restCommands(RestTemplate restTemplate) {
-        return new RestCommands(restTemplate);
+    public BankClient restCommands(RestTemplate restTemplate) {
+        return new BankClient(restTemplate);
     }
 }

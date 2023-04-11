@@ -15,7 +15,7 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.LinkRelations;
-import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.command.support.BankClient;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_SUMMARY_REL;
 import static io.roach.bank.api.LinkRelations.REPORTING_REL;
@@ -25,7 +25,7 @@ import static io.roach.bank.api.LinkRelations.TRANSACTION_SUMMARY_REL;
 @ShellCommandGroup(Constants.REPORTING_COMMANDS)
 public class Report extends AbstractCommand {
     @Autowired
-    private RestCommands restCommands;
+    private BankClient bankClient;
 
     @ShellMethod(value = "Report account summary", key = {"report-accounts", "ra"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
@@ -36,12 +36,12 @@ public class Report extends AbstractCommand {
 
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
-            regionSet.add(restCommands.getGatewayRegion());
+            regionSet.add(bankClient.getGatewayRegion());
             console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
-        ResponseEntity<List> accountSummary = restCommands.fromRoot()
+        ResponseEntity<List> accountSummary = bankClient.fromRoot()
                 .follow(LinkRelations.withCurie(REPORTING_REL))
                 .follow(LinkRelations.withCurie(ACCOUNT_SUMMARY_REL))
                 .withTemplateParameters(parameters)
@@ -59,12 +59,12 @@ public class Report extends AbstractCommand {
 
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
-            regionSet.add(restCommands.getGatewayRegion());
+            regionSet.add(bankClient.getGatewayRegion());
             console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
-        ResponseEntity<List> transactionSummary = restCommands.fromRoot()
+        ResponseEntity<List> transactionSummary = bankClient.fromRoot()
                 .follow(LinkRelations.withCurie(REPORTING_REL))
                 .follow(LinkRelations.withCurie(TRANSACTION_SUMMARY_REL))
                 .withTemplateParameters(parameters)

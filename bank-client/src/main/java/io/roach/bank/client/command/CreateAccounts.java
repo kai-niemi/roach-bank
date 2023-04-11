@@ -15,7 +15,7 @@ import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.AccountBatchForm;
 import io.roach.bank.client.command.support.ExecutorTemplate;
-import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.command.support.BankClient;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_BATCH_FORM_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
@@ -25,7 +25,7 @@ import static io.roach.bank.api.LinkRelations.withCurie;
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class CreateAccounts extends AbstractCommand {
     @Autowired
-    private RestCommands restCommands;
+    private BankClient bankClient;
 
     @Autowired
     private ExecutorTemplate executorTemplate;
@@ -33,7 +33,7 @@ public class CreateAccounts extends AbstractCommand {
     @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void accounts(
-            @ShellOption(help = "number of accounts", defaultValue = "50_000") String totalAccounts,
+            @ShellOption(help = "number of accounts per city", defaultValue = "50_000") String accounts,
             @ShellOption(help = "batch size", defaultValue = "128") int batchSize,
             @ShellOption(help = "initial balance per account", defaultValue = "25000.00") String balance,
             @ShellOption(help = "account currency", defaultValue = "USD") String currency,
@@ -44,24 +44,23 @@ public class CreateAccounts extends AbstractCommand {
 
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
-            regionSet.add(restCommands.getGatewayRegion());
+            regionSet.add(bankClient.getGatewayRegion());
             console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
-        final Collection<String> cities = restCommands.getRegionCities(regionSet);
+        final Collection<String> cities = bankClient.getRegionCities(regionSet);
 
-        logger.info("Cities found matching region(s) {}: {}", regionSet, cities);
+        logger.info("Found {} cities: {}", cities.size(), cities);
 
-        final Link submitLink = restCommands.fromRoot()
+        final Link submitLink = bankClient.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
                 .follow(withCurie(ACCOUNT_BATCH_FORM_REL))
                 .asLink();
 
         final AtomicInteger batchNumber = new AtomicInteger();
 
-        final int totAccounts = Integer.parseInt(totalAccounts.replace("_", ""));
-        final int totBatches = Math.max(1, totAccounts / batchSize / cities.size());
+        final int numAccounts = Integer.parseInt(accounts.replace("_", ""));
 
         for (String city : cities) {
             Runnable worker = () -> {
@@ -70,19 +69,18 @@ public class CreateAccounts extends AbstractCommand {
                 form.setPrefix("" + batchNumber.incrementAndGet());
                 form.setBalance(balance);
                 form.setCurrency(currency);
-                form.setNumAccounts(totAccounts);
                 form.setBatchSize(batchSize);
 
-                ResponseEntity<String> response = restCommands.post(submitLink, form, String.class);
+                ResponseEntity<String> response = bankClient.post(submitLink, form, String.class);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     logger.warn("Unexpected HTTP status: {}", response);
                 }
             };
 
-            executorTemplate.runAsync(city + " (accounts)", worker, totBatches);
+            logger.info("Creating {} accounts for city '{}' using {} batches",
+                    numAccounts, city, numAccounts / batchSize);
 
-            logger.info("Creating {} accounts for city '{}' in {} batches",
-                    totAccounts, city, totBatches);
+            executorTemplate.runAsync(city + " (accounts)", worker, numAccounts / batchSize);
         }
     }
 }

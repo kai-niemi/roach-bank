@@ -1,10 +1,18 @@
 package io.roach.bank.repository.jdbc;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.AccountType;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.AccountRepository;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
+
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -23,14 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import javax.sql.DataSource;
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.AccountType;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.AccountRepository;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -66,38 +71,35 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<UUID> createAccounts(Supplier<Account> factory, int numAccounts, int batchSize) {
+    public List<UUID> createAccounts(Supplier<Account> factory, int batchSize) {
         Assert.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Expected no transaction");
-
         List<UUID> ids = new ArrayList<>();
+        // Implict transaction
+        jdbcTemplate.batchUpdate(
+                "INSERT INTO account "
+                        + "(id,city, balance, currency, name, description, type, closed, allow_negative) "
+                        + "VALUES(?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        Account account = factory.get();
+                        int idx = 1;
+                        ps.setObject(idx++, account.getId());
+                        ps.setString(idx++, account.getCity());
+                        ps.setBigDecimal(idx++, account.getBalance().getAmount());
+                        ps.setString(idx++, account.getBalance().getCurrency().getCurrencyCode());
+                        ps.setString(idx++, account.getName());
+                        ps.setString(idx++, account.getDescription());
+                        ps.setString(idx++, account.getAccountType().getCode());
+                        ps.setBoolean(idx++, account.isClosed());
+                        ps.setInt(idx, account.getAllowNegative());
+                        ids.add(account.getId());
+                    }
 
-        // Implict transactions
-        IntStream.rangeClosed(1, numAccounts / batchSize)
-                .forEach(batch -> jdbcTemplate.batchUpdate(
-                        "INSERT INTO account "
-                                + "(id,city, balance, currency, name, description, type, closed, allow_negative) "
-                                + "VALUES(?,?,?,?,?,?,?,?,?)", new BatchPreparedStatementSetter() {
-                            @Override
-                            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                                Account account = factory.get();
-                                int idx = 1;
-                                ps.setObject(idx++, account.getId());
-                                ps.setString(idx++, account.getCity());
-                                ps.setBigDecimal(idx++, account.getBalance().getAmount());
-                                ps.setString(idx++, account.getBalance().getCurrency().getCurrencyCode());
-                                ps.setString(idx++, account.getName());
-                                ps.setString(idx++, account.getDescription());
-                                ps.setString(idx++, account.getAccountType().getCode());
-                                ps.setBoolean(idx++, account.isClosed());
-                                ps.setInt(idx, account.getAllowNegative());
-                                ids.add(account.getId());
-                            }
-
-                            @Override
-                            public int getBatchSize() {
-                                return batchSize;
-                            }
-                        }));
+                    @Override
+                    public int getBatchSize() {
+                        return batchSize;
+                    }
+                });
         return ids;
     }
 

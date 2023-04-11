@@ -21,7 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.client.command.support.Console;
-import io.roach.bank.client.command.support.RestCommands;
+import io.roach.bank.client.command.support.BankClient;
 import io.roach.bank.client.command.support.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
@@ -35,7 +35,7 @@ public class Admin implements Quit.Command {
     private ConfigurableApplicationContext applicationContext;
 
     @Autowired
-    private RestCommands restCommands;
+    private BankClient bankClient;
 
     @Autowired
     private Console console;
@@ -88,14 +88,14 @@ public class Admin implements Quit.Command {
     @ShellMethod(value = "Toggle SQL trace logging (server side)", key = {"trace"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void toggleSqlTraceLogging() {
-        Link submitLink = restCommands.fromRoot()
+        Link submitLink = bankClient.fromRoot()
                 .follow(withCurie(ADMIN_REL))
                 .follow(withCurie(TOGGLE_TRACE_LOG))
                 .asLink();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri());
 
-        ResponseEntity<MessageModel> response = restCommands
+        ResponseEntity<MessageModel> response = bankClient
                 .post(Link.of(builder.build().toUriString()), MessageModel.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {

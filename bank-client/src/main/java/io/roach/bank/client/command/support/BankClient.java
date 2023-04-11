@@ -19,14 +19,14 @@ import java.util.*;
 
 import static io.roach.bank.api.LinkRelations.*;
 
-public class RestCommands {
+public class BankClient {
     private static final List<MediaType> ACCEPT_TYPES = Arrays.asList(MediaTypes.HAL_JSON);
 
     private final RestTemplate restTemplate;
 
     private URI baseUri;
 
-    public RestCommands(RestTemplate restTemplate) {
+    public BankClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -77,8 +77,9 @@ public class RestCommands {
                 new TypeReferences.CollectionModelType<>() {};
 
         CollectionModel<Region> result = fromRoot()
+                .follow(LinkRelations.withCurie(CONFIG_INDEX_REL))
                 .follow(LinkRelations.withCurie(CONFIG_REGION_REL))
-                .follow(LinkRelations.withCurie(REGION_LIST_REL))
+//                .follow(LinkRelations.withCurie(REGION_LIST_REL))
                 .toObject(collectionModelType);
 
         return result.getContent();
@@ -87,6 +88,7 @@ public class RestCommands {
     @SuppressWarnings("unchecked")
     public String getGatewayRegion() {
         Map<String, String> rv = fromRoot()
+                .follow(LinkRelations.withCurie(CONFIG_INDEX_REL))
                 .follow(LinkRelations.withCurie(CONFIG_REGION_REL))
                 .follow(LinkRelations.withCurie(GATEWAY_REGION_REL))
                 .toObject(Map.class);
@@ -102,6 +104,7 @@ public class RestCommands {
                 new TypeReferences.CollectionModelType<>() {};
 
         CollectionModel<String> rv = fromRoot()
+                .follow(LinkRelations.withCurie(CONFIG_INDEX_REL))
                 .follow(LinkRelations.withCurie(CONFIG_CITY_GROUP_REL))
                 .follow(LinkRelations.withCurie(CITY_LIST_REL))
                 .withTemplateParameters(parameters)

@@ -17,7 +17,7 @@ import io.roach.bank.domain.Account;
 public interface AccountRepository {
     Account createAccount(Account account);
 
-    List<UUID> createAccounts(Supplier<Account> factory, int numAccounts, int batchSize);
+    List<UUID> createAccounts(Supplier<Account> factory, int batchSize);
 
     Account getAccountReferenceById(UUID id);
 
