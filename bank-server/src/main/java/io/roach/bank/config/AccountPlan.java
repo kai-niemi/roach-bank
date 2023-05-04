@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 public class AccountPlan {
     private boolean clearAtStartup;
 
-    private String region;
-
     private int accountsPerCity;
 
     private String initialBalance;
@@ -22,14 +20,6 @@ public class AccountPlan {
 
     public void setClearAtStartup(boolean clearAtStartup) {
         this.clearAtStartup = clearAtStartup;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
     }
 
     public int getAccountsPerCity() {
@@ -60,7 +50,6 @@ public class AccountPlan {
     public String toString() {
         return "AccountPlan{" +
                 "clearAtStartup=" + clearAtStartup +
-                ", region='" + region + '\'' +
                 ", accountsPerCity=" + accountsPerCity +
                 ", initialBalance='" + initialBalance + '\'' +
                 ", currency='" + currency + '\'' +

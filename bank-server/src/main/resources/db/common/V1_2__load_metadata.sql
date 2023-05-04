@@ -79,7 +79,7 @@ VALUES
        ('azure-canadacentral', string_to_array('us-central-1',',')),
        ('azure-canadaeast', string_to_array('us-east-1',',')),
        ('azure-uksouth', string_to_array('eu-west-1',',')),
-       ('azure-ukwest', string_to_array('eu-west-1',',')),
+       ('azure-ukwest', string_to_array('eu-west-2',',')),
        ('azure-westcentralus', string_to_array('us-central-1',',')),
        ('azure-westus2', string_to_array('us-west-2',',')),
        ('azure-koreacentral', string_to_array('ap-northeast-1',',')),

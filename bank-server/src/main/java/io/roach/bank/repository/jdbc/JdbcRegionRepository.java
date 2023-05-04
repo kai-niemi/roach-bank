@@ -72,14 +72,9 @@ public class JdbcRegionRepository implements RegionRepository {
         Set<String> cities = new TreeSet<>();
 
         if (regions.isEmpty()) {
-            listRegions().forEach(region -> {
-                cities.addAll(region.getCities());
-            });
+            listRegions().forEach(region -> cities.addAll(region.getCities()));
         } else {
-            regions.forEach(region -> {
-                Region r = findRegionByName(region);
-                cities.addAll(r.getCities());
-            });
+            regions.forEach(region -> cities.addAll(findRegionByName(region).getCities()));
         }
 
         return cities;
@@ -90,11 +85,11 @@ public class JdbcRegionRepository implements RegionRepository {
         try {
             return findRegionByName(region);
         } catch (EmptyResultDataAccessException e) {
-            Region defaultRegion = findRegionByName("default");
+            List<String> groups = findRegionByName("default").getCityGroups();
             return createRegion(new Region()
                     .setName(region)
-                    .setCityGroups(defaultRegion.getCityGroups())
-            );
+                    .setCityGroups(groups)
+                    .setCities(listCityNames(groups)));
         }
     }
 
