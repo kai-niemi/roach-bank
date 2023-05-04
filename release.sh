@@ -54,7 +54,7 @@ pomVersion=$(echo 'VERSION=${project.version}' | mvn help:evaluate | grep '^VERS
 # The version to be released
 releaseVersion="$(fn_filter_version ${pomVersion})"
 # The next development version
-developmentVersion="$(fn_advance_version ${pomVersion}).BUILD-SNAPSHOT"
+developmentVersion="$(fn_advance_version ${pomVersion})-SNAPSHOT"
 
 fn_print_info "Git branch: $(git rev-parse --abbrev-ref HEAD)"
 fn_print_info "POM version is ${pomVersion}"
