@@ -15,7 +15,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import io.roach.bank.client.command.support.BankClient;
 import io.roach.bank.client.command.support.ThreadPoolStats;
 
-import static io.roach.bank.api.LinkRelations.*;
+import static io.roach.bank.api.LinkRelations.ADMIN_REL;
+import static io.roach.bank.api.LinkRelations.POOL_CONFIG_REL;
+import static io.roach.bank.api.LinkRelations.POOL_SIZE_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.POOL_COMMANDS)
@@ -76,6 +79,8 @@ public class ResourcePools extends AbstractCommand {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "-1") int size) {
         size = size > 0 ? size : Runtime.getRuntime().availableProcessors() * 8;
+        threadPoolTaskExecutor.setMaxPoolSize(
+                Math.max(threadPoolTaskExecutor.getMaxPoolSize(), size));
         threadPoolTaskExecutor.setCorePoolSize(size);
         console.infof("Thread pool size set to %d", size);
     }

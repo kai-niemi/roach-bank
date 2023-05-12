@@ -10,6 +10,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.hateoas.server.core.TypeReferences;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -53,11 +54,27 @@ public class BankClient {
         return restTemplate.postForEntity(link.getTemplate().expand(), null, String.class);
     }
 
-    public <T> ResponseEntity<T> post(Link link, Class<T> reponseType) {
+    public <T> ResponseEntity<T> post(Link link, Class<T> responseType) {
         return restTemplate.postForEntity(
                 link.getTemplate().expand(),
                 null,
-                reponseType);
+                responseType);
+    }
+
+    public <T> ResponseEntity<T> put(Link link, Class<T> responseType) {
+        return restTemplate.exchange(
+                link.getTemplate().expand(),
+                HttpMethod.PUT,
+                null,
+                responseType);
+    }
+
+    public <T> ResponseEntity<T> delete(Link link, Class<T> responseType) {
+        return restTemplate.exchange(
+                link.getTemplate().expand(),
+                HttpMethod.DELETE,
+                null,
+                responseType);
     }
 
     public <T> ResponseEntity<T> post(Link link, Object request, Class<T> reponseType) {

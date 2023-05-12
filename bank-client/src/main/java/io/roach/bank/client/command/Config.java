@@ -1,13 +1,22 @@
 package io.roach.bank.client.command;
 
-import io.roach.bank.client.command.support.BankClient;
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
-import org.springframework.shell.standard.*;
+import org.springframework.shell.standard.ShellCommandGroup;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.StringUtils;
 
-import static io.roach.bank.api.LinkRelations.*;
+import io.roach.bank.client.command.support.BankClient;
+
+import static io.roach.bank.api.LinkRelations.CONFIG_INDEX_REL;
+import static io.roach.bank.api.LinkRelations.CONFIG_MULTI_REGION_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.CONFIG_COMMANDS)
@@ -49,6 +58,78 @@ public class Config extends AbstractCommand {
                 .asLink();
 
         ResponseEntity<String> response = bankClient.post(submitLink, String.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.warn("Unexpected HTTP status: {}", response);
+        }
+
+        logger.info("{}", response);
+    }
+
+    @ShellMethod(value = "Set primary database region", key = {"primary-region", "pr"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void primaryRegion(@ShellOption(help = "region name", defaultValue = "",
+            valueProvider = RegionProvider.class) String region) {
+        final Link submitLink = bankClient.fromRoot()
+                .follow(withCurie(CONFIG_INDEX_REL))
+                .follow(withCurie(CONFIG_MULTI_REGION_REL))
+                .follow(withCurie("primary-region"))
+                .withTemplateParameters(Collections.singletonMap("region", region))
+                .asLink();
+
+        ResponseEntity<String> response = bankClient.put(submitLink, String.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.warn("Unexpected HTTP status: {}", response);
+        }
+
+        logger.info("{}", response);
+    }
+
+    @ShellMethod(value = "Set secondary database region", key = {"secondary-region", "sr"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void secondaryRegion(@ShellOption(help = "region name", defaultValue = "",
+            valueProvider = RegionProvider.class) String region) {
+        final Link submitLink = bankClient.fromRoot()
+                .follow(withCurie(CONFIG_INDEX_REL))
+                .follow(withCurie(CONFIG_MULTI_REGION_REL))
+                .follow(withCurie("secondary-region"))
+                .withTemplateParameters(Collections.singletonMap("region", region))
+                .asLink();
+
+        ResponseEntity<String> response = bankClient.put(submitLink, String.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.warn("Unexpected HTTP status: {}", response);
+        }
+
+        logger.info("{}", response);
+    }
+
+    @ShellMethod(value = "Add database regions", key = {"add-regions", "ar"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void addRegions() {
+        final Link submitLink = bankClient.fromRoot()
+                .follow(withCurie(CONFIG_INDEX_REL))
+                .follow(withCurie(CONFIG_MULTI_REGION_REL))
+                .follow(withCurie("add-regions"))
+                .asLink();
+
+        ResponseEntity<String> response = bankClient.put(submitLink, String.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.warn("Unexpected HTTP status: {}", response);
+        }
+
+        logger.info("{}", response);
+    }
+
+    @ShellMethod(value = "Drop database regions", key = {"drop-regions", "dr"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void dropRegions() {
+        final Link submitLink = bankClient.fromRoot()
+                .follow(withCurie(CONFIG_INDEX_REL))
+                .follow(withCurie(CONFIG_MULTI_REGION_REL))
+                .follow(withCurie("drop-regions"))
+                .asLink();
+
+        ResponseEntity<String> response = bankClient.delete(submitLink, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             logger.warn("Unexpected HTTP status: {}", response);
         }
