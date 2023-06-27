@@ -13,17 +13,7 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-  jackson:
-    serialization:
-      indent_output: true
-      write_dates_as_timestamps: false
-    deserialization:
-      fail_on_unknown_properties: false
-      fail_on_ignored_properties: false
-    default-property-inclusion: non_null
-    locale: en_US
-  mvc:
-    throw-exception-if-no-handler-found: true
+
   thymeleaf:
     cache: false
     mode: HTML
@@ -148,8 +138,8 @@ roachbank:
   report-query-timeout: 120
   # SELECT using '.. FOR UPDATE' locks
   select-for-update: false
-  # Enable alternative low-contention transfer workflow (no running balance)
-  alternative-workflow: false
+  # Update running balance (more SQL traffic + contention)
+  update-running-balance: false
   # Account plan to run workload against
   account-plan:
     # (CAUTION) Clear accounts and transactions at startup

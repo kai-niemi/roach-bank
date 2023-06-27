@@ -50,7 +50,7 @@ public class ServerApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        accountPlanBuilder.setupAccountPlan();
+        accountPlanBuilder.buildAccountPlan();
         logger.info("RoachBank is open for business - lets invent some $$");
     }
 }

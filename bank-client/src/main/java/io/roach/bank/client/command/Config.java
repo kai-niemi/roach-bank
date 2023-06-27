@@ -3,6 +3,7 @@ package io.roach.bank.client.command;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ansi.AnsiColor;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.shell.standard.ShellCommandGroup;
@@ -10,7 +11,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.util.StringUtils;
 
 import io.roach.bank.client.command.support.BankClient;
 
@@ -27,28 +27,29 @@ public class Config extends AbstractCommand {
     @ShellMethod(value = "Print gateway region", key = {"gateway-region", "gr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void printGatewayRegion() {
-        console.successf("%s", bankClient.getGatewayRegion());
+        console.infof("%s", bankClient.getGatewayRegion());
     }
 
     @ShellMethod(value = "List region", key = {"list-regions", "lr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegions() {
         bankClient.getRegions().forEach(r -> {
-            console.successf("%s - groups: %s cities: %s", r.getName(), r.getCityGroups(), r.getCities());
+            console.infof("Region: %s\n\t City groups: %s\n\tCities: %s\n",
+                    r.getName(), r.getCityGroups(), r.getCities());
         });
     }
 
     @ShellMethod(value = "List region cities", key = {"list-cities", "lc"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegionCities(
-            @ShellOption(help = "region names (gateway region if omitted)", defaultValue = "",
-                    valueProvider = RegionProvider.class) String regions) {
-        bankClient.getRegionCities(StringUtils.commaDelimitedListToSet(regions)).forEach(s -> {
-            console.successf("%s", s);
-        });
+            @ShellOption(help = "region name (gateway region if omitted)", defaultValue = "",
+                    valueProvider = RegionProvider.class) String region) {
+        console.textf(AnsiColor.BRIGHT_CYAN, "Region cities for region '%s'", region);
+        bankClient.getRegionCities(Collections.singleton(region)).forEach(s -> console.infof("%s", s));
     }
 
-    @ShellMethod(value = "Configure table localities for multi-region", key = {"multi-region", "mr"})
+    @ShellMethod(value = "Configure table localities for multi-region",
+            key = {"multi-region", "mr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void configureMultiRegion() {
         final Link submitLink = bankClient.fromRoot()
@@ -67,7 +68,7 @@ public class Config extends AbstractCommand {
 
     @ShellMethod(value = "Set primary database region", key = {"primary-region", "pr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void primaryRegion(@ShellOption(help = "region name", defaultValue = "",
+    public void primaryRegion(@ShellOption(help = "region name",
             valueProvider = RegionProvider.class) String region) {
         final Link submitLink = bankClient.fromRoot()
                 .follow(withCurie(CONFIG_INDEX_REL))
@@ -75,6 +76,8 @@ public class Config extends AbstractCommand {
                 .follow(withCurie("primary-region"))
                 .withTemplateParameters(Collections.singletonMap("region", region))
                 .asLink();
+
+        console.textf(AnsiColor.BRIGHT_CYAN, "Set primary region to '%s'", region);
 
         ResponseEntity<String> response = bankClient.put(submitLink, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
@@ -86,7 +89,7 @@ public class Config extends AbstractCommand {
 
     @ShellMethod(value = "Set secondary database region", key = {"secondary-region", "sr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void secondaryRegion(@ShellOption(help = "region name", defaultValue = "",
+    public void secondaryRegion(@ShellOption(help = "region name",
             valueProvider = RegionProvider.class) String region) {
         final Link submitLink = bankClient.fromRoot()
                 .follow(withCurie(CONFIG_INDEX_REL))
@@ -94,6 +97,8 @@ public class Config extends AbstractCommand {
                 .follow(withCurie("secondary-region"))
                 .withTemplateParameters(Collections.singletonMap("region", region))
                 .asLink();
+
+        console.textf(AnsiColor.BRIGHT_CYAN, "Set secondary region to '%s'", region);
 
         ResponseEntity<String> response = bankClient.put(submitLink, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
@@ -112,6 +117,8 @@ public class Config extends AbstractCommand {
                 .follow(withCurie("add-regions"))
                 .asLink();
 
+        console.textf(AnsiColor.BRIGHT_CYAN, "Add database regions");
+
         ResponseEntity<String> response = bankClient.put(submitLink, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             logger.warn("Unexpected HTTP status: {}", response);
@@ -129,6 +136,8 @@ public class Config extends AbstractCommand {
                 .follow(withCurie("drop-regions"))
                 .asLink();
 
+        console.textf(AnsiColor.BRIGHT_CYAN, "Drop database regions");
+
         ResponseEntity<String> response = bankClient.delete(submitLink, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             logger.warn("Unexpected HTTP status: {}", response);
@@ -136,6 +145,4 @@ public class Config extends AbstractCommand {
 
         logger.info("{}", response);
     }
-
-//    http://localhost:8090/api/config/multiregion/configure
 }

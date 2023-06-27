@@ -35,8 +35,8 @@ public class DefaultTransactionService implements TransactionService {
     @Value("${roachbank.select-for-update}")
     private boolean selectForUpdate;
 
-    @Value("${roachbank.alternative-workflow}")
-    private boolean alternativeWorkflow;
+    @Value("${roachbank.update-running-balance}")
+    private boolean updateRunningBalance;
 
     @Override
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
@@ -66,7 +66,7 @@ public class DefaultTransactionService implements TransactionService {
 
         legs.forEach((accountId, value) -> accountIds.add(accountId));
 
-        if (alternativeWorkflow) {
+        if (updateRunningBalance) {
             legs.forEach((accountId, pair) -> {
                 // Load by reference and mark it to signal lazy-initialized attributes
                 Account account = accountRepository.getAccountReferenceById(accountId);

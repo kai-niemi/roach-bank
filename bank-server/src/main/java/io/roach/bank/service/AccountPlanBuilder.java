@@ -34,7 +34,7 @@ public class AccountPlanBuilder {
     private RegionRepository metadataRepository;
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED) // Implicit
-    public void setupAccountPlan() {
+    public void buildAccountPlan() {
         logger.info(">> Setup account plan: {}", accountPlan);
 
         transactionTemplate.executeWithoutResult(transactionStatus -> {
