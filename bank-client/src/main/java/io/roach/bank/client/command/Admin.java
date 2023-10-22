@@ -49,40 +49,40 @@ public class Admin implements Quit.Command {
     @ShellMethod(value = "Print application uptime")
     public void uptime() {
         long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
-        console.infof("%s", DurationFormat.millisecondsToDisplayString(uptime));
+        console.info("%s", DurationFormat.millisecondsToDisplayString(uptime));
     }
 
     @ShellMethod(value = "Print system information", key = {"system-info", "si"})
     public void systemInfo() {
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-        console.successf(">> OS");
-        console.infof(" Arch: %s | OS: %s | Version: %s", os.getArch(), os.getName(), os.getVersion());
-        console.infof(" Available processors: %d", os.getAvailableProcessors());
-        console.infof(" Load avg: %f", os.getSystemLoadAverage());
+        console.success(">> OS");
+        console.info(" Arch: %s | OS: %s | Version: %s", os.getArch(), os.getName(), os.getVersion());
+        console.info(" Available processors: %d", os.getAvailableProcessors());
+        console.info(" Load avg: %f", os.getSystemLoadAverage());
 
         RuntimeMXBean r = ManagementFactory.getRuntimeMXBean();
-        console.successf(">> Runtime");
-        console.infof(" Uptime: %s", r.getUptime());
-        console.infof(" VM name: %s | Vendor: %s | Version: %s", r.getVmName(), r.getVmVendor(), r.getVmVersion());
+        console.success(">> Runtime");
+        console.info(" Uptime: %s", r.getUptime());
+        console.info(" VM name: %s | Vendor: %s | Version: %s", r.getVmName(), r.getVmVendor(), r.getVmVersion());
 
         ThreadMXBean t = ManagementFactory.getThreadMXBean();
-        console.successf(">> Runtime");
-        console.infof(" Peak threads: %d", t.getPeakThreadCount());
-        console.infof(" Thread #: %d", t.getThreadCount());
-        console.infof(" Total started threads: %d", t.getTotalStartedThreadCount());
+        console.success(">> Runtime");
+        console.info(" Peak threads: %d", t.getPeakThreadCount());
+        console.info(" Thread #: %d", t.getThreadCount());
+        console.info(" Total started threads: %d", t.getTotalStartedThreadCount());
 
         Arrays.stream(t.getAllThreadIds()).sequential().forEach(value -> {
-            console.infof(" Thread (%d): %s %s", value,
+            console.info(" Thread (%d): %s %s", value,
                     t.getThreadInfo(value).getThreadName(),
                     t.getThreadInfo(value).getThreadState().toString()
             );
         });
 
         MemoryMXBean m = ManagementFactory.getMemoryMXBean();
-        console.successf(">> Memory");
-        console.infof(" Heap: %s", m.getHeapMemoryUsage().toString());
-        console.infof(" Non-heap: %s", m.getNonHeapMemoryUsage().toString());
-        console.infof(" Pending GC: %s", m.getObjectPendingFinalizationCount());
+        console.success(">> Memory");
+        console.info(" Heap: %s", m.getHeapMemoryUsage().toString());
+        console.info(" Non-heap: %s", m.getNonHeapMemoryUsage().toString());
+        console.info(" Pending GC: %s", m.getObjectPendingFinalizationCount());
     }
 
     @ShellMethod(value = "Toggle SQL trace logging (server side)", key = {"trace"})
@@ -99,9 +99,9 @@ public class Admin implements Quit.Command {
                 .post(Link.of(builder.build().toUriString()), MessageModel.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            console.successf("Unexpected HTTP status: %s", response.toString());
+            console.success("Unexpected HTTP status: %s", response.toString());
         } else {
-            console.errorf("%s", response.getBody().getMessage());
+            console.error("%s", response.getBody().getMessage());
         }
     }
 }

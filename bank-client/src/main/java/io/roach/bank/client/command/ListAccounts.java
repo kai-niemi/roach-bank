@@ -45,9 +45,9 @@ public class ListAccounts extends AbstractCommand {
 
         outer_loop:
         for (; ; ) {
-            console.infof(">> Page %s", Objects.requireNonNull(accountPage).getMetadata());
+            console.info(">> Page %s", Objects.requireNonNull(accountPage).getMetadata());
 
-            console.successf("%15s|%10s|%8s|%15s|%10s|%10s| %s",
+            console.success("%15s|%10s|%8s|%15s|%10s|%10s| %s",
                     "Name",
                     "Desc",
                     "Type",
@@ -57,7 +57,7 @@ public class ListAccounts extends AbstractCommand {
                     "Link");
 
             for (AccountModel accountModel : accountPage) {
-                console.successf("%15s|%10s|%8s|%15s|%10s|%10s| %s",
+                console.success("%15s|%10s|%8s|%15s|%10s|%10s| %s",
                         accountModel.getName(),
                         accountModel.getDescription(),
                         accountModel.getAccountType(),
@@ -76,7 +76,7 @@ public class ListAccounts extends AbstractCommand {
 
             innner_loop:
             for (; ; ) {
-                console.infof("%s", sb.toString());
+                console.info("%s", sb.toString());
                 Scanner s = new Scanner(System.in);
                 if (s.hasNext()) {
                     switch (s.next()) {

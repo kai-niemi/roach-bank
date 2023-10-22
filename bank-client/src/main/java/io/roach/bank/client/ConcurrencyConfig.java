@@ -19,7 +19,7 @@ public class ConcurrencyConfig implements AsyncConfigurer {
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setMaxPoolSize(500);
-        executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 20);
+        executor.setCorePoolSize(500);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("workload");
         return executor;

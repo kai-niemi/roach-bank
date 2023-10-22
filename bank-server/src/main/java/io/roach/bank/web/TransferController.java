@@ -1,7 +1,6 @@
 package io.roach.bank.web;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -51,7 +50,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping(value = "/api/transfer")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class TransferFormController {
+public class TransferController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -89,8 +88,10 @@ public class TransferFormController {
         }
 
         TransactionForm.Builder formBuilder = TransactionForm.builder().withUUID(UUID.randomUUID())
-                .withCity(accounts.iterator().next().getCity()).withBookingDate(LocalDate.now())
-                .withTransferDate(LocalDate.now()).withTransactionType("GEN");
+                .withCity(accounts.iterator().next().getCity())
+                .withBookingDate(LocalDate.now())
+                .withTransferDate(LocalDate.now())
+                .withTransactionType("GEN");
 
         AtomicBoolean flip = new AtomicBoolean();
 
@@ -112,25 +113,30 @@ public class TransferFormController {
 
     @PostMapping(value = "/form")
     @TransactionBoundary
-    @Retryable
+    @Retryable(increasePriority = true, retryAttempts = 7, maxBackoff = 10_000)
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
-        UUID idempotencyKey = form.getUuid();
-
         if (form.getAccountLegs().size() % 2 != 0) {
             throw new BadRequestException("Account legs must be a multiple of 2: "
                     + form.getAccountLegs().size());
         }
 
+        final UUID idempotencyKey = form.getUuid();
+
         try {
             Link selfLink = linkTo(methodOn(TransactionController.class)
                     .getTransaction(idempotencyKey)).withSelfRel();
+
             Transaction entity = bankService.createTransaction(idempotencyKey, form);
+
             if (FollowLocation.ofCurrentRequest()) {
-                return ResponseEntity.created(selfLink.toUri()).body(transactionResourceAssembler.toModel(entity));
+                return ResponseEntity.created(selfLink.toUri())
+                        .body(transactionResourceAssembler.toModel(entity));
             }
+
             return ResponseEntity.created(selfLink.toUri()).build();
         } catch (DataIntegrityViolationException e) {
             String msg = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
+
             if (msg.contains("duplicate key value")) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return ResponseEntity.status(HttpStatus.OK)
@@ -141,5 +147,4 @@ public class TransferFormController {
             throw e;
         }
     }
-
 }

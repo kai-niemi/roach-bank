@@ -25,9 +25,9 @@ import io.roach.bank.api.TransactionModel;
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.BankClient;
 import io.roach.bank.client.command.support.DurationFormat;
+import io.roach.bank.client.command.support.ExecutorTemplate;
 
 import static io.roach.bank.api.LinkRelations.TRANSFER_FORM_REL;
 
@@ -59,10 +59,12 @@ public class Transfer extends AbstractCommand {
             @ShellOption(help = "number of worker threads per city",
                     defaultValue = "1") int concurrency,
             @ShellOption(help = "enable smoke test (pass HTTP requests as no-ops server side)",
-                    defaultValue = "false") boolean smokeTest
+                    defaultValue = "false") boolean smokeTest,
+            @ShellOption(help = "update running balance on accounts (more risk for contention)",
+                    defaultValue = "false") boolean updateRunningBalance
     ) {
         if (legs % 2 != 0) {
-            console.warnf("Account legs must be a multiple of 2");
+            console.warn("Account legs must be a multiple of 2");
             return;
         }
 
@@ -71,7 +73,7 @@ public class Transfer extends AbstractCommand {
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
             regionSet.add(bankClient.getGatewayRegion());
-            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+            console.warn("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
@@ -93,12 +95,12 @@ public class Transfer extends AbstractCommand {
             IntStream.rangeClosed(1, concurrency).forEach(value -> {
                 if (iterations > 0) {
                     executorTemplate.runAsync(city + " (transfer)",
-                            () -> transferFunds(transferLink, city, accountModels, amount, legs, smokeTest),
+                            () -> transferFunds(transferLink, city, accountModels, amount, legs, smokeTest, updateRunningBalance),
                             iterations
                     );
                 } else {
                     executorTemplate.runAsync(city + " (transfer)",
-                            () -> transferFunds(transferLink, city, accountModels, amount, legs, smokeTest),
+                            () -> transferFunds(transferLink, city, accountModels, amount, legs, smokeTest, updateRunningBalance),
                             DurationFormat.parseDuration(duration)
                     );
                 }
@@ -111,7 +113,8 @@ public class Transfer extends AbstractCommand {
                                List<AccountModel> accounts,
                                String amount,
                                int legs,
-                               boolean smokeTest) {
+                               boolean smokeTest,
+                               boolean updateRunningBalance) {
         String parts[] = amount.split("-");
         String minAmount = parts.length > 1 ? parts[0] : amount;
         String maxAmount = parts.length > 1 ? parts[1] : amount;
@@ -125,6 +128,10 @@ public class Transfer extends AbstractCommand {
                 .withTransactionType("GEN")
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
+
+        if (updateRunningBalance) {
+            builder.withUpdateRunningBalance();
+        }
 
         if (smokeTest) {
             builder.withSmokeTest();

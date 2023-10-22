@@ -1,8 +1,7 @@
 package io.roach.bank.client.command.support;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,18 +13,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.ansi.AnsiColor;
+
 public class CallMetrics {
     private static String separator(int len) {
         return new String(new char[len]).replace('\0', '-');
     }
 
-    private static final String HEADER_PATTERN = "%-30s %9s %7s %8s %10s %10s %10s %10s %10s %9s %9s";
+    private static final String HEADER_PATTERN = "%-35s %9s %7s %8s %10s %10s %10s %10s %10s %9s %9s";
 
-    private static final String ROW_PATTERN = "%-30s %,9d %7.0f %c%7.1f %10.1f %10.2f %10.2f %10.2f %10.2f %,9d %,9d";
+    private static final String ROW_PATTERN = "%-35s %,9d %7.0f %c%7.1f %10.1f %10.2f %10.2f %10.2f %10.2f %,9d %,9d";
 
-    private static final String FOOTER_PATTERN = "%-30s %,9d %7.0f %c%7.1f %10.1f %10.2f %10.2f %10.2f %10.2f %,9d %,9d";
-
-    public static final int FRAME_SIZE = 200;
+    private static final String FOOTER_PATTERN = "%-35s %,9d %7.0f %c%7.1f %10.1f %10.2f %10.2f %10.2f %10.2f %,9d %,9d";
 
     private final SortedMap<String, Context> metrics = Collections.synchronizedSortedMap(new TreeMap<>());
 
@@ -37,95 +36,65 @@ public class CallMetrics {
         metrics.clear();
     }
 
-    public void reset() {
-        metrics.values().stream().forEach(context -> {
-            context.reset();
-        });
-    }
-
-    public String prettyPrintHeader() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-
-        pw.println();
-        pw.printf(Locale.US,
+    public void prettyPrint(Console console) {
+        console.text(AnsiColor.BRIGHT_WHITE,
                 HEADER_PATTERN,
                 "metric",
                 "threads",
                 "time(s)",
                 "op/s",
                 "op/m",
-                "p50(ms)",
-                "p90(ms)",
-                "p99(ms)",
-                "mean(ms)",
+                "p90",
+                "p99",
+                "p99.9",
+                "mean",
                 "ok",
                 "fail"
         );
-        pw.println();
-        pw.printf(Locale.US,
+        console.text(AnsiColor.BRIGHT_WHITE,
                 HEADER_PATTERN,
-                separator(30),// metric
+                separator(35),// metric
                 separator(9), // threads
                 separator(7), // time
                 separator(8), // ops
                 separator(10), // opm
-                separator(10), // p50
                 separator(10), // p90
                 separator(10), // p99
+                separator(10), // p99.9
                 separator(10), // mean
                 separator(9), // success
                 separator(9) // fail
         );
-        pw.println();
-        return sw.toString();
-    }
 
-    public String prettyPrintBody() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        metrics.forEach((key, value) -> pw.println(value.formatStats()));
-        return sw.toString();
-    }
+        metrics.forEach((key, value) -> console.text(AnsiColor.BRIGHT_GREEN, value.printStats()));
 
-    public String prettyPrintFooter() {
-        // Aggregate
         int concurrencySum = metrics.values().stream().mapToInt(Context::concurrency).sum();
-
         double timeAvg = metrics.values().stream().mapToDouble(Context::executionTimeSeconds).average()
                 .orElse(0);
-
         double opsPerSecSum = metrics.values().stream().mapToDouble(Context::opsPerSec).sum();
         double opsPerMinSum = metrics.values().stream().mapToDouble(Context::opsPerMin).sum();
-
-        double p50 = metrics.values().stream().mapToDouble(Context::p50).average().orElse(0);
         double p90 = metrics.values().stream().mapToDouble(Context::p90).average().orElse(0);
         double p99 = metrics.values().stream().mapToDouble(Context::p99).average().orElse(0);
+        double p999 = metrics.values().stream().mapToDouble(Context::p999).average().orElse(0);
         double meanTime = metrics.values().stream().mapToDouble(Context::mean).average().orElse(0);
-
         int successSum = metrics.values().stream().mapToInt(Context::successfulCalls).sum();
         int failSum = metrics.values().stream().mapToInt(Context::failedCalls).sum();
 
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-
-        pw.printf(Locale.US,
+        console.text(AnsiColor.BRIGHT_YELLOW,
                 FOOTER_PATTERN,
                 "sum/avg",
                 concurrencySum,
                 timeAvg,
-                opsPerSecSum >= FRAME_SIZE ? '>' : ' ',
+                ' ',
                 opsPerSecSum,
                 opsPerMinSum,
-                p50,
                 p90,
                 p99,
+                p999,
                 meanTime,
                 successSum,
                 failSum
         );
-        pw.println();
-        return sw.toString();
     }
 
     public static class Context {
@@ -146,20 +115,14 @@ public class CallMetrics {
             this.concurrencyCallback = concurrencyCallback;
         }
 
-        public void reset() {
-            successful.set(0);
-            failed.set(0);
-            snapshots.clear();
-        }
-
         public long before() {
             return System.nanoTime();
         }
 
         public void after(long beginTime, Throwable t) {
-            if (snapshots.size() > FRAME_SIZE) {
-                snapshots.remove(0);
-            }
+            evictTail();
+
+            // Purge snapshots older than 1min
             snapshots.add(new Snapshot(beginTime));
 
             if (t != null) {
@@ -169,21 +132,28 @@ public class CallMetrics {
             }
         }
 
+        private void evictTail() {
+            final Instant bound = Instant.now().minusSeconds(60);
+            snapshots.removeIf(snapshot -> snapshot.getMark().isBefore(bound));
+        }
+
         private double executionTimeSeconds() {
             return Duration.ofNanos(System.nanoTime() - startTime).toMillis() / 1000.0;
         }
 
-        private String formatStats() {
-            double p50 = 0;
-            double p90 = 0;
-            double p99 = 0;
+        private String printStats() {
+            evictTail();
 
             List<Double> latencies = sortedLatencies();
 
+            double p90 = 0;
+            double p99 = 0;
+            double p999 = 0;
+
             if (snapshots.size() > 1) {
-                p50 = percentile(latencies, .5);
                 p90 = percentile(latencies, .9);
                 p99 = percentile(latencies, .99);
+                p999 = percentile(latencies, .999);
             }
 
             final double opsPerSec = opsPerSec();
@@ -193,12 +163,12 @@ public class CallMetrics {
                     name,
                     concurrencyCallback.get(),
                     executionTimeSeconds(),
-                    opsPerSec >= FRAME_SIZE ? '>' : ' ',
+                    ' ',
                     opsPerSec,
                     opsPerSec * 60,
-                    p50,
                     p90,
                     p99,
+                    p999,
                     mean(),
                     successful.get(),
                     failed.get()
@@ -217,16 +187,16 @@ public class CallMetrics {
             return opsPerSec() * 60;
         }
 
-        private double p50() {
-            return percentile(sortedLatencies(), .5);
-        }
-
         private double p90() {
             return percentile(sortedLatencies(), .9);
         }
 
         private double p99() {
             return percentile(sortedLatencies(), .99);
+        }
+
+        private double p999() {
+            return percentile(sortedLatencies(), .999);
         }
 
         private int successfulCalls() {
@@ -259,7 +229,7 @@ public class CallMetrics {
             if (percentile < 0 || percentile > 1) {
                 throw new IllegalArgumentException(">=0 N <=1");
             }
-            if (latencies.size() > 0) {
+            if (!latencies.isEmpty()) {
                 int index = (int) Math.ceil(percentile * latencies.size());
                 return latencies.get(index - 1);
             }
@@ -268,6 +238,8 @@ public class CallMetrics {
     }
 
     private static class Snapshot implements Comparable<Snapshot> {
+        final Instant mark = Instant.now();
+
         final long endTime = System.nanoTime();
 
         final long beginTime;
@@ -281,6 +253,10 @@ public class CallMetrics {
 
         public double durationMillis() {
             return (endTime - beginTime) / 1_000_000.0;
+        }
+
+        public Instant getMark() {
+            return mark;
         }
 
         @Override

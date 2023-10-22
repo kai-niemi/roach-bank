@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -16,7 +16,7 @@
     <version>2.0.2-SNAPSHOT</version>
 
     <properties>
-        <spring.boot.version>3.0.6</spring.boot.version>
+        <spring.boot.version>3.1.5</spring.boot.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -55,12 +55,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>3.0.6</version>
+                    <version>3.1.5</version>
                     <executions>
                         <execution>
                             <goals>
@@ -88,7 +88,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M9</version>
+                <version>3.1.2</version>
                 <configuration>
                     <groups>unit-test</groups>
                     <includes>
@@ -103,7 +103,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.1</version>
                 <configuration>
                     <failOnError>false</failOnError>
                     <filesets>
@@ -164,14 +164,14 @@
             <dependency>
                 <groupId>org.springframework.shell</groupId>
                 <artifactId>spring-shell-dependencies</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.shell</groupId>
                 <artifactId>spring-shell-starter</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.4</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.persistence</groupId>
@@ -182,12 +182,12 @@
             <dependency>
                 <groupId>net.ttddyy</groupId>
                 <artifactId>datasource-proxy</artifactId>
-                <version>1.8.1</version>
+                <version>1.9</version>
             </dependency>
             <dependency>
                 <groupId>io.cockroachdb</groupId>
                 <artifactId>spring-data-cockroachdb</artifactId>
-                <version>1.0.0</version>
+                <version>1.0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

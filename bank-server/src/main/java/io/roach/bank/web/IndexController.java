@@ -35,7 +35,7 @@ public class IndexController {
                 .withRel(LinkRelations.TRANSACTION_REL)
                 .withTitle("Transaction resource details")
         );
-        index.add(Link.of(UriTemplate.of(linkTo(TransferFormController.class)
+        index.add(Link.of(UriTemplate.of(linkTo(TransferController.class)
                                 .toUriComponentsBuilder().path(
                                         "/form{?limit,amount,regions}")  // RFC-6570 template
                                 .build().toUriString()),

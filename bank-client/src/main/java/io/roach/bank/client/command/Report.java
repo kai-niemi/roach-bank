@@ -37,7 +37,7 @@ public class Report extends AbstractCommand {
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
             regionSet.add(bankClient.getGatewayRegion());
-            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+            console.warn("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
@@ -47,7 +47,7 @@ public class Report extends AbstractCommand {
                 .withTemplateParameters(parameters)
                 .toEntity(List.class);
 
-        accountSummary.getBody().forEach(item -> console.infof("%s", item));
+        accountSummary.getBody().forEach(item -> console.info("%s", item));
     }
 
     @ShellMethod(value = "Report transaction summary", key = {"report-transactions", "rt"})
@@ -60,7 +60,7 @@ public class Report extends AbstractCommand {
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
             regionSet.add(bankClient.getGatewayRegion());
-            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+            console.warn("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
@@ -70,6 +70,6 @@ public class Report extends AbstractCommand {
                 .withTemplateParameters(parameters)
                 .toEntity(List.class);
 
-        transactionSummary.getBody().forEach(item -> console.infof("%s", item));
+        transactionSummary.getBody().forEach(item -> console.info("%s", item));
     }
 }

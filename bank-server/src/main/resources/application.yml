@@ -138,8 +138,6 @@ roachbank:
   report-query-timeout: 120
   # SELECT using '.. FOR UPDATE' locks
   select-for-update: false
-  # Update running balance (more SQL traffic + contention)
-  update-running-balance: false
   # Account plan to run workload against
   account-plan:
     # (CAUTION) Clear accounts and transactions at startup

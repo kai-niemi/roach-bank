@@ -5,7 +5,7 @@ package io.roach.bank;
  */
 public abstract class ProfileNames {
     /**
-     * Propagate transaction retry's to clients on serialization errors.
+     * Propagate transaction retries to clients on serialization errors.
      */
     public static final String RETRY_NONE = "retry-none";
 
@@ -20,7 +20,7 @@ public abstract class ProfileNames {
     public static final String RETRY_CLIENT = "retry-client";
 
     /**
-     * Adopt server-side savepoint rollback retrys on serialization errors.
+     * Adopt server-side savepoint rollback retries on serialization errors.
      * JDBC only.
      */
     public static final String RETRY_SAVEPOINT = "retry-savepoint";

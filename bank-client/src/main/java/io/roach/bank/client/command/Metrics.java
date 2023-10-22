@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.ansi.AnsiColor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
@@ -36,22 +35,20 @@ public class Metrics extends AbstractCommand {
 
     @ShellMethod(value = "Reset call metrics", key = {"reset-metrics", "rm"})
     public void resetStats() {
-        callMetrics.reset();
-        console.successf("Metrics was reset");
+        callMetrics.clear();
+        console.success("Metrics was reset");
     }
 
     @ShellMethod(value = "Toggle console metrics", key = {"toggle-metrics", "m"})
     public void toggleMetrics() {
         printMetrics = !printMetrics;
-        console.successf("Metrics printing is %s", printMetrics ? "on" : "off");
+        console.success("Metrics printing is %s", printMetrics ? "on" : "off");
     }
 
     private Runnable callMetricsPrinter() {
         return () -> {
             if (printMetrics && threadPoolTaskExecutor.getActiveCount() > 0) {
-                console.otherf(AnsiColor.BRIGHT_GREEN, "%s", callMetrics.prettyPrintHeader());
-                console.otherf(AnsiColor.BRIGHT_YELLOW, "%s", callMetrics.prettyPrintBody());
-                console.otherf(AnsiColor.BRIGHT_MAGENTA, "%s", callMetrics.prettyPrintFooter());
+                callMetrics.prettyPrint(console);
             }
         };
     }

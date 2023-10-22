@@ -35,9 +35,6 @@ public class DefaultTransactionService implements TransactionService {
     @Value("${roachbank.select-for-update}")
     private boolean selectForUpdate;
 
-    @Value("${roachbank.update-running-balance}")
-    private boolean updateRunningBalance;
-
     @Override
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
         Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
@@ -60,13 +57,14 @@ public class DefaultTransactionService implements TransactionService {
                 .withTransferDate(transactionForm.getTransferDate());
 
         final List<Pair<UUID, BigDecimal>> balanceUpdates = new ArrayList<>();
+
         final Set<UUID> accountIds = new HashSet<>();
 
         final Map<UUID, Pair<Money, String>> legs = coalesce(transactionForm);
 
         legs.forEach((accountId, value) -> accountIds.add(accountId));
 
-        if (updateRunningBalance) {
+        if (transactionForm.isUpdateRunningBalance()) {
             legs.forEach((accountId, pair) -> {
                 // Load by reference and mark it to signal lazy-initialized attributes
                 Account account = accountRepository.getAccountReferenceById(accountId);

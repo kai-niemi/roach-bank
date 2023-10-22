@@ -27,14 +27,14 @@ public class Config extends AbstractCommand {
     @ShellMethod(value = "Print gateway region", key = {"gateway-region", "gr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void printGatewayRegion() {
-        console.infof("%s", bankClient.getGatewayRegion());
+        console.info("%s", bankClient.getGatewayRegion());
     }
 
     @ShellMethod(value = "List region", key = {"list-regions", "lr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegions() {
         bankClient.getRegions().forEach(r -> {
-            console.infof("Region: %s\n\t City groups: %s\n\tCities: %s\n",
+            console.info("Region: %s\n\t City groups: %s\n\tCities: %s\n",
                     r.getName(), r.getCityGroups(), r.getCities());
         });
     }
@@ -45,7 +45,7 @@ public class Config extends AbstractCommand {
             @ShellOption(help = "region name (gateway region if omitted)", defaultValue = "",
                     valueProvider = RegionProvider.class) String region) {
         console.textf(AnsiColor.BRIGHT_CYAN, "Region cities for region '%s'", region);
-        bankClient.getRegionCities(Collections.singleton(region)).forEach(s -> console.infof("%s", s));
+        bankClient.getRegionCities(Collections.singleton(region)).forEach(s -> console.info("%s", s));
     }
 
     @ShellMethod(value = "Configure table localities for multi-region",

@@ -38,15 +38,15 @@ public class ResourcePools extends AbstractCommand {
                 .follow(withCurie(POOL_SIZE_REL))
                 .toEntity(String.class);
 
-        console.infof("Connection pool size:");
-        console.successf("%s", configResponse.getBody());
+        console.info("Connection pool size:");
+        console.success("%s", configResponse.getBody());
     }
 
     @ShellMethod(value = "Set server connection pool size", key = {"set-pool-size", "sps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void setPoolSize(@ShellOption(help = "connection pool size", defaultValue = "100") int size
     ) {
-        console.successf("Setting connection pool size to %d", size);
+        console.success("Setting connection pool size to %d", size);
 
         Link submitLink = bankClient.fromRoot()
                 .follow(withCurie(ADMIN_REL))
@@ -59,7 +59,7 @@ public class ResourcePools extends AbstractCommand {
         ResponseEntity<String> response = bankClient.post(Link.of(builder.build().toUriString()));
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            console.successf("Unexpected HTTP status: %s", response.toString());
+            console.success("Unexpected HTTP status: %s", response.toString());
         }
     }
 
@@ -71,31 +71,30 @@ public class ResourcePools extends AbstractCommand {
                 .follow(withCurie(POOL_CONFIG_REL))
                 .toEntity(String.class);
 
-        console.infof("Connection pool config:");
-        console.successf("%s", response.getBody());
+        console.info("Connection pool config:");
+        console.success("%s", response.getBody());
     }
 
     @ShellMethod(value = "Set local thread pool size", key = {"set-thread-pool-size", "stps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "-1") int size) {
-        size = size > 0 ? size : Runtime.getRuntime().availableProcessors() * 8;
-        threadPoolTaskExecutor.setMaxPoolSize(
-                Math.max(threadPoolTaskExecutor.getMaxPoolSize(), size));
+        size = size > 0 ? size : Runtime.getRuntime().availableProcessors() * 20;
+        threadPoolTaskExecutor.setMaxPoolSize(size);
         threadPoolTaskExecutor.setCorePoolSize(size);
-        console.infof("Thread pool size set to %d", size);
+        console.info("Thread pool size set to %d", size);
     }
 
     @ShellMethod(value = "Get local thread pool size", key = {"get-thread-pool-size", "gtps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void getThreadPoolSize() {
         ThreadPoolStats stats = ThreadPoolStats.from(threadPoolTaskExecutor);
-        console.infof("Thread pool stats:");
-        console.successf("\tpoolSize: %s", stats.poolSize);
-        console.successf("\tmaximumPoolSize: %s", stats.maximumPoolSize);
-        console.successf("\tcorePoolSize: %s", stats.corePoolSize);
-        console.successf("\tactiveCount: %s", stats.activeCount);
-        console.successf("\tcompletedTaskCount: %s", stats.completedTaskCount);
-        console.successf("\ttaskCount: %s", stats.taskCount);
-        console.successf("\tlargestPoolSize: %s", stats.largestPoolSize);
+        console.info("Thread pool stats:");
+        console.success("\tpoolSize: %s", stats.poolSize);
+        console.success("\tmaximumPoolSize: %s", stats.maximumPoolSize);
+        console.success("\tcorePoolSize: %s", stats.corePoolSize);
+        console.success("\tactiveCount: %s", stats.activeCount);
+        console.success("\tcompletedTaskCount: %s", stats.completedTaskCount);
+        console.success("\ttaskCount: %s", stats.taskCount);
+        console.success("\tlargestPoolSize: %s", stats.largestPoolSize);
     }
 }

@@ -50,7 +50,7 @@ public class Balance extends AbstractCommand {
         final Map<String, Object> parameters = new HashMap<>();
         if (regionSet.isEmpty()) {
             regionSet.add(bankClient. getGatewayRegion());
-            console.warnf("No region(s) specified - defaulting to gateway region %s", regionSet);
+            console.warn("No region(s) specified - defaulting to gateway region %s", regionSet);
         }
         parameters.put("regions", regionSet);
 
