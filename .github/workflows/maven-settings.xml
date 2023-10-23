@@ -15,7 +15,7 @@
                 </repository>
                 <repository>
                     <id>github</id>
-                    <url>https://maven.pkg.github.com/cockroachlabs-field/*</url>
+                    <url>https://maven.pkg.github.com/kai-niemi/*</url>
                     <snapshots>
                         <enabled>true</enabled>
                     </snapshots>
