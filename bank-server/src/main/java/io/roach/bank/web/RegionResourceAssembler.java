@@ -1,13 +1,16 @@
 package io.roach.bank.web;
 
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.Region;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.Region;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class RegionResourceAssembler implements SimpleRepresentationModelAssembler<Region> {

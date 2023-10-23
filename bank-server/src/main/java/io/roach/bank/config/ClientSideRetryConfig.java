@@ -1,10 +1,7 @@
 package io.roach.bank.config;
 
-import java.sql.SQLException;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import org.postgresql.util.PSQLState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,23 +44,22 @@ public class ClientSideRetryConfig {
         Assert.isTrue(!environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER)),
                 "Cant have both RETRY_CLIENT and RETRY_DRIVER");
 
-        this.retryEvents = meterRegistry.counter("bank.retries.event");
+        this.retryEvents = Counter.builder("roach.bank.retries.event")
+                .description("Number of transient error events")
+                .register(meterRegistry);
 
-        this.retryCalls = meterRegistry.counter("bank.retries.call");
+        this.retryCalls = Counter.builder("roach.bank.retries.call")
+                .description("Number of retry calls (closed loop cycles)")
+                .register(meterRegistry);
 
-        this.retryTime = Timer.builder("bank.retries.timeInRetryLoop")
+        this.retryTime = Timer.builder("roach.bank.retries.time")
+                .description("Time spent in retry wait loops")
                 .register(meterRegistry);
     }
 
     @Bean
     public TransactionRetryAspect transactionRetryAspect() {
-        TransactionRetryAspect retryAspect = new TransactionRetryAspect() {
-            @Override
-            protected boolean isRetryable(SQLException sqlException) {
-                return PSQLState.SERIALIZATION_FAILURE.getState().equals(sqlException.getSQLState())
-                        || PSQLState.DEADLOCK_DETECTED.getState().equals(sqlException.getSQLState());
-            }
-        };
+        TransactionRetryAspect retryAspect = new TransactionRetryAspect();
         retryAspect.setRetryEventConsumer(retryEvent -> {
             this.retryEvents.increment(1);
             this.retryCalls.increment(retryEvent.getNumCalls());

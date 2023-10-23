@@ -8,7 +8,18 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Represents a monetary account like asset, liability, expense, capital accounts and so forth.

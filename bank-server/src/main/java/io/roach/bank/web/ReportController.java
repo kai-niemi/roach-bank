@@ -10,8 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
+import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,7 +69,7 @@ public class ReportController {
     @GetMapping(value = "/account-summary")
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
-            priority = TransactionBoundary.Priority.low)
+            priority = TransactionPriority.LOW)
     @Retryable
     public Collection<AccountSummary> getAccountSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
@@ -84,7 +85,7 @@ public class ReportController {
     @GetMapping(value = "/transaction-summary")
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
-            priority = TransactionBoundary.Priority.low)
+            priority = TransactionPriority.LOW)
     @Retryable
     public Collection<TransactionSummary> getTransactionSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions

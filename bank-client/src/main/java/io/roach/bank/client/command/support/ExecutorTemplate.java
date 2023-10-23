@@ -7,6 +7,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
@@ -147,7 +148,7 @@ public class ExecutorTemplate {
                         backoffMillis,
                         ex.getMessage());
             }
-            Thread.sleep(backoffMillis);
+            TimeUnit.MILLISECONDS.sleep(backoffMillis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

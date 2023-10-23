@@ -13,8 +13,9 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
+import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.http.HttpStatus;
@@ -80,6 +81,7 @@ public class TransferController {
         }
 
         Set<String> cities = metadataRepository.listCities(regions);
+
         List<Account> accounts = accountRepository.findByCity(cities, accountsPerRegion);
 
         if (accounts.isEmpty()) {
@@ -112,8 +114,10 @@ public class TransferController {
     }
 
     @PostMapping(value = "/form")
-    @TransactionBoundary
-    @Retryable(increasePriority = true, retryAttempts = 7, maxBackoff = 10_000)
+    @TransactionBoundary(
+            priority = TransactionPriority.NORMAL,
+            retryPriority = TransactionPriority.HIGH)
+    @Retryable
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
         if (form.getAccountLegs().size() % 2 != 0) {
             throw new BadRequestException("Account legs must be a multiple of 2: "

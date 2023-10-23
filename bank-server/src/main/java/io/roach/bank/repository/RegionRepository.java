@@ -1,11 +1,11 @@
 package io.roach.bank.repository;
 
-import io.roach.bank.api.CityGroup;
-import io.roach.bank.api.Region;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import io.roach.bank.api.CityGroup;
+import io.roach.bank.api.Region;
 
 public interface RegionRepository {
     List<Region> listRegions();

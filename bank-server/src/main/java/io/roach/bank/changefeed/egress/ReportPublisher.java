@@ -21,8 +21,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.cockroachdb.aspect.TimeTravelMode;
+import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -127,7 +128,7 @@ public class ReportPublisher {
 
     @TransactionBoundary(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
-            priority = TransactionBoundary.Priority.low)
+            priority = TransactionPriority.LOW)
     @Retryable
     public void computeSummaryAndPush(String city) {
         logger.info("Compute report for city [{}]", city);

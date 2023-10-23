@@ -1,9 +1,9 @@
 package io.roach.bank.service;
 
-import io.roach.bank.api.AccountType;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.config.AccountPlan;
-import io.roach.bank.repository.RegionRepository;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
+import io.roach.bank.api.AccountType;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.config.AccountPlan;
+import io.roach.bank.repository.RegionRepository;
 
 @Service
 public class AccountPlanBuilder {

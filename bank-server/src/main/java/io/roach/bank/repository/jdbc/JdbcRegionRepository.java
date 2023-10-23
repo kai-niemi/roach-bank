@@ -1,8 +1,17 @@
 package io.roach.bank.repository.jdbc;
 
-import io.roach.bank.api.CityGroup;
-import io.roach.bank.api.Region;
-import io.roach.bank.repository.RegionRepository;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
@@ -13,10 +22,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.util.*;
+import io.roach.bank.api.CityGroup;
+import io.roach.bank.api.Region;
+import io.roach.bank.repository.RegionRepository;
 
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)

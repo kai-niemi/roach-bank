@@ -33,10 +33,10 @@ public class Metrics extends AbstractCommand {
         scheduledExecutorService.scheduleAtFixedRate(callMetricsPrinter(), 5, 5, TimeUnit.SECONDS);
     }
 
-    @ShellMethod(value = "Reset call metrics", key = {"reset-metrics", "rm"})
-    public void resetStats() {
+    @ShellMethod(value = "Reset call metrics", key = {"clear-metrics", "cm"})
+    public void clearMetrics() {
         callMetrics.clear();
-        console.success("Metrics was reset");
+        console.success("Call metrics was cleared");
     }
 
     @ShellMethod(value = "Toggle console metrics", key = {"toggle-metrics", "m"})

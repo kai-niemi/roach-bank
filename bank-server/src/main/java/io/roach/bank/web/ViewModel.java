@@ -1,9 +1,9 @@
 package io.roach.bank.web;
 
-import io.roach.bank.api.Region;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import io.roach.bank.api.Region;
 
 public class ViewModel {
     private int limit;

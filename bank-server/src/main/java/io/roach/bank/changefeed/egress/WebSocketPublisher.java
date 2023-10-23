@@ -44,15 +44,23 @@ public class WebSocketPublisher {
 
     private Counter eventsQueued;
 
-    private Counter eventsLost;
+    private Counter eventsDropped;
 
     private Counter eventsSent;
 
     @PostConstruct
     public void init() {
-        eventsQueued = meterRegistry.counter("bank.events.queued");
-        eventsLost = meterRegistry.counter("bank.events.lost");
-        eventsSent = meterRegistry.counter("bank.events.sent");
+        this.eventsQueued = Counter.builder("roach.bank.events.queued")
+                .description("Events queued for STOMP publication")
+                .register(meterRegistry);
+
+        this.eventsDropped = Counter.builder("roach.bank.events.dropped")
+                .description("Events dropped due to buffer overflow")
+                .register(meterRegistry);
+
+        this.eventsSent = Counter.builder("roach.bank.events.sent")
+                .description("Events published over STOMP")
+                .register(meterRegistry);
 
         // Drain events and push in batches
         taskScheduler.execute(payloadPublisher());
@@ -70,7 +78,7 @@ public class WebSocketPublisher {
 
                         if (logger.isTraceEnabled()) {
                             logger.trace("Egress events: {} sent {} queued {} lost)",
-                                    eventsSent.count(), eventsQueued.count(), eventsLost.count());
+                                    eventsSent.count(), eventsQueued.count(), eventsDropped.count());
                         }
                     }
                 }
@@ -106,7 +114,7 @@ public class WebSocketPublisher {
             if (payloadBuffer.offer(accountPayload)) {
                 eventsQueued.increment();
             } else {
-                eventsLost.increment();
+                eventsDropped.increment();
             }
         }
     }

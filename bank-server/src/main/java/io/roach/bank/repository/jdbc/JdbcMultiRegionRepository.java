@@ -1,9 +1,11 @@
 package io.roach.bank.repository.jdbc;
 
-import io.roach.bank.api.Region;
-import io.roach.bank.domain.SurvivalGoal;
-import io.roach.bank.repository.MultiRegionRepository;
-import io.roach.bank.repository.RegionRepository;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
+import io.roach.bank.api.Region;
+import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.repository.MultiRegionRepository;
+import io.roach.bank.repository.RegionRepository;
 
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)

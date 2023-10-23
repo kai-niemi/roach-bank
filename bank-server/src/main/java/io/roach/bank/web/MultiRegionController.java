@@ -1,20 +1,27 @@
 package io.roach.bank.web;
 
-import io.roach.bank.api.MessageModel;
-import io.roach.bank.api.Region;
-import io.roach.bank.domain.SurvivalGoal;
-import io.roach.bank.repository.MultiRegionRepository;
-import io.roach.bank.repository.RegionRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import io.roach.bank.api.MessageModel;
+import io.roach.bank.api.Region;
+import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.repository.MultiRegionRepository;
+import io.roach.bank.repository.RegionRepository;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
