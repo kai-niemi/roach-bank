@@ -52,7 +52,7 @@ public class DataSourceConfig {
         }
 
         // https://stackoverflow.com/questions/851758/java-enums-jpa-and-postgres-enums-how-do-i-make-them-work-together/43125099#43125099
-        if (environment.acceptsProfiles(Profiles.of(ProfileNames.PSQL_LOCAL, ProfileNames.PSQL_DEV))) {
+        if (ProfileNames.acceptsPostgresSQL(environment)) {
             ds.addDataSourceProperty("stringtype", "unspecified");
         }
 

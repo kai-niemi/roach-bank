@@ -1,28 +1,37 @@
 -- RoachBank DDL for PostgreSQL 10+
 CREATE EXTENSION if not exists pgcrypto;
 
-CREATE
-FUNCTION gateway_region() RETURNS text
-    AS $$ select 'europe_west1' $$
+drop function if exists gateway_region();
+CREATE FUNCTION gateway_region() RETURNS text
+    AS $$ select 'default' $$
     LANGUAGE SQL
     IMMUTABLE
     RETURNS NULL ON NULL INPUT;
 
-drop type if exists account_type;
+drop type if exists account_type cascade ;
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 
-drop type if exists transaction_type;
+drop type if exists transaction_type cascade ;
 create type transaction_type as enum ('GEN','TMP','PAY');
 
 ----------------------
 -- Configuration
 ----------------------
 
+drop table if exists city_group;
+create table city_group
+(
+    name       varchar(255)   not null,
+    city_names varchar[] not null default array[]::varchar[],
+
+    primary key (name)
+);
+
+drop table if exists region;
 create table region
 (
-    cloud  varchar(256) not null,
-    name   varchar(256) not null,
-    cities varchar(256) not null,
+    name        varchar(255)   not null,
+    city_groups varchar[] not null default array[]::varchar[],
 
     primary key (name)
 );
@@ -31,6 +40,7 @@ create table region
 -- Main tables
 ----------------------
 
+drop table  if exists account cascade;
 create table account
 (
     id             uuid           not null default gen_random_uuid(),
@@ -49,6 +59,7 @@ create table account
 
 create index on account (city);
 
+drop table  if exists transaction cascade;
 create table transaction
 (
     id               uuid             not null default gen_random_uuid(),
@@ -60,6 +71,7 @@ create table transaction
     primary key (id)
 );
 
+drop table  if exists transaction_item cascade;
 create table transaction_item
 (
     transaction_id  uuid           not null,
@@ -73,6 +85,7 @@ create table transaction_item
     primary key (transaction_id, account_id)
 );
 
+drop table  if exists outbox cascade;
 create table outbox
 (
     id             uuid         not null default gen_random_uuid(),
@@ -86,7 +99,7 @@ create table outbox
 );
 
 ----------------------
--- Contraints
+-- Constraints
 ----------------------
 
 alter table account

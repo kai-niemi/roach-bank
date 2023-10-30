@@ -77,8 +77,7 @@ public class ResourcePools extends AbstractCommand {
 
     @ShellMethod(value = "Set local thread pool size", key = {"set-thread-pool-size", "stps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "-1") int size) {
-        size = size > 0 ? size : Runtime.getRuntime().availableProcessors() * 20;
+    public void setThreadPoolSize(@ShellOption(help = "connection pool size", defaultValue = "500") int size) {
         threadPoolTaskExecutor.setMaxPoolSize(size);
         threadPoolTaskExecutor.setCorePoolSize(size);
         console.info("Thread pool size set to %d", size);

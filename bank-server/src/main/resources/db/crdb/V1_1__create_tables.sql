@@ -97,7 +97,7 @@ create table outbox
 );
 
 ----------------------
--- Contraints
+-- Constraints
 ----------------------
 
 alter table account

@@ -11,6 +11,8 @@ import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import io.roach.bank.ProfileNames;
 import io.roach.bank.api.support.Money;
@@ -37,6 +40,9 @@ public class JpaAccountRepository implements AccountRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    private Environment environment;
 
     @Override
     public List<UUID> createAccounts(Supplier<Account> factory, int batchSize) {
@@ -106,6 +112,9 @@ public class JpaAccountRepository implements AccountRepository {
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Money getBalanceSnapshot(UUID id) {
+        if (ProfileNames.acceptsPostgresSQL(environment)) {
+           return getBalance(id);
+        }
         Tuple tuple = accountRepository.findBalanceSnapshot(id.toString());
         return Money.of(
                 tuple.get(1, BigDecimal.class).toPlainString(),

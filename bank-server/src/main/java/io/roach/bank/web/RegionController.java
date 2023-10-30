@@ -44,7 +44,7 @@ public class RegionController {
     @GetMapping(value = "/{region}")
     @TransactionBoundary(readOnly = true)
     public EntityModel<Region> getRegion(@PathVariable("region") String region) {
-        return regionResourceAssembler.toModel(metadataRepository.getOrCreateRegionByName(region));
+        return regionResourceAssembler.toModel(metadataRepository.getRegionByName(region));
     }
 
     @PutMapping

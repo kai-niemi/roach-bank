@@ -130,6 +130,14 @@ server:
 # Bank server config
 #############################
 roachbank:
+  # Regions to load or 'auto' to detect regions based on CRDB metadata.
+  # First region is designated primary.
+  # Examples:
+  # aws-eu*
+  # azure-*
+  # gcp-*
+  # See: db/common/V1_2__load_metadata.sql
+  regions: auto
   # Default accounts per city scan limit
   default-account-limit: 10
   # Interval of pushing cached balance reports (seconds)

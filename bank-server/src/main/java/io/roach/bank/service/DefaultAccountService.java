@@ -6,12 +6,15 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.roach.bank.ProfileNames;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
@@ -21,6 +24,9 @@ import io.roach.bank.repository.AccountRepository;
 public class DefaultAccountService implements AccountService {
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private Environment environment;
 
     @Override
     public Account createAccount(Account account) {
@@ -55,6 +61,9 @@ public class DefaultAccountService implements AccountService {
 
     @Override
     public Money getBalanceSnapshot(UUID id) {
+        if (ProfileNames.acceptsPostgresSQL(environment)) {
+            return getBalance(id);
+        }
         return accountRepository.getBalanceSnapshot(id);
     }
 

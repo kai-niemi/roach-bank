@@ -111,7 +111,7 @@ public class MultiRegionController {
 
     @PutMapping(value = "/primary/{region}")
     public ResponseEntity<MessageModel> setPrimaryRegion(@PathVariable("region") String region) {
-        Region r = metadataRepository.getOrCreateRegionByName(region);
+        Region r = metadataRepository.getRegionByName(region);
         if (r == null) {
             throw new ObjectRetrievalFailureException(Region.class, region);
         }
@@ -126,7 +126,7 @@ public class MultiRegionController {
 
     @PutMapping(value = "/secondary/{region}")
     public ResponseEntity<MessageModel> setSecondaryRegion(@PathVariable("region") String region) {
-        Region r = metadataRepository.getOrCreateRegionByName(region);
+        Region r = metadataRepository.getRegionByName(region);
         if (r == null) {
             throw new ObjectRetrievalFailureException(Region.class, region);
         }

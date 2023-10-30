@@ -125,7 +125,7 @@ Note that the server and repository id's must match but doesnt need to have id `
 </settings>
 ```
 
-The here are two locations where this file may be placed:
+The are two locations where this file may be placed:
 
 - A user's home dir: `$user.dir/.m2/settings.xml` (default)
 - The Maven install dir: `$M2_HOME/conf/settings.xml`

@@ -13,15 +13,20 @@ import java.util.TreeSet;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import io.roach.bank.ProfileNames;
 import io.roach.bank.api.CityGroup;
 import io.roach.bank.api.Region;
 import io.roach.bank.repository.RegionRepository;
@@ -29,6 +34,12 @@ import io.roach.bank.repository.RegionRepository;
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
 public class JdbcRegionRepository implements RegionRepository {
+    @Autowired
+    private Environment environment;
+
+    @Value("${roachbank.regions}")
+    private String regions;
+
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private JdbcTemplate jdbcTemplate;
@@ -42,14 +53,37 @@ public class JdbcRegionRepository implements RegionRepository {
 
     @Override
     public List<Region> listRegions() {
-        return this.namedParameterJdbcTemplate.query(
-                "SELECT region,(primary_region_of[1]='roach_bank') as primary FROM [SHOW regions] ORDER BY region",
+        Set<String> names = StringUtils.commaDelimitedListToSet(regions);
+
+        if (names.contains("auto") && names.size() == 1) {
+            return this.namedParameterJdbcTemplate.query(
+                    "SELECT region,(primary_region_of[1]='roach_bank') as primary FROM [SHOW regions] ORDER BY region",
+                    Collections.emptyMap(),
+                    (rs, rowNum) -> {
+                        Region r = getRegionByName(rs.getString("region"));
+                        r.setPrimary(rs.getBoolean(2));
+                        return r;
+                    });
+        }
+
+        StringBuilder predicate = new StringBuilder();
+        names.forEach(name -> {
+            if (!predicate.isEmpty()) {
+                predicate.append(" OR ");
+            }
+            predicate.append("name like '").append(name.replaceAll("\\*","%")).append("'");
+        });
+
+        List<Region> regions =
+                this.namedParameterJdbcTemplate.query(
+                "SELECT name,city_groups FROM region WHERE " + predicate,
                 Collections.emptyMap(),
-                (rs, rowNum) -> {
-                    Region r = getOrCreateRegionByName(rs.getString("region"));
-                    r.setPrimary(rs.getBoolean(2));
-                    return r;
-                });
+                regionRowMapper());
+        if (!regions.isEmpty()) {
+            regions.get(0).setPrimary(true);
+        }
+
+        return regions;
     }
 
     @Override
@@ -79,46 +113,41 @@ public class JdbcRegionRepository implements RegionRepository {
     public Set<String> listCities(Collection<String> regions) {
         Set<String> cities = new TreeSet<>();
 
-        if (regions.isEmpty()) {
-            listRegions().forEach(region -> cities.addAll(region.getCities()));
-        } else {
-            regions.forEach(region -> cities.addAll(findRegionByName(region).getCities()));
+        try {
+            if (regions.isEmpty()) {
+                listRegions().forEach(region -> cities.addAll(region.getCities()));
+            } else {
+                regions.forEach(region -> cities.addAll(getRegionByName(region).getCities()));
+            }
+        } catch (EmptyResultDataAccessException e) {
+            return cities;
         }
 
         return cities;
     }
 
     @Override
-    public Region getOrCreateRegionByName(String region) {
-        try {
-            return findRegionByName(region);
-        } catch (EmptyResultDataAccessException e) {
-            List<String> groups = findRegionByName("default").getCityGroups();
-            return createRegion(new Region()
-                    .setName(region)
-                    .setCityGroups(groups)
-                    .setCities(listCityNames(groups)));
-        }
-    }
-
-    private Region findRegionByName(String region) throws EmptyResultDataAccessException {
+    public Region getRegionByName(String region) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("name", region);
-
         return this.namedParameterJdbcTemplate.queryForObject(
                 "SELECT name,city_groups FROM region WHERE name = :name",
                 parameters,
-                (rs, rowNum) -> {
-                    Array array = rs.getArray("city_groups");
-                    String[] cityGroups = (String[]) array.getArray();
+                regionRowMapper());
+    }
 
-                    Region r = new Region();
-                    r.setName(rs.getString("name"));
-                    r.setCityGroups(Arrays.asList(cityGroups));
-                    r.setCities(listCityNames(Arrays.asList(cityGroups)));
+    private RowMapper<Region> regionRowMapper() {
+        return (rs, rowNum) -> {
+            Array array = rs.getArray("city_groups");
+            String[] cityGroups = (String[]) array.getArray();
 
-                    return r;
-                });
+            Region r = new Region();
+            r.setName(rs.getString("name"));
+            r.setCityGroups(Arrays.asList(cityGroups));
+            r.setCities(listCityNames(Arrays.asList(cityGroups)));
+
+            return r;
+        };
     }
 
     @Override
@@ -208,21 +237,41 @@ public class JdbcRegionRepository implements RegionRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("names", groupNames);
 
-        this.namedParameterJdbcTemplate.query(
-                "select array_cat_agg(city_names) city_names from city_group where name in (:names)",
-                parameters,
-                (rs, rowNum) -> {
-                    Array array = rs.getArray("city_names");
-                    String[] cityGroups = (String[]) array.getArray();
-                    cities.addAll(Arrays.asList(cityGroups));
-                    return null;
-                });
+        if (ProfileNames.acceptsPostgresSQL(environment)) {
+            this.namedParameterJdbcTemplate.query(
+                    "select array_agg(c) city_names "
+                            + "from (select unnest(city_names) "
+                            + "      from city_group "
+                            + "      where name in (:names)) as dt(c)",
+                    parameters,
+                    (rs, rowNum) -> {
+                        Array array = rs.getArray("city_names");
+                        String[] cityGroups = (String[]) array.getArray();
+                        cities.addAll(Arrays.asList(cityGroups));
+                        return null;
+                    });
+        } else {
+            this.namedParameterJdbcTemplate.query(
+                    "select array_cat_agg(city_names) city_names "
+                            + "from city_group where name in (:names)",
+                    parameters,
+                    (rs, rowNum) -> {
+                        Array array = rs.getArray("city_names");
+                        String[] cityGroups = (String[]) array.getArray();
+                        cities.addAll(Arrays.asList(cityGroups));
+                        return null;
+                    });
+        }
+
 
         return cities;
     }
 
     @Override
     public String getGatewayRegion() {
+        if (ProfileNames.acceptsPostgresSQL(environment)) {
+            return listRegions().get(0).getName();
+        }
         return this.namedParameterJdbcTemplate
                 .queryForObject("SELECT gateway_region()",
                         Collections.emptyMap(),

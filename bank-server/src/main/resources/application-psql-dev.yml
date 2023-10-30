@@ -11,3 +11,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: root
+    hikari:
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+roachbank:
+  regions: aws-eu*

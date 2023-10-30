@@ -14,7 +14,7 @@ public interface RegionRepository {
 
     Set<String> listCities(Collection<String> regions);
 
-    Region getOrCreateRegionByName(String region);
+    Region getRegionByName(String region);
 
     Region createRegion(Region region);
 

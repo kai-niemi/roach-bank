@@ -34,7 +34,11 @@ public class Config extends AbstractCommand {
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listRegions() {
         bankClient.getRegions().forEach(r -> {
-            console.info("Region: %s\n\t City groups: %s\n\tCities: %s\n",
+            console.info("""
+                                 Region: %s
+                            City groups: %s
+                                 Cities: %s
+                            """,
                     r.getName(), r.getCityGroups(), r.getCities());
         });
     }

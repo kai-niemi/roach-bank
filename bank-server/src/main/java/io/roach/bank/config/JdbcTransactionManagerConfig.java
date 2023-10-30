@@ -45,7 +45,8 @@ public class JdbcTransactionManagerConfig implements TransactionManagementConfig
      */
     @Bean
     @Profile({
-            ProfileNames.PGJDBC_LOCAL, ProfileNames.PGJDBC_DEV, ProfileNames.PGJDBC_CLOUD, ProfileNames.CRDB_LOCAL,
+            ProfileNames.PGJDBC_LOCAL, ProfileNames.PGJDBC_DEV,
+            ProfileNames.PGJDBC_CLOUD, ProfileNames.CRDB_LOCAL,
             ProfileNames.CRDB_DEV, ProfileNames.CRDB_CLOUD})
     public TransactionAttributesAspect transactionAttributesAspect(JdbcTemplate jdbcTemplate) {
         return new TransactionAttributesAspect(jdbcTemplate);
