@@ -187,7 +187,7 @@
             <dependency>
                 <groupId>io.cockroachdb</groupId>
                 <artifactId>spring-data-cockroachdb</artifactId>
-                <version>1.0.1-SNAPSHOT</version>
+                <version>1.0.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
