@@ -15,7 +15,7 @@
                 </repository>
                 <repository>
                     <id>github</id>
-                    <url>https://maven.pkg.github.com/kai-niemi/*</url>
+                    <url>https://maven.pkg.github.com/cloudneutral/*</url>
                     <snapshots>
                         <enabled>true</enabled>
                     </snapshots>

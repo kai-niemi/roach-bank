@@ -236,8 +236,7 @@
 
         <repository>
             <id>github</id>
-            <name>Cockroach Labs Maven Packages</name>
-            <url>https://maven.pkg.github.com/kai-niemi/cockroachdb-jdbc</url>
+            <url>https://maven.pkg.github.com/cloudneutral/spring-data-cockroachdb</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
