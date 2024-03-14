@@ -279,7 +279,7 @@ public class JdbcRegionRepository implements RegionRepository {
     }
 
     @Override
-    public boolean doesAccountPlanExist() {
+    public boolean hasAccountPlan() {
         return this.namedParameterJdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM account LIMIT 1)",
                 Collections.emptyMap(),

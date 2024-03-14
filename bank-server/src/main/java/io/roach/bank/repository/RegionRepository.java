@@ -28,5 +28,5 @@ public interface RegionRepository {
 
     String getGatewayRegion();
 
-    boolean doesAccountPlanExist();
+    boolean hasAccountPlan();
 }

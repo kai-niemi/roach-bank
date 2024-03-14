@@ -9,7 +9,6 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
@@ -27,12 +26,11 @@ import io.roach.bank.service.AccountPlanBuilder;
         TransactionAutoConfiguration.class,
         SecurityAutoConfiguration.class,
         DataSourceTransactionManagerAutoConfiguration.class,
-        KafkaAutoConfiguration.class,
         ErrorMvcAutoConfiguration.class,
         DataSourceAutoConfiguration.class
 })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@EnableJpaRepositories(basePackages = {"io.roach"})
+@EnableJpaRepositories(basePackages = {"io.roach"}, enableDefaultTransactions = false)
 @ComponentScan(basePackages = "io.roach")
 @ServletComponentScan
 public class ServerApplication implements ApplicationRunner {
@@ -51,6 +49,6 @@ public class ServerApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         accountPlanBuilder.buildAccountPlan();
-        logger.info("RoachBank is open for business - lets invent some $$");
+        logger.info("RoachBank is now open for business - lets invent $$ from nothing");
     }
 }

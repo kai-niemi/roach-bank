@@ -7,15 +7,15 @@ if [ ! -f "$FILE" ]; then
 fi
 
 fn_start_local(){
-java -jar $FILE --spring.profiles.active=retry-client,cdc-none,crdb-local "$@"
+java -jar $FILE --spring.profiles.active=retry-client,crdb-local "$@"
 }
 
 fn_start_dev(){
-java -jar $FILE --spring.profiles.active=retry-client,cdc-none,crdb-dev "$@"
+java -jar $FILE --spring.profiles.active=retry-client,crdb-dev "$@"
 }
 
 fn_start_cloud(){
-java -jar $FILE --spring.profiles.active=retry-client,cdc-none,crdb-cloud "$@"
+java -jar $FILE --spring.profiles.active=retry-client,crdb-cloud "$@"
 }
 
 ########################################

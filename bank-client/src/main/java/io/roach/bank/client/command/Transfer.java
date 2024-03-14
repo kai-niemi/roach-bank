@@ -115,7 +115,7 @@ public class Transfer extends AbstractCommand {
                                int legs,
                                boolean smokeTest,
                                boolean updateRunningBalance) {
-        String parts[] = amount.split("-");
+        String[] parts = amount.split("-");
         String minAmount = parts.length > 1 ? parts[0] : amount;
         String maxAmount = parts.length > 1 ? parts[1] : amount;
 

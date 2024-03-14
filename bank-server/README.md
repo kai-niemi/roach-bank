@@ -59,12 +59,6 @@ Retry strategy, one of:
 * retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
 * retry-savepoint - Enables client-side retries using savepoints
 * retry-none - Disable retries
-
-Change data capture and websocket push events, one of:
-
-* cdc-none - Enables synthetic CDC events (via AOP) for websocket push (default)
-* cdc-kafka - Enables Kafka subscriptions of CDC events for websocket push (requires CRDB, CDC, Kafka)
-* cdc-http - Enables HTTP subscriptions of CDC events for websocket push (requires CRDB and CDC)
  
 Optional:
 
@@ -80,8 +74,7 @@ Profiles are set during startup with following command line parameter:
     --spring.datasource.url=jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=retry-none,cdc-none,crdb-local  \
-    --spring.kafka.bootstrap-servers=localhost:9092 \
+    --spring.profiles.active=retry-none,crdb-local  \
     --server.port=8090
 
 PostgreSQL example:
@@ -90,7 +83,6 @@ PostgreSQL example:
     --spring.datasource.url=jdbc:cockroachdb://localhost:5432/roach_bank \
     --spring.datasource.username=postgres \
     --spring.datasource.password=root \
-    --spring.profiles.active=retry-none,cdc-none,psql-local  \
-    --spring.kafka.bootstrap-servers=localhost:9092 \
+    --spring.profiles.active=retry-none,psql-local  \
     --server.port=8090
     

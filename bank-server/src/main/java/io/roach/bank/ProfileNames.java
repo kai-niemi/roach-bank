@@ -29,21 +29,6 @@ public abstract class ProfileNames {
     public static final String RETRY_SAVEPOINT = "retry-savepoint";
 
     /**
-     * Websocket/STOMP events via AOP interceptors (dual-write)
-     */
-    public static final String CDC_NONE = "cdc-none";
-
-    /**
-     * Websocket/STOMP events via Kafka listeners via CRDB kafka sink.
-     */
-    public static final String CDC_KAFKA = "cdc-kafka";
-
-    /**
-     * Websocket/STOMP events via REST controller via CRDB webhook sink.
-     */
-    public static final String CDC_HTTP = "cdc-http";
-
-    /**
      * Use filesystem paths for Thymeleaf templates.
      */
     public static final String DEBUG = "debug";

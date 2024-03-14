@@ -1,27 +1,5 @@
 package io.roach.bank.repository.jpa;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-
 import io.roach.bank.ProfileNames;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -30,6 +8,25 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -113,9 +110,14 @@ public class JpaAccountRepository implements AccountRepository {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Money getBalanceSnapshot(UUID id) {
         if (ProfileNames.acceptsPostgresSQL(environment)) {
-           return getBalance(id);
+            return getBalance(id);
         }
-        Tuple tuple = accountRepository.findBalanceSnapshot(id.toString());
+        Query q = entityManager.createNativeQuery("select a.currency,a.balance " +
+                "from account a " +
+                "as of system time follower_read_timestamp() " +
+                "where a.id = ?1", Tuple.class);
+        q.setParameter(1, id);
+        Tuple tuple = (Tuple) q.getSingleResult();
         return Money.of(
                 tuple.get(1, BigDecimal.class).toPlainString(),
                 tuple.get(0, String.class));

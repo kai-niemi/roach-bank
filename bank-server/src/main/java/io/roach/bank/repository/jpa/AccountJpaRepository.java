@@ -29,13 +29,6 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
             + "where a.id = ?1")
     Money findBalanceById(UUID id);
 
-    @Query(value = "select a.currency,a.balance "
-            + "from account a "
-            + "as of system time follower_read_timestamp() "
-            + "where a.id = ?1", nativeQuery = true)
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    Tuple findBalanceSnapshot(String id);
-
     @Query(value = "select "
             + "count (a.id), "
             + "count (distinct a.city), "

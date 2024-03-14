@@ -40,6 +40,7 @@ public class AccountPlanBuilder {
 
         transactionTemplate.executeWithoutResult(transactionStatus -> {
             logger.info("Available regions:");
+
             metadataRepository.listRegions().forEach(region -> {
                 logger.info("Name: {}\nCity Groups: {}\nCities: {}",
                         region.getName(),
@@ -54,9 +55,7 @@ public class AccountPlanBuilder {
             clearAccounts();
         }
 
-        boolean exist = transactionTemplate.execute(status -> metadataRepository.doesAccountPlanExist());
-
-        if (exist) {
+        if (transactionTemplate.execute(status -> metadataRepository.hasAccountPlan())) {
             logger.info("Account plan already exist - skip");
         } else {
             Set<String> cities = transactionTemplate.execute(

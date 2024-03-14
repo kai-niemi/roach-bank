@@ -1,8 +1,0 @@
-spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      auto-offset-reset: earliest
-      group-id: bank-dispatcher
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

@@ -1,35 +1,25 @@
 package io.roach.bank.changefeed.egress;
 
+import io.roach.bank.AdvisorOrder;
+import io.roach.bank.changefeed.model.AccountPayload;
+import io.roach.bank.domain.Account;
+import io.roach.bank.domain.Transaction;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import io.roach.bank.AdvisorOrder;
-import io.roach.bank.ProfileNames;
-import io.roach.bank.changefeed.model.AccountPayload;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
-import jakarta.annotation.PostConstruct;
-
 @Aspect
 @Component
-@Order(AdvisorOrder.CHANGE_FEED_ADVISOR)
-@Profile(ProfileNames.CDC_NONE)
-public class ChangeFeedAdapterAspect {
+@Order(AdvisorOrder.OUTBOX_ADVISOR)
+public class AccountBalanceUpdateAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private WebSocketPublisher changeFeedPublisher;
-
-    @PostConstruct
-    public void init() {
-        logger.info("Bootstrapping AOP-driven change feed publisher");
-    }
+    private WebSocketPublisher webSocketPublisher;
 
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))",
             returning = "transaction")
@@ -47,7 +37,7 @@ public class ChangeFeedAdapterAspect {
                 AccountPayload payload = new AccountPayload();
                 payload.setAfter(fields);
 
-                changeFeedPublisher.publish(payload);
+                webSocketPublisher.publish(payload);
             }
         });
     }

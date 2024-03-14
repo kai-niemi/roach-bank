@@ -28,7 +28,7 @@ import jakarta.annotation.PostConstruct;
 
 @Aspect
 @Component
-@Order(AdvisorOrder.CHANGE_FEED_ADVISOR)
+@Order(AdvisorOrder.OUTBOX_ADVISOR)
 @Profile(ProfileNames.OUTBOX)
 public class OutboxAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());

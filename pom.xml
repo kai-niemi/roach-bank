@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -13,10 +13,10 @@
 
     <groupId>io.roach.bank</groupId>
     <artifactId>bank-parent</artifactId>
-    <version>2.0.3-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
 
     <properties>
-        <spring.boot.version>3.1.5</spring.boot.version>
+        <spring.boot.version>3.2.3</spring.boot.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -60,7 +60,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>3.1.5</version>
+                    <version>3.2.3</version>
                     <executions>
                         <execution>
                             <goals>
@@ -88,7 +88,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.5</version>
                 <configuration>
                     <groups>unit-test</groups>
                     <includes>
@@ -99,11 +99,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.12.1</version>
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <configuration>
                     <failOnError>false</failOnError>
                     <filesets>
@@ -129,7 +129,7 @@
             <plugin>
                 <groupId>com.amashchenko.maven.plugin</groupId>
                 <artifactId>gitflow-maven-plugin</artifactId>
-                <version>1.14.0</version>
+                <version>1.21.0</version>
                 <configuration>
                     <fetchRemote>false</fetchRemote>
                     <verbose>true</verbose>
@@ -164,14 +164,14 @@
             <dependency>
                 <groupId>org.springframework.shell</groupId>
                 <artifactId>spring-shell-dependencies</artifactId>
-                <version>3.1.4</version>
+                <version>3.2.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.shell</groupId>
                 <artifactId>spring-shell-starter</artifactId>
-                <version>3.1.4</version>
+                <version>3.2.2</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.persistence</groupId>
@@ -187,7 +187,7 @@
             <dependency>
                 <groupId>io.cockroachdb</groupId>
                 <artifactId>spring-data-cockroachdb</artifactId>
-                <version>1.0.1</version>
+                <version>1.2.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -203,7 +203,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.8</version>
+                        <version>0.8.11</version>
                         <executions>
                             <execution>
                                 <goals>

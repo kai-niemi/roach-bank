@@ -27,7 +27,7 @@ var resetPosition = false;
 //
 function setup() {
     var month = new Date().getMonth();
-    var snowing = month >= 9 || month <= 2; // oct-mar
+    var snowing = month >= 10 || month <= 1; // nov-feb
 
     // snowing = true;
     // month = 11;

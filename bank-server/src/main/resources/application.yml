@@ -9,7 +9,7 @@ spring:
   application:
     name: roach-bank
   profiles:
-    active: pgjdbc-local,retry-client,cdc-none
+    active: pgjdbc-local,retry-client
   output:
     ansi:
       enabled: ALWAYS
@@ -110,17 +110,15 @@ management:
 #############################
 # HTTP and HTTPS with self-signed cert for webhook sink
 server:
-  http:
-    port: 8090
-  port: 8443
-  ssl:
-    key-store: classpath:cert/bank.p12
-    key-store-password: secret
-    key-store-type: pkcs12
-    key-alias: bank
-    key-password: secret
-  gzip:
-    enabled: true
+  port: 8090
+#  ssl:
+#    key-store: classpath:cert/bank.p12
+#    key-store-password: secret
+#    key-store-type: pkcs12
+#    key-alias: bank
+#    key-password: secret
+#  gzip:
+#    enabled: true
   error:
     whitelabel:
       enabled: false
