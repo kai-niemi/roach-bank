@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed.egress;
+package io.roach.bank.changefeed;
 
 import java.util.ArrayList;
 import java.util.List;

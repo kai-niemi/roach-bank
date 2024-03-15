@@ -13,7 +13,6 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-
   thymeleaf:
     cache: false
     mode: HTML

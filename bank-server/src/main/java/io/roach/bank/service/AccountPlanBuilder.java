@@ -59,7 +59,7 @@ public class AccountPlanBuilder {
             logger.info("Account plan already exist - skip");
         } else {
             Set<String> cities = transactionTemplate.execute(
-                    status -> metadataRepository.listCities(Collections.emptySet()));
+                    status -> metadataRepository.listAllCities());
 
             logger.info("Account plan not found - creating {} accounts in cities: {}",
                     accountPlan.getAccountsPerCity(), cities);

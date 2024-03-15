@@ -47,9 +47,9 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
             + "  sum (abs(ti.amount.amount)), "
             + "  sum (ti.amount.amount), "
             + "  ti.amount.currency "
-            + "from Transaction t join TransactionItem ti "
+            + "from Transaction t join TransactionItem ti on t.id = ti.id.transactionId "
             + "where ti.city = ?1 "
-            + "group by ti.city,ti.amount.currency")
+            + "group by ti.city, ti.amount.currency")
     Stream<Tuple> transactionSummary(String city);
 
     @Query(value = "select a "

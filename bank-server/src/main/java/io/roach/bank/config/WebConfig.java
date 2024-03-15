@@ -1,8 +1,6 @@
 package io.roach.bank.config;
 
-import java.util.Currency;
-import java.util.List;
-
+import io.roach.bank.api.LinkRelations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -22,13 +20,15 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import io.roach.bank.api.LinkRelations;
+import java.util.Currency;
+import java.util.List;
 
 @EnableWebMvc
 @EnableHypermediaSupport(type = {
-        EnableHypermediaSupport.HypermediaType.HAL_FORMS, EnableHypermediaSupport.HypermediaType.HAL})
+        EnableHypermediaSupport.HypermediaType.HAL_FORMS,
+        EnableHypermediaSupport.HypermediaType.HAL
+})
 @EnableSpringDataWebSupport
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -45,7 +45,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("*");
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedOrigins("*")
+                .allowedHeaders("*");
     }
 
     @Override
@@ -53,12 +55,12 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("/webjars/");
 
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/");
-
         registry.addResourceHandler("/js/**")
                 .addResourceLocations("classpath:/static/js/");
-
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
     }
@@ -85,12 +87,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public CurieProvider defaultCurieProvider() {
-        String uri = ServletUriComponentsBuilder.newInstance()
-                .scheme("http")
-                .host("localhost")
-                .port(8080)
-                .pathSegment("rels", "{rel}")
-                .build().toUriString();
-        return new DefaultCurieProvider(LinkRelations.CURIE_NAMESPACE, UriTemplate.of(uri));
+        return new DefaultCurieProvider(LinkRelations.CURIE_NAMESPACE, UriTemplate.of("/rels/{rel}"));
     }
 }

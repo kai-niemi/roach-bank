@@ -1,17 +1,9 @@
 package io.roach.bank.repository.jdbc;
 
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.sql.DataSource;
-
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.CityGroup;
+import io.roach.bank.api.Region;
+import io.roach.bank.repository.RegionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -26,10 +18,16 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.CityGroup;
-import io.roach.bank.api.Region;
-import io.roach.bank.repository.RegionRepository;
+import javax.sql.DataSource;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
@@ -71,14 +69,14 @@ public class JdbcRegionRepository implements RegionRepository {
             if (!predicate.isEmpty()) {
                 predicate.append(" OR ");
             }
-            predicate.append("name like '").append(name.replaceAll("\\*","%")).append("'");
+            predicate.append("name like '").append(name.replaceAll("\\*", "%")).append("'");
         });
 
         List<Region> regions =
                 this.namedParameterJdbcTemplate.query(
-                "SELECT name,city_groups FROM region WHERE " + predicate,
-                Collections.emptyMap(),
-                regionRowMapper());
+                        "SELECT name,city_groups FROM region WHERE " + predicate,
+                        Collections.emptyMap(),
+                        regionRowMapper());
         if (!regions.isEmpty()) {
             regions.get(0).setPrimary(true);
         }
@@ -107,6 +105,23 @@ public class JdbcRegionRepository implements RegionRepository {
                 });
 
         return groups;
+    }
+
+    @Override
+    public Set<String> listAllCities() {
+        Set<String> cities = new TreeSet<>();
+
+        try {
+            this.namedParameterJdbcTemplate.query(
+                            "SELECT name,city_groups FROM region WHERE 1=1",
+                            Collections.emptyMap(),
+                            regionRowMapper())
+                    .forEach(region -> cities.addAll(region.getCities()));
+        } catch (EmptyResultDataAccessException e) {
+            return cities;
+        }
+
+        return cities;
     }
 
     @Override

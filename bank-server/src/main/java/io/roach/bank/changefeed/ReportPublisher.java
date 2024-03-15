@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed.egress;
+package io.roach.bank.changefeed;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

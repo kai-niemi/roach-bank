@@ -18,7 +18,7 @@
     <logger name="org.springframework.transaction" level="INFO"/>
     <logger name="org.springframework.web" level="WARN"/>
 
-    <springProfile name="verbose | debug">
+    <springProfile name="verbose">
         <logger name="io.roach.bank" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="ASYNC_FILE"/>
@@ -32,7 +32,7 @@
             <appender-ref ref="ASYNC_FILE"/>
         </logger>
     </springProfile>
-    <springProfile name="!verbose &amp; !debug">
+    <springProfile name="!verbose">
         <logger name="io.roach.bank" level="INFO" additivity="false">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="ASYNC_FILE"/>

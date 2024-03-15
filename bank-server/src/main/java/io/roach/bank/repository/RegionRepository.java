@@ -12,6 +12,8 @@ public interface RegionRepository {
 
     List<CityGroup> listCityGroups();
 
+    Set<String> listAllCities();
+
     Set<String> listCities(Collection<String> regions);
 
     Region getRegionByName(String region);

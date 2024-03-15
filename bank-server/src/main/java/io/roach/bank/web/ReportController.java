@@ -24,7 +24,7 @@ import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.TransactionSummary;
-import io.roach.bank.changefeed.egress.ReportPublisher;
+import io.roach.bank.changefeed.ReportPublisher;
 import io.roach.bank.config.CacheConfig;
 import io.roach.bank.repository.RegionRepository;
 import io.roach.bank.repository.ReportingRepository;

@@ -12,12 +12,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/roach-bank")
-//        https://github.com/spring-projects/spring-framework/issues/26111
 //                .setAllowedOrigins("*")
                 .withSockJS()
                 .setHttpMessageCacheSize(128)
                 .setDisconnectDelay(15000)
-                .setClientLibraryUrl("/webjars/sockjs-client/1.1.1/sockjs.min.js");
+                .setClientLibraryUrl("/webjars/sockjs-client/1.5.1/sockjs.min.js");
     }
 
     @Override

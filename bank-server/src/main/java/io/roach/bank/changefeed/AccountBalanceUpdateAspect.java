@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed.egress;
+package io.roach.bank.changefeed;
 
 import io.roach.bank.AdvisorOrder;
 import io.roach.bank.changefeed.model.AccountPayload;
