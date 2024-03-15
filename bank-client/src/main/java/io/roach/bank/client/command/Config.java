@@ -48,7 +48,7 @@ public class Config extends AbstractCommand {
     public void listRegionCities(
             @ShellOption(help = "region name (gateway region if omitted)", defaultValue = "",
                     valueProvider = RegionProvider.class) String region) {
-        console.textf(AnsiColor.BRIGHT_CYAN, "Region cities for region '%s'", region);
+        console.textf(AnsiColor.BRIGHT_CYAN, "Region cities for region '%s'\n", region);
         bankClient.getRegionCities(Collections.singleton(region)).forEach(s -> console.info("%s", s));
     }
 

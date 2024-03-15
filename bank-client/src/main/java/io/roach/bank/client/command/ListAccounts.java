@@ -24,12 +24,12 @@ import static io.roach.bank.api.LinkRelations.withCurie;
 import static io.roach.bank.client.command.Constants.ACCOUNT_PAGE_MODEL_PTR;
 
 @ShellComponent
-@ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
+@ShellCommandGroup(Constants.REPORTING_COMMANDS)
 public class ListAccounts extends AbstractCommand {
     @Autowired
     private BankClient bankClient;
 
-    @ShellMethod(value = "List accounts using pagination", key = {"list-accounts"})
+    @ShellMethod(value = "List accounts using pagination", key = {"list-accounts","la"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void listAccounts(@ShellOption(help = "page number", defaultValue = "0") int page,
                              @ShellOption(help = "page size", defaultValue = "20") int pageSize) {
