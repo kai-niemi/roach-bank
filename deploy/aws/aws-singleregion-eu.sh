@@ -12,7 +12,7 @@ nodes="12"
 # Nodes hosting CRDB
 crdbnodes="1-9"
 # Array of client nodes (must match size of regions)
-clients=(10,11,12)
+clients=(10 11 12)
 # Array of regions localities (must match zone names)
 regions=('eu-central-1')
 # AWS/GCE cloud (aws|gce)
@@ -33,7 +33,7 @@ eu-central-1b,\
 eu-central-1c"
 
 # AWS/GCE machine types
-machinetypes="c5d.4xlarge"
+machinetypes="m6i.2xlarge"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################

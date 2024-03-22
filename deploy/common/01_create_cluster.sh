@@ -3,13 +3,13 @@
 fn_create_cluster() {
   if [ "${cloud}" = "aws" ]; then
     echo roachprod create $CLUSTER --clouds=aws --aws-machine-type-ssd=${machinetypes} --geo --local-ssd --nodes=${nodes} --aws-zones=${zones}
-    fn_failcheck roachprod create $CLUSTER --clouds=aws --aws-machine-type-ssd=${machinetypes} --geo --local-ssd --nodes=${nodes} --aws-zones=${zones}
+    fn_failcheck roachprod create $CLUSTER --clouds=aws --aws-machine-type-ssd=${machinetypes} --geo --local-ssd --nodes=${nodes} --aws-zones=${zones} --aws-profile crl-revenue --aws-config ~/rev.json
   elif [ "${cloud}" = "gce" ]; then
     echo roachprod create $CLUSTER --clouds=gce --gce-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --gce-zones=${zones}
-    fn_failcheck roachprod create $CLUSTER --clouds=gce --gce-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --gce-zones=${zones}
+    fn_failcheck roachprod create $CLUSTER --clouds=gce --gce-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --gce-zones=${zones} --aws-profile crl-revenue --aws-config ~/rev.json
   else
     echo roachprod create $CLUSTER --clouds=azure --azure-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --azure-locations=${zones}
-    fn_failcheck roachprod create $CLUSTER --clouds=azure --azure-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --azure-locations=${zones}
+    fn_failcheck roachprod create $CLUSTER --clouds=azure --azure-machine-type=${machinetypes} --geo --local-ssd --nodes=${nodes} --azure-locations=${zones} --aws-profile crl-revenue --aws-config ~/rev.json
   fi
 }
 
@@ -20,7 +20,7 @@ fn_stage_cluster() {
 
 fn_start_cluster() {
   fn_echo_info_nl "Start CockroachDB nodes $crdbnodes"
-  fn_failcheck roachprod start $CLUSTER:$crdbnodes --sequential
+  fn_failcheck roachprod start $CLUSTER:$crdbnodes
   fn_failcheck roachprod admin --open --ips $CLUSTER:1
 }
 

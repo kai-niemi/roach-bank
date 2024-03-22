@@ -49,6 +49,6 @@ public class ServerApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         accountPlanBuilder.buildAccountPlan();
-        logger.info("RoachBank is now open for business - lets invent $$ from nothing");
+        logger.info("RoachBank is now open for business - lets invent some $$");
     }
 }

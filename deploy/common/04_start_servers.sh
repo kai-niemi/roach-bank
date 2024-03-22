@@ -3,16 +3,20 @@
 fn_start_server(){
   local c=$1
 
-  fn_echo_info_nl "Starting bank server.."
+  fn_echo_info_nl "Starting bank server $c.."
 
   fn_failcheck roachprod run $CLUSTER:$c 'chmod +x *.sh'
   fn_failcheck roachprod run $CLUSTER:$c './run_server.sh > /dev/null 2>&1 &'
 
-  local url="http://$(roachprod ip $CLUSTER:$c --external):8090"
+  local ip
+  ip=$(roachprod ip $CLUSTER:$c --external)
 
-  fn_echo_info_nl "Waiting for server to start $url"
+  local url
+  url="http://$ip:8090"
 
-  until $(curl --output /dev/null --silent --head --fail "$url"); do
+  fn_echo_info_nl "Waiting for server to start: $url"
+
+  until curl --output /dev/null --silent --head --fail "$url"; do
     printf '.'
     sleep 5
   done
