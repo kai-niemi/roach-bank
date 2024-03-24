@@ -44,10 +44,6 @@ public abstract class LinkRelations {
 
     public static final String REGION_LIST_REL = "region-list";
 
-    public static final String CITY_GROUP_REL = "citygroup";
-
-    public static final String CITY_GROUP_LIST_REL = "citygroup-list";
-
     public static final String CITY_LIST_REL = "city-list";
 
     public static final String GATEWAY_REGION_REL = "gateway-region";
@@ -71,13 +67,11 @@ public abstract class LinkRelations {
 
     public static final String ACTUATOR_REL = "actuator";
 
-    public static final String CONFIG_INDEX_REL = "config-index";
+    public static final String CONFIG_INDEX_REL = "config";
 
     public static final String CONFIG_REGION_REL = "config-region";
 
     public static final String CONFIG_MULTI_REGION_REL = "config-multiregion";
-
-    public static final String CONFIG_CITY_GROUP_REL = "config-citygroup";
 
 
     // IANA standard link relations:

@@ -2,8 +2,10 @@ package io.roach.bank.web;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
+import io.roach.bank.api.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,11 +76,10 @@ public class ReportController {
     public Collection<AccountSummary> getAccountSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
     ) {
-        Set<String> cities = metadataRepository.listCities(regions);
+        List<Region> regionList = metadataRepository.listRegions(regions);
+        Collection<String> cities = metadataRepository.listCities(regionList);
         Collection<AccountSummary> result = new LinkedList<>();
-        cities.forEach((city) -> {
-            result.add(reportingRepository.accountSummary(city));
-        });
+        cities.forEach((city) -> result.add(reportingRepository.accountSummary(city)));
         return result;
     }
 
@@ -90,22 +91,20 @@ public class ReportController {
     public Collection<TransactionSummary> getTransactionSummary(
             @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
     ) {
-        Set<String> cities = metadataRepository.listCities(regions);
+        Collection<String> cities = metadataRepository.listCities(metadataRepository.listRegions(regions));
         Collection<TransactionSummary> result = new LinkedList<>();
-        cities.forEach((city) -> {
-            result.add(reportingRepository.transactionSummary(city));
-        });
+        cities.forEach((city) -> result.add(reportingRepository.transactionSummary(city)));
         return result;
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<String> refreshReport(@RequestParam(value = "region", required = false) String region,
-                                                Model model) {
+    public ResponseEntity<String> refreshReport(@RequestParam(value = "region", required = false, defaultValue = "all")
+                                                    String region) {
         // Evict caches since it's a user-initated request
         cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY).clear();
         cacheManager.getCache(CacheConfig.CACHE_TRANSACTION_REPORT_SUMMARY).clear();
 
-        reportPublisher.publishSummaryAsync("null".equals(region) ? null : region);
+        reportPublisher.publishSummaryAsync("all".equals(region) ? null : region);
 
         return ResponseEntity.ok().build();
     }

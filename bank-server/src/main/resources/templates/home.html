@@ -139,7 +139,7 @@
 
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li><h6 class="dropdown-header">Gateway Region</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
+                            <li><a class="dropdown-item disabled" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -162,7 +162,7 @@
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
                            aria-expanded="false">View</a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Accounts per city</h6></li>
+                            <li><h6 class="dropdown-header">Show accounts per city</h6></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=1)}">1</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=5)}">5</a></li>
                             <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=10)}">10</a></li>
@@ -218,7 +218,6 @@
         </div>
 
         <div class="product-device shadow-sm d-none d-md-block"></div>
-        <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>
     </div>
 
     <!-- Main container -->

@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.repository.RegionRepository;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/")
-public class RootController {
+public class FrontEndController {
     @Autowired
     private RegionRepository metadataRepository;
 
@@ -28,11 +30,10 @@ public class RootController {
 
     @GetMapping
     @TransactionBoundary
-    public String homePage(@RequestParam(value = "region", required = false) String region,
+    public String homePage(@RequestParam(value = "region", required = false, defaultValue = "all") String region,
                            @RequestParam(value = "limit", defaultValue = "10") int limit,
                            @ModelAttribute ViewModel viewModel,
                            Model model) {
-
         if (viewModel == null) {
             viewModel = new ViewModel();
         }
@@ -45,7 +46,8 @@ public class RootController {
         viewModel.setGatewayRegion(gatewayRegion);
         viewModel.setRandomFact(CockroachFacts.nextFact());
 
-        metadataRepository.listRegions().forEach(viewModel::addRegion);
+        metadataRepository.listRegions(List.of())
+                .forEach(viewModel::addRegion);
 
         model.addAttribute("model", viewModel);
 

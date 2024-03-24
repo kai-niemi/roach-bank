@@ -1,11 +1,17 @@
-package io.roach.bank.web;
+package io.roach.bank.web.transaction;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import io.roach.bank.api.TransactionForm;
+import io.roach.bank.api.TransactionModel;
+import io.roach.bank.api.support.CockroachFacts;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.domain.Transaction;
+import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.service.BadRequestException;
+import io.roach.bank.service.TransactionService;
+import io.roach.bank.web.support.FollowLocation;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,18 +36,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.api.TransactionForm;
-import io.roach.bank.api.TransactionModel;
-import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
-import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.repository.RegionRepository;
-import io.roach.bank.service.BadRequestException;
-import io.roach.bank.service.TransactionService;
-import io.roach.bank.web.support.FollowLocation;
-import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -71,7 +69,7 @@ public class TransferController {
     public ResponseEntity<TransactionForm> getTransactionRequestForm(
             @RequestParam(value = "accountsPerRegion", defaultValue = "2", required = false) int accountsPerRegion,
             @RequestParam(value = "amount", defaultValue = "5.00", required = false) final String amount,
-            @RequestParam(value = "regions", required = false, defaultValue = "") List<String> regions) {
+            @RequestParam(value = "region") String region) {
 
         if (accountsPerRegion < 2) {
             throw new BadRequestException("Accounts per region must be >= 2: " + accountsPerRegion);
@@ -80,13 +78,12 @@ public class TransferController {
             throw new BadRequestException("Accounts per region must be a multiple of 2: " + accountsPerRegion);
         }
 
-        Set<String> cities = metadataRepository.listCities(regions);
+        Collection<String> cities = metadataRepository.listCities(
+                metadataRepository.listRegions(List.of(region)));
 
-        List<Account> accounts = accountRepository.findByCity(cities, accountsPerRegion);
-
+        List<Account> accounts = accountRepository.findTopByCity(cities, accountsPerRegion);
         if (accounts.isEmpty()) {
-            throw new BadRequestException(
-                    "No accounts matching regions: " + StringUtils.collectionToCommaDelimitedString(regions));
+            throw new BadRequestException("No accounts matching region: " + region);
         }
 
         TransactionForm.Builder formBuilder = TransactionForm.builder().withUUID(UUID.randomUUID())
@@ -107,8 +104,11 @@ public class TransferController {
 
 
         Link affordances = Affordances.of(
-                linkTo(methodOn(getClass()).getTransactionRequestForm(accountsPerRegion, amount, regions)).withSelfRel()
-                        .andAffordance(afford(methodOn(getClass()).submitTransactionForm(null)))).toLink();
+                        linkTo(methodOn(getClass())
+                                .getTransactionRequestForm(accountsPerRegion, amount, region))
+                                .withSelfRel()
+                                .andAffordance(afford(methodOn(getClass()).submitTransactionForm(null))))
+                .toLink();
 
         return ResponseEntity.ok().body(formBuilder.build().add(affordances));
     }

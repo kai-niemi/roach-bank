@@ -26,23 +26,20 @@ BankDashboard.prototype = {
             limit = urlParams.get('limit');
         }
 
+        var region;
         if (urlParams.has('region')) {
-            const region = urlParams.get('region');
-
-            $.get(this.settings.endpoints.topAccounts+"?limit="+limit+"&regions="+region, function (data) {
-                _this.createAccountElements(data['_embedded']['roachbank:account-list']);
-            });
-            $.get(this.settings.endpoints.cities+"?regions="+region, function (data) {
-                _this.createReportElements(data['_embedded']['roachbank:stringList']);
-            });
+            region = urlParams.get('region');
         } else {
-            $.get(this.settings.endpoints.topAccounts+"?limit="+limit, function (data) {
-                _this.createAccountElements(data['_embedded']['roachbank:account-list']);
-            });
-            $.get(this.settings.endpoints.cities, function (data) {
-                _this.createReportElements(data['_embedded']['roachbank:stringList']);
-            });
+            region = "all";
         }
+
+        $.get(this.settings.endpoints.topAccounts+"?limit="+limit+"&region="+region, function (data) {
+            _this.createAccountElements(data['_embedded']['roachbank:account-list']);
+        });
+        
+        $.get(this.settings.endpoints.cities+"?region="+region, function (data) {
+            _this.createReportElements(data);
+        });
     },
 
     getElement: function (id) {
@@ -55,7 +52,7 @@ BankDashboard.prototype = {
         _this.accountSpinner.remove();
 
         accounts = data.map(function (account) {
-            var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : account.city);
+            var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : 'GEN');
 
             var city = account.city.replace(/\s/g, "_");
 
@@ -180,7 +177,7 @@ BankDashboard.prototype = {
             });
 
             stompClient.subscribe(_this.settings.topics.accounts, function (account) {
-                var event = JSON.parse(account.body); // batch
+                var event = JSON.parse(account.body);
 
                 event.map(function (item) {
                     var accountElt = _this.getElement(item.id);
@@ -239,8 +236,11 @@ BankDashboard.prototype = {
 
         totalTransactionsSuffix.text(_this.formatNumber(transactionSummary.numberOfTransactions));
         totalTransactionLegsSuffix.text(_this.formatNumber(transactionSummary.numberOfLegs));
-        totalTurnoverSuffix.text(_this.formatMoney(transactionSummary.totalTurnover, transactionSummary.currency));
-        totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
+
+        if (transactionSummary.hasOwnProperty("totalTurnover")) {
+            totalTurnoverSuffix.text(_this.formatMoney(transactionSummary.totalTurnover, transactionSummary.currency));
+            totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
+        }
     },
 
     // Linear interpolation for box size
@@ -258,6 +258,16 @@ BankDashboard.prototype = {
     },
 
     boxSize: function (city, balance) {
+        var size = 50;
+
+        return {
+            width: size + 'px',
+            height: size + 'px',
+            lineHeight: size + 'px'
+        }
+    },
+
+    boxSizeRelative: function (city, balance) {
         var minSize=50;
         var maxSize=120;
 
@@ -325,7 +335,8 @@ document.addEventListener('DOMContentLoaded', function () {
     new BankDashboard({
         endpoints: {
             topAccounts: '/api/account/top',
-            cities: '/api/config/citygroup/cities',
+            cities: '/api/config/region/cities',
+            
             socket: '/roach-bank'
         },
 
@@ -495,7 +506,9 @@ document.addEventListener('DOMContentLoaded', function () {
             'winnipeg': 'CAN',
             'regina': 'CAN',
             'brandon': 'CAN',
-            'dryden': 'CAN'
+            'dryden': 'CAN',
+
+            'pretoria': 'GEN'
         }
     });
 });

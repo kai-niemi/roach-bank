@@ -1,13 +1,14 @@
 package io.roach.bank.client.command;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Scanner;
 
+import io.roach.bank.client.command.support.TableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
@@ -16,7 +17,8 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import io.roach.bank.api.AccountModel;
-import io.roach.bank.client.command.support.BankClient;
+import io.roach.bank.client.command.support.HypermediaClient;
+import org.springframework.shell.table.TableModel;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_LIST_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
@@ -27,15 +29,20 @@ import static io.roach.bank.client.command.Constants.ACCOUNT_PAGE_MODEL_PTR;
 @ShellCommandGroup(Constants.REPORTING_COMMANDS)
 public class ListAccounts extends AbstractCommand {
     @Autowired
-    private BankClient bankClient;
+    private HypermediaClient bankClient;
 
     @ShellMethod(value = "List accounts using pagination", key = {"list-accounts","la"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void listAccounts(@ShellOption(help = "page number", defaultValue = "0") int page,
+    public void listAccounts(
+            @ShellOption(help = Constants.REGIONS_HELP,
+                    defaultValue = Constants.DEFAULT_REGION,
+                    valueProvider = RegionProvider.class) String region,
+            @ShellOption(help = "page number", defaultValue = "0") int page,
                              @ShellOption(help = "page size", defaultValue = "20") int pageSize) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("page", page);
         parameters.put("size", pageSize);
+        parameters.put("region", region);
 
         PagedModel<AccountModel> accountPage = bankClient.fromRoot()
                 .follow(withCurie(ACCOUNT_REL))
@@ -45,38 +52,27 @@ public class ListAccounts extends AbstractCommand {
 
         outer_loop:
         for (; ; ) {
-            console.info(">> Page %s", Objects.requireNonNull(accountPage).getMetadata());
-
-            console.success("%15s|%10s|%8s|%15s|%10s|%10s| %s",
-                    "Name",
-                    "Desc",
-                    "Type",
-                    "Balance",
-                    "Status",
-                    "Weight",
-                    "Link");
-
-            for (AccountModel accountModel : accountPage) {
-                console.success("%15s|%10s|%8s|%15s|%10s|%10s| %s",
-                        accountModel.getName(),
-                        accountModel.getDescription(),
-                        accountModel.getAccountType(),
-                        accountModel.getBalance(),
-                        accountModel.getStatus(),
-                        accountModel.getWeight(),
-                        accountModel.getLink(IanaLinkRelations.SELF).orElse(Link.of("n/a")).getHref());
-            }
+            console.success(printContentTable(
+                    new ArrayList<>(accountPage.getContent())));
 
             StringBuilder sb = new StringBuilder("Continue to");
+
             accountPage.getPreviousLink().ifPresent(link -> sb.append(" P)rev"));
             accountPage.getNextLink().ifPresent(link -> sb.append(" N)ext"));
             accountPage.getLink(IanaLinkRelations.LAST).ifPresent(link -> sb.append(" F)irst"));
             accountPage.getLink(IanaLinkRelations.FIRST).ifPresent(link -> sb.append(" L)ast"));
+
             sb.append(" page or C)ancel?");
 
             innner_loop:
             for (; ; ) {
+                PagedModel.PageMetadata metadata = accountPage.getMetadata();
+                console.success("Page %d of %d with %d items total",
+                        metadata.getNumber(),
+                        metadata.getTotalPages(),
+                        metadata.getTotalElements());
                 console.info("%s", sb.toString());
+
                 Scanner s = new Scanner(System.in);
                 if (s.hasNext()) {
                     switch (s.next()) {
@@ -109,5 +105,76 @@ public class ListAccounts extends AbstractCommand {
                 }
             }
         }
+    }
+
+    public static String printContentTable(List<AccountModel> pageContent) {
+        return TableUtils.prettyPrint(
+                new TableModel() {
+                    @Override
+                    public int getRowCount() {
+                        return pageContent.size() + 1;
+                    }
+
+                    @Override
+                    public int getColumnCount() {
+                        return 7;
+                    }
+
+                    @Override
+                    public Object getValue(int row, int column) {
+                        if (row == 0) {
+                            switch (column) {
+                                case 0 -> {
+                                    return "#";
+                                }
+                                case 1 -> {
+                                    return "Name";
+                                }
+                                case 2 -> {
+                                    return "City";
+                                }
+                                case 3 -> {
+                                    return "Type";
+                                }
+                                case 4 -> {
+                                    return "Balance";
+                                }
+                                case 5 -> {
+                                    return "Status";
+                                }
+                                case 6 -> {
+                                    return "Link";
+                                }
+                            }
+                            return "??";
+                        }
+
+                        AccountModel account = pageContent.get(row - 1);
+                        switch (column) {
+                            case 0 -> {
+                                return row;
+                            }
+                            case 1 -> {
+                                return account.getName();
+                            }
+                            case 2 -> {
+                                return account.getCity();
+                            }
+                            case 3 -> {
+                                return account.getAccountType();
+                            }
+                            case 4 -> {
+                                return account.getBalance();
+                            }
+                            case 5 -> {
+                                return account.getStatus();
+                            }
+                            case 6 -> {
+                                return account.getRequiredLink(IanaLinkRelations.SELF).getHref();
+                            }
+                        }
+                        return "??";
+                    }
+                });
     }
 }

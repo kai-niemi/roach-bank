@@ -1,5 +1,6 @@
 package io.roach.bank.repository.jpa;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -71,5 +72,5 @@ public interface AccountJpaRepository extends JpaRepository<Account, UUID>,
                     = "select count(a.id) "
                     + "from Account a "
                     + "where a.city in (:cities)")
-    Page<Account> findAll(Pageable pageable, @Param("cities") List<String> cities);
+    Page<Account> findAll(@Param("cities") Collection<String> cities, Pageable pageable);
 }

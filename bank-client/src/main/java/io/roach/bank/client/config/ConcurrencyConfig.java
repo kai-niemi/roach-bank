@@ -1,4 +1,4 @@
-package io.roach.bank.client;
+package io.roach.bank.client.config;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,7 +21,7 @@ public class ConcurrencyConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(500);
         executor.setCorePoolSize(500);
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadNamePrefix("workload");
+        executor.setThreadNamePrefix("worker-");
         return executor;
     }
 

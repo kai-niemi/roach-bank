@@ -1,17 +1,13 @@
 package io.roach.bank.changefeed;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
+import io.roach.bank.api.AccountSummary;
+import io.roach.bank.api.Region;
+import io.roach.bank.api.ReportUpdate;
+import io.roach.bank.api.TransactionSummary;
+import io.roach.bank.config.CacheConfig;
+import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.repository.ReportingRepository;
+import io.roach.bank.util.ConcurrencyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +28,17 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import io.roach.bank.api.AccountSummary;
-import io.roach.bank.api.ReportUpdate;
-import io.roach.bank.api.TransactionSummary;
-import io.roach.bank.config.CacheConfig;
-import io.roach.bank.repository.RegionRepository;
-import io.roach.bank.repository.ReportingRepository;
-import io.roach.bank.util.ConcurrencyUtils;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class ReportPublisher {
@@ -122,8 +122,9 @@ public class ReportPublisher {
 
     @TransactionBoundary(readOnly = true)
     public Set<String> getCities(String region) {
-        return metadataRepository.listCities(
-                StringUtils.hasLength(region) ? Collections.singleton(region) : Collections.emptySet());
+        List<Region> regions = metadataRepository.listRegions(
+                StringUtils.hasLength(region) ? List.of(region) : List.of());
+        return metadataRepository.listCities(regions);
     }
 
     @TransactionBoundary(readOnly = true,

@@ -1,5 +1,6 @@
-package io.roach.bank.web;
+package io.roach.bank.web.transaction;
 
+import io.roach.bank.web.account.AccountController;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;

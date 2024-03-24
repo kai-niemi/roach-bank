@@ -46,13 +46,13 @@ public class DefaultTransactionService implements TransactionService {
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
         Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
 
-        // Short-circuit for smoke testing
-        if (transactionForm.isSmokeTest()) {
-            return Transaction.builder().withId(id).build();
-        }
-
         if (transactionForm.getAccountLegs().size() < 2) {
             throw new BadRequestException("Must have at least two account legs");
+        }
+
+        Transaction t = transactionRepository.findTransactionById(id);
+        if (t != null) {
+            return t;
         }
 
         // Coalesce multi-legged transactions

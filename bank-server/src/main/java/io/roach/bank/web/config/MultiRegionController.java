@@ -1,4 +1,4 @@
-package io.roach.bank.web;
+package io.roach.bank.web.config;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,7 +83,7 @@ public class MultiRegionController {
 
     @PutMapping(value = "/regions")
     public ResponseEntity<MessageModel> addDatabaseRegions() {
-        List<Region> regions = metadataRepository.listRegions();
+        List<Region> regions = metadataRepository.listRegions(List.of());
 
         multiRegionRepository.addDatabaseRegions(regions);
 
@@ -97,7 +97,7 @@ public class MultiRegionController {
 
     @DeleteMapping(value = "/regions")
     public ResponseEntity<MessageModel> dropDatabaseRegions() {
-        List<Region> regions = metadataRepository.listRegions();
+        List<Region> regions = metadataRepository.listRegions(List.of());
 
         multiRegionRepository.dropDatabaseRegions(regions);
 
@@ -151,20 +151,18 @@ public class MultiRegionController {
 
     @PostMapping(value = "/configure")
     public ResponseEntity<MessageModel> configureMultiRegions() {
-        List<Region> regions = metadataRepository.listRegions();
+        List<Region> regions = metadataRepository.listRegions(List.of());
 
         if (regions.size() < 3) {
             logger.warn("Expected at least 3 regions - found {}", regions.size());
         }
 
-        multiRegionRepository.setPrimaryRegion(regions.iterator().next());
-        multiRegionRepository.addDatabaseRegions(regions);
         multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
+        multiRegionRepository.addGlobalTable("region");
+        multiRegionRepository.addGlobalTable("region_mapping");
         multiRegionRepository.addRegionalByRowTable("account");
         multiRegionRepository.addRegionalByRowTable("transaction");
         multiRegionRepository.addRegionalByRowTable("transaction_item");
-        multiRegionRepository.addGloalTable("region");
-        multiRegionRepository.addGloalTable("city_group");
 
         MessageModel model = new MessageModel();
         model.setMessage("Configured table localities for multi-region (global and RBR)");

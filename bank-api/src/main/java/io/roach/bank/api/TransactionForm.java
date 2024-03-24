@@ -53,8 +53,6 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     @NotBlank
     private String transactionType;
 
-    private boolean smokeTest;
-
     private boolean updateRunningBalance;
 
     @NotNull
@@ -104,10 +102,6 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
         return Collections.unmodifiableList(accountLegs);
     }
 
-    public boolean isSmokeTest() {
-        return smokeTest;
-    }
-
     public static class Builder {
         private final TransactionForm instance = new TransactionForm();
 
@@ -138,11 +132,6 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
 
         public Builder withUpdateRunningBalance() {
             this.instance.updateRunningBalance = true;
-            return this;
-        }
-
-        public Builder withSmokeTest() {
-            this.instance.smokeTest = true;
             return this;
         }
 

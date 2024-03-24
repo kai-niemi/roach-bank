@@ -1,4 +1,4 @@
-package io.roach.bank.web;
+package io.roach.bank.web.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -29,11 +29,6 @@ public class ConfigurationController {
                 .index())
                 .withRel(LinkRelations.CONFIG_REGION_REL)
                 .withTitle("Region configuration")
-        );
-        index.add(linkTo(methodOn(CityGroupController.class)
-                .index())
-                .withRel(LinkRelations.CONFIG_CITY_GROUP_REL)
-                .withTitle("City group configuration")
         );
 
         if (!ProfileNames.acceptsPostgresSQL(environment)) {

@@ -1,11 +1,10 @@
 package io.roach.bank.repository.jdbc;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import io.cockroachdb.jdbc.util.Assert;
+import io.roach.bank.api.Region;
+import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.repository.MultiRegionRepository;
+import io.roach.bank.repository.RegionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +13,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.roach.bank.api.Region;
-import io.roach.bank.domain.SurvivalGoal;
-import io.roach.bank.repository.MultiRegionRepository;
-import io.roach.bank.repository.RegionRepository;
+import javax.sql.DataSource;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
 
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
@@ -36,17 +35,15 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
     @Override
     public void addDatabaseRegions(List<Region> regions) {
-        if (regions.size() < 3) {
-            logger.warn("Expected at least 3 regions - found {}", regions.size());
-        }
-
-        regions.forEach(region -> {
-            if (region.isPrimary()) {
-                jdbcTemplate.update("ALTER DATABASE roach_bank PRIMARY REGION \"" + region.getName() + "\"");
-            } else {
-                jdbcTemplate.update("ALTER DATABASE roach_bank ADD REGION IF NOT EXISTS \"" + region.getName() + "\"");
-            }
-        });
+        regions.stream()
+                .filter(region -> region.getDatabaseRegion() != null)
+                .forEach(region -> {
+                    if (region.isPrimary()) {
+                        jdbcTemplate.update("ALTER DATABASE roach_bank PRIMARY REGION \"" + region.getDatabaseRegion() + "\"");
+                    } else {
+                        jdbcTemplate.update("ALTER DATABASE roach_bank ADD REGION IF NOT EXISTS \"" + region.getDatabaseRegion() + "\"");
+                    }
+                });
     }
 
     @Override
@@ -56,21 +53,26 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
                 setPrimaryRegion(region);
             }
         });
-        regions.forEach(region -> {
-            if (!region.isPrimary()) {
-                jdbcTemplate.update("ALTER DATABASE roach_bank DROP REGION IF EXISTS \"" + region.getName() + "\"");
-            }
-        });
+
+        regions.stream()
+                .filter(region -> region.getDatabaseRegion() != null)
+                .forEach(region -> {
+                    if (!region.isPrimary()) {
+                        jdbcTemplate.update("ALTER DATABASE roach_bank DROP REGION IF EXISTS \"" + region.getDatabaseRegion() + "\"");
+                    }
+                });
     }
 
     @Override
     public void setPrimaryRegion(Region region) {
-        jdbcTemplate.update("ALTER DATABASE roach_bank SET PRIMARY REGION \"" + region.getName() + "\"");
+        Assert.notNull(region.getDatabaseRegion(), "Database region is null (no mapping?)");
+        jdbcTemplate.update("ALTER DATABASE roach_bank SET PRIMARY REGION \"" + region.getDatabaseRegion() + "\"");
     }
 
     @Override
     public void setSecondaryRegion(Region region) {
-        jdbcTemplate.update("ALTER DATABASE roach_bank SET SECONDARY REGION \"" + region.getName() + "\"");
+        Assert.notNull(region.getDatabaseRegion(), "Database region is null (no mapping?)");
+        jdbcTemplate.update("ALTER DATABASE roach_bank SET SECONDARY REGION \"" + region.getDatabaseRegion() + "\"");
     }
 
     @Override
@@ -80,6 +82,8 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
     @Override
     public void setSurvivalGoal(SurvivalGoal survivalGoal) {
+        logger.info("Change survival goal to %s".formatted(survivalGoal));
+
         if (survivalGoal.equals(SurvivalGoal.REGION)) {
             jdbcTemplate.update("ALTER DATABASE roach_bank SURVIVE REGION FAILURE");
         } else {
@@ -88,12 +92,15 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
     }
 
     @Override
-    public void addGloalTable(String table) {
+    public void addGlobalTable(String table) {
+        logger.info("Set locality GLOBAL for %s".formatted(table));
         jdbcTemplate.update("ALTER TABLE " + table + " SET locality GLOBAL");
     }
 
     @Override
     public void addRegionalByRowTable(String table) {
+        logger.info("Set locality RBR for %s".formatted(table));
+
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER TABLE ")
                 .append(table)
@@ -101,33 +108,41 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
         Deque<Region> primary = new ArrayDeque<>();
 
-        metadataRepository.listRegions().forEach(region -> {
-            if (region.isPrimary()) {
-                primary.push(region);
-            }
-            sb.append(" WHEN city IN (");
-            boolean sep = false;
-            for (String city : region.getCities()) {
-                if (sep) {
-                    sb.append(",");
-                }
-                sep = true;
-                sb.append("'").append(city).append("'");
-            }
-            sb.append(") THEN '").append(region.getName()).append("'");
-        });
+        metadataRepository.listRegions(List.of())
+                .stream()
+                .filter(region -> region.getDatabaseRegion() != null)
+                .forEach(region -> {
+                    if (region.isPrimary()) {
+                        primary.push(region);
+                    }
+
+                    sb.append(" WHEN city IN (");
+
+                    boolean sep = false;
+
+                    for (String city : region.getCities()) {
+                        if (sep) {
+                            sb.append(",");
+                        }
+                        sep = true;
+                        sb.append("'").append(city).append("'");
+                    }
+                    sb.append(") THEN '").append(region.getDatabaseRegion()).append("'");
+                });
 
         sb.append(" ELSE '")
-                .append(primary.pop().getName())
+                .append(primary.pop().getDatabaseRegion())
                 .append("' END) STORED NOT NULL");
 
-        jdbcTemplate.execute(sb.toString());
+        logger.info("SQL: %s".formatted(sb.toString()));
 
+        jdbcTemplate.execute(sb.toString());
         jdbcTemplate.execute("ALTER TABLE " + table + " SET LOCALITY REGIONAL BY ROW AS region");
     }
 
     @Override
     public void addRegionalTable(String table) {
+        logger.info("Set locality REGIONAL for %s".formatted(table));
         jdbcTemplate.update("ALTER TABLE " + table + " SET LOCALITY REGIONAL");
     }
 }

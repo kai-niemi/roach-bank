@@ -1,4 +1,4 @@
-package io.roach.bank.client;
+package io.roach.bank.client.config;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -17,13 +17,13 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import io.roach.bank.client.command.support.BankClient;
+import io.roach.bank.client.command.support.HypermediaClient;
 
 @Configuration
 @EnableHypermediaSupport(type = {
         EnableHypermediaSupport.HypermediaType.HAL_FORMS, EnableHypermediaSupport.HypermediaType.HAL
 })
-public class RestConfig implements RestTemplateCustomizer {
+public class HypermediaConfig implements RestTemplateCustomizer {
     @Value("${roachbank.http.maxTotal}")
     private int maxTotal;
 
@@ -60,7 +60,7 @@ public class RestConfig implements RestTemplateCustomizer {
     }
 
     @Bean
-    public BankClient restCommands(RestTemplate restTemplate) {
-        return new BankClient(restTemplate);
+    public HypermediaClient restCommands(RestTemplate restTemplate) {
+        return new HypermediaClient(restTemplate);
     }
 }

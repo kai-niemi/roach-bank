@@ -1,18 +1,10 @@
 package io.roach.bank.repository.jdbc;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
-
-import javax.sql.DataSource;
-
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.AccountType;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -31,11 +23,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.AccountType;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.AccountRepository;
+import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -226,33 +225,7 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Page<Account> findByCity(Set<String> cities, Pageable pageable) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("cities", cities)
-                .addValue("limit", pageable.getPageSize())
-                .addValue("offset", pageable.getOffset());
-
-        String sql =
-                "SELECT * "
-                        + "FROM account "
-                        + "WHERE city IN (:cities) "
-                        + "ORDER BY id, city "
-                        + "LIMIT :limit OFFSET :offset ";
-
-        List<Account> accounts = this.namedParameterJdbcTemplate
-                .query(sql, parameters, (rs, rowNum) -> readAccount(rs));
-
-        return new PageImpl<>(accounts, pageable, countAll(parameters));
-    }
-
-    private Long countAll(MapSqlParameterSource params) {
-        return this.namedParameterJdbcTemplate.queryForObject(
-                "SELECT count(id) FROM account WHERE city IN (:cities)",
-                params, Long.class);
-    }
-
-    @Override
-    public List<Account> findByCity(Set<String> cities, int limit) {
+    public List<Account> findTopByCity(Collection<String> cities, int limit) {
         // Use window function to add limit per city
         String sql = "SELECT a.*" +
                 " FROM (select *," +
@@ -280,5 +253,32 @@ public class JdbcAccountRepository implements AccountRepository {
                 "SELECT * FROM account WHERE id in (:ids)" + (forUpdate ? " FOR UPDATE" : ""),
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
+    }
+
+    @Override
+    public Page<Account> findAll(Collection<String> cities, Pageable pageable) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("cities", cities)
+                .addValue("limit", pageable.getPageSize())
+                .addValue("offset", pageable.getOffset());
+
+        String sql =
+                "SELECT * "
+                        + "FROM account "
+                        + "WHERE account.city in (:cities) "
+                        + "ORDER BY id, city "
+                        + "LIMIT :limit OFFSET :offset ";
+
+        List<Account> accounts = this.namedParameterJdbcTemplate
+                .query(sql, parameters, (rs, rowNum) -> readAccount(rs));
+
+        return new PageImpl<>(accounts, pageable, countAll(parameters));
+    }
+
+    private Long countAll(MapSqlParameterSource params) {
+        return this.namedParameterJdbcTemplate.queryForObject(
+                "SELECT count(id) FROM account WHERE city in (:cities)",
+                params,
+                Long.class);
     }
 }

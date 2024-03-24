@@ -71,7 +71,9 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-            logger.info("Finihed '{}'", id);
+            if (!cancelRequested) {
+                logger.info("Finihed '{}'", id);
+            }
 
             return null;
         });
@@ -113,12 +115,16 @@ public class ExecutorTemplate {
 
             activeWorkers.decrementAndGet();
 
-            logger.info("Finihed '{}'", id);
+            if (!cancelRequested) {
+                logger.info("Finihed '{}'", id);
+            }
 
             return null;
         });
         futures.add(future);
+
         logger.info("Started '{}' to run {} times", id, iterations);
+
         return future;
     }
 

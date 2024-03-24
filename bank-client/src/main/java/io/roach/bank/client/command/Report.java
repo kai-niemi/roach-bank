@@ -15,7 +15,7 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.LinkRelations;
-import io.roach.bank.client.command.support.BankClient;
+import io.roach.bank.client.command.support.HypermediaClient;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_SUMMARY_REL;
 import static io.roach.bank.api.LinkRelations.REPORTING_REL;
@@ -25,21 +25,16 @@ import static io.roach.bank.api.LinkRelations.TRANSACTION_SUMMARY_REL;
 @ShellCommandGroup(Constants.REPORTING_COMMANDS)
 public class Report extends AbstractCommand {
     @Autowired
-    private BankClient bankClient;
+    private HypermediaClient bankClient;
 
     @ShellMethod(value = "Report account summary", key = {"report-accounts", "ra"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void reportAccounts(@ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
-            valueProvider = RegionProvider.class) String regions
+    public void reportAccounts(@ShellOption(help = Constants.REGIONS_HELP,
+            defaultValue = Constants.DEFAULT_REGION,
+            valueProvider = RegionProvider.class) String region
     ) {
-        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
-
         final Map<String, Object> parameters = new HashMap<>();
-        if (regionSet.isEmpty()) {
-            regionSet.add(bankClient.getGatewayRegion());
-            console.warn("No region(s) specified - defaulting to gateway region %s", regionSet);
-        }
-        parameters.put("regions", regionSet);
+        parameters.put("region", region);
 
         ResponseEntity<List> accountSummary = bankClient.fromRoot()
                 .follow(LinkRelations.withCurie(REPORTING_REL))
@@ -52,17 +47,12 @@ public class Report extends AbstractCommand {
 
     @ShellMethod(value = "Report transaction summary", key = {"report-transactions", "rt"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void reportTransactions(@ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
-            valueProvider = RegionProvider.class) String regions
+    public void reportTransactions(@ShellOption(help = Constants.REGIONS_HELP,
+            defaultValue = Constants.DEFAULT_REGION,
+            valueProvider = RegionProvider.class) String region
     ) {
-        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
-
         final Map<String, Object> parameters = new HashMap<>();
-        if (regionSet.isEmpty()) {
-            regionSet.add(bankClient.getGatewayRegion());
-            console.warn("No region(s) specified - defaulting to gateway region %s", regionSet);
-        }
-        parameters.put("regions", regionSet);
+        parameters.put("region", region);
 
         ResponseEntity<List> transactionSummary = bankClient.fromRoot()
                 .follow(LinkRelations.withCurie(REPORTING_REL))

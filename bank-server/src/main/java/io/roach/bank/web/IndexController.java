@@ -1,5 +1,9 @@
 package io.roach.bank.web;
 
+import io.roach.bank.web.account.AccountController;
+import io.roach.bank.web.config.ConfigurationController;
+import io.roach.bank.web.transaction.TransactionController;
+import io.roach.bank.web.transaction.TransferController;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.http.ResponseEntity;

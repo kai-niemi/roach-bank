@@ -1,45 +1,4 @@
-package io.roach.bank.web;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.mediatype.Affordances;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+package io.roach.bank.web.account;
 
 import io.roach.bank.api.AccountBatchForm;
 import io.roach.bank.api.AccountForm;
@@ -54,6 +13,43 @@ import io.roach.bank.repository.RegionRepository;
 import io.roach.bank.service.AccountService;
 import io.roach.bank.web.support.FollowLocation;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.cockroachdb.annotations.Retryable;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.mediatype.Affordances;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -64,9 +60,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Value("${roachbank.report-query-timeout}")
-    private int reportQueryTimeoutSeconds;
 
     @Value("${roachbank.default-account-limit}")
     private int defaultAccountLimit;
@@ -83,9 +76,6 @@ public class AccountController {
     @Autowired
     private RegionRepository metadataRepository;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     @GetMapping
     public MessageModel index() {
         MessageModel index = new MessageModel("Monetary account resource");
@@ -94,17 +84,12 @@ public class AccountController {
                 .index()).withSelfRel());
 
         index.add(linkTo(methodOn(getClass())
-                .listAccounts(null, null, null))
+                .listAccounts(null,null))
                 .withRel(LinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("Collection of accounts"));
 
         index.add(linkTo(methodOn(getClass())
                 .listTopAccounts(null, null))
-                .withRel(LinkRelations.ACCOUNT_TOP
-                ).withTitle("Collection of top accounts grouped by region"));
-
-        index.add(linkTo(methodOn(getClass())
-                .listTopAccounts(Collections.emptySet(), -1))
                 .withRel(LinkRelations.ACCOUNT_TOP
                 ).withTitle("Collection of top accounts grouped by region"));
 
@@ -124,38 +109,46 @@ public class AccountController {
     @GetMapping(value = "/top")
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccounts(
-            @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
+            @RequestParam(value = "region", defaultValue = "all", required = false) String region,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
         limit = limit <= 0 ? this.defaultAccountLimit : limit;
 
-        final Set<String> cities = metadataRepository.listCities(regions);
+        List<String> regions = "gateway".equals(region)
+                ? List.of(metadataRepository.getGatewayRegion())
+                : "all".equals(region)
+                ? List.of() : List.of(region);
+
+        Collection<String> cities = metadataRepository.listCities(metadataRepository.listRegions(regions));
+        logger.info("Found [{}] in regions [{}]", cities, regions);
+
         if (cities.isEmpty()) {
-            logger.warn("No cities found matching regions {}", regions);
             return ResponseEntity.ok()
                     .body(CollectionModel.empty(AccountModel.class));
         }
-        logger.info("Found {} cities matching regions {}", cities, regions);
 
-        List<Account> accounts = accountService.findAccountsByCity(cities, limit);
-
-        logger.info("Found {} accounts total using limit {} per city", accounts.size(), limit);
+        List<Account> accounts = accountService.findTopAccountsByCity(cities, limit);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Client-side caching
                 .body(accountResourceAssembler.toCollectionModel(accounts));
     }
 
-    @GetMapping(value = "/list")
+    @GetMapping(value = "/all")
     @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public PagedModel<AccountModel> listAccounts(
-            @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions,
-            @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
-            @RequestParam(value = "size", defaultValue = "5", required = false) Integer size) {
-        Set<String> cities = metadataRepository.listCities(regions);
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
+            @RequestParam(value = "region", defaultValue = "all", required = false) String region,
+            @PageableDefault(size = 30) Pageable page) {
+        List<String> regions = "gateway".equals(region)
+                ? List.of(metadataRepository.getGatewayRegion())
+                : "all".equals(region)
+                ? List.of() : List.of(region);
+
+        Collection<String> cities = metadataRepository.listCities(metadataRepository.listRegions(regions));
+        logger.info("Found [{}] in regions [{}]", cities, regions);
+
         return pagedResourcesAssembler
-                .toModel(accountService.findAccountsByCity(cities, pageable), accountResourceAssembler);
+                .toModel(accountService.findAll(cities, page), accountResourceAssembler);
     }
 
     @GetMapping(value = "/{id}")

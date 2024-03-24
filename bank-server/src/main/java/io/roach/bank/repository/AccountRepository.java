@@ -1,18 +1,18 @@
 package io.roach.bank.repository;
 
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
+
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
-
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
 
 public interface AccountRepository {
     Account createAccount(Account account);
@@ -35,9 +35,9 @@ public interface AccountRepository {
 
     void deleteAll();
 
-    Page<Account> findByCity(Set<String> cities, Pageable page);
-
-    List<Account> findByCity(Set<String> cities, int limit);
+    List<Account> findTopByCity(Collection<String> cities, int limit);
 
     List<Account> findByIDs(Set<UUID> ids, boolean forUpdate);
+
+    Page<Account> findAll(Collection<String> cities, Pageable page);
 }
