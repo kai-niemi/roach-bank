@@ -24,21 +24,21 @@ public class AccountBalanceUpdateAspect {
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))",
             returning = "transaction")
     public void doAfterTransaction(Transaction transaction) {
-        transaction.getItems().forEach(transactionItem -> {
+        transaction.getItems()
+                .forEach(transactionItem -> {
             Account account = transactionItem.getAccount();
-            if (!account.isByReference()) {
-                AccountPayload.Fields fields = new AccountPayload.Fields();
-                fields.setId(account.getId());
-                fields.setName(account.getName());
-                fields.setBalance(account.getBalance().getAmount());
-                fields.setCurrency(account.getBalance().getCurrency().getCurrencyCode());
-                fields.setCity(transactionItem.getCity());
 
-                AccountPayload payload = new AccountPayload();
-                payload.setAfter(fields);
+            AccountPayload.Fields fields = new AccountPayload.Fields();
+            fields.setId(account.getId());
+            fields.setName(account.getName());
+            fields.setBalance(account.getBalance().getAmount());
+            fields.setCurrency(account.getBalance().getCurrency().getCurrencyCode());
+            fields.setCity(account.getCity());
 
-                webSocketPublisher.publish(payload);
-            }
+            AccountPayload payload = new AccountPayload();
+            payload.setAfter(fields);
+
+            webSocketPublisher.publishAsync(payload);
         });
     }
 }

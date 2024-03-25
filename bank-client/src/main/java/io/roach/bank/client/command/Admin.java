@@ -21,7 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.client.command.support.Console;
-import io.roach.bank.client.command.support.BankClient;
+import io.roach.bank.client.command.support.HypermediaClient;
 import io.roach.bank.client.command.support.DurationFormat;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
@@ -35,7 +35,7 @@ public class Admin implements Quit.Command {
     private ConfigurableApplicationContext applicationContext;
 
     @Autowired
-    private BankClient bankClient;
+    private HypermediaClient bankClient;
 
     @Autowired
     private Console console;

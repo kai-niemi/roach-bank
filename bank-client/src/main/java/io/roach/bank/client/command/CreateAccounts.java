@@ -1,8 +1,8 @@
 package io.roach.bank.client.command;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import io.roach.bank.api.AccountBatchForm;
+import io.roach.bank.client.command.support.ExecutorTemplate;
+import io.roach.bank.client.command.support.HypermediaClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +11,11 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.util.StringUtils;
 
-import io.roach.bank.api.AccountBatchForm;
-import io.roach.bank.client.command.support.ExecutorTemplate;
-import io.roach.bank.client.command.support.BankClient;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_BATCH_FORM_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
@@ -25,7 +25,7 @@ import static io.roach.bank.api.LinkRelations.withCurie;
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class CreateAccounts extends AbstractCommand {
     @Autowired
-    private BankClient bankClient;
+    private HypermediaClient bankClient;
 
     @Autowired
     private ExecutorTemplate executorTemplate;
@@ -37,19 +37,14 @@ public class CreateAccounts extends AbstractCommand {
             @ShellOption(help = "batch size", defaultValue = "128") int batchSize,
             @ShellOption(help = "initial balance per account", defaultValue = "25000.00") String balance,
             @ShellOption(help = "account currency", defaultValue = "USD") String currency,
-            @ShellOption(help = Constants.REGIONS_HELP, defaultValue = Constants.EMPTY,
-                    valueProvider = RegionProvider.class) String regions
+            @ShellOption(help = Constants.REGIONS_HELP,
+                    defaultValue = Constants.DEFAULT_REGION,
+                    valueProvider = RegionProvider.class) String region
     ) {
-        final Set<String> regionSet = StringUtils.commaDelimitedListToSet(regions);
-
         final Map<String, Object> parameters = new HashMap<>();
-        if (regionSet.isEmpty()) {
-            regionSet.add(bankClient.getGatewayRegion());
-            console.warn("No region(s) specified - defaulting to gateway region %s", regionSet);
-        }
-        parameters.put("regions", regionSet);
+        parameters.put("region", region);
 
-        final Collection<String> cities = bankClient.getRegionCities(regionSet);
+        final Collection<String> cities = bankClient.getRegionCities(region);
 
         logger.info("Found {} cities: {}", cities.size(), cities);
 
@@ -80,7 +75,7 @@ public class CreateAccounts extends AbstractCommand {
             logger.info("Creating {} accounts for city '{}' using {} batches",
                     numAccounts, city, numAccounts / batchSize);
 
-            executorTemplate.runAsync(city + " (accounts)", worker, numAccounts / batchSize);
+            executorTemplate.runAsync(city + " (" + region + ")", worker, numAccounts / batchSize);
         }
     }
 }

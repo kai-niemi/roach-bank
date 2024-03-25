@@ -1,4 +1,4 @@
-package io.roach.bank.web;
+package io.roach.bank.web.transaction;
 
 import java.util.UUID;
 

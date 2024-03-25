@@ -53,10 +53,6 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
     @NotBlank
     private String transactionType;
 
-    private boolean smokeTest;
-
-    private boolean updateRunningBalance;
-
     @NotNull
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -74,14 +70,6 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
 
     public UUID getUuid() {
         return uuid;
-    }
-
-    public boolean isUpdateRunningBalance() {
-        return updateRunningBalance;
-    }
-
-    public void setUpdateRunningBalance(boolean updateRunningBalance) {
-        this.updateRunningBalance = updateRunningBalance;
     }
 
     public String getCity() {
@@ -102,10 +90,6 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
 
     public List<AccountItem> getAccountLegs() {
         return Collections.unmodifiableList(accountLegs);
-    }
-
-    public boolean isSmokeTest() {
-        return smokeTest;
     }
 
     public static class Builder {
@@ -133,16 +117,6 @@ public class TransactionForm extends RepresentationModel<TransactionForm> {
 
         public Builder withTransferDate(LocalDate transferDate) {
             this.instance.transferDate = transferDate;
-            return this;
-        }
-
-        public Builder withUpdateRunningBalance() {
-            this.instance.updateRunningBalance = true;
-            return this;
-        }
-
-        public Builder withSmokeTest() {
-            this.instance.smokeTest = true;
             return this;
         }
 

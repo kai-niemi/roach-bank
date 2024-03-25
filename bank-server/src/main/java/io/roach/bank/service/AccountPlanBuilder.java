@@ -1,9 +1,9 @@
 package io.roach.bank.service;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
-
+import io.roach.bank.api.AccountType;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.config.AccountPlan;
+import io.roach.bank.repository.RegionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import io.roach.bank.api.AccountType;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.config.AccountPlan;
-import io.roach.bank.repository.RegionRepository;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class AccountPlanBuilder {
@@ -36,20 +34,6 @@ public class AccountPlanBuilder {
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED) // Implicit
     public void buildAccountPlan() {
-        logger.info(">> Setup account plan: {}", accountPlan);
-
-        transactionTemplate.executeWithoutResult(transactionStatus -> {
-            logger.info("Available regions:");
-
-            metadataRepository.listRegions().forEach(region -> {
-                logger.info("Name: {}\nCity Groups: {}\nCities: {}",
-                        region.getName(),
-                        region.getCityGroups(),
-                        region.getCities());
-
-            });
-        });
-
         if (accountPlan.isClearAtStartup()) {
             logger.info("Clear existing accounts");
             clearAccounts();
@@ -58,16 +42,11 @@ public class AccountPlanBuilder {
         if (transactionTemplate.execute(status -> metadataRepository.hasAccountPlan())) {
             logger.info("Account plan already exist - skip");
         } else {
-            Set<String> cities = transactionTemplate.execute(
-                    status -> metadataRepository.listAllCities());
-
-            logger.info("Account plan not found - creating {} accounts in cities: {}",
-                    accountPlan.getAccountsPerCity(), cities);
-
-            cities.parallelStream().forEach(this::createAccounts);
+            metadataRepository.listCities(metadataRepository.listRegions(List.of()))
+                    .parallelStream()
+                    .unordered()
+                    .forEach(this::createAccounts);
         }
-
-        logger.info("<< Account plan ready: {}", accountPlan);
     }
 
     public void clearAccounts() {
@@ -79,11 +58,11 @@ public class AccountPlanBuilder {
     public void createAccounts(String city) {
         Money balance = Money.of(accountPlan.getInitialBalance(), accountPlan.getCurrency());
 
-        logger.info("Creating {} accounts for city '{}' with initial balance {} (total {})",
+        logger.info("Creating %d accounts for city [%s] with initial balance [%s] (total %s)".formatted(
                 accountPlan.getAccountsPerCity(),
                 city,
                 balance,
-                balance.multiply(accountPlan.getAccountsPerCity()));
+                balance.multiply(accountPlan.getAccountsPerCity())));
 
         jdbcTemplate.update(
                 "INSERT INTO account (id, city, balance, currency, name, type, closed, allow_negative, updated_at) "

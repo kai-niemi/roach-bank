@@ -16,18 +16,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
-import static io.roach.bank.api.LinkRelations.*;
+import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
+import static io.roach.bank.api.LinkRelations.ACCOUNT_TOP;
+import static io.roach.bank.api.LinkRelations.CITY_LIST_REL;
+import static io.roach.bank.api.LinkRelations.CONFIG_INDEX_REL;
+import static io.roach.bank.api.LinkRelations.CONFIG_REGION_REL;
+import static io.roach.bank.api.LinkRelations.GATEWAY_REGION_REL;
+import static io.roach.bank.api.LinkRelations.REGION_LIST_REL;
 
-public class BankClient {
+public class HypermediaClient {
     private static final List<MediaType> ACCEPT_TYPES = Arrays.asList(MediaTypes.HAL_JSON);
 
     private final RestTemplate restTemplate;
 
     private URI baseUri;
 
-    public BankClient(RestTemplate restTemplate) {
+    public HypermediaClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -91,12 +104,13 @@ public class BankClient {
     @SuppressWarnings("unchecked")
     public Collection<Region> getRegions() {
         TypeReferences.CollectionModelType<Region> collectionModelType =
-                new TypeReferences.CollectionModelType<>() {};
+                new TypeReferences.CollectionModelType<>() {
+                };
 
         CollectionModel<Region> result = fromRoot()
                 .follow(LinkRelations.withCurie(CONFIG_INDEX_REL))
                 .follow(LinkRelations.withCurie(CONFIG_REGION_REL))
-//                .follow(LinkRelations.withCurie(REGION_LIST_REL))
+                .follow(LinkRelations.withCurie(REGION_LIST_REL))
                 .toObject(collectionModelType);
 
         return result.getContent();
@@ -113,26 +127,23 @@ public class BankClient {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<String> getRegionCities(Set<String> regions) {
+    public Collection<String> getRegionCities(String region) {
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("regions", regions);
+        parameters.put("region", region);
 
-        TypeReferences.CollectionModelType<String> collectionModelType =
-                new TypeReferences.CollectionModelType<>() {};
-
-        CollectionModel<String> rv = fromRoot()
+        List<String> rv = fromRoot()
                 .follow(LinkRelations.withCurie(CONFIG_INDEX_REL))
-                .follow(LinkRelations.withCurie(CONFIG_CITY_GROUP_REL))
+                .follow(LinkRelations.withCurie(CONFIG_REGION_REL))
                 .follow(LinkRelations.withCurie(CITY_LIST_REL))
                 .withTemplateParameters(parameters)
-                .toObject(collectionModelType);
+                .toObject(List.class);
 
-        return rv.getContent();
+        return rv;
     }
 
-    public Map<String, List<AccountModel>> getTopAccounts(Set<String> regions, int limit) {
+    public Map<String, List<AccountModel>> getTopAccounts(String region, int limit) {
         final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("regions", regions);
+        parameters.put("region", region);
         parameters.put("limit", limit);
 
         final Map<String, List<AccountModel>> accounts = new HashMap<>();

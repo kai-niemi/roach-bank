@@ -1,4 +1,4 @@
-package io.roach.bank.web;
+package io.roach.bank.web.admin;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

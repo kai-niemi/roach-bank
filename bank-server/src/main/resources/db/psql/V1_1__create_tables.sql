@@ -18,20 +18,11 @@ create type transaction_type as enum ('GEN','TMP','PAY');
 -- Configuration
 ----------------------
 
-drop table if exists city_group;
-create table city_group
-(
-    name       varchar(255)   not null,
-    city_names varchar[] not null default array[]::varchar[],
-
-    primary key (name)
-);
-
 drop table if exists region;
 create table region
 (
-    name        varchar(255)   not null,
-    city_groups varchar[] not null default array[]::varchar[],
+    name       varchar(255)   not null,
+    city_names varchar[] not null default array[]::varchar[],
 
     primary key (name)
 );

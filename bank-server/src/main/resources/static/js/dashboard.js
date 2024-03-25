@@ -21,28 +21,25 @@ BankDashboard.prototype = {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
 
-        var limit=10;
+        var limit = 10;
         if (urlParams.has('limit')) {
             limit = urlParams.get('limit');
         }
 
+        var region;
         if (urlParams.has('region')) {
-            const region = urlParams.get('region');
-
-            $.get(this.settings.endpoints.topAccounts+"?limit="+limit+"&regions="+region, function (data) {
-                _this.createAccountElements(data['_embedded']['roachbank:account-list']);
-            });
-            $.get(this.settings.endpoints.cities+"?regions="+region, function (data) {
-                _this.createReportElements(data['_embedded']['roachbank:stringList']);
-            });
+            region = urlParams.get('region');
         } else {
-            $.get(this.settings.endpoints.topAccounts+"?limit="+limit, function (data) {
-                _this.createAccountElements(data['_embedded']['roachbank:account-list']);
-            });
-            $.get(this.settings.endpoints.cities, function (data) {
-                _this.createReportElements(data['_embedded']['roachbank:stringList']);
-            });
+            region = "gateway";
         }
+
+        $.get(this.settings.endpoints.accounts + "?region=" + region + "&limit=" + limit, function (data) {
+            _this.createAccountElements(data['_embedded']['roachbank:account-list']);
+        });
+
+        $.get(this.settings.endpoints.cities + "?region=" + region, function (data) {
+            _this.createReportElements(data);
+        });
     },
 
     getElement: function (id) {
@@ -55,45 +52,45 @@ BankDashboard.prototype = {
         _this.accountSpinner.remove();
 
         accounts = data.map(function (account) {
-            var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : account.city);
+            var countryCode = ((_this.settings.regionCountry[account.city]) ? _this.settings.regionCountry[account.city] : 'GEN');
 
             var city = account.city.replace(/\s/g, "_");
 
             return $('<div>')
-                    .attr('id', account.id)
-                    .attr('data-toggle', 'tooltip')
-                    .attr('title', account._links.self.href)
-                    .addClass('box')
-                    .css(_this.boxSize(city, account.balance.amount))
-                    .css({
-                        background: _this.boxColor(account.city)
-                    })
-                    .append(
-                            $('<span>')
-                                    .addClass('amount')
-                                    .text(_this.formatMoney(account.balance.amount, account.balance.currency))
-                    )
-                    .append(
-                            $('<span>')
-                                    .addClass('name')
-                                    .text(account.name)
-                    )
-                    .append(
-                            $('<span>')
-                                    .addClass('city')
-                                    .text(account.city)
-                    )
-                    .append(
-                            $('<span>')
-                                    .addClass('flag')
-                                    .append($('<a>')
-                                            .append(
-                                                    $('<img>')
-                                                            .addClass('img-fluid')
-                                                            .attr("src", "/images/flags/" + countryCode + ".png")
-                                            )
-                                            .attr('href', account._links.self.href))
-                    )
+                .attr('id', account.id)
+                .attr('data-toggle', 'tooltip')
+                .attr('title', account._links.self.href)
+                .addClass('box')
+                .css(_this.boxSize(city, account.balance.amount))
+                .css({
+                    background: _this.boxColor(account.city)
+                })
+                .append(
+                    $('<span>')
+                        .addClass('amount')
+                        .text(_this.formatMoney(account.balance.amount, account.balance.currency))
+                )
+                .append(
+                    $('<span>')
+                        .addClass('name')
+                        .text(account.name)
+                )
+                .append(
+                    $('<span>')
+                        .addClass('city')
+                        .text(account.city)
+                )
+                .append(
+                    $('<span>')
+                        .addClass('flag')
+                        .append($('<a>')
+                            .append(
+                                $('<img>')
+                                    .addClass('img-fluid')
+                                    .attr("src", "/images/flags/" + countryCode + ".png")
+                            )
+                            .attr('href', account._links.self.href))
+                )
         });
 
         this.container.append(accounts);
@@ -105,41 +102,41 @@ BankDashboard.prototype = {
         report = data.map(function (city) {
             city = city.replace(/\s/g, "_");
             return $('<tr>')
-                    .append(
-                            $('<th>')
-                                    .attr('scope', 'row')
-                                    .text(city)
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', city + "-total-accounts")
-                                    .text("0")
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', city + "-total-transactions")
-                                    .text("0")
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', city + "-total-transaction-legs")
-                                    .text("0")
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', city + "-total-balance")
-                                    .text(_this.formatMoney("0.00", "USD"))
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', city + "-total-turnover")
-                                    .text(_this.formatMoney("0.00", "USD"))
-                    )
-                    .append(
-                            $('<td>')
-                                    .attr('id', city + "-total-checksum")
-                                    .text(_this.formatMoney("0.00", "USD"))
-                    )
+                .append(
+                    $('<th>')
+                        .attr('scope', 'row')
+                        .text(city)
+                )
+                .append(
+                    $('<td>')
+                        .attr('id', city + "-total-accounts")
+                        .text("0")
+                )
+                .append(
+                    $('<td>')
+                        .attr('id', city + "-total-transactions")
+                        .text("0")
+                )
+                .append(
+                    $('<td>')
+                        .attr('id', city + "-total-transaction-legs")
+                        .text("0")
+                )
+                .append(
+                    $('<td>')
+                        .attr('id', city + "-total-balance")
+                        .text(_this.formatMoney("0.00", "USD"))
+                )
+                .append(
+                    $('<td>')
+                        .attr('id', city + "-total-turnover")
+                        .text(_this.formatMoney("0.00", "USD"))
+                )
+                .append(
+                    $('<td>')
+                        .attr('id', city + "-total-checksum")
+                        .text(_this.formatMoney("0.00", "USD"))
+                )
         });
 
         this.reportContainer.append(report);
@@ -147,8 +144,8 @@ BankDashboard.prototype = {
 
     addWebsocketListener: function () {
         var socket = new SockJS(this.settings.endpoints.socket),
-                stompClient = Stomp.over(socket),
-                _this = this;
+            stompClient = Stomp.over(socket),
+            _this = this;
 
         stompClient.connect({}, function (frame) {
             stompClient.subscribe(_this.settings.topics.reportAccountSummary, function (report) {
@@ -169,23 +166,23 @@ BankDashboard.prototype = {
                     var event = JSON.parse(report.body);
 
                     var city = event.city.replace(/\s/g, "_");
-                    _this.handleTransactionSummaryUpdate(city,event);
+                    _this.handleTransactionSummaryUpdate(city, event);
                 }
             });
 
             stompClient.subscribe(_this.settings.topics.reportUpdate, function (report) {
                 var event = JSON.parse(report.body);
-
                 _this.notificationBadge.text(event.message);
             });
 
-            stompClient.subscribe(_this.settings.topics.accounts, function (account) {
-                var event = JSON.parse(account.body); // batch
-
+            stompClient.subscribe(_this.settings.topics.accountUpdate, function (account) {
+                var event = JSON.parse(account.body);
                 event.map(function (item) {
                     var accountElt = _this.getElement(item.id);
                     if (accountElt) {
                         _this.handleAccountBalanceUpdate(accountElt, item);
+                    } else {
+                        console.log("Not found: " + item.id);
                     }
                 });
             });
@@ -198,16 +195,14 @@ BankDashboard.prototype = {
         var balance = item.balance;
         var currency = item.currency;
 
-        // console.log("UPDATE ACCOUNT: " + item.name);
-
         accountElt.find('.amount').text(_this.formatMoney(balance, currency));
-        accountElt.css(_this.boxSize(city, balance));
+        // accountElt.css(_this.boxSize(city, balance));
         accountElt.css({
             background: "red",
             color: "yellow"
         })
 
-        setTimeout(function(){
+        setTimeout(function () {
             accountElt.css({
                 background: _this.boxColor(city),
                 color: "#fff"
@@ -229,18 +224,21 @@ BankDashboard.prototype = {
         var _this = this;
 
         var totalTransactionsSuffix = _this.getElement(
-                city + _this.settings.elements.totalTransactionsSuffix);
+            city + _this.settings.elements.totalTransactionsSuffix);
         var totalTransactionLegsSuffix = _this.getElement(
-                city + _this.settings.elements.totalTransactionLegsSuffix);
+            city + _this.settings.elements.totalTransactionLegsSuffix);
         var totalTurnoverSuffix = _this.getElement(
-                city + _this.settings.elements.totalTurnoverSuffix);
+            city + _this.settings.elements.totalTurnoverSuffix);
         var totalChecksumSuffix = _this.getElement(
-                city + _this.settings.elements.totalChecksumSuffix);
+            city + _this.settings.elements.totalChecksumSuffix);
 
         totalTransactionsSuffix.text(_this.formatNumber(transactionSummary.numberOfTransactions));
         totalTransactionLegsSuffix.text(_this.formatNumber(transactionSummary.numberOfLegs));
-        totalTurnoverSuffix.text(_this.formatMoney(transactionSummary.totalTurnover, transactionSummary.currency));
-        totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
+
+        if (transactionSummary.hasOwnProperty("totalTurnover")) {
+            totalTurnoverSuffix.text(_this.formatMoney(transactionSummary.totalTurnover, transactionSummary.currency));
+            totalChecksumSuffix.text(_this.formatMoney(transactionSummary.totalCheckSum, transactionSummary.currency));
+        }
     },
 
     // Linear interpolation for box size
@@ -258,8 +256,18 @@ BankDashboard.prototype = {
     },
 
     boxSize: function (city, balance) {
-        var minSize=50;
-        var maxSize=120;
+        var size = 50;
+
+        return {
+            width: size + 'px',
+            height: size + 'px',
+            lineHeight: size + 'px'
+        }
+    },
+
+    boxSizeRelative: function (city, balance) {
+        var minSize = 50;
+        var maxSize = 120;
 
         var minBalance = sessionStorage.getItem("account-minBalance-" + city);
         if (minBalance == null) {
@@ -299,7 +307,7 @@ BankDashboard.prototype = {
                 c = [c[0], c[0], c[1], c[1], c[2], c[2]];
             }
             c = '0x' + c.join('');
-            var a=1;
+            var a = 1;
             return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255, a].join(',') + ')';
         }
         return "rgba(1,0.5,1,1)";
@@ -324,8 +332,9 @@ BankDashboard.prototype = {
 document.addEventListener('DOMContentLoaded', function () {
     new BankDashboard({
         endpoints: {
-            topAccounts: '/api/account/top',
-            cities: '/api/config/citygroup/cities',
+            accounts: '/api/account/top',
+            cities: '/api/config/region/cities',
+
             socket: '/roach-bank'
         },
 
@@ -333,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function () {
             reportAccountSummary: '/topic/account-summary',
             reportTransactionSummary: '/topic/transaction-summary',
             reportUpdate: '/topic/report-update',
-            accounts: '/topic/accounts'
+            accountUpdate: '/topic/account-update'
         },
 
         elements: {
@@ -495,7 +504,9 @@ document.addEventListener('DOMContentLoaded', function () {
             'winnipeg': 'CAN',
             'regina': 'CAN',
             'brandon': 'CAN',
-            'dryden': 'CAN'
+            'dryden': 'CAN',
+
+            'pretoria': 'GEN'
         }
     });
 });

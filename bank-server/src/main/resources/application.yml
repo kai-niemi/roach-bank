@@ -60,7 +60,7 @@ spring:
       validation-timeout: 20000
       max-lifetime: 180000
       idle-timeout: 60000
-      maximum-pool-size: 200
+      maximum-pool-size: 500
       minimum-idle: 25
       transaction-isolation: TRANSACTION_SERIALIZABLE
 
@@ -73,7 +73,7 @@ spring:
 #############################
 logging:
   pattern:
-    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr([%logger{39}]){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) [%t] %clr([%logger{39}]){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
     file: "%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:%5p} [%t] %logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
   file:
     name: .log/server.log
@@ -110,14 +110,6 @@ management:
 # HTTP and HTTPS with self-signed cert for webhook sink
 server:
   port: 8090
-#  ssl:
-#    key-store: classpath:cert/bank.p12
-#    key-store-password: secret
-#    key-store-type: pkcs12
-#    key-alias: bank
-#    key-password: secret
-#  gzip:
-#    enabled: true
   error:
     whitelabel:
       enabled: false
@@ -127,19 +119,9 @@ server:
 # Bank server config
 #############################
 roachbank:
-  # Regions to load or 'auto' to detect regions based on CRDB metadata.
-  # First region is designated primary.
-  # Examples:
-  # aws-eu*
-  # azure-*
-  # gcp-*
-  # See: db/common/V1_2__load_metadata.sql
-  regions: auto
   # Default accounts per city scan limit
   default-account-limit: 10
   # Interval of pushing cached balance reports (seconds)
-  report-push-interval: 120
-  # Report / WS push query timeout (seconds)
   report-query-timeout: 120
   # SELECT using '.. FOR UPDATE' locks
   select-for-update: false

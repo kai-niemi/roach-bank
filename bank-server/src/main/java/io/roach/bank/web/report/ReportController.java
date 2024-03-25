@@ -1,11 +1,14 @@
-package io.roach.bank.web;
+package io.roach.bank.web.report;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.roach.bank.api.AccountSummary;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
+import io.roach.bank.api.Region;
+import io.roach.bank.api.TransactionSummary;
+import io.roach.bank.changefeed.ReportPublisher;
+import io.roach.bank.config.CacheConfig;
+import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.repository.ReportingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.cockroachdb.annotations.Retryable;
@@ -14,20 +17,14 @@ import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.roach.bank.api.AccountSummary;
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.MessageModel;
-import io.roach.bank.api.TransactionSummary;
-import io.roach.bank.changefeed.ReportPublisher;
-import io.roach.bank.config.CacheConfig;
-import io.roach.bank.repository.RegionRepository;
-import io.roach.bank.repository.ReportingRepository;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -35,8 +32,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping(value = "/api/report")
 public class ReportController {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     private ReportingRepository reportingRepository;
 
@@ -72,40 +67,60 @@ public class ReportController {
             priority = TransactionPriority.LOW)
     @Retryable
     public Collection<AccountSummary> getAccountSummary(
-            @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
+            @RequestParam(value = "region", defaultValue = "gateway") String region
     ) {
-        Set<String> cities = metadataRepository.listCities(regions);
+        List<String> regions = "gateway".equals(region)
+                ? List.of(metadataRepository.getGatewayRegion())
+                : "all".equals(region)
+                ? List.of() : List.of(region);
+
+        List<Region> regionList = metadataRepository.listRegions(regions);
+        Collection<String> cities = metadataRepository.listCities(regionList);
+
         Collection<AccountSummary> result = new LinkedList<>();
-        cities.forEach((city) -> {
-            result.add(reportingRepository.accountSummary(city));
-        });
+        cities.forEach((city) -> result.add(reportingRepository.accountSummary(city)));
+
         return result;
     }
 
     @GetMapping(value = "/transaction-summary")
     @TransactionBoundary(readOnly = true,
-            timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ),
             priority = TransactionPriority.LOW)
     @Retryable
     public Collection<TransactionSummary> getTransactionSummary(
-            @RequestParam(value = "regions", defaultValue = "", required = false) Set<String> regions
+            @RequestParam(value = "region", defaultValue = "gateway") String region
     ) {
-        Set<String> cities = metadataRepository.listCities(regions);
+        List<String> regions = "gateway".equals(region)
+                ? List.of(metadataRepository.getGatewayRegion())
+                : "all".equals(region)
+                ? List.of() : List.of(region);
+
+        Collection<String> cities = metadataRepository.listCities(metadataRepository.listRegions(regions));
+
         Collection<TransactionSummary> result = new LinkedList<>();
-        cities.forEach((city) -> {
-            result.add(reportingRepository.transactionSummary(city));
-        });
+        cities.forEach((city) -> result.add(reportingRepository.transactionSummary(city)));
+
         return result;
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<String> refreshReport(@RequestParam(value = "region", required = false) String region,
-                                                Model model) {
+    @TransactionBoundary(readOnly = true,
+            timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ),
+            priority = TransactionPriority.LOW)
+    public ResponseEntity<String> refreshReport(
+            @RequestParam(value = "region", defaultValue = "gateway") String region) {
+        List<String> regions = "gateway".equals(region)
+                ? List.of(metadataRepository.getGatewayRegion())
+                : "all".equals(region)
+                ? List.of() : List.of(region);
+        List<Region> regionList = metadataRepository.listRegions(regions);
+
         // Evict caches since it's a user-initated request
         cacheManager.getCache(CacheConfig.CACHE_ACCOUNT_REPORT_SUMMARY).clear();
         cacheManager.getCache(CacheConfig.CACHE_TRANSACTION_REPORT_SUMMARY).clear();
 
-        reportPublisher.publishSummaryAsync("null".equals(region) ? null : region);
+        reportPublisher.publishSummaryAsync(metadataRepository.listCities(regionList));
 
         return ResponseEntity.ok().build();
     }

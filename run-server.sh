@@ -40,39 +40,85 @@ fi
 
 ########################################
 
-fn_print_cyan "Database type, one of:"
-fn_print_blue "     crdb-local - Use CockroachDB JDBC driver connecting to localhost (default)"
-fn_print_blue "     crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud"
-fn_print_blue "   pgjdbc-local - Use PostgreSQL JDBC driver connecting to localhost"
-fn_print_blue "   pgjdbc-cloud - Use PostgreSQL JDBC driver connecting to CockroachDB Cloud"
-fn_print_blue "     psql-local - Use PostgreSQL JDBC driver connecting to PostgreSQL on localhost"
-
-fn_print_cyan "Retry strategy, one of:"
-fn_print_blue "   retry-client - Enables client-side retries with exponential backoff (default)"
-fn_print_blue "   retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)"
-fn_print_blue "retry-savepoint - Enables client-side retries using savepoints"
-fn_print_blue "     retry-none - Disable retries"
-
-fn_print_cyan "Optional:"
-fn_print_blue "            jpa - Enables JPA repositories over JDBC (default)"
-fn_print_blue "         outbox - Enables writing to a transactional outbox table"
-fn_print_blue "          debug - Enables debug features for Thymeleaf"
-
-PS3='Please select profile(s): '
-options=(
-"default"
-"crdb-local" "crdb-cloud" "crdb-dev" "pgjdbc-local" "pgjdbc-cloud" "pgjdbc-dev" "psql-local" "psql-dev"
-"retry-client" "retry-driver" "retry-savepoint" "retry-none"
-"jpa" "outbox" "debug"
-"<Start>" "<Quit>" )
 profiles=default
+
+fn_print_cyan "Datasource option, one of:"
+fn_print_blue "1) pgjdbc-local - Use pgJDBC driver connecting to localhost"
+fn_print_blue "2) pgjdbc-cloud - Use pgJDBC driver connecting to CockroachDB Cloud"
+fn_print_blue "3) pgjdbc-dev - Use pgJDBC driver connecting to dev host (default)"
+fn_print_blue "4) psql-local - Use pgJDBC driver connecting to PostgreSQL on localhost"
+fn_print_blue "5) crdb-local - Use CockroachDB JDBC driver connecting to localhost"
+fn_print_blue "6) crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud"
+fn_print_blue "7) crdb-dev - Use CockroachDB JDBC driver connecting to dev host"
+fn_print_blue "8) psql-dev - Use pgJDBC driver connecting to dev host"
+
+PS3='Please select datasource: '
+options=(
+"pgjdbc-local" "pgjdbc-cloud" "pgjdbc-dev" "psql-local" "crdb-local" "crdb-cloud" "crdb-dev" "psql-dev"
+"<Default>" "<Quit>" )
 
 select option in "${options[@]}"; do
   case $option in
-    "default")
-      profiles=$profiles,crdb-dev,retry-client,jpa
+    "<Default>")
+      profiles=$profiles,pgjdbc-dev
       break
       ;;
+    "<Quit>")
+      exit 0
+      ;;
+    *)
+      profiles=$profiles,$option
+      fn_print_cyan "Selected profile: $profiles"
+      break
+      ;;
+  esac
+done
+
+########################################
+
+fn_print_cyan "Retry option, one of:"
+fn_print_blue "1) retry-client - Enables client-side retries with exponential backoff (default)"
+fn_print_blue "2) retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)"
+fn_print_blue "3) retry-savepoint - Enables client-side retries using savepoints"
+fn_print_blue "4) retry-none - Disable retries"
+
+PS3='Please select retry option: '
+options=(
+"retry-client" "retry-driver" "retry-savepoint" "retry-none"
+"<Default>" "<Quit>" )
+
+select option in "${options[@]}"; do
+  case $option in
+    "<Default>")
+      profiles=$profiles,retry-client
+      break
+      ;;
+    "<Quit>")
+      exit 0
+      ;;
+    *)
+      profiles=$profiles,$option
+      fn_print_cyan "Selected profile: $profiles"
+      break
+      ;;
+  esac
+done
+
+########################################
+
+fn_print_cyan "Optional, any of:"
+fn_print_blue "1) jpa - Enables JPA repositories over JDBC (default)"
+fn_print_blue "2) outbox - Enables writing to a transactional outbox table"
+fn_print_blue "3) debug - Enables debug features for Thymeleaf"
+fn_print_blue "4) verbose - Enables verbose logging"
+
+PS3='Please select profile(s): '
+options=(
+"jpa" "outbox" "debug" "verbose"
+"<Start>" "<Quit>" )
+
+select option in "${options[@]}"; do
+  case $option in
     "<Start>")
       break
       ;;
@@ -81,7 +127,8 @@ select option in "${options[@]}"; do
       ;;
     *)
       profiles=$profiles,$option
-      fn_print_cyan "You chose: $option"
+      fn_print_cyan "Selected profiles: $profiles"
+      fn_print_blue "(Press enter)"
       ;;
   esac
 done

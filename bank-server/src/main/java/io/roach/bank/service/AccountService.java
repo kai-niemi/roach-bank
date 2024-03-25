@@ -1,24 +1,23 @@
 package io.roach.bank.service;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
-
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 public interface AccountService {
     Account createAccount(Account account);
 
     List<UUID> createAccountBatch(Supplier<Account> factory, int batchSize);
 
-    List<Account> findAccountsByCity(Set<String> cities, int limit);
+    List<Account> findTopAccountsByCity(Collection<String> cities, int limit);
 
-    Page<Account> findAccountsByCity(Set<String> cities, Pageable page);
+    Page<Account> findAll(Collection<String> cities, Pageable page);
 
     Account getAccountById(UUID id);
 

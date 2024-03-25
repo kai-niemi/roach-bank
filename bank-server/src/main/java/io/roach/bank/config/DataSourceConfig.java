@@ -1,8 +1,14 @@
 package io.roach.bank.config;
 
-import javax.sql.DataSource;
-
+import com.zaxxer.hikari.HikariDataSource;
+import io.cockroachdb.jdbc.CockroachProperty;
+import io.roach.bank.ProfileNames;
+import net.ttddyy.dsproxy.listener.logging.DefaultQueryLogEntryCreator;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
+import net.ttddyy.dsproxy.listener.logging.SLF4JQueryLoggingListener;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.postgresql.PGProperty;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -14,12 +20,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
-import com.zaxxer.hikari.HikariDataSource;
-
-import io.cockroachdb.jdbc.CockroachProperty;
-import io.roach.bank.ProfileNames;
-import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
@@ -63,11 +64,20 @@ public class DataSourceConfig {
     @Primary
     public DataSource dataSource() {
         DataSource dataSource = primaryDataSource();
-        return new LazyConnectionDataSourceProxy(ProxyDataSourceBuilder.create(dataSource)
-                .name("SQL-Trace")
-                .asJson()
-                .logQueryBySlf4j(SLF4JLogLevel.TRACE, SQL_TRACE_LOGGER)
-                .multiline()
-                .build());
+
+        DefaultQueryLogEntryCreator creator = new DefaultQueryLogEntryCreator();
+        creator.setMultiline(true);
+
+        SLF4JQueryLoggingListener listener = new SLF4JQueryLoggingListener();
+        listener.setLogger(LoggerFactory.getLogger(SQL_TRACE_LOGGER));
+        listener.setLogLevel(SLF4JLogLevel.TRACE);
+        listener.setQueryLogEntryCreator(creator);
+
+        return new LazyConnectionDataSourceProxy(
+                ProxyDataSourceBuilder.create(dataSource)
+                        .name("SQL-Trace")
+                        .asJson()
+                        .listener(listener)
+                        .build());
     }
 }

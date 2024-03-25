@@ -1,4 +1,4 @@
-package io.roach.bank.client;
+package io.roach.bank.client.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

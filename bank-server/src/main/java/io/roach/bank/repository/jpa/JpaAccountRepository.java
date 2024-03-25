@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -131,26 +133,19 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Page<Account> findByCity(Set<String> cities, Pageable page) {
-        return accountRepository.findAll(page, new ArrayList<>(cities));
-    }
-
-    @Override
-    public List<Account> findByCity(Set<String> cities, int limit) {
-        // TODO! window function
-        List<Account> accounts = new ArrayList<>();
-        cities.forEach(city -> {
-            accounts.addAll(entityManager.createQuery("SELECT a FROM Account a WHERE a.city=?1",
-                            Account.class)
-                    .setParameter(1, city)
-                    .setMaxResults(limit)
-                    .getResultList());
-        });
-        return accounts;
+    public List<Account> findTopByCity(Collection<String> cities, int limit) {
+        // Todo!
+        return accountRepository.findAll(cities,
+                PageRequest.ofSize(limit)).getContent();
     }
 
     @Override
     public void deleteAll() {
         accountRepository.deleteAllInBatch();
+    }
+
+    @Override
+    public Page<Account> findAll(Collection<String> cities, Pageable page) {
+        return accountRepository.findAll(cities, page);
     }
 }

@@ -11,9 +11,8 @@ create type transaction_type as enum ('GEN','TMP','PAY');
 ----------------------
 
 -- drop table region;
--- drop table city_group;
 
-create table city_group
+create table region
 (
     name       string   not null,
     city_names string[] not null default ARRAY [],
@@ -21,19 +20,16 @@ create table city_group
     primary key (name)
 );
 
-COMMENT ON COLUMN city_group.name IS 'Name of city group';
-COMMENT ON COLUMN city_group.city_names IS 'Array of city names';
-
-create table region
+-- drop table region_mapping;
+create table region_mapping
 (
-    name        string   not null,
-    city_groups string[] not null default ARRAY [],
-
-    primary key (name)
+    crdb_region string not null primary key,
+    region      string not null
 );
 
-COMMENT ON COLUMN region.name IS 'Name of cloud region matching --locality';
-COMMENT ON COLUMN region.city_groups IS 'Array of city groups for given region';
+alter table region_mapping
+    add constraint fk_mapping_ref_region
+        foreign key (region) references roach_bank.public.region (name);
 
 ----------------------
 -- Main tables

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.roach.bank.changefeed.model.AccountPayload;
-import io.roach.bank.web.AccountController;
+import io.roach.bank.web.account.AccountController;
 import jakarta.annotation.PostConstruct;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -28,9 +28,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class WebSocketPublisher {
     private static final int BATCH_SIZE = 20;
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     private final BlockingQueue<AccountPayload> payloadBuffer = new ArrayBlockingQueue<>(BATCH_SIZE);
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
@@ -72,7 +72,7 @@ public class WebSocketPublisher {
                 while (!Thread.currentThread().isInterrupted()) {
                     List<AccountPayload> payloadBatch = drainAccounts();
                     if (!payloadBatch.isEmpty()) {
-                        simpMessagingTemplate.convertAndSend("/topic/accounts", payloadBatch);
+                        simpMessagingTemplate.convertAndSend(TopicNames.TOPIC_ACCOUNT_UPDATE, payloadBatch);
 
                         eventsSent.increment(payloadBatch.size());
 
@@ -109,7 +109,7 @@ public class WebSocketPublisher {
         return payloads;
     }
 
-    public void publish(AccountPayload accountPayload) {
+    public void publishAsync(AccountPayload accountPayload) {
         if (accountPayload.getId() != null) {
             if (payloadBuffer.offer(accountPayload)) {
                 eventsQueued.increment();

@@ -93,7 +93,7 @@
 <nav class="navbar navbar-expand-md bg-dark sticky-top border-bottom" data-bs-theme="dark">
     <div class="container">
         <a class="navbar-brand d-md-none" href="#">
-            <a><img class="d-inline-block align-content-center"
+            <a href="/"><img class="d-inline-block align-content-center"
                     height="32"
                     src="../static/images/logo_white-32px.png"
                     th:src="@{/images/logo_mark_white.png}"></a>
@@ -109,8 +109,55 @@
             </div>
             <div class="offcanvas-body">
                 <ul class="navbar-nav flex-grow-1 justify-content-between">
-                    <li class="nav-item"><a class="nav-link" href="#">
-                    </a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"></a></li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link disabled" th:switch="${model.viewingGatewayRegion}">
+                            <span th:case="true" class="text-info" th:text="${model.viewRegion}"></span>
+                            <span th:case="false" class="text-warning" th:text="${model.viewRegion}"></span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                           aria-expanded="false"> Region</a>
+
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><h6 class="dropdown-header">Gateway Region</h6></li>
+                            <li><a class="dropdown-item disabled" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><h6 class="dropdown-header">Available Regions</h6></li>
+
+                            <li th:each="region : ${model.regions}">
+                                <a th:href="@{/(region=${region.name},limit=${model.limit})}"
+                                   th:text="${region.name}"
+                                   class="dropdown-item"/>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" th:href="@{/(region='all')}">All</a></li>
+                        </ul>
+                    </li>
+
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                           aria-expanded="false">View</a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><h6 class="dropdown-header">Show accounts per city</h6></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=1)}">1</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=5)}">5</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=10)}">10</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=50)}">50</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=100)}">100</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=150)}">150</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=200)}">200</a></li>
+                        </ul>
+                    </li>
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
@@ -133,52 +180,6 @@
                             <li><a class="dropdown-item" th:href="@{/actuator}">Actuator Endpoints</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-                           aria-expanded="false"> Region</a>
-
-                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Gateway Region</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><h6 class="dropdown-header">Available Regions</h6></li>
-
-                            <li th:each="region : ${model.regions}">
-                                <a th:href="@{/(region=${region.name},limit=${model.limit})}"
-                                   th:text="${region.name}"
-                                   class="dropdown-item"/>
-                            </li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" th:href="@{/}">All</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-                           aria-expanded="false">View</a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
-                            <li><h6 class="dropdown-header">Accounts per city</h6></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=1)}">1</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=5)}">5</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=10)}">10</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=50)}">50</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=100)}">100</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=150)}">150</a></li>
-                            <li><a class="dropdown-item" th:href="@{/(region=${model.viewRegion},limit=200)}">200</a></li>
-                        </ul>
-                    </li>
-                    <!-- -->
-                    <li class="nav-item">
-                        <a class="nav-link disabled" th:switch="${model.viewingGatewayRegion}">
-                            <span th:case="true" class="text-info" th:text="${model.viewRegion}"></span>
-                            <span th:case="false" class="text-warning" th:text="${model.viewRegion}"></span>
-                        </a>
-                    </li>
 
                     <li class="nav-item"><a class="nav-link" href="https://cockroachlabs.cloud">Sign In</a></li>
                 </ul>
@@ -188,7 +189,8 @@
 </nav>
 
 <main>
-    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-body-tertiary">
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-body-tertiary"
+        th:unless="${model.viewRegion == 'all'}">
         <div class="col-md-6 p-lg-5 mx-auto my-5">
             <h1 class="display-3 fw-bold">Roach Bank</h1>
             <h3 class="fw-normal text-muted mb-3">Summary of account totals and turnover</h3>
@@ -218,11 +220,10 @@
         </div>
 
         <div class="product-device shadow-sm d-none d-md-block"></div>
-        <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>
     </div>
 
     <!-- Main container -->
-    <div id="dashboard-container">
+    <div id="dashboard-container" class="position-relative overflow-hidden p-3 p-md-1 m-md-3 text-center bg-body-secondary">
         <div id="account-spinner" class="text-center">
             <div class="spinner-border" role="status">
             </div>

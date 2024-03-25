@@ -1,6 +1,8 @@
 package io.roach.bank.config;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,11 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(25);
 
         return executor;
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    public ScheduledExecutorService scheduledExecutor() {
+        return Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     @Override

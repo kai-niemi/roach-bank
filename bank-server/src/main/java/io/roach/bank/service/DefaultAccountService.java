@@ -1,23 +1,21 @@
 package io.roach.bank.service;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
-
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.AccountRepository;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 @Service
 @Transactional(propagation = Propagation.MANDATORY)
@@ -36,16 +34,6 @@ public class DefaultAccountService implements AccountService {
     @Override
     public List<UUID> createAccountBatch(Supplier<Account> factory, int batchSize) {
         return accountRepository.createAccounts(factory, batchSize);
-    }
-
-    @Override
-    public List<Account> findAccountsByCity(Set<String> cities, int limit) {
-        return accountRepository.findByCity(cities, limit);
-    }
-
-    @Override
-    public Page<Account> findAccountsByCity(Set<String> cities, Pageable page) {
-        return accountRepository.findByCity(cities, page);
     }
 
     @Override
@@ -84,5 +72,15 @@ public class DefaultAccountService implements AccountService {
     @Override
     public void deleteAll() {
         accountRepository.deleteAll();
+    }
+
+    @Override
+    public List<Account> findTopAccountsByCity(Collection<String> cities, int limit) {
+        return accountRepository.findTopByCity(cities, limit);
+    }
+
+    @Override
+    public Page<Account> findAll(Collection<String> cities, Pageable page) {
+        return accountRepository.findAll(cities, page);
     }
 }

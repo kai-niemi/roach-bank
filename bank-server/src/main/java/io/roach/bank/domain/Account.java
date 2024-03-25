@@ -1,11 +1,5 @@
 package io.roach.bank.domain;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.support.Money;
 import jakarta.persistence.AttributeOverride;
@@ -19,7 +13,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PostUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Represents a monetary account like asset, liability, expense, capital accounts and so forth.
@@ -127,9 +125,6 @@ public class Account extends AbstractEntity<UUID> {
     @Column(nullable = false)
     private int allowNegative;
 
-    @Transient
-    private boolean byReference;
-
     protected Account() {
     }
 
@@ -148,14 +143,6 @@ public class Account extends AbstractEntity<UUID> {
     @Override
     public UUID getId() {
         return id;
-    }
-
-    public boolean isByReference() {
-        return byReference;
-    }
-
-    public void setByReference(boolean byReference) {
-        this.byReference = byReference;
     }
 
     public String getCity() {
@@ -203,10 +190,6 @@ public class Account extends AbstractEntity<UUID> {
                 ", accountType=" + accountType +
                 ", balance=" + balance +
                 '}';
-    }
-
-    public String toDisplayString() {
-        return toString();
     }
 
     @Override

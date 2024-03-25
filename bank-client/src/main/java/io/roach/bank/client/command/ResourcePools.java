@@ -12,7 +12,7 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.client.command.support.BankClient;
+import io.roach.bank.client.command.support.HypermediaClient;
 import io.roach.bank.client.command.support.ThreadPoolStats;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
@@ -28,7 +28,7 @@ public class ResourcePools extends AbstractCommand {
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
-    private BankClient bankClient;
+    private HypermediaClient bankClient;
 
     @ShellMethod(value = "Get server connection pool size", key = {"get-pool-size", "gps"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
