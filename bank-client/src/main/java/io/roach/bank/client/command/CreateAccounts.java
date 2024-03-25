@@ -75,7 +75,7 @@ public class CreateAccounts extends AbstractCommand {
             logger.info("Creating {} accounts for city '{}' using {} batches",
                     numAccounts, city, numAccounts / batchSize);
 
-            executorTemplate.runAsync(region + " (" + city + ")", worker, numAccounts / batchSize);
+            executorTemplate.runAsync(city + " (" + region + ")", worker, numAccounts / batchSize);
         }
     }
 }

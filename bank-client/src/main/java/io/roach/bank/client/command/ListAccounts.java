@@ -38,7 +38,7 @@ public class ListAccounts extends AbstractCommand {
                     defaultValue = Constants.DEFAULT_REGION,
                     valueProvider = RegionProvider.class) String region,
             @ShellOption(help = "page number", defaultValue = "0") int page,
-                             @ShellOption(help = "page size", defaultValue = "20") int pageSize) {
+                             @ShellOption(help = "page size", defaultValue = "10") int pageSize) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("page", page);
         parameters.put("size", pageSize);

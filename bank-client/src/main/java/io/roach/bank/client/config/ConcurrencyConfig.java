@@ -21,7 +21,7 @@ public class ConcurrencyConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(500);
         executor.setCorePoolSize(500);
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadNamePrefix("worker-");
+        executor.setThreadNamePrefix("worker");
         return executor;
     }
 

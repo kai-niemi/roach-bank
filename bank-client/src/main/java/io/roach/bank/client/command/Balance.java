@@ -56,7 +56,7 @@ public class Balance extends AbstractCommand {
                                     : withCurie(LinkRelations.ACCOUNT_BALANCE_REL))
                     .get()));
 
-            executorTemplate.runAsync(region + " (" + city + ")",
+            executorTemplate.runAsync(city + " (" + region + ")",
                     () -> bankClient.get(RandomData.selectRandom(links)),
                     DurationFormat.parseDuration(duration));
         });

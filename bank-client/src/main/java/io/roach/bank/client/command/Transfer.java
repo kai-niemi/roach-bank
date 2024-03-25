@@ -1,5 +1,20 @@
 package io.roach.bank.client.command;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.shell.standard.ShellCommandGroup;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
+
 import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.TransactionForm;
@@ -10,20 +25,6 @@ import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.command.support.DurationFormat;
 import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.HypermediaClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellMethodAvailability;
-import org.springframework.shell.standard.ShellOption;
-
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.roach.bank.api.LinkRelations.TRANSFER_FORM_REL;
 
@@ -68,32 +69,25 @@ public class Transfer extends AbstractCommand {
                 .withTemplateParameters(parameters)
                 .asTemplatedLink();
 
-        Map<String, List<AccountModel>> accounts = bankClient.getTopAccounts(region, limit);
-        accounts.forEach((city, accountModels) -> {
-            logger.info("Found {} accounts in city [{}]", accountModels.size(), city);
-            console.success(ListAccounts.printContentTable(accountModels));
-        });
+        bankClient.getTopAccounts(region, limit)
+                .forEach((city, accountModels) -> {
+                    console.success(ListAccounts.printContentTable(accountModels));
 
-        accounts.forEach((city, accountModels) -> {
-            if (iterations > 0) {
-                executorTemplate.runAsync(region + " (" + city + ")",
-                        () -> transferFunds(transferLink, city, accountModels, amount, legs, updateRunningBalance),
-                        iterations
-                );
-            } else {
-                executorTemplate.runAsync(region + " (" + city + ")",
-                        () -> transferFunds(transferLink, city, accountModels, amount, legs, updateRunningBalance),
-                        DurationFormat.parseDuration(duration)
-                );
-            }
-        });
+                    if (iterations > 0) {
+                        executorTemplate.runAsync(city + " (" + region + ")",
+                                () -> transferFunds(transferLink, city, accountModels, amount, legs,
+                                        updateRunningBalance),
+                                iterations
+                        );
+                    } else {
+                        executorTemplate.runAsync(city + " (" + region + ")",
+                                () -> transferFunds(transferLink, city, accountModels, amount, legs,
+                                        updateRunningBalance),
+                                DurationFormat.parseDuration(duration)
+                        );
+                    }
+                });
     }
-
-//    private static <T> Stream<List<T>> chunkedStream(Stream<T> stream, int chunkSize) {
-//        AtomicInteger idx = new AtomicInteger();
-//        return stream.collect(Collectors.groupingBy(x -> idx.getAndIncrement() / chunkSize))
-//                .values().stream();
-//    }
 
     private void transferFunds(Link link,
                                String city,
@@ -120,6 +114,7 @@ public class Transfer extends AbstractCommand {
         }
 
         AtomicInteger c = new AtomicInteger();
+
         RandomData.selectRandomUnique(accounts, legs)
                 .forEach(accountModel -> builder.addLeg()
                         .withId(accountModel.getId())

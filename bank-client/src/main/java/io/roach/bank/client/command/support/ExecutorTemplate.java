@@ -72,7 +72,7 @@ public class ExecutorTemplate {
             activeWorkers.decrementAndGet();
 
             if (!cancelRequested) {
-                logger.info("Finihed '{}'", id);
+                logger.info("Finished '{}'", id);
             }
 
             return null;
@@ -96,8 +96,9 @@ public class ExecutorTemplate {
                     break;
                 }
 
-                for (int fails = 0; ; fails++) { // Repeat indefinately
+                for (int fails = 0; ; fails++) { // Repeat indefinitely
                     final long callTime = context.before();
+
                     try {
                         runnable.run();
                         context.after(callTime, null);
@@ -116,7 +117,7 @@ public class ExecutorTemplate {
             activeWorkers.decrementAndGet();
 
             if (!cancelRequested) {
-                logger.info("Finihed '{}'", id);
+                logger.info("Finished '{}'", id);
             }
 
             return null;

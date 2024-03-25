@@ -1,14 +1,16 @@
 package io.roach.bank.client.command;
 
-import io.roach.bank.client.command.support.HypermediaClient;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.CompletionContext;
 import org.springframework.shell.CompletionProposal;
 import org.springframework.shell.standard.ValueProvider;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.roach.bank.api.Region;
+import io.roach.bank.client.command.support.HypermediaClient;
 
 public class RegionProvider implements ValueProvider {
     @Autowired
@@ -20,18 +22,18 @@ public class RegionProvider implements ValueProvider {
 
         final String gateway = bankClient.getGatewayRegion();
 
-        bankClient.getRegions().forEach((k) -> {
-            CompletionProposal p;
+        for (Region k : bankClient.getRegions()) {
             if (k.getName().equals(gateway)) {
-                p = new CompletionProposal(k.getName())
-                        .description("(GATEWAY) "
+                CompletionProposal p = new CompletionProposal(k.getName())
+                        .description("-> "
                                 + StringUtils.collectionToCommaDelimitedString(k.getCities()));
+                result.add(0, p);
             } else {
-                p = new CompletionProposal(k.getName())
+                CompletionProposal p = new CompletionProposal(k.getName())
                         .description(StringUtils.collectionToCommaDelimitedString(k.getCities()));
+                result.add(p);
             }
-            result.add(p);
-        });
+        }
 
         return result;
     }
