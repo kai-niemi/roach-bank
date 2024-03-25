@@ -56,7 +56,7 @@ public class JdbcRegionRepository implements RegionRepository {
     public Set<String> listCities(Collection<Region> regions) {
         return regions.stream()
                 .flatMap(region -> region.getCities().stream())
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -95,7 +95,8 @@ public class JdbcRegionRepository implements RegionRepository {
         return (rs, rowNum) -> {
             Region region = new Region();
             region.setName(rs.getString("name"));
-            region.setCities(Arrays.asList((String[]) rs.getArray("city_names").getArray()));
+            region.setCities(new TreeSet<>(
+                    Arrays.asList((String[]) rs.getArray("city_names").getArray())));
 
             String databaseRegion = mapBankRegionToDatabaseRegion(region.getName());
             region.setDatabaseRegion(databaseRegion);

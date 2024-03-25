@@ -120,17 +120,21 @@ public class AccountController {
                 ? List.of() : List.of(region);
 
         Collection<String> cities = metadataRepository.listCities(metadataRepository.listRegions(regions));
-        logger.info("Found [{}] in regions [{}]", cities, regions);
-
         if (cities.isEmpty()) {
             return ResponseEntity.ok()
                     .body(CollectionModel.empty(AccountModel.class));
         }
 
         List<Account> accounts = accountService.findTopAccountsByCity(cities, limit);
+        accounts.stream()
+                .limit(10)
+                .forEach(account -> {
+            logger.info("%s %s %s %s".formatted(account.getId(), account.getName(), account.getBalance(), account.getCity()));
+        });
+        logger.info("Cities [%s] limit [%d]".formatted(cities, limit));
 
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES)) // Client-side caching
+                .cacheControl(CacheControl.maxAge(2, TimeUnit.MINUTES)) // Client-side caching
                 .body(accountResourceAssembler.toCollectionModel(accounts));
     }
 

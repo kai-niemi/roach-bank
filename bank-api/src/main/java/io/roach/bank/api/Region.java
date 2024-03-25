@@ -3,6 +3,7 @@ package io.roach.bank.api;
 import org.springframework.hateoas.server.core.Relation;
 
 import java.util.List;
+import java.util.Set;
 
 import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
 import static io.roach.bank.api.LinkRelations.REGION_LIST_REL;
@@ -13,7 +14,7 @@ import static io.roach.bank.api.LinkRelations.REGION_REL;
 public class Region implements Comparable<Region> {
     private String name;
 
-    private List<String> cities;
+    private Set<String> cities;
 
     private String databaseRegion;
 
@@ -46,11 +47,11 @@ public class Region implements Comparable<Region> {
         return this;
     }
 
-    public List<String> getCities() {
+    public Set<String> getCities() {
         return cities;
     }
 
-    public Region setCities(List<String> cities) {
+    public Region setCities(Set<String> cities) {
         this.cities = cities;
         return this;
     }

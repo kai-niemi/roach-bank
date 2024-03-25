@@ -122,8 +122,6 @@ roachbank:
   # Default accounts per city scan limit
   default-account-limit: 10
   # Interval of pushing cached balance reports (seconds)
-  report-push-interval: 120
-  # Report / WS push query timeout (seconds)
   report-query-timeout: 120
   # SELECT using '.. FOR UPDATE' locks
   select-for-update: false

@@ -1,15 +1,12 @@
 package io.roach.bank.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
+import io.roach.bank.api.TransactionForm;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.domain.Transaction;
+import io.roach.bank.domain.TransactionItem;
+import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -22,13 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import io.roach.bank.api.TransactionForm;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
-import io.roach.bank.domain.TransactionItem;
-import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.repository.TransactionRepository;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @Transactional(propagation = Propagation.MANDATORY)
@@ -71,44 +70,25 @@ public class DefaultTransactionService implements TransactionService {
 
         legs.forEach((accountId, value) -> accountIds.add(accountId));
 
-        if (transactionForm.isUpdateRunningBalance()) {
-            legs.forEach((accountId, pair) -> {
-                // Load by reference and mark it to signal lazy-initialized attributes
-                Account account = accountRepository.getAccountReferenceById(accountId);
-                account.setByReference(true);
+        // Load to get the running balance and for front-end push events.
+        List<Account> accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
 
-                transactionBuilder
-                        .andItem()
-                        .withAccount(account)
-                        .withAmount(pair.getFirst())
-                        .withNote(pair.getSecond())
-                        .withRunningBalance(Money.zero(
-                                pair.getFirst().getCurrency())) // Avoid looking up the account, so no running balance
-                        .then();
+        legs.forEach((accountId, pair) -> {
+            Account account = accounts.stream()
+                    .filter(a -> a.getId().equals(accountId))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchAccountException(accountId));
 
-                balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
-            });
-        } else {
-            // Load to get the running balance and for front-end push events.
-            List<Account> accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
+            transactionBuilder
+                    .andItem()
+                    .withAccount(account)
+                    .withRunningBalance(account.getBalance())
+                    .withAmount(pair.getFirst())
+                    .withNote(pair.getSecond())
+                    .then();
 
-            legs.forEach((accountId, pair) -> {
-                Account account = accounts.stream()
-                        .filter(a -> a.getId().equals(accountId))
-                        .findFirst()
-                        .orElseThrow(() -> new NoSuchAccountException(accountId));
-
-                transactionBuilder
-                        .andItem()
-                        .withAccount(account)
-                        .withAmount(pair.getFirst())
-                        .withNote(pair.getSecond())
-                        .withRunningBalance(account.getBalance())
-                        .then();
-
-                balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
-            });
-        }
+            balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
+        });
 
         try {
             accountRepository.updateBalances(balanceUpdates);

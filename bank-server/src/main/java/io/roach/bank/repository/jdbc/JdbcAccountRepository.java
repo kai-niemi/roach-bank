@@ -226,16 +226,19 @@ public class JdbcAccountRepository implements AccountRepository {
 
     @Override
     public List<Account> findTopByCity(Collection<String> cities, int limit) {
-        // Use window function to add limit per city
-        String sql = "SELECT a.*" +
-                " FROM (select *," +
-                "             ROW_NUMBER() over (PARTITION BY city) n" +
-                "      from account) a" +
-                " WHERE a.city IN (:cities) and n <= :limit" +
-                " ORDER BY a.city, a.id";
-
+        // Use CTE window function to sort and limit by city
         return this.namedParameterJdbcTemplate.query(
-                sql,
+                "WITH accounts AS ( " +
+                        "SELECT " +
+                        "*, " +
+                        "ROW_NUMBER() OVER (PARTITION BY city ORDER BY id) n " +
+                        "FROM account " +
+                        "WHERE city IN (:cities) " +
+                        ") " + // CTE end
+                        "SELECT * " +
+                        "FROM accounts " +
+                        "WHERE n <= :limit " +
+                        "ORDER BY city",
                 new MapSqlParameterSource()
                         .addValue("cities", cities)
                         .addValue("limit", limit),

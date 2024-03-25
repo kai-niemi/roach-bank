@@ -52,9 +52,7 @@ public class Transfer extends AbstractCommand {
             @ShellOption(help = Constants.DURATION_HELP,
                     defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "execution iterations (precedence over duration if >0)",
-                    defaultValue = "0") int iterations,
-            @ShellOption(help = "update running balance on accounts (more contention)",
-                    defaultValue = "false") boolean updateRunningBalance
+                    defaultValue = "0") int iterations
     ) {
         if (legs % 2 != 0) {
             console.warn("Account legs must be a multiple of 2");
@@ -75,14 +73,12 @@ public class Transfer extends AbstractCommand {
 
                     if (iterations > 0) {
                         executorTemplate.runAsync(city + " (" + region + ")",
-                                () -> transferFunds(transferLink, city, accountModels, amount, legs,
-                                        updateRunningBalance),
+                                () -> transferFunds(transferLink, city, accountModels, amount, legs),
                                 iterations
                         );
                     } else {
                         executorTemplate.runAsync(city + " (" + region + ")",
-                                () -> transferFunds(transferLink, city, accountModels, amount, legs,
-                                        updateRunningBalance),
+                                () -> transferFunds(transferLink, city, accountModels, amount, legs),
                                 DurationFormat.parseDuration(duration)
                         );
                     }
@@ -93,8 +89,7 @@ public class Transfer extends AbstractCommand {
                                String city,
                                List<AccountModel> accounts,
                                String amount,
-                               int legs,
-                               boolean updateRunningBalance) {
+                               int legs) {
         String[] parts = amount.split("-");
         String minAmount = parts.length > 1 ? parts[0] : amount;
         String maxAmount = parts.length > 1 ? parts[1] : amount;
@@ -108,10 +103,6 @@ public class Transfer extends AbstractCommand {
                 .withTransactionType("GEN")
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now());
-
-        if (updateRunningBalance) {
-            builder.withUpdateRunningBalance();
-        }
 
         AtomicInteger c = new AtomicInteger();
 
