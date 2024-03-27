@@ -4,6 +4,8 @@ import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.Region;
 import io.roach.bank.client.command.Constants;
+import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
+
 import org.springframework.context.event.EventListener;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;

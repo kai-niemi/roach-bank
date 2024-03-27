@@ -110,7 +110,7 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
         metadataRepository.listRegions(List.of())
                 .stream()
-                .filter(region -> region.getDatabaseRegion() != null)
+                .filter(region -> !region.getCities().isEmpty())
                 .forEach(region -> {
                     if (region.isPrimary()) {
                         primary.push(region);

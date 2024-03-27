@@ -132,14 +132,11 @@ public class JdbcRegionRepository implements RegionRepository {
                     parameters,
                     String.class);
         } catch (EmptyResultDataAccessException e) {
-            return null;
+            return bankRegion;
         }
     }
 
     private boolean isPrimary(String databaseRegion) {
-        if (databaseRegion == null) {
-            return false;
-        }
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("region", databaseRegion);
         try {

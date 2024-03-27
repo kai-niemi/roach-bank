@@ -103,13 +103,14 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
+    public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates, String city) {
         int rows = jdbcTemplate.update(
                 "UPDATE account SET balance = account.balance + data_table.balance, updated_at=clock_timestamp() "
                         + "FROM "
                         + "(select unnest(?) as id, unnest(?) as balance) as data_table "
                         + "WHERE account.id=data_table.id "
                         + "AND account.closed=false "
+                        + "AND account.city=? "
                         + "AND (account.balance + data_table.balance) * abs(account.allow_negative-1) >= 0",
                 ps -> {
                     List<UUID> ids = new ArrayList<>();
@@ -123,6 +124,7 @@ public class JdbcAccountRepository implements AccountRepository {
                             .createArrayOf("UUID", ids.toArray()));
                     ps.setArray(2, ps.getConnection()
                             .createArrayOf("DECIMAL", balances.toArray()));
+                    ps.setString(3, city);
                 });
 
         if (rows != balanceUpdates.size()) {
@@ -246,14 +248,16 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findByIDs(Set<UUID> ids, boolean forUpdate) {
+    public List<Account> findByIDs(Set<UUID> ids, String city, boolean forUpdate) {
         Assert.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Expected transaction");
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", ids);
+        parameters.addValue("city", city);
 
         return this.namedParameterJdbcTemplate.query(
-                "SELECT * FROM account WHERE id in (:ids)" + (forUpdate ? " FOR UPDATE" : ""),
+                "SELECT * FROM account WHERE id in (:ids) and city = :city "
+                        + (forUpdate ? " FOR UPDATE" : ""),
                 parameters,
                 (rs, rowNum) -> readAccount(rs));
     }

@@ -5,7 +5,7 @@
 
 title="CockroachDB single region deployment (AZ)"
 # CRDB release version
-releaseversion="v23.2.3"
+releaseversion="v23.2.2"
 # Number of node instances in total including clients
 nodes="7"
 # Nodes hosting CRDB
@@ -31,7 +31,7 @@ machinetypes="Standard_D8_v4"
 # DO NOT EDIT BELOW THIS LINE
 #############################
 
-functionsdir="../common"
+functionsdir="./common"
 
 source "${functionsdir}/core_functions.sh"
 

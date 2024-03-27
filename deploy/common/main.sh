@@ -13,8 +13,6 @@ case "$OSTYPE" in
         ;;
 esac
 
-partitionsqlfile="${selfname%.*}.sql"
-
 fn_echo_header
 {
 	echo -e "${lightblue}Cluster id:\t\t${default}$CLUSTER"
@@ -25,7 +23,6 @@ fn_echo_header
 	echo -e "${lightblue}Cloud:\t\t${default}$cloud"
 	echo -e "${lightblue}Machine types:\t\t${default}$machinetypes"
 	echo -e "${lightblue}Zones:\t\t${default}$zones"
-	echo -e "${lightblue}Partition SQL file (if exist):\t\t${default}${partitionsqlfile}"
 } | column -s $'\t' -t
 
 if [ -z "${CLUSTER}" ]; then
@@ -48,12 +45,6 @@ fi
 
 if fn_prompt_yes_no "4/5: Start Bank Servers?" Y; then
   04_start_servers.sh
-fi
-
-if test -f "$partitionsqlfile"; then
-  if fn_prompt_yes_no "5/5: Apply partitioning?" Y; then
-    05_partition.sh
-  fi
 fi
 
 fn_echo_info_nl "Done!"

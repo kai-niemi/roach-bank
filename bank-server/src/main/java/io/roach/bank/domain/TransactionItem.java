@@ -98,9 +98,7 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
     public TransactionItem link(Transaction transaction) {
         this.transaction = transaction;
         this.city = transaction.getCity();
-        this.id = new TransactionItem.Id(
-                Objects.requireNonNull(account.getId()),
-                Objects.requireNonNull(transaction.getId()));
+        this.id = new TransactionItem.Id(account.getId(), transaction.getId());
         return this;
     }
 
@@ -167,6 +165,10 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
 
         public static Id of(UUID accountId, UUID transactionId) {
             return new Id(accountId, transactionId);
+        }
+
+        public void setTransactionId(UUID transactionId) {
+            this.transactionId = transactionId;
         }
 
         public UUID getAccountId() {

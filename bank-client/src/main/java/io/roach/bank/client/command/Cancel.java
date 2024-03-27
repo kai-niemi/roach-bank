@@ -6,13 +6,12 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 import io.roach.bank.client.command.support.CallMetrics;
-import io.roach.bank.client.command.support.ExecutorTemplate;
 
 @ShellComponent
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class Cancel extends AbstractCommand {
     @Autowired
-    private ExecutorTemplate executorTemplate;
+    private AsyncHelper asyncHelper;
 
     @Autowired
     private CallMetrics callMetrics;
@@ -20,6 +19,6 @@ public class Cancel extends AbstractCommand {
     @ShellMethod(value = "Cancel all workers", key = {"cancel", "x"})
     public void cancel() {
         callMetrics.clear();
-        executorTemplate.cancelFutures();
+        asyncHelper.cancelFutures();
     }
 }

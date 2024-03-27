@@ -1,5 +1,6 @@
 package io.roach.bank.repository.jdbc;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,17 +47,25 @@ public class JdbcTransactionRepository implements TransactionRepository {
         final LocalDate bookingDate = transaction.getBookingDate();
         final LocalDate transferDate = transaction.getTransferDate();
 
-        jdbcTemplate.update("INSERT INTO transaction "
-                        + "(id,city,booking_date,transfer_date,transaction_type) "
-                        + "VALUES(?,?,?,?,?::transaction_type)",
-                transaction.getId(),
-                transaction.getCity(),
-                bookingDate != null ? bookingDate : LocalDate.now(),
-                transferDate != null ? transferDate : LocalDate.now(),
-                transaction.getTransactionType()
-        );
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(conn -> {
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO transaction "
+                    + "(city,booking_date,transfer_date,transaction_type) "
+                    + "VALUES(?,?,?,?::transaction_type) returning id::uuid",
+                    PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setObject(1, transaction.getCity());
+            ps.setObject(2, bookingDate != null ? bookingDate : LocalDate.now());
+            ps.setObject(3, transferDate != null ? transferDate : LocalDate.now());
+            ps.setObject(4, transaction.getTransactionType());
+            return ps;
+        }, keyHolder);
+
+        UUID txnId = keyHolder.getKeyAs(UUID.class);
+        transaction.setId(txnId);
 
         final List<TransactionItem> items = transaction.getItems();
+        items.forEach(item -> item.getId().setTransactionId(txnId));
 
         jdbcTemplate.batchUpdate(
                 "INSERT INTO transaction_item "
@@ -63,8 +74,9 @@ public class JdbcTransactionRepository implements TransactionRepository {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         TransactionItem item = items.get(i);
+
                         int idx = 1;
-                        ps.setObject(idx++, item.getId().getTransactionId());
+                        ps.setObject(idx++, txnId);
                         ps.setString(idx++, item.getCity());
                         ps.setObject(idx++, item.getId().getAccountId());
                         ps.setBigDecimal(idx++, item.getAmount().getAmount());
@@ -88,6 +100,14 @@ public class JdbcTransactionRepository implements TransactionRepository {
                 "SELECT * FROM transaction WHERE id=?",
                 (rs, rowNum) -> mapToTransaction(rs),
                 id));
+    }
+
+    @Override
+    public Transaction findTransactionById(UUID id, String city) {
+        return DataAccessUtils.singleResult(this.jdbcTemplate.query(
+                "SELECT * FROM transaction WHERE id=? and city=?",
+                (rs, rowNum) -> mapToTransaction(rs),
+                id, city));
     }
 
     private Transaction mapToTransaction(ResultSet rs) throws SQLException {

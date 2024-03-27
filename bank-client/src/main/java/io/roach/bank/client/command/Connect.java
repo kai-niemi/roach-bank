@@ -20,10 +20,10 @@ import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;
 
-import io.roach.bank.client.command.support.ConnectionUpdatedEvent;
+import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
 
 @ShellComponent
-@ShellCommandGroup(Constants.ADMIN_COMMANDS)
+@ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
 public class Connect extends AbstractCommand {
     private static boolean connected;
 

@@ -60,16 +60,18 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates) {
+    public void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates, String city) {
         balanceUpdates.forEach(pair -> {
             Query q = entityManager.createQuery("UPDATE Account a"
                     + " SET"
                     + "   a.balance.amount = a.balance.amount + ?2"
                     + " WHERE a.id = ?1"
                     + "   AND a.closed=false"
+                    + "   AND a.city=?3"
                     + "   AND (a.balance.amount + ?2) * abs(a.allowNegative-1) >= 0");
             q.setParameter(1, pair.getFirst());
             q.setParameter(2, pair.getSecond());
+            q.setParameter(3, city);
             int r = q.executeUpdate();
             if (r != 1) {
                 throw new IncorrectResultSizeDataAccessException(1, r);
@@ -126,10 +128,10 @@ public class JpaAccountRepository implements AccountRepository {
     }
 
     @Override
-    public List<Account> findByIDs(Set<UUID> ids, boolean forUpdate) {
+    public List<Account> findByIDs(Set<UUID> ids, String city, boolean forUpdate) {
         return forUpdate
-                ? accountRepository.findAllWithLock(ids)
-                : accountRepository.findAll(ids);
+                ? accountRepository.findAllWithLock(ids, city)
+                : accountRepository.findAll(ids, city);
     }
 
     @Override

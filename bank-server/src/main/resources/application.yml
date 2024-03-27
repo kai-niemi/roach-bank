@@ -61,7 +61,7 @@ spring:
       max-lifetime: 180000
       idle-timeout: 60000
       maximum-pool-size: 500
-      minimum-idle: 25
+      minimum-idle: 5
       transaction-isolation: TRANSACTION_SERIALIZABLE
 
 # Hikari defaults:
@@ -132,6 +132,6 @@ roachbank:
     # Number of accounts per city (see db/common/V1_2__load_metadata.sql)
     accounts-per-city: 5000
     # Initial balance per account in same currency
-    initial-balance: "5000.00"
+    initial-balance: "10000.00"
     # Account currency
     currency: USD

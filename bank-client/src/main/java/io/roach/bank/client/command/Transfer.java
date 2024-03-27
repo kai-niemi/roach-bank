@@ -1,7 +1,6 @@
 package io.roach.bank.client.command;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,7 +22,6 @@ import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.command.support.DurationFormat;
-import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.HypermediaClient;
 
 import static io.roach.bank.api.LinkRelations.TRANSFER_FORM_REL;
@@ -35,13 +33,13 @@ public class Transfer extends AbstractCommand {
     private HypermediaClient bankClient;
 
     @Autowired
-    private ExecutorTemplate executorTemplate;
+    private AsyncHelper asyncHelper;
 
     @ShellMethod(value = "Transfer funds between accounts", key = {"t", "transfer"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void transfer(
             @ShellOption(help = "amount range (min/max)",
-                    defaultValue = "0.50-15.00") final String amount,
+                    defaultValue = "0.25-7.50") final String amount,
             @ShellOption(help = "number of legs per transaction",
                     defaultValue = "2") final int legs,
             @ShellOption(help = Constants.ACCOUNT_LIMIT_HELP,
@@ -49,6 +47,9 @@ public class Transfer extends AbstractCommand {
             @ShellOption(help = Constants.REGIONS_HELP,
                     defaultValue = Constants.DEFAULT_REGION,
                     valueProvider = RegionProvider.class) String region,
+            @ShellOption(help = "Filter selection for one specific city (must be in regions)",
+                    defaultValue = ShellOption.NULL,
+                    valueProvider = RegionProvider.class) String city,
             @ShellOption(help = Constants.DURATION_HELP,
                     defaultValue = Constants.DEFAULT_DURATION) String duration,
             @ShellOption(help = "execution iterations (precedence over duration if >0)",
@@ -59,30 +60,50 @@ public class Transfer extends AbstractCommand {
             return;
         }
 
-        final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("region", region);
-
         final Link transferLink = bankClient.fromRoot()
                 .follow(LinkRelations.withCurie(TRANSFER_FORM_REL))
-                .withTemplateParameters(parameters)
                 .asTemplatedLink();
 
-        bankClient.getTopAccounts(region, limit)
-                .forEach((city, accountModels) -> {
-                    console.success(ListAccounts.printContentTable(accountModels));
+        Map<String, List<AccountModel>> top = bankClient.getTopAccounts(region, limit);
 
-                    if (iterations > 0) {
-                        executorTemplate.runAsync(city + " (" + region + ")",
-                                () -> transferFunds(transferLink, city, accountModels, amount, legs),
-                                iterations
-                        );
-                    } else {
-                        executorTemplate.runAsync(city + " (" + region + ")",
-                                () -> transferFunds(transferLink, city, accountModels, amount, legs),
-                                DurationFormat.parseDuration(duration)
-                        );
-                    }
-                });
+        if (city != null) {
+            if (!top.containsKey(city)) {
+                console.warn("City not found in selected regions");
+                return;
+            }
+
+            List<AccountModel> accountModels = top.get(city);
+
+            console.success(ListAccounts.printContentTable(accountModels));
+
+            if (iterations > 0) {
+                asyncHelper.runAsync(city + " (" + region + ")",
+                        () -> transferFunds(transferLink, city, accountModels, amount, legs),
+                        iterations
+                );
+            } else {
+                asyncHelper.runAsync(city + " (" + region + ")",
+                        () -> transferFunds(transferLink, city, accountModels, amount, legs),
+                        DurationFormat.parseDuration(duration)
+                );
+            }
+        } else {
+            top.forEach((c, accountModels) -> {
+                console.success(ListAccounts.printContentTable(accountModels));
+
+                if (iterations > 0) {
+                    asyncHelper.runAsync(c + " (" + region + ")",
+                            () -> transferFunds(transferLink, c, accountModels, amount, legs),
+                            iterations
+                    );
+                } else {
+                    asyncHelper.runAsync(c + " (" + region + ")",
+                            () -> transferFunds(transferLink, c, accountModels, amount, legs),
+                            DurationFormat.parseDuration(duration)
+                    );
+                }
+            });
+        }
     }
 
     private void transferFunds(Link link,

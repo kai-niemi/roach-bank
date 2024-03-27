@@ -1,21 +1,25 @@
 package io.roach.bank.service;
 
-import io.roach.bank.ProfileNames;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.AccountRepository;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.cockroachdb.annotations.TimeTravel;
+import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
+import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
+import io.roach.bank.ProfileNames;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.AccountRepository;
 
 @Service
 @Transactional(propagation = Propagation.MANDATORY)
@@ -75,6 +79,7 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
+    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public List<Account> findTopAccountsByCity(Collection<String> cities, int limit) {
         return accountRepository.findTopByCity(cities, limit);
     }

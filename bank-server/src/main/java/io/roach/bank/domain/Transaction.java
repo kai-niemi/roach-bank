@@ -31,7 +31,6 @@ import jakarta.persistence.Table;
 @Table(name = "transaction")
 @DynamicInsert
 public class Transaction extends AbstractEntity<UUID> {
-    //    @Column(name = "id", updatable = false)
     @Id
     private UUID id;
 
@@ -59,12 +58,10 @@ public class Transaction extends AbstractEntity<UUID> {
     public Transaction() {
     }
 
-    protected Transaction(UUID id,
-                          String city,
+    protected Transaction(String city,
                           String transactionType,
                           LocalDate bookingDate, LocalDate transferDate,
                           List<TransactionItem> items) {
-        this.id = id;
         this.city = city;
         this.transactionType = transactionType;
         this.bookingDate = bookingDate;
@@ -73,8 +70,8 @@ public class Transaction extends AbstractEntity<UUID> {
         this.items.forEach(item -> item.link(this));
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     @PrePersist
@@ -113,6 +110,10 @@ public class Transaction extends AbstractEntity<UUID> {
     public String toString() {
         return "Transaction{" + "id=" + id + ", transactionType='" + transactionType + '\'' + ", transferDate="
                 + transferDate + ", bookingDate=" + bookingDate + ", items=<..>" + '}';
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static final class Builder {
@@ -163,7 +164,7 @@ public class Transaction extends AbstractEntity<UUID> {
         }
 
         public Transaction build() {
-            return new Transaction(id, city, transactionType, bookingDate, transferDate, items);
+            return new Transaction(city, transactionType, bookingDate, transferDate, items);
         }
     }
 }

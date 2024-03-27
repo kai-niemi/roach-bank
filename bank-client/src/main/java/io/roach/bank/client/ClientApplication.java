@@ -1,6 +1,6 @@
 package io.roach.bank.client;
 
-import io.roach.bank.client.command.support.ConnectionUpdatedEvent;
+import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
 import org.springframework.boot.WebApplicationType;

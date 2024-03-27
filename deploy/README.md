@@ -16,11 +16,6 @@ First create a CockroachDB cluster with a cloud provider of choice. There are av
 - Azure
 - GCE
 
-For example:
-
-    cd aws
-    ./aws-multiregion-eu.sh
-
 ## Demo Instructions
 
 Once the cluster is setup and the bank is deployed, you can issue workload commands to create traffic.

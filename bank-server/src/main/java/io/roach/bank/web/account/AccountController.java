@@ -1,18 +1,13 @@
 package io.roach.bank.web.account;
 
-import io.roach.bank.api.AccountBatchForm;
-import io.roach.bank.api.AccountForm;
-import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.AccountType;
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.MessageModel;
-import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.repository.RegionRepository;
-import io.roach.bank.service.AccountService;
-import io.roach.bank.web.support.FollowLocation;
-import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +39,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.roach.bank.api.AccountBatchForm;
+import io.roach.bank.api.AccountForm;
+import io.roach.bank.api.AccountModel;
+import io.roach.bank.api.AccountType;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
+import io.roach.bank.api.support.CockroachFacts;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.service.AccountService;
+import io.roach.bank.util.ConcurrencyUtils;
+import io.roach.bank.web.support.FollowLocation;
+import jakarta.validation.Valid;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -84,7 +87,7 @@ public class AccountController {
                 .index()).withSelfRel());
 
         index.add(linkTo(methodOn(getClass())
-                .listAccounts(null,null))
+                .listAccounts(null, null))
                 .withRel(LinkRelations.ACCOUNT_LIST_REL
                 ).withTitle("Collection of accounts"));
 
@@ -107,35 +110,46 @@ public class AccountController {
     }
 
     @GetMapping(value = "/top")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public ResponseEntity<CollectionModel<AccountModel>> listTopAccounts(
             @RequestParam(value = "region", defaultValue = "all", required = false) String region,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
-        limit = limit <= 0 ? this.defaultAccountLimit : limit;
+        final int finalLimit = limit <= 0 ? this.defaultAccountLimit : limit;
 
         List<String> regions = "gateway".equals(region)
                 ? List.of(metadataRepository.getGatewayRegion())
                 : "all".equals(region)
                 ? List.of() : List.of(region);
 
-        Collection<String> cities = metadataRepository.listCities(metadataRepository.listRegions(regions));
-        if (cities.isEmpty()) {
-            return ResponseEntity.ok()
-                    .body(CollectionModel.empty(AccountModel.class));
-        }
+        final List<Callable<List<Account>>> tasks = new ArrayList<>();
 
-        List<Account> accounts = accountService.findTopAccountsByCity(cities, limit);
-        accounts.stream()
-                .limit(10)
-                .forEach(account -> {
-            logger.info("%s %s %s %s".formatted(account.getId(), account.getName(), account.getBalance(), account.getCity()));
-        });
-        logger.info("Cities [%s] limit [%d]".formatted(cities, limit));
+        metadataRepository.listRegions(regions).forEach(r -> tasks.add(() -> {
+            Collection<String> cities = metadataRepository.listCities(List.of(r));
+            List<Account> accounts = accountService.findTopAccountsByCity(cities, finalLimit);
+            if (logger.isDebugEnabled()) {
+                accounts.stream()
+                        .limit(10)
+                        .forEach(account -> {
+                            logger.debug("%s %s %s %s".formatted(
+                                    account.getId(), account.getName(), account.getBalance(), account.getCity()));
+                        });
+                logger.debug("Cities [%s] limit [%d]".formatted(cities, finalLimit));
+            }
+            return accounts;
+        }));
+
+        final List<Account> availableAccounts = new ArrayList<>();
+
+        // Retrieve accounts per region concurrently with a collective timeout
+        int completions = ConcurrencyUtils.runConcurrentlyAndWait(tasks,
+                5, TimeUnit.SECONDS, availableAccounts::addAll);
+
+        logger.warn("Completed %d of %d account retrieval tasks"
+                .formatted(completions, tasks.size()));
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(2, TimeUnit.MINUTES)) // Client-side caching
-                .body(accountResourceAssembler.toCollectionModel(accounts));
+                .body(accountResourceAssembler.toCollectionModel(availableAccounts));
     }
 
     @GetMapping(value = "/all")

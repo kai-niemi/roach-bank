@@ -1,46 +1,32 @@
 package io.roach.bank.web.transaction;
 
-import io.roach.bank.api.TransactionForm;
-import io.roach.bank.api.TransactionModel;
-import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
-import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.repository.RegionRepository;
-import io.roach.bank.service.BadRequestException;
-import io.roach.bank.service.TransactionService;
-import io.roach.bank.web.support.FollowLocation;
-import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.NestedExceptionUtils;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
 import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.Affordances;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.roach.bank.api.TransactionForm;
+import io.roach.bank.api.TransactionModel;
+import io.roach.bank.domain.Transaction;
+import io.roach.bank.service.BadRequestException;
+import io.roach.bank.service.TransactionService;
+import io.roach.bank.web.support.FollowLocation;
+import jakarta.validation.Valid;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.afford;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -53,59 +39,22 @@ public class TransferController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private TransactionService bankService;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private RegionRepository metadataRepository;
+    private TransactionService transactionService;
 
     @Autowired
     private TransactionResourceAssembler transactionResourceAssembler;
 
     @GetMapping("/form")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
-    public ResponseEntity<TransactionForm> getTransactionRequestForm(
-            @RequestParam(value = "accountsPerRegion", defaultValue = "2", required = false) int accountsPerRegion,
-            @RequestParam(value = "amount", defaultValue = "5.00", required = false) final String amount,
-            @RequestParam(value = "region") String region) {
-
-        if (accountsPerRegion < 2) {
-            throw new BadRequestException("Accounts per region must be >= 2: " + accountsPerRegion);
-        }
-        if (accountsPerRegion % 2 != 0) {
-            throw new BadRequestException("Accounts per region must be a multiple of 2: " + accountsPerRegion);
-        }
-
-        Collection<String> cities = metadataRepository.listCities(
-                metadataRepository.listRegions(List.of(region)));
-
-        List<Account> accounts = accountRepository.findTopByCity(cities, accountsPerRegion);
-        if (accounts.isEmpty()) {
-            throw new BadRequestException("No accounts matching region: " + region);
-        }
-
+    public ResponseEntity<TransactionForm> getTransactionRequestForm() {
         TransactionForm.Builder formBuilder = TransactionForm.builder().withUUID(UUID.randomUUID())
-                .withCity(accounts.iterator().next().getCity())
+                .withCity("city")
                 .withBookingDate(LocalDate.now())
                 .withTransferDate(LocalDate.now())
                 .withTransactionType("GEN");
 
-        AtomicBoolean flip = new AtomicBoolean();
-
-        accounts.forEach(account -> {
-            Money a = Money.of(amount, account.getBalance().getCurrency());
-            if (flip.getAndSet(!flip.get())) {
-                a = a.negate();
-            }
-            formBuilder.addLeg().withId(account.getId()).withAmount(a).withNote(CockroachFacts.nextFact()).then();
-        });
-
-
         Link affordances = Affordances.of(
                         linkTo(methodOn(getClass())
-                                .getTransactionRequestForm(accountsPerRegion, amount, region))
+                                .getTransactionRequestForm())
                                 .withSelfRel()
                                 .andAffordance(afford(methodOn(getClass()).submitTransactionForm(null))))
                 .toLink();
@@ -114,9 +63,7 @@ public class TransferController {
     }
 
     @PostMapping(value = "/form")
-    @TransactionBoundary(
-            priority = TransactionPriority.NORMAL,
-            retryPriority = TransactionPriority.HIGH)
+    @TransactionBoundary(priority = TransactionPriority.NORMAL, retryPriority = TransactionPriority.HIGH)
     @Retryable
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
         if (form.getAccountLegs().size() % 2 != 0) {
@@ -124,31 +71,16 @@ public class TransferController {
                     + form.getAccountLegs().size());
         }
 
-        final UUID idempotencyKey = form.getUuid();
+        Link selfLink = linkTo(methodOn(TransactionController.class)
+                .getTransaction(form.getUuid())).withSelfRel();
 
-        try {
-            Link selfLink = linkTo(methodOn(TransactionController.class)
-                    .getTransaction(idempotencyKey)).withSelfRel();
+        Transaction entity = transactionService.createTransaction(form.getUuid(), form);
 
-            Transaction entity = bankService.createTransaction(idempotencyKey, form);
-
-            if (FollowLocation.ofCurrentRequest()) {
-                return ResponseEntity.created(selfLink.toUri())
-                        .body(transactionResourceAssembler.toModel(entity));
-            }
-
-            return ResponseEntity.created(selfLink.toUri()).build();
-        } catch (DataIntegrityViolationException e) {
-            String msg = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
-
-            if (msg.contains("duplicate key value")) {
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                return ResponseEntity.status(HttpStatus.OK)
-                        .location(linkTo(methodOn(TransactionController.class)
-                                .getTransaction(idempotencyKey)).toUri())
-                        .build();
-            }
-            throw e;
+        if (FollowLocation.ofCurrentRequest()) {
+            return ResponseEntity.created(selfLink.toUri())
+                    .body(transactionResourceAssembler.toModel(entity));
         }
+
+        return ResponseEntity.created(selfLink.toUri()).build();
     }
 }

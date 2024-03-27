@@ -7,8 +7,8 @@ fi
 
 for c in "${clients[@]}"
 do
-    fn_failcheck roachprod put ${CLUSTER}:${c} ../../bank-server/target/bank-server.jar
-    fn_failcheck roachprod put ${CLUSTER}:${c} ../scripts/run_server.sh
+    fn_failcheck roachprod put ${CLUSTER}:${c} ../bank-server/target/bank-server.jar
+    fn_failcheck roachprod put ${CLUSTER}:${c} scripts/run_server.sh
 
     i=($i+1)
 done

@@ -172,6 +172,7 @@ BankDashboard.prototype = {
 
             stompClient.subscribe(_this.settings.topics.reportUpdate, function (report) {
                 var event = JSON.parse(report.body);
+                _this.accountSpinner.remove();
                 _this.notificationBadge.text(event.message);
             });
 

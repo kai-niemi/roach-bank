@@ -31,13 +31,13 @@ public interface AccountRepository {
 
     void openAccount(UUID id);
 
-    void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates);
+    void updateBalances(List<Pair<UUID, BigDecimal>> balanceUpdates, String city);
 
     void deleteAll();
 
     List<Account> findTopByCity(Collection<String> cities, int limit);
 
-    List<Account> findByIDs(Set<UUID> ids, boolean forUpdate);
+    List<Account> findByIDs(Set<UUID> ids, String city, boolean forUpdate);
 
     Page<Account> findAll(Collection<String> cities, Pageable page);
 }

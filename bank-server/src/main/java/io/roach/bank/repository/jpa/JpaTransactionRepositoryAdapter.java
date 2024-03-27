@@ -27,13 +27,20 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
 
     @Override
     public Transaction createTransaction(Transaction transaction) {
+        Transaction t = transactionRepository.save(transaction);
+        transaction.getItems().forEach(transactionItem -> transactionItem.getId().setTransactionId(t.getId()));
         itemRepository.saveAll(transaction.getItems());
-        return transactionRepository.save(transaction);
+        return t;
     }
 
     @Override
     public Transaction findTransactionById(UUID id) {
         return transactionRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Transaction findTransactionById(UUID id, String city) {
+        return transactionRepository.findByIdAndCity(id, city).orElse(null);
     }
 
     @Override

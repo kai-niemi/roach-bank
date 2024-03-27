@@ -13,7 +13,6 @@
     </appender>
 
     <logger name="org.eclipse.jetty" level="WARN"/>
-
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.transaction" level="INFO"/>
     <logger name="org.springframework.web" level="WARN"/>

@@ -99,7 +99,7 @@ public abstract class ConcurrencyUtils {
                 } catch (CancellationException e) {
                     logger.warn("Task cancellation: " + e);
                 } catch (ExecutionException e) {
-                    logger.error("Task fail", e);
+                    logger.warn("Task fail: " + e.getCause());
                 }
                 return false;
             });
@@ -112,6 +112,7 @@ public abstract class ConcurrencyUtils {
             executorService.shutdown();
             cancellationService.shutdown();
         }
+
         return completions.get();
     }
 

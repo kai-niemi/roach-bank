@@ -1,5 +1,6 @@
-package io.roach.bank.client.command.support;
+package io.roach.bank.client.command;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.Map;
@@ -14,16 +15,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 
+import io.roach.bank.client.command.event.ExecutionErrorEvent;
+import io.roach.bank.client.command.support.CallMetrics;
+import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
 import jakarta.annotation.PreDestroy;
 
 @Component
-public class ExecutorTemplate {
+public class AsyncHelper {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final Map<String, AtomicInteger> workers = new ConcurrentHashMap<>();
@@ -38,6 +43,9 @@ public class ExecutorTemplate {
 
     @Autowired
     private CallMetrics callMetrics;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     public Future<Void> runAsync(String id, Runnable runnable, Duration duration) {
         Future<Void> future = threadPoolExecutor.submitListenable(() -> {
@@ -132,29 +140,33 @@ public class ExecutorTemplate {
     private void backoffDelay(int fails, RestClientException ex) {
         try {
             long backoffMillis = Math.min((long) (Math.pow(2, fails) + Math.random() * 1000), 10_000);
+            String message;
             if (ex instanceof HttpStatusCodeException) {
                 HttpStatusCode code = ((HttpStatusCodeException) ex).getStatusCode();
                 if (code.is4xxClientError()) {
-                    logger.warn("HTTP client error {} - backing off {} ms due to: {}",
+                    message = "HTTP client error %s - backing off %d ms due to: %s".formatted(
                             code,
                             backoffMillis,
                             ex.getMessage());
                 } else if (code.is5xxServerError()) {
-                    logger.warn("HTTP server error {} - backing off {} ms due to: {}",
+                    message = "HTTP server error %s - backing off %d ms due to: %s".formatted(
                             code,
                             backoffMillis,
                             ex.getMessage());
                 } else {
-                    logger.warn("HTTP uncategorized error {} - backing off {} ms due to: {}",
+                    message = "HTTP uncategorized error %s - backing off %d ms due to: %s".formatted(
                             code,
                             backoffMillis,
                             ex.getMessage());
                 }
             } else {
-                logger.warn("Communication error - backing off {} ms due to: {}",
+                message = "Communication error - backing off %s ms due to: %s".formatted(
                         backoffMillis,
                         ex.getMessage());
             }
+
+            applicationEventPublisher.publishEvent(new ExecutionErrorEvent(this, message, ex));
+
             TimeUnit.MILLISECONDS.sleep(backoffMillis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

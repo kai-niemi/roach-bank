@@ -1,7 +1,6 @@
 package io.roach.bank.client.command;
 
 import io.roach.bank.api.AccountBatchForm;
-import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.HypermediaClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -28,7 +27,7 @@ public class CreateAccounts extends AbstractCommand {
     private HypermediaClient bankClient;
 
     @Autowired
-    private ExecutorTemplate executorTemplate;
+    private AsyncHelper asyncHelper;
 
     @ShellMethod(value = "Create new accounts", key = {"accounts", "a"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
@@ -75,7 +74,7 @@ public class CreateAccounts extends AbstractCommand {
             logger.info("Creating {} accounts for city '{}' using {} batches",
                     numAccounts, city, numAccounts / batchSize);
 
-            executorTemplate.runAsync(city + " (" + region + ")", worker, numAccounts / batchSize);
+            asyncHelper.runAsync(city + " (" + region + ")", worker, numAccounts / batchSize);
         }
     }
 }

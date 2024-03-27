@@ -1,9 +1,8 @@
 package io.roach.bank.api;
 
-import org.springframework.hateoas.server.core.Relation;
-
-import java.util.List;
 import java.util.Set;
+
+import org.springframework.hateoas.server.core.Relation;
 
 import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
 import static io.roach.bank.api.LinkRelations.REGION_LIST_REL;

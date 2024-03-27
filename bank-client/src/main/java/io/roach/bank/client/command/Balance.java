@@ -4,7 +4,6 @@ import io.roach.bank.api.AccountModel;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.support.RandomData;
 import io.roach.bank.client.command.support.DurationFormat;
-import io.roach.bank.client.command.support.ExecutorTemplate;
 import io.roach.bank.client.command.support.HypermediaClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -15,7 +14,6 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +26,7 @@ public class Balance extends AbstractCommand {
     private HypermediaClient bankClient;
 
     @Autowired
-    private ExecutorTemplate executorTemplate;
+    private AsyncHelper asyncHelper;
 
     @ShellMethod(value = "Read account balance", key = {"b", "balance"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
@@ -56,7 +54,7 @@ public class Balance extends AbstractCommand {
                                     : withCurie(LinkRelations.ACCOUNT_BALANCE_REL))
                     .get()));
 
-            executorTemplate.runAsync(city + " (" + region + ")",
+            asyncHelper.runAsync(city + " (" + region + ")",
                     () -> bankClient.get(RandomData.selectRandom(links)),
                     DurationFormat.parseDuration(duration));
         });

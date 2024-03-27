@@ -1,12 +1,15 @@
 package io.roach.bank.service;
 
-import io.roach.bank.api.TransactionForm;
-import io.roach.bank.api.support.Money;
-import io.roach.bank.domain.Account;
-import io.roach.bank.domain.Transaction;
-import io.roach.bank.domain.TransactionItem;
-import io.roach.bank.repository.AccountRepository;
-import io.roach.bank.repository.TransactionRepository;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -19,15 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import io.roach.bank.api.TransactionForm;
+import io.roach.bank.api.support.Money;
+import io.roach.bank.domain.Account;
+import io.roach.bank.domain.Transaction;
+import io.roach.bank.domain.TransactionItem;
+import io.roach.bank.repository.AccountRepository;
+import io.roach.bank.repository.TransactionRepository;
 
 @Service
 @Transactional(propagation = Propagation.MANDATORY)
@@ -49,14 +50,13 @@ public class DefaultTransactionService implements TransactionService {
             throw new BadRequestException("Must have at least two account legs");
         }
 
-        Transaction t = transactionRepository.findTransactionById(id);
-        if (t != null) {
-            return t;
-        }
+//        Transaction t = transactionRepository.findTransactionById(id, transactionForm.getCity());
+//        if (t != null) {
+//            return t;
+//        }
 
         // Coalesce multi-legged transactions
         final Transaction.Builder transactionBuilder = Transaction.builder()
-                .withId(id)
                 .withCity(transactionForm.getCity())
                 .withTransactionType(transactionForm.getTransactionType())
                 .withBookingDate(transactionForm.getBookingDate())
@@ -71,7 +71,7 @@ public class DefaultTransactionService implements TransactionService {
         legs.forEach((accountId, value) -> accountIds.add(accountId));
 
         // Load to get the running balance and for front-end push events.
-        List<Account> accounts = accountRepository.findByIDs(accountIds, selectForUpdate);
+        List<Account> accounts = accountRepository.findByIDs(accountIds, transactionForm.getCity(), selectForUpdate);
 
         legs.forEach((accountId, pair) -> {
             Account account = accounts.stream()
@@ -90,13 +90,15 @@ public class DefaultTransactionService implements TransactionService {
             balanceUpdates.add(Pair.of(accountId, pair.getFirst().getAmount()));
         });
 
+        Transaction t = transactionRepository.createTransaction(transactionBuilder.build());
+
         try {
-            accountRepository.updateBalances(balanceUpdates);
+            accountRepository.updateBalances(balanceUpdates, transactionForm.getCity());
         } catch (NonTransientDataAccessException e) {
             throw new NegativeBalanceException("Negative balance check failed", e);
         }
 
-        return transactionRepository.createTransaction(transactionBuilder.build());
+        return t;
     }
 
     private Map<UUID, Pair<Money, String>> coalesce(TransactionForm request) {

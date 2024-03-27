@@ -1,12 +1,11 @@
 #!/bin/bash
-# Script for setting up a multi-region Roach Bank cluster using roachprod in either AWS or GCE.
 
 # Configuration
 ########################
 
-title="CockroachDB 3-region EU deployment"
+title="CockroachDB 3-region EU-US deployment"
 # CRDB release version
-releaseversion="v23.2.3"
+releaseversion="v23.2.2"
 # Number of node instances in total including clients
 nodes="12"
 # Nodes hosting CRDB
@@ -14,33 +13,31 @@ crdbnodes="1-9"
 # Array of client nodes (must match size of regions)
 clients=(10 11 12)
 # Array of regions localities (must match zone names)
-regions=('europe-west1' 'europe-west2' 'europe-west3')
+regions=('us-east-1' 'eu-central-1' 'eu-north-1')
 # AWS/GCE cloud (aws|gce)
-cloud="gce"
+cloud="aws"
 # AWS/GCE region zones (must align with nodes count)
 zones="\
-europe-west1-b,\
-europe-west1-c,\
-europe-west1-d,\
-europe-west2-a,\
-europe-west2-b,\
-europe-west2-c,\
-europe-west3-a,\
-europe-west3-b,\
-europe-west3-c,\
-europe-west1-b,\
-europe-west2-a,\
-europe-west3-a"
+us-east-1a,\
+us-east-1b,\
+us-east-1c,\
+eu-central-1a,\
+eu-central-1b,\
+eu-central-1c,\
+eu-north-1a,\
+eu-north-1b,\
+eu-north-1c,\
+us-east-1a,\
+eu-central-1a,\
+eu-north-1a"
 # AWS/GCE machine types
-machinetypes="n2-standard-4"
+machinetypes="m6i.2xlarge"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################
 
-functionsdir="../common"
+functionsdir="./common"
 
 source "${functionsdir}/core_functions.sh"
 
 main.sh
-
-exit 0

@@ -151,18 +151,14 @@ public class MultiRegionController {
 
     @PostMapping(value = "/configure")
     public ResponseEntity<MessageModel> configureMultiRegions() {
-        List<Region> regions = metadataRepository.listRegions(List.of());
-
-        if (regions.size() < 3) {
-            logger.warn("Expected at least 3 regions - found {}", regions.size());
-        }
-
-        multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
         multiRegionRepository.addGlobalTable("region");
         multiRegionRepository.addGlobalTable("region_mapping");
         multiRegionRepository.addRegionalByRowTable("account");
         multiRegionRepository.addRegionalByRowTable("transaction");
         multiRegionRepository.addRegionalByRowTable("transaction_item");
+        multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
+
+        logger.info("Multi-region configuration completed");
 
         MessageModel model = new MessageModel();
         model.setMessage("Configured table localities for multi-region (global and RBR)");

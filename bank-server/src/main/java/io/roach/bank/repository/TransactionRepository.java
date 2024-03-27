@@ -13,6 +13,8 @@ public interface TransactionRepository {
 
     Transaction findTransactionById(UUID id);
 
+    Transaction findTransactionById(UUID id, String city);
+
     TransactionItem findTransactionItemById(TransactionItem.Id id);
 
     Page<Transaction> findTransactions(Pageable pageable);
