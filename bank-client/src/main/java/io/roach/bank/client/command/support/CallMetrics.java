@@ -46,7 +46,7 @@ public class CallMetrics {
                 "op/m",
                 "p90",
                 "p99",
-                "p99.9",
+                "p999",
                 "mean",
                 "ok",
                 "fail"
@@ -60,7 +60,7 @@ public class CallMetrics {
                 separator(10), // opm
                 separator(10), // p90
                 separator(10), // p99
-                separator(10), // p99.9
+                separator(10), // p999
                 separator(10), // mean
                 separator(9), // success
                 separator(9) // fail

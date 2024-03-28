@@ -3,10 +3,13 @@ package io.roach.bank.client.command;
 import io.roach.bank.api.Region;
 import io.roach.bank.client.command.support.HypermediaClient;
 import io.roach.bank.client.command.support.TableUtils;
+import io.roach.bank.domain.SurvivalGoal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ansi.AnsiColor;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
+import org.springframework.shell.standard.EnumValueProvider;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -182,4 +185,26 @@ public class Regions extends AbstractCommand {
 
         logger.info("{}", response);
     }
+
+    @ShellMethod(value = "Set survival goal", key = {"survival-goal", "sg"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void survivalGoal(@ShellOption(help = "survival goal",
+            valueProvider = EnumValueProvider.class) SurvivalGoal survivalGoal) {
+        final Link submitLink = hypermediaClient.fromRoot()
+                .follow(withCurie(CONFIG_INDEX_REL))
+                .follow(withCurie(CONFIG_MULTI_REGION_REL))
+                .follow(withCurie("survival-goal"))
+                .withTemplateParameters(Collections.singletonMap("goal", survivalGoal))
+                .asLink();
+
+        console.textf(AnsiColor.BRIGHT_CYAN, "Set survival goal '%s'", survivalGoal);
+
+        ResponseEntity<String> response = hypermediaClient.put(submitLink, String.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.warn("Unexpected HTTP status: {}", response);
+        }
+
+        logger.info("{}", response);
+    }
+
 }

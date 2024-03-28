@@ -76,7 +76,10 @@ public class MultiRegionController {
                 .configureMultiRegions())
                 .withRel("configure-multiregion")
                 .withTitle("Configure table localities"));
-
+        index.add(linkTo(methodOn(getClass())
+                .setSurvivalGaol(null))
+                .withRel("survival-goal")
+                .withTitle("Configure survival goal"));
 
         return ResponseEntity.ok().body(index);
     }
@@ -165,4 +168,15 @@ public class MultiRegionController {
 
         return ResponseEntity.ok(model);
     }
+
+    @PutMapping(value = "/survival/{goal}")
+    public ResponseEntity<MessageModel> setSurvivalGaol(@PathVariable("goal") SurvivalGoal goal) {
+        multiRegionRepository.setSurvivalGoal(goal);
+
+        MessageModel model = new MessageModel();
+        model.setMessage("Set survival goal: " + goal);
+
+        return ResponseEntity.ok(model);
+    }
+
 }
