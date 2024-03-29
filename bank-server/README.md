@@ -59,6 +59,11 @@ Retry strategy, one of:
 * retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
 * retry-savepoint - Enables client-side retries using savepoints
 * retry-none - Disable retries
+
+Account plan, one of:
+
+* default-plan - Default plan including most world regions
+* demo-plan - Slimmed demo plan
  
 Optional:
 
@@ -66,15 +71,13 @@ Optional:
 * outbox - Enables writing transfer requests to a transactional outbox table
 * dev - Enables debug features for Thymeleaf 
    
-Note: Some features including CDC requires a CockroachDB enterprise license (trial).
-
 Profiles are set during startup with following command line parameter:
 
     java -jar target/bank-server.jar \
     --spring.datasource.url=jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=retry-none,crdb-local  \
+    --spring.profiles.active=retry-none,crdb-local,default-plan  \
     --server.port=8090
 
 PostgreSQL example:
@@ -83,6 +86,6 @@ PostgreSQL example:
     --spring.datasource.url=jdbc:cockroachdb://localhost:5432/roach_bank \
     --spring.datasource.username=postgres \
     --spring.datasource.password=root \
-    --spring.profiles.active=retry-none,psql-local  \
+    --spring.profiles.active=retry-none,psql-local,default-plan  \
     --server.port=8090
     

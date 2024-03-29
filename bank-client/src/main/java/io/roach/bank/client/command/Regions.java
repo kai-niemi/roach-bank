@@ -50,13 +50,13 @@ public class Regions extends AbstractCommand {
 
             @Override
             public int getColumnCount() {
-                return 4;
+                return 5;
             }
 
             @Override
             public Object getValue(int row, int column) {
                 if (row == 0 ) {
-                    return List.of("Name", "Cities", "Primary", "CRDB Region").get(column);
+                    return List.of("Name", "Cities", "Primary", "Secondary", "DB Region").get(column);
                 }
 
                 switch (column) {
@@ -70,6 +70,9 @@ public class Regions extends AbstractCommand {
                         return regions.get(row-1).isPrimary();
                     }
                     case 3 -> {
+                        return regions.get(row-1).isSecondary();
+                    }
+                    case 4 -> {
                         return regions.get(row-1).getDatabaseRegion();
                     }
                     default -> {

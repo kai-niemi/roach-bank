@@ -8,10 +8,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.roach.bank.ApplicationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
 import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
@@ -64,8 +64,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AccountController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${roachbank.default-account-limit}")
-    private int defaultAccountLimit;
+    @Autowired
+    private ApplicationModel applicationModel;
 
     @Autowired
     private AccountService accountService;
@@ -114,7 +114,7 @@ public class AccountController {
             @RequestParam(value = "region", defaultValue = "all", required = false) String region,
             @RequestParam(value = "limit", defaultValue = "-1", required = false) Integer limit
     ) {
-        final int finalLimit = limit <= 0 ? this.defaultAccountLimit : limit;
+        final int finalLimit = limit <= 0 ? applicationModel.getDefaultAccountLimit() : limit;
 
         List<String> regions = "gateway".equals(region)
                 ? List.of(metadataRepository.getGatewayRegion())
@@ -144,7 +144,7 @@ public class AccountController {
         int completions = ConcurrencyUtils.runConcurrentlyAndWait(tasks,
                 5, TimeUnit.SECONDS, availableAccounts::addAll);
 
-        logger.warn("Completed %d of %d account retrieval tasks"
+        logger.debug("Completed %d of %d account retrieval tasks"
                 .formatted(completions, tasks.size()));
 
         return ResponseEntity.ok()

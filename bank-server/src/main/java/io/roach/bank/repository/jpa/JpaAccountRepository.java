@@ -136,9 +136,11 @@ public class JpaAccountRepository implements AccountRepository {
 
     @Override
     public List<Account> findTopByCity(Collection<String> cities, int limit) {
-        // Todo!
-        return accountRepository.findAll(cities,
-                PageRequest.ofSize(limit)).getContent();
+        List<Account> accounts = new ArrayList<>();
+        // No window fnc
+        cities.forEach(c -> accounts.addAll(accountRepository.findAll(List.of(c),
+                PageRequest.ofSize(limit)).getContent()));
+        return accounts;
     }
 
     @Override

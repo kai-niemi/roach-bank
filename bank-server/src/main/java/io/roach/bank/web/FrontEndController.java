@@ -49,12 +49,16 @@ public class FrontEndController {
                 .forEach(viewModel::addRegion);
 
         String gatewayRegion = metadataRepository.getGatewayRegion();
+        String primaryRegion = metadataRepository.getPrimaryRegion().orElse("n/a");
+        String secondaryRegion = metadataRepository.getSecondaryRegion().orElse("n/a");
 
         // Narrow down limit if picking all regions
         viewModel.setLimit("all".equals(region) ? Math.min(10, limit) : limit);
-        viewModel.setViewRegion(region);
+        viewModel.setViewRegion("gateway".equals(region) ? gatewayRegion : region );
         viewModel.setViewingGatewayRegion(gatewayRegion.equalsIgnoreCase(region));
         viewModel.setGatewayRegion(gatewayRegion);
+        viewModel.setPrimaryRegion(primaryRegion);
+        viewModel.setSecondaryRegion(secondaryRegion);
         viewModel.setRandomFact(CockroachFacts.nextFact());
 
         model.addAttribute("model", viewModel);

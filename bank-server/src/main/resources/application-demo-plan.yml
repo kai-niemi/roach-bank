@@ -1,0 +1,25 @@
+#############################
+# Bank server config
+#############################
+bank:
+  default-account-limit: 10
+  report-query-timeout: 120
+  select-for-update: false
+  clear-at-startup: true
+  account-plan:
+    accounts-per-city: 5000
+    initial-balance: "10000.00"
+    currency: USD
+  regions:
+    - name: eu-central-1
+      primary: true
+      cities: "london,amsterdam,rotterdam,berlin,hamburg,frankfurt"
+    - name: eu-north-1
+      cities: "stockholm,copenhagen,helsinki,oslo,riga,tallinn"
+      secondary: true
+    - name: us-east-1
+      cities: "new york,boston,washington dc,miami,charlotte,atlanta"
+  region-mapping:
+    aws-eu-central-1: eu-central-1
+    aws-eu-north-1: eu-north-1
+    aws-us-east-1: us-east-1

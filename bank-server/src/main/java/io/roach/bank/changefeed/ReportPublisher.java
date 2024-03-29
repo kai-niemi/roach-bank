@@ -3,10 +3,10 @@ package io.roach.bank.changefeed;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.ReportUpdate;
 import io.roach.bank.api.TransactionSummary;
+import io.roach.bank.ApplicationModel;
 import io.roach.bank.repository.ReportingRepository;
 import io.roach.bank.util.ConcurrencyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.cockroachdb.annotations.Retryable;
 import org.springframework.data.cockroachdb.annotations.TimeTravel;
@@ -34,8 +34,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ReportPublisher {
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Value("${roachbank.report-query-timeout}")
-    private int reportQueryTimeoutSeconds;
+    @Autowired
+    private ApplicationModel applicationModel;
 
     @Autowired
     @Lazy
@@ -64,7 +64,7 @@ public class ReportPublisher {
 
                 // Retrieve accounts per region concurrently with a collective timeout
                 int completions = ConcurrencyUtils.runConcurrentlyAndWait(tasks,
-                        reportQueryTimeoutSeconds, TimeUnit.SECONDS);
+                        applicationModel.getReportQueryTimeout(), TimeUnit.SECONDS);
 
                 ReportUpdate reportUpdate = new ReportUpdate();
                 reportUpdate.setLastUpdatedAt(LocalDateTime.now());

@@ -4,12 +4,11 @@
 #
 # See README.md for available Spring Profiles
 ##############################################
-
 spring:
+  profiles:
+    active: pgjdbc-local,retry-client,default-plan
   application:
     name: roach-bank
-  profiles:
-    active: pgjdbc-local,retry-client
   output:
     ansi:
       enabled: ALWAYS
@@ -23,7 +22,7 @@ spring:
           max-age: 0
           no-cache: true
           no-store: true
-#############################
+  #############################
   flyway:
     enabled: true
     connect-retries: 15
@@ -83,11 +82,8 @@ logging:
 #############################
 info:
   build:
-    artifact: io.roach.bank.server
     name: Roach Bank
-    description: Accounting ledger based on Spring Boot and CockroachDB
     version: 2.0.0
-    app-label: Roach Bank
 #############################
 management:
   endpoints:
@@ -115,23 +111,3 @@ server:
       enabled: false
     include-stacktrace: always
     include-message: always
-#############################
-# Bank server config
-#############################
-roachbank:
-  # Default accounts per city scan limit
-  default-account-limit: 10
-  # Interval of pushing cached balance reports (seconds)
-  report-query-timeout: 120
-  # SELECT using '.. FOR UPDATE' locks
-  select-for-update: false
-  # Account plan to run workload against
-  account-plan:
-    # (CAUTION) Clear accounts and transactions at startup
-    clear-at-startup: false
-    # Number of accounts per city (see db/common/V1_2__load_metadata.sql)
-    accounts-per-city: 5000
-    # Initial balance per account in same currency
-    initial-balance: "10000.00"
-    # Account currency
-    currency: USD

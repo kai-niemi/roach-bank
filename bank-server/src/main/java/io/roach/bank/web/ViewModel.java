@@ -10,13 +10,17 @@ public class ViewModel {
 
     private String gatewayRegion;
 
+    private String primaryRegion;
+
+    private String secondaryRegion;
+
     private String viewRegion;
 
     private boolean viewingGatewayRegion;
 
     private String randomFact;
 
-    private List<Region> regions = new ArrayList<>();
+    private final List<Region> regions = new ArrayList<>();
 
     public int getLimit() {
         return limit;
@@ -32,6 +36,22 @@ public class ViewModel {
 
     public void setGatewayRegion(String gatewayRegion) {
         this.gatewayRegion = gatewayRegion;
+    }
+
+    public String getPrimaryRegion() {
+        return primaryRegion;
+    }
+
+    public void setPrimaryRegion(String primaryRegion) {
+        this.primaryRegion = primaryRegion;
+    }
+
+    public String getSecondaryRegion() {
+        return secondaryRegion;
+    }
+
+    public void setSecondaryRegion(String secondaryRegion) {
+        this.secondaryRegion = secondaryRegion;
     }
 
     public String getViewRegion() {

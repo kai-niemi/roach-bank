@@ -35,15 +35,27 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
     @Override
     public void addDatabaseRegions(List<Region> regions) {
+        Region primary = regions.stream()
+                .filter(Region::isPrimary)
+                .findFirst().orElseThrow(() -> new IllegalStateException("No primary region defined!"));
+
+        jdbcTemplate.update("ALTER DATABASE roach_bank PRIMARY REGION \"" + primary.getDatabaseRegion() + "\"");
+
         regions.stream()
                 .filter(region -> region.getDatabaseRegion() != null)
                 .forEach(region -> {
-                    if (region.isPrimary()) {
-                        jdbcTemplate.update("ALTER DATABASE roach_bank PRIMARY REGION \"" + region.getDatabaseRegion() + "\"");
-                    } else {
-                        jdbcTemplate.update("ALTER DATABASE roach_bank ADD REGION IF NOT EXISTS \"" + region.getDatabaseRegion() + "\"");
+                    if (!region.isPrimary() && region.isSecondary()) {
+                        jdbcTemplate.update("ALTER DATABASE roach_bank ADD REGION IF NOT EXISTS \""
+                                + region.getDatabaseRegion() + "\"");
                     }
                 });
+
+        regions.stream()
+                .filter(Region::isSecondary)
+                .findFirst()
+                .ifPresent(region ->
+                        jdbcTemplate.update("ALTER DATABASE roach_bank SET SECONDARY REGION \""
+                                + region.getDatabaseRegion() + "\""));
     }
 
     @Override

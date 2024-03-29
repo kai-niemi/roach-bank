@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import io.roach.bank.ApplicationModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +39,8 @@ public class DefaultTransactionService implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    @Value("${roachbank.select-for-update}")
-    private boolean selectForUpdate;
+    @Autowired
+    private ApplicationModel applicationModel;
 
     @Override
     public Transaction createTransaction(UUID id, TransactionForm transactionForm) {
@@ -71,7 +71,7 @@ public class DefaultTransactionService implements TransactionService {
         legs.forEach((accountId, value) -> accountIds.add(accountId));
 
         // Load to get the running balance and for front-end push events.
-        List<Account> accounts = accountRepository.findByIDs(accountIds, transactionForm.getCity(), selectForUpdate);
+        List<Account> accounts = accountRepository.findByIDs(accountIds, transactionForm.getCity(), applicationModel.isSelectForUpdate());
 
         legs.forEach((accountId, pair) -> {
             Account account = accounts.stream()

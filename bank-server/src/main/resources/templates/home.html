@@ -124,16 +124,28 @@
 
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li><h6 class="dropdown-header">Gateway Region</h6></li>
-                            <li><a class="dropdown-item disabled" th:href="@{/(region=${model.gatewayRegion})}" th:text="${model.gatewayRegion}"></a></li>
+                            <li><a class="dropdown-item" th:href="@{/(region=${model.gatewayRegion},limit=${model.limit})}" th:text="${model.gatewayRegion}"></a></li>
+                                                        
+                            <li th:unless="${model.primaryRegion} == 'n/a'"><h6 class="dropdown-header">Primary Region</h6></li>
+                            <li th:unless="${model.primaryRegion} == 'n/a'">
+                                <a class="dropdown-item" th:unless="${model.primaryRegion} == 'n/a'" th:text="${model.primaryRegion}"
+                                   th:href="@{/(region=${model.primaryRegion},limit=${model.limit})}"></a>
+                            </li>
+
+                            <li th:unless="${model.secondaryRegion} == 'n/a'"><h6 class="dropdown-header">Secondary Region</h6></li>
+                            <li th:unless="${model.secondaryRegion} == 'n/a'">
+                                <a class="dropdown-item" th:unless="${model.secondaryRegion} == 'n/a'" th:text="${model.secondaryRegion}"
+                                   th:href="@{/(region=${model.secondaryRegion},limit=${model.limit})}"></a>
+                            </li>
+
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
+
                             <li><h6 class="dropdown-header">Available Regions</h6></li>
 
                             <li th:each="region : ${model.regions}">
-                                <a th:href="@{/(region=${region.name},limit=${model.limit})}"
-                                   th:text="${region.name}"
-                                   class="dropdown-item"/>
+                                <a th:href="@{/(region=${region.name},limit=${model.limit})}" th:text="${region.name}" class="dropdown-item"></a>
                             </li>
 
                             <li>
@@ -193,7 +205,7 @@
 <!--        th:unless="${model.viewRegion == 'all'}">-->
         <div class="col-md-6 p-lg-5 mx-auto my-5">
             <h1 class="display-3 fw-bold">Roach Bank</h1>
-            <h3 class="fw-normal text-muted mb-3">Summary of account totals and turnover</h3>
+            <h3 class="fw-normal text-muted mb-3">Summary of account holdings</h3>
 
             <table class="table table-striped table-bordered table-sm table-hover">
                 <thead>

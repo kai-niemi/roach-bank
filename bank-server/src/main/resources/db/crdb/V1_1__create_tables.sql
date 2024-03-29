@@ -13,8 +13,10 @@ create type transaction_type as enum ('GEN','TMP','PAY');
 -- drop table region;
 create table region
 (
-    name       string   not null,
-    city_names string[] not null default ARRAY [],
+    name         string   not null,
+    city_names   string[] not null default ARRAY [],
+    is_primary   boolean  not null default false,
+    is_secondary boolean  not null default false,
 
     primary key (name)
 );
@@ -96,12 +98,12 @@ alter table account
 alter table account
     add constraint check_account_positive_balance check (balance * abs(allow_negative - 1) >= 0);
 
--- alter table transaction_item
---     add constraint fk_txn_item_ref_transaction
---         foreign key (transaction_id) references transaction (id);
--- alter table transaction_item
---     add constraint fk_txn_item_ref_account
---         foreign key (account_id) references account (id);
--- alter table region_mapping
---     add constraint fk_mapping_ref_region
---         foreign key (region) references roach_bank.public.region (name);
+alter table transaction_item
+    add constraint fk_txn_item_ref_transaction
+        foreign key (transaction_id) references transaction (id);
+alter table transaction_item
+    add constraint fk_txn_item_ref_account
+        foreign key (account_id) references account (id);
+alter table region_mapping
+    add constraint fk_mapping_ref_region
+        foreign key (region) references roach_bank.public.region (name);

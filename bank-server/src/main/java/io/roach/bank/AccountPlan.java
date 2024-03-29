@@ -1,26 +1,17 @@
-package io.roach.bank.config;
+package io.roach.bank;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 
-@Component
-@ConfigurationProperties(prefix = "roachbank.account-plan")
+@Validated
 public class AccountPlan {
-    private boolean clearAtStartup;
-
     private int accountsPerCity;
 
+    @NotNull
     private String initialBalance;
 
+    @NotNull
     private String currency;
-
-    public boolean isClearAtStartup() {
-        return clearAtStartup;
-    }
-
-    public void setClearAtStartup(boolean clearAtStartup) {
-        this.clearAtStartup = clearAtStartup;
-    }
 
     public int getAccountsPerCity() {
         return accountsPerCity;
@@ -49,8 +40,7 @@ public class AccountPlan {
     @Override
     public String toString() {
         return "AccountPlan{" +
-                "clearAtStartup=" + clearAtStartup +
-                ", accountsPerCity=" + accountsPerCity +
+                "accountsPerCity=" + accountsPerCity +
                 ", initialBalance='" + initialBalance + '\'' +
                 ", currency='" + currency + '\'' +
                 '}';

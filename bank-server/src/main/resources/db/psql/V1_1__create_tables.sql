@@ -1,17 +1,19 @@
 -- RoachBank DDL for PostgreSQL 10+
 CREATE EXTENSION if not exists pgcrypto;
 
-drop function if exists gateway_region();
-CREATE FUNCTION gateway_region() RETURNS text
+drop
+function if exists gateway_region();
+CREATE
+FUNCTION gateway_region() RETURNS text
     AS $$ select 'default' $$
     LANGUAGE SQL
     IMMUTABLE
     RETURNS NULL ON NULL INPUT;
 
-drop type if exists account_type cascade ;
+drop type if exists account_type cascade;
 create type account_type as enum ('A', 'L', 'E', 'R', 'C');
 
-drop type if exists transaction_type cascade ;
+drop type if exists transaction_type cascade;
 create type transaction_type as enum ('GEN','TMP','PAY');
 
 ----------------------
@@ -21,17 +23,26 @@ create type transaction_type as enum ('GEN','TMP','PAY');
 drop table if exists region;
 create table region
 (
-    name       varchar(255)   not null,
-    city_names varchar[] not null default array[]::varchar[],
+    name         varchar(255) not null,
+    city_names   varchar[]    not null default array []::varchar[],
+    is_primary   boolean      not null default false,
+    is_secondary boolean      not null default false,
 
     primary key (name)
+);
+
+drop table if exists region_mapping;
+create table region_mapping
+(
+    crdb_region varchar(255) not null primary key,
+    region      varchar(255) not null
 );
 
 ----------------------
 -- Main tables
 ----------------------
 
-drop table  if exists account cascade;
+drop table if exists account cascade;
 create table account
 (
     id             uuid           not null default gen_random_uuid(),
@@ -50,7 +61,7 @@ create table account
 
 create index on account (city);
 
-drop table  if exists transaction cascade;
+drop table if exists transaction cascade;
 create table transaction
 (
     id               uuid             not null default gen_random_uuid(),
@@ -62,7 +73,7 @@ create table transaction
     primary key (id)
 );
 
-drop table  if exists transaction_item cascade;
+drop table if exists transaction_item cascade;
 create table transaction_item
 (
     transaction_id  uuid           not null,
@@ -76,7 +87,7 @@ create table transaction_item
     primary key (transaction_id, account_id)
 );
 
-drop table  if exists outbox cascade;
+drop table if exists outbox cascade;
 create table outbox
 (
     id             uuid         not null default gen_random_uuid(),

@@ -1,11 +1,11 @@
 package io.roach.bank.repository.jdbc;
 
-import io.roach.bank.ProfileNames;
 import io.roach.bank.api.Region;
 import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.util.MetadataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -14,11 +14,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -27,27 +29,30 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.SUPPORTS)
 public class JdbcRegionRepository implements RegionRepository {
     @Autowired
-    private Environment environment;
+    private DataSource dataSource;
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
     public List<Region> listRegions(Collection<String> regions) {
         if (regions.isEmpty()) {
             return this.namedParameterJdbcTemplate.query(
-                    "SELECT name,city_names FROM region",
+                    "SELECT * FROM region",
                     Map.of(),
                     regionRowMapper());
         }
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("regions", regions);
         return this.namedParameterJdbcTemplate.query(
-                "SELECT name,city_names FROM region WHERE name in (:regions)",
+                "SELECT * FROM region WHERE name in (:regions)",
                 parameters,
                 regionRowMapper());
     }
@@ -64,14 +69,14 @@ public class JdbcRegionRepository implements RegionRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("name", region);
         return this.namedParameterJdbcTemplate.queryForObject(
-                "SELECT name,city_names FROM region WHERE name = :name",
+                "SELECT * FROM region WHERE name = :name",
                 parameters,
                 regionRowMapper());
     }
 
     @Override
     public String getGatewayRegion() {
-        if (ProfileNames.acceptsPostgresSQL(environment)) {
+        if (!MetadataUtils.isCockroachDB(dataSource)) {
             return listRegions(List.of()).get(0).getName();
         }
 
@@ -84,11 +89,69 @@ public class JdbcRegionRepository implements RegionRepository {
     }
 
     @Override
-    public boolean hasAccountPlan() {
+    public Optional<String> getPrimaryRegion() {
+        if (MetadataUtils.isCockroachDB(dataSource)) {
+            MapSqlParameterSource parameters = new MapSqlParameterSource();
+            try {
+                return Optional.ofNullable(
+                        mapDatabaseRegionToBankRegion(
+                                this.namedParameterJdbcTemplate.queryForObject(
+                                        "select region from [SHOW REGIONS FROM DATABASE roach_bank] WHERE \"primary\" = true",
+                                        parameters,
+                                        String.class)));
+            } catch (EmptyResultDataAccessException e) {
+                // ok
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getSecondaryRegion() {
+        if (MetadataUtils.isCockroachDB(dataSource)) {
+            MapSqlParameterSource parameters = new MapSqlParameterSource();
+            try {
+                return Optional.ofNullable(
+                        mapDatabaseRegionToBankRegion(this.namedParameterJdbcTemplate.queryForObject(
+                                "select region from [SHOW REGIONS FROM DATABASE roach_bank] WHERE \"secondary\" = true",
+                                parameters,
+                                String.class)));
+            } catch (EmptyResultDataAccessException e) {
+                // ok
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Boolean hasExistingAccountPlan() {
         return this.namedParameterJdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM account LIMIT 1)",
                 Collections.emptyMap(),
                 Boolean.class);
+    }
+
+    @Override
+    public void createRegion(Region region) {
+        jdbcTemplate.update("INSERT INTO region (name,city_names,is_primary,is_secondary) VALUES (?,?,?,?)",
+                ps -> {
+                    Connection conn = ps.getConnection();
+                    ps.setString(1, region.getName());
+                    ps.setArray(2, conn.createArrayOf("VARCHAR", region.getCities().toArray(new String[0])));
+                    ps.setBoolean(3, region.isPrimary());
+                    ps.setBoolean(4, region.isSecondary());
+                });
+    }
+
+    @Override
+    public void createRegionMappings(Map<String, String> mappings) {
+        mappings.forEach((k, v) -> {
+            jdbcTemplate.update("INSERT INTO region_mapping (crdb_region,region) VALUES (?,?)",
+                    ps -> {
+                        ps.setString(1, k);
+                        ps.setString(2, v);
+                    });
+        });
     }
 
     private RowMapper<Region> regionRowMapper() {
@@ -97,11 +160,9 @@ public class JdbcRegionRepository implements RegionRepository {
             region.setName(rs.getString("name"));
             region.setCities(new TreeSet<>(
                     Arrays.asList((String[]) rs.getArray("city_names").getArray())));
-
-            String databaseRegion = mapBankRegionToDatabaseRegion(region.getName());
-            region.setDatabaseRegion(databaseRegion);
-            region.setPrimary(isPrimary(databaseRegion));
-
+            region.setPrimary(rs.getBoolean("is_primary"));
+            region.setSecondary(rs.getBoolean("is_secondary"));
+            region.setDatabaseRegion(mapBankRegionToDatabaseRegion(region.getName()));
             return region;
         };
     }
@@ -122,6 +183,9 @@ public class JdbcRegionRepository implements RegionRepository {
     }
 
     private String mapBankRegionToDatabaseRegion(String bankRegion) {
+        if (!MetadataUtils.isCockroachDB(dataSource)) {
+            return bankRegion;
+        }
         // Look for mapping against bank regions
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("region", bankRegion);
@@ -133,20 +197,6 @@ public class JdbcRegionRepository implements RegionRepository {
                     String.class);
         } catch (EmptyResultDataAccessException e) {
             return bankRegion;
-        }
-    }
-
-    private boolean isPrimary(String databaseRegion) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("region", databaseRegion);
-        try {
-            //noinspection DataFlowIssue
-            return this.namedParameterJdbcTemplate.queryForObject(
-                    "SELECT (primary_region_of[1]='roach_bank') as primary, region FROM [SHOW regions] WHERE region = :region",
-                    parameters,
-                    (rs, rowNum) -> rs.getBoolean(1));
-        } catch (EmptyResultDataAccessException e) {
-            return false;
         }
     }
 }

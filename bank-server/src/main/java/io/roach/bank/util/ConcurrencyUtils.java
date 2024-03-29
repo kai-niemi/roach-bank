@@ -1,5 +1,8 @@
 package io.roach.bank.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +25,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utility for submitting concurrent workers with a collective timeout and
@@ -65,6 +65,10 @@ public abstract class ConcurrencyUtils {
 
     public static <V> int runConcurrentlyAndWait(List<Callable<V>> tasks, long timeout, TimeUnit timeUnit,
                                                  Consumer<V> consumer) {
+        if (timeout <= 0) {
+            throw new IllegalArgumentException("Timeout must be > 0");
+        }
+
         ScheduledExecutorService cancellationService = Executors.newSingleThreadScheduledExecutor();
 
         ExecutorService executorService = new ThreadPoolExecutor(ForkJoinPool.getCommonPoolParallelism(),
@@ -95,9 +99,9 @@ public abstract class ConcurrencyUtils {
                     return true;
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    logger.warn("Task interrupt: " + e);
+                    logger.warn("Task interrupt");
                 } catch (CancellationException e) {
-                    logger.warn("Task cancellation: " + e);
+                    logger.warn("Task cancellation");
                 } catch (ExecutionException e) {
                     logger.warn("Task fail: " + e.getCause());
                 }
@@ -107,7 +111,7 @@ public abstract class ConcurrencyUtils {
         });
 
         try {
-            CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[] {})).join();
+            CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[]{})).join();
         } finally {
             executorService.shutdown();
             cancellationService.shutdown();
@@ -119,12 +123,12 @@ public abstract class ConcurrencyUtils {
     /**
      * Run a set of tasks using a bounded thread pool and awaits completion.
      *
-     * @param numThreads max number of threads
-     * @param tasks number of tasks
-     * @param factoryFn task factory function
+     * @param numThreads   max number of threads
+     * @param tasks        number of tasks
+     * @param factoryFn    task factory function
      * @param completionFn task completion function
-     * @param exceptionFn task exception function
-     * @param <V> task type
+     * @param exceptionFn  task exception function
+     * @param <V>          task type
      */
     public static <V> void runConcurrentlyAndWait(int numThreads,
                                                   int tasks,
@@ -164,7 +168,7 @@ public abstract class ConcurrencyUtils {
             allFutures.add(future);
         });
 
-        CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[] {}))
+        CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[]{}))
                 .join();
 
         executor.shutdown();

@@ -1,5 +1,6 @@
 package io.roach.bank;
 
+import io.roach.bank.service.AccountPlanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +14,12 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-
-import io.roach.bank.service.AccountPlanBuilder;
 
 @Configuration
 @EnableAutoConfiguration(exclude = {
@@ -29,6 +29,7 @@ import io.roach.bank.service.AccountPlanBuilder;
         ErrorMvcAutoConfiguration.class,
         DataSourceAutoConfiguration.class
 })
+@ConfigurationPropertiesScan(basePackageClasses = ServerApplication.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableJpaRepositories(basePackages = {"io.roach"}, enableDefaultTransactions = false)
 @ComponentScan(basePackages = "io.roach")
@@ -49,6 +50,5 @@ public class ServerApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         accountPlanBuilder.buildAccountPlan();
-        logger.info("RoachBank is now open for business - lets invent some $$");
     }
 }

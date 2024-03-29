@@ -19,6 +19,8 @@ public class Region implements Comparable<Region> {
 
     private boolean primary;
 
+    private boolean secondary;
+
     public boolean isPrimary() {
         return primary;
     }
@@ -26,6 +28,14 @@ public class Region implements Comparable<Region> {
     public Region setPrimary(boolean primary) {
         this.primary = primary;
         return this;
+    }
+
+    public boolean isSecondary() {
+        return secondary;
+    }
+
+    public void setSecondary(boolean secondary) {
+        this.secondary = secondary;
     }
 
     public String getDatabaseRegion() {
@@ -58,6 +68,17 @@ public class Region implements Comparable<Region> {
     @Override
     public int compareTo(Region o) {
         return name.compareTo(o.name);
+    }
+
+    @Override
+    public String toString() {
+        return "Region{" +
+                "name='" + name + '\'' +
+                ", cities=" + cities +
+                ", databaseRegion='" + databaseRegion + '\'' +
+                ", primary=" + primary +
+                ", secondary=" + secondary +
+                '}';
     }
 }
 

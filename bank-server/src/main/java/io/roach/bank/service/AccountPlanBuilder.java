@@ -1,72 +1,90 @@
 package io.roach.bank.service;
 
+import io.roach.bank.AccountPlan;
+import io.roach.bank.ApplicationModel;
 import io.roach.bank.api.AccountType;
+import io.roach.bank.api.Region;
 import io.roach.bank.api.support.Money;
-import io.roach.bank.config.AccountPlan;
 import io.roach.bank.repository.RegionRepository;
+import io.roach.bank.util.AsciiArt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
+import java.util.Currency;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class AccountPlanBuilder {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private AccountPlan accountPlan;
+    private ApplicationModel applicationModel;
 
     @Autowired
-    private RegionRepository metadataRepository;
+    private RegionRepository regionRepository;
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED) // Implicit
     public void buildAccountPlan() {
-        if (accountPlan.isClearAtStartup()) {
-            logger.info("Clear existing accounts");
+        logger.info("Using: %s".formatted(applicationModel));
+
+        if (applicationModel.isClearAtStartup()) {
+            logger.info("Clear existing account plan");
             clearAccounts();
         }
 
-        if (transactionTemplate.execute(status -> metadataRepository.hasAccountPlan())) {
+        if (regionRepository.hasExistingAccountPlan()) {
             logger.info("Account plan already exist - skip");
-        } else {
-            metadataRepository.listCities(metadataRepository.listRegions(List.of()))
-                    .parallelStream()
-                    .unordered()
-                    .forEach(this::createAccounts);
+            return;
         }
+
+        applicationModel.getRegions().forEach(region -> regionRepository.createRegion(region));
+        regionRepository.createRegionMappings(applicationModel.getRegionMapping());
+
+        final Map<Currency, Money> totals = new ConcurrentHashMap<>();
+        final List<Region> regions = regionRepository.listRegions(List.of());
+
+        regionRepository.listCities(regions)
+                .parallelStream()
+                .unordered()
+                .forEach(s -> {
+                    Money tot = createAccounts(s);
+                    totals.putIfAbsent(tot.getCurrency(), tot);
+                });
+
+        logger.info("Bank is now open for business with total holdings of %s %s"
+                .formatted(totals.values(), AsciiArt.shrug()));
     }
 
     public void clearAccounts() {
         jdbcTemplate.execute("truncate table transaction_item CASCADE");
         jdbcTemplate.execute("truncate table transaction CASCADE");
         jdbcTemplate.execute("truncate table account CASCADE");
+        jdbcTemplate.execute("truncate table region_mapping CASCADE");
+        jdbcTemplate.execute("truncate table region CASCADE");
     }
 
-    public void createAccounts(String city) {
+    public Money createAccounts(String city) {
+        AccountPlan accountPlan = applicationModel.getAccountPlan();
+
         Money balance = Money.of(accountPlan.getInitialBalance(), accountPlan.getCurrency());
 
-        logger.info("Creating %d accounts for city [%s] with initial balance [%s] (total %s)".formatted(
+        logger.info("Creating %,d accounts for city [%s] with initial balance [%s] and total of [%s]".formatted(
                 accountPlan.getAccountsPerCity(),
                 city,
                 balance,
                 balance.multiply(accountPlan.getAccountsPerCity())));
 
         jdbcTemplate.update(
-                "INSERT INTO account (id, city, balance, currency, name, type, closed, allow_negative, updated_at) "
-                        + "SELECT gen_random_uuid(),"
+                "INSERT INTO account (city, balance, currency, name, type, closed, allow_negative, updated_at) "
+                        + "SELECT "
                         + " ?,"
                         + " ?,"
                         + " ?,"
@@ -82,5 +100,7 @@ public class AccountPlanBuilder {
                 AccountType.ASSET.getCode(),
                 LocalDate.now(),
                 accountPlan.getAccountsPerCity());
+
+        return balance.multiply(accountPlan.getAccountsPerCity());
     }
 }

@@ -2,6 +2,7 @@ package io.roach.bank.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.cockroachdb.jdbc.CockroachProperty;
+import io.roach.bank.ApplicationModel;
 import io.roach.bank.ProfileNames;
 import net.ttddyy.dsproxy.listener.logging.DefaultQueryLogEntryCreator;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
@@ -10,7 +11,6 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.postgresql.PGProperty;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,8 +29,8 @@ public class DataSourceConfig {
     @Autowired
     private Environment environment;
 
-    @Value("${roachbank.select-for-update}")
-    private boolean selectForUpdate;
+    @Autowired
+    private ApplicationModel applicationModel;
 
     @Bean
     @Primary
@@ -49,7 +49,7 @@ public class DataSourceConfig {
         if (environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER))) {
             ds.addDataSourceProperty(CockroachProperty.RETRY_CONNECTION_ERRORS.getName(), "true");
             ds.addDataSourceProperty(CockroachProperty.RETRY_TRANSIENT_ERRORS.getName(), "true");
-            ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), selectForUpdate + "");
+            ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), applicationModel.isSelectForUpdate() + "");
         }
 
         // https://stackoverflow.com/questions/851758/java-enums-jpa-and-postgres-enums-how-do-i-make-them-work-together/43125099#43125099

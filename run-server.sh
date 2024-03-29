@@ -40,39 +40,32 @@ fi
 
 ########################################
 
-profiles=default
-
 fn_print_cyan "Datasource option, one of:"
 fn_print_blue "1) pgjdbc-local - Use pgJDBC driver connecting to localhost"
 fn_print_blue "2) pgjdbc-cloud - Use pgJDBC driver connecting to CockroachDB Cloud"
 fn_print_blue "3) pgjdbc-dev - Use pgJDBC driver connecting to dev host (default)"
-fn_print_blue "4) psql-local - Use pgJDBC driver connecting to PostgreSQL on localhost"
-fn_print_blue "5) crdb-local - Use CockroachDB JDBC driver connecting to localhost"
-fn_print_blue "6) crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud"
-fn_print_blue "7) crdb-dev - Use CockroachDB JDBC driver connecting to dev host"
-fn_print_blue "8) psql-dev - Use pgJDBC driver connecting to dev host"
+fn_print_blue "4) crdb-local - Use CockroachDB JDBC driver connecting to localhost"
+fn_print_blue "5) crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud"
+fn_print_blue "6) crdb-dev - Use CockroachDB JDBC driver connecting to dev host"
+fn_print_blue "7) psql-local - Use pgJDBC driver connecting to PostgreSQL on localhost"
+fn_print_blue "8) psql-dev - Use pgJDBC driver connecting to PostgreSQL on dev host"
 
 PS3='Please select datasource: '
-options=(
-"pgjdbc-local" "pgjdbc-cloud" "pgjdbc-dev" "psql-local" "crdb-local" "crdb-cloud" "crdb-dev" "psql-dev"
-"<Default>" "<Quit>" )
+options=("pgjdbc-local" "pgjdbc-cloud" "pgjdbc-dev" "crdb-local" "crdb-cloud" "crdb-dev" "psql-local" "psql-dev")
+
+db_profile=
 
 select option in "${options[@]}"; do
   case $option in
-    "<Default>")
-      profiles=$profiles,pgjdbc-dev
-      break
-      ;;
-    "<Quit>")
-      exit 0
-      ;;
     *)
-      profiles=$profiles,$option
-      fn_print_cyan "Selected profile: $profiles"
+      db_profile=$option
+      fn_print_cyan "Selected profile: $db_profile"
       break
       ;;
   esac
 done
+
+profiles=$db_profile
 
 ########################################
 
@@ -83,19 +76,10 @@ fn_print_blue "3) retry-savepoint - Enables client-side retries using savepoints
 fn_print_blue "4) retry-none - Disable retries"
 
 PS3='Please select retry option: '
-options=(
-"retry-client" "retry-driver" "retry-savepoint" "retry-none"
-"<Default>" "<Quit>" )
+options=("retry-client" "retry-driver" "retry-savepoint" "retry-none")
 
 select option in "${options[@]}"; do
   case $option in
-    "<Default>")
-      profiles=$profiles,retry-client
-      break
-      ;;
-    "<Quit>")
-      exit 0
-      ;;
     *)
       profiles=$profiles,$option
       fn_print_cyan "Selected profile: $profiles"
@@ -106,33 +90,41 @@ done
 
 ########################################
 
-fn_print_cyan "Optional, any of:"
-fn_print_blue "1) jpa - Enables JPA repositories over JDBC (default)"
-fn_print_blue "2) outbox - Enables writing to a transactional outbox table"
-fn_print_blue "3) debug - Enables debug features for Thymeleaf"
-fn_print_blue "4) verbose - Enables verbose logging"
-
-PS3='Please select profile(s): '
-options=(
-"jpa" "outbox" "debug" "verbose"
-"<Start>" "<Quit>" )
+PS3='Please select account plan profile(s): '
+options=("default-plan" "demo-plan")
 
 select option in "${options[@]}"; do
   case $option in
-    "<Start>")
-      break
-      ;;
-    "<Quit>")
-      exit 0
-      ;;
     *)
       profiles=$profiles,$option
       fn_print_cyan "Selected profiles: $profiles"
-      fn_print_blue "(Press enter)"
+      break
       ;;
   esac
 done
 
-fn_print_blue java -jar ${jarfile} --spring.profiles.active=$profiles "$@"
+########################################
+
+PS3='Please select optional profile(s): '
+options=("<Skip>" "jpa" "outbox" "debug" "verbose" )
+
+select option in "${options[@]}"; do
+  case $option in
+    "<Skip>")
+      break
+      ;;
+    *)
+      profiles=$profiles,$option
+      fn_print_cyan "Selected profiles: $profiles"
+      fn_print_blue "(Type 5 and press enter to start)"
+      ;;
+  esac
+done
+
+########################################
+
+fn_print_cyan "java -jar ${jarfile} --spring.profiles.active=$profiles"
+
+sleep 3
 
 java -jar ${jarfile} --spring.profiles.active=$profiles "$@"
