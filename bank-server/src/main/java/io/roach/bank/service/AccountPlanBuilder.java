@@ -33,34 +33,32 @@ public class AccountPlanBuilder {
     private RegionRepository regionRepository;
 
     public void buildAccountPlan() {
-        logger.info("Using: %s".formatted(applicationModel));
+        logger.info("Building account plan: %s".formatted(applicationModel.getName()));
 
         if (applicationModel.isClearAtStartup()) {
             logger.info("Clear existing account plan");
             clearAccounts();
         }
 
+
         if (regionRepository.hasExistingAccountPlan()) {
-            logger.info("Account plan already exist - skip");
-            return;
+            logger.info("Account plan already exist - skip creating");
+        } else {
+            logger.info("Creating account plan");
+
+            applicationModel.getRegions().forEach(region -> regionRepository.createRegion(region));
+
+            regionRepository.createRegionMappings(applicationModel.getRegionMapping());
+
+            List<Region> regions = regionRepository.listRegions(List.of());
+
+            regionRepository.listCities(regions)
+                    .parallelStream()
+                    .unordered()
+                    .forEach(this::createAccounts);
         }
 
-        applicationModel.getRegions().forEach(region -> regionRepository.createRegion(region));
-        regionRepository.createRegionMappings(applicationModel.getRegionMapping());
-
-        final Map<Currency, Money> totals = new ConcurrentHashMap<>();
-        final List<Region> regions = regionRepository.listRegions(List.of());
-
-        regionRepository.listCities(regions)
-                .parallelStream()
-                .unordered()
-                .forEach(s -> {
-                    Money tot = createAccounts(s);
-                    totals.putIfAbsent(tot.getCurrency(), tot);
-                });
-
-        logger.info("Bank is now open for business with total holdings of %s %s"
-                .formatted(totals.values(), AsciiArt.shrug()));
+        logger.info("Bank is now open for business %s".formatted(AsciiArt.shrug()));
     }
 
     public void clearAccounts() {

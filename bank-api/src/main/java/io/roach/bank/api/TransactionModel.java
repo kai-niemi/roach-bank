@@ -1,7 +1,6 @@
 package io.roach.bank.api;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -25,9 +24,7 @@ import static io.roach.bank.api.LinkRelations.CURIE_PREFIX;
         collectionRelation = CURIE_PREFIX + LinkRelations.TRANSACTION_LIST_REL)
 @JsonPropertyOrder({"links", "transactionItems"})
 public class TransactionModel extends RepresentationModel<TransactionModel> {
-    private UUID transactionId;
-
-    private String region;
+    private String city;
 
     private String transactionType;
 
@@ -49,21 +46,13 @@ public class TransactionModel extends RepresentationModel<TransactionModel> {
         this.transactionType = transactionType;
     }
 
-    public String getRegion() {
-        return region;
+    public String getCity() {
+        return city;
     }
 
-    public TransactionModel setRegion(String region) {
-        this.region = region;
+    public TransactionModel setCity(String city) {
+        this.city = city;
         return this;
-    }
-
-    public UUID getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(UUID transactionId) {
-        this.transactionId = transactionId;
     }
 
     public LocalDate getBookingDate() {

@@ -163,7 +163,7 @@ public class AccountController {
                 ? List.of() : List.of(region);
 
         Collection<String> cities = metadataRepository.listCities(metadataRepository.listRegions(regions));
-        logger.info("Found [{}] in regions [{}]", cities, regions);
+        logger.debug("Found {} in regions {}", cities, regions);
 
         return pagedResourcesAssembler
                 .toModel(accountService.findAll(cities, page), accountResourceAssembler);

@@ -2,6 +2,7 @@
 # Bank server config
 #############################
 bank:
+  name: "Default"
   # Default accounts per city scan limit
   default-account-limit: 10
   # Interval of pushing cached balance reports (seconds)

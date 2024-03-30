@@ -83,7 +83,7 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
     })
     private Money runningBalance;
 
-    protected TransactionItem() {
+    public TransactionItem() {
     }
 
     public static Builder builder(Transaction.Builder parentBuilder, Consumer<TransactionItem> callback) {
@@ -138,13 +138,12 @@ public class TransactionItem extends AbstractEntity<TransactionItem.Id> {
         this.runningBalance = runningBalance;
     }
 
-    @Override
-    public String toString() {
-        return "TransactionItem{" +
-                "id=" + id +
-                ", amount=" + amount +
-                ", note='" + note + '\'' +
-                '}';
+    public void setId(Id id) {
+        this.id = id;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     @Embeddable

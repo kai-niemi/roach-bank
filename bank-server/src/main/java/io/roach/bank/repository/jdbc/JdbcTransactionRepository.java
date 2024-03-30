@@ -1,6 +1,5 @@
 package io.roach.bank.repository.jdbc;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -51,8 +49,8 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
         jdbcTemplate.update(conn -> {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO transaction "
-                    + "(city,booking_date,transfer_date,transaction_type) "
-                    + "VALUES(?,?,?,?::transaction_type) returning id::uuid",
+                            + "(city,booking_date,transfer_date,transaction_type) "
+                            + "VALUES(?,?,?,?::transaction_type) returning id::uuid",
                     PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setObject(1, transaction.getCity());
             ps.setObject(2, bookingDate != null ? bookingDate : LocalDate.now());
@@ -98,7 +96,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
     public Transaction findTransactionById(UUID id) {
         return DataAccessUtils.singleResult(this.jdbcTemplate.query(
                 "SELECT * FROM transaction WHERE id=?",
-                (rs, rowNum) -> mapToTransaction(rs),
+                (rs, rowNum) -> mapTransaction(rs,true),
                 id));
     }
 
@@ -106,28 +104,8 @@ public class JdbcTransactionRepository implements TransactionRepository {
     public Transaction findTransactionById(UUID id, String city) {
         return DataAccessUtils.singleResult(this.jdbcTemplate.query(
                 "SELECT * FROM transaction WHERE id=? and city=?",
-                (rs, rowNum) -> mapToTransaction(rs),
+                (rs, rowNum) -> mapTransaction(rs,true),
                 id, city));
-    }
-
-    private Transaction mapToTransaction(ResultSet rs) throws SQLException {
-        UUID transactionId = (UUID) rs.getObject("id");
-        String city = rs.getString("city");
-        String transactionType = rs.getString("transaction_type");
-        LocalDate bookingDate = rs.getDate("booking_date").toLocalDate();
-        LocalDate transferDate = rs.getDate("transfer_date").toLocalDate();
-
-        // N+1
-        List<TransactionItem> items = findTransactionItems(transactionId);
-
-        return Transaction.builder()
-                .withId(transactionId)
-                .withCity(city)
-                .withTransactionType(transactionType)
-                .withBookingDate(bookingDate)
-                .withTransferDate(transferDate)
-                .withItems(items)
-                .build();
     }
 
     @Override
@@ -135,7 +113,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
         int count = countAllTransactions();
         List<Transaction> content = this.jdbcTemplate.query(
                 "SELECT * FROM transaction ORDER BY transfer_date LIMIT ? OFFSET ?",
-                (rs, rowNum) -> mapToTransaction(rs),
+                (rs, rowNum) -> mapTransaction(rs,false),
                 pageable.getPageSize(), pageable.getOffset());
         return new PageImpl<>(content, pageable, count);
     }
@@ -153,7 +131,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
 
         List<TransactionItem> content = this.jdbcTemplate.query(
                 "SELECT * FROM transaction_item WHERE transaction_id=?",
-                (rs, rowNum) -> readTransactionItem(rs),
+                (rs, rowNum) -> mapTransactionItem(rs),
                 transactionId
         );
 
@@ -173,7 +151,7 @@ public class JdbcTransactionRepository implements TransactionRepository {
     private List<TransactionItem> findTransactionItems(UUID id) {
         return this.jdbcTemplate.query(
                 "SELECT * FROM transaction_item WHERE transaction_id=?",
-                (rs, rowNum) -> readTransactionItem(rs),
+                (rs, rowNum) -> mapTransactionItem(rs),
                 id
         );
     }
@@ -182,31 +160,49 @@ public class JdbcTransactionRepository implements TransactionRepository {
         return DataAccessUtils.requiredSingleResult(this.jdbcTemplate.query(
                 "SELECT * FROM transaction_item WHERE transaction_id=? "
                         + "AND account_id=? ",
-                (rs, rowNum) -> readTransactionItem(rs),
+                (rs, rowNum) -> mapTransactionItem(rs),
                 id.getTransactionId(), id.getAccountId()
         ));
     }
 
-    private TransactionItem readTransactionItem(ResultSet rs) throws SQLException {
+    private TransactionItem mapTransactionItem(ResultSet rs) throws SQLException {
         UUID accountId = (UUID) rs.getObject("account_id");
         UUID transactionId = (UUID) rs.getObject("transaction_id");
-        String transactionCity = rs.getString("city");
+        String city = rs.getString("city");
         Money amount = Money.of(rs.getString("amount"), rs.getString("currency"));
         Money runningBalance = Money.of(rs.getString("running_balance"), rs.getString("currency"));
         String note = rs.getString("note");
 
-        return Transaction.builder()
-                .withId(transactionId)
-                .withCity(transactionCity)
-                .andItem()
-                .withAccount(Account.builder().withId(accountId).build())
-                .withRunningBalance(runningBalance)
-                .withAmount(amount)
-                .withNote(note)
-                .then()
-                .build()
-                .getItems()
-                .get(0);
+        TransactionItem item = new TransactionItem();
+        item.setId(TransactionItem.Id.of(accountId, transactionId));
+        item.setCity(city);
+        item.setAmount(amount);
+        item.setRunningBalance(runningBalance);
+        item.setNote(note);
+        item.setAccount(Account.builder().withId(accountId).build());
+
+        return item;
+    }
+
+    private Transaction mapTransaction(ResultSet rs, boolean includeItems) throws SQLException {
+        UUID transactionId = (UUID) rs.getObject("id");
+        String city = rs.getString("city");
+        String transactionType = rs.getString("transaction_type");
+        LocalDate bookingDate = rs.getDate("booking_date").toLocalDate();
+        LocalDate transferDate = rs.getDate("transfer_date").toLocalDate();
+
+        // N+1
+        List<TransactionItem> items = includeItems ? findTransactionItems(transactionId) : List.of();
+
+        Transaction t = Transaction.builder()
+                .withCity(city)
+                .withTransactionType(transactionType)
+                .withBookingDate(bookingDate)
+                .withTransferDate(transferDate)
+                .withItems(items)
+                .build();
+        t.setId(transactionId);
+        return t;
     }
 
     @Override

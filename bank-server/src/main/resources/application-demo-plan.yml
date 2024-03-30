@@ -2,12 +2,13 @@
 # Bank server config
 #############################
 bank:
+  name: "Demo"
   default-account-limit: 10
-  report-query-timeout: 120
-  select-for-update: false
-  clear-at-startup: true
+  report-query-timeout: 60
+  select-for-update: true
+  clear-at-startup: false
   account-plan:
-    accounts-per-city: 5000
+    accounts-per-city: 15000
     initial-balance: "10000.00"
     currency: USD
   regions:

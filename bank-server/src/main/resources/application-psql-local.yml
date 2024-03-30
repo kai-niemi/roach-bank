@@ -13,5 +13,3 @@ spring:
     password: root
     hikari:
       transaction-isolation: TRANSACTION_READ_COMMITTED
-roachbank:
-  regions: aws-eu*

@@ -14,6 +14,8 @@ import java.util.Map;
 @Validated
 @ConfigurationProperties(prefix = "bank")
 public class ApplicationModel {
+    private String name;
+
     private int defaultAccountLimit;
 
     private int reportQueryTimeout;
@@ -29,6 +31,14 @@ public class ApplicationModel {
     private List<Region> regions = new ArrayList<>();
 
     private Map<String, String> regionMapping = new HashMap<>();
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public boolean isClearAtStartup() {
         return clearAtStartup;

@@ -25,11 +25,10 @@ public class TransactionResourceAssembler
         TransactionModel resource = new TransactionModel();
         resource.add(linkTo(methodOn(TransactionController.class)
                 .getTransaction(entity.getId())).withSelfRel());
-
-        resource.setTransactionId(entity.getId());
         resource.setTransactionType(entity.getTransactionType());
         resource.setBookingDate(entity.getBookingDate());
         resource.setTransactionDate(entity.getTransferDate());
+        resource.setCity(entity.getCity());
 
         resource.add(linkTo(DummyInvocationUtils.methodOn(TransactionItemController.class)
                 .getTransactionItems(entity.getId(),

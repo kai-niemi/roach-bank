@@ -74,7 +74,7 @@ public class Transaction extends AbstractEntity<UUID> {
         this.id = id;
     }
 
-    @PrePersist
+    @Override
     protected void onCreate() {
         if (bookingDate == null) {
             bookingDate = LocalDate.now();
@@ -106,20 +106,12 @@ public class Transaction extends AbstractEntity<UUID> {
         return Collections.unmodifiableList(items);
     }
 
-    @Override
-    public String toString() {
-        return "Transaction{" + "id=" + id + ", transactionType='" + transactionType + '\'' + ", transferDate="
-                + transferDate + ", bookingDate=" + bookingDate + ", items=<..>" + '}';
-    }
-
     public static Builder builder() {
         return new Builder();
     }
 
     public static final class Builder {
         private final List<TransactionItem> items = new ArrayList<>();
-
-        private UUID id;
 
         private String city;
 
@@ -128,11 +120,6 @@ public class Transaction extends AbstractEntity<UUID> {
         private LocalDate bookingDate;
 
         private LocalDate transferDate;
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
 
         public Builder withCity(String city) {
             this.city = city;
