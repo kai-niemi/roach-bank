@@ -79,7 +79,7 @@ public class ServerApplication implements ApplicationRunner {
             }
         }
 
-        if (profiles.stream().filter(string -> string.startsWith("RETRY_"))
+        if (profiles.stream().filter(string -> string.startsWith("retry_"))
                 .findAny().isEmpty()) {
             profiles.add(ProfileNames.RETRY_CLIENT);
         }

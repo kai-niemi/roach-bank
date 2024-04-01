@@ -3,13 +3,9 @@ package io.roach.bank.client.command.event;
 import org.springframework.context.ApplicationEvent;
 
 public class ExecutionErrorEvent extends ApplicationEvent {
-    private String message;
+    private final String message;
 
-    private Throwable cause;
-
-    public ExecutionErrorEvent(Object source) {
-        super(source);
-    }
+    private final Throwable cause;
 
     public ExecutionErrorEvent(Object source, String message, Throwable cause) {
         super(source);
