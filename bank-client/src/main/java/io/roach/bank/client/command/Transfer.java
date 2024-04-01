@@ -74,7 +74,7 @@ public class Transfer extends AbstractCommand {
 
             List<AccountModel> accountModels = top.get(city);
 
-            console.success(ListAccounts.printContentTable(accountModels));
+//            console.success(ListAccounts.printContentTable(accountModels));
 
             if (iterations > 0) {
                 asyncHelper.runAsync(city + " (" + region + ")",
@@ -89,7 +89,7 @@ public class Transfer extends AbstractCommand {
             }
         } else {
             top.forEach((c, accountModels) -> {
-                console.success(ListAccounts.printContentTable(accountModels));
+//                console.success(ListAccounts.printContentTable(accountModels));
 
                 if (iterations > 0) {
                     asyncHelper.runAsync(c + " (" + region + ")",

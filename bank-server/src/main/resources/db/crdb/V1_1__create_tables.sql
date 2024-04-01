@@ -1,7 +1,7 @@
 -- RoachBank DDL for CockroachDB
 
 drop type if exists account_type;
-create type account_type as enum ('A', 'L', 'E', 'R', 'C');
+create type account_type as enum ('Asset', 'Liability', 'Expense', 'Revenue', 'Equity');
 
 drop type if exists transaction_type;
 create type transaction_type as enum ('GEN','TMP','PAY');
@@ -10,7 +10,6 @@ create type transaction_type as enum ('GEN','TMP','PAY');
 -- Configuration
 ----------------------
 
--- drop table region;
 create table region
 (
     name         string   not null,
@@ -21,7 +20,6 @@ create table region
     primary key (name)
 );
 
--- drop table region_mapping;
 create table region_mapping
 (
     crdb_region string not null primary key,
@@ -49,7 +47,8 @@ create table account
     primary key (id)
 );
 
-create index on account (city) storing (balance, currency);
+create index if not exists account_city_storing_rec_idx on roach_bank.public.account (city)
+    storing (balance, currency, name, description, type, closed, allow_negative, updated_at);
 
 create table transaction
 (

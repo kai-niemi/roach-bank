@@ -1,7 +1,6 @@
 package io.roach.bank.changefeed;
 
 import io.roach.bank.AdvisorOrder;
-import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.domain.Account;
 import io.roach.bank.domain.Transaction;
 import org.aspectj.lang.annotation.AfterReturning;

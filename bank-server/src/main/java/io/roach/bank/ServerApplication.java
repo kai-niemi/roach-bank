@@ -1,11 +1,15 @@
 package io.roach.bank;
 
-import io.roach.bank.service.AccountPlanBuilder;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -20,6 +24,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.util.StringUtils;
+
+import io.roach.bank.service.AccountPlanBuilder;
 
 @Configuration
 @EnableAutoConfiguration(exclude = {
@@ -37,11 +44,54 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class ServerApplication implements ApplicationRunner {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static void printHelpAndExit(String message) {
+        System.out.println("Usage: java --jar bank-server.jar <options> [args..]");
+        System.out.println();
+        System.out.println("Options:");
+        System.out.println("--help                    this help");
+        System.out.println("--profiles [profile,..]   spring profiles to activate");
+        System.out.println();
+        System.out.println("All other options are passed to the shell.");
+        System.out.println();
+        System.out.println(message);
+
+        System.exit(0);
+    }
+
     public static void main(String[] args) {
+        LinkedList<String> argsList = new LinkedList<>(Arrays.asList(args));
+        LinkedList<String> passThroughArgs = new LinkedList<>();
+
+        Set<String> profiles =
+                StringUtils.commaDelimitedListToSet(System.getProperty("spring.profiles.active", ""));
+
+        while (!argsList.isEmpty()) {
+            String arg = argsList.pop();
+            if (arg.equals("--help")) {
+                printHelpAndExit("");
+            } else if (arg.equals("--dev")) {
+                profiles.add(ProfileNames.PGJDBC_DEV);
+            } else if (arg.equals("--profiles")) {
+                profiles.clear();
+                profiles.addAll(StringUtils.commaDelimitedListToSet(argsList.pop()));
+            } else {
+                passThroughArgs.add(arg);
+            }
+        }
+
+        if (profiles.stream().filter(string -> string.startsWith("RETRY_"))
+                .findAny().isEmpty()) {
+            profiles.add(ProfileNames.RETRY_CLIENT);
+        }
+
+        System.setProperty("spring.profiles.active", StringUtils.collectionToCommaDelimitedString(profiles));
+
         new SpringApplicationBuilder(ServerApplication.class)
-                .logStartupInfo(false)
                 .web(WebApplicationType.SERVLET)
-                .run(args);
+                .bannerMode(Banner.Mode.CONSOLE)
+                .logStartupInfo(true)
+                .profiles(profiles.toArray(new String[0]))
+                .run(passThroughArgs.toArray(new String[] {}));
     }
 
     @Autowired

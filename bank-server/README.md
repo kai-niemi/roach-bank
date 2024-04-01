@@ -43,33 +43,33 @@ Example:
 ## Configuration
 
 The default server configuration can be found in [application.yml](src/main/resources/application.yml).
-The config can be overridden at startup time through the command line and by activating Spring profiles, which are:
+The config can be overridden at startup time through the command line and by activating Spring profiles, 
+which are:
 
 Database type, one of:
 
 * crdb-local - Use CockroachDB JDBC driver connecting to localhost (default)
 * crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud
-* pgjdbc-local - Use PostgreSQL JDBC driver connecting to localhost
-* pgjdbc-cloud - Use PostgreSQL JDBC driver connecting to CockroachDB Cloud
-* psql-local - Use PostgreSQL JDBC driver connecting to PostgreSQL on localhost 
+* pgjdbc-cloud - Use pgJDBC connecting to CockroachDB Cloud
+* psql-local - Use pgJDBC driver connecting to PostgreSQL on localhost 
+
+Default is pgJDBC against local CockroachDB.
 
 Retry strategy, one of:
 
-* retry-client - Enables client-side retries with exponential backoff (default)
 * retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
 * retry-savepoint - Enables client-side retries using savepoints
 * retry-none - Disable retries
 
-Account plan, one of:
+Default is client-side retries with exponential backoff.
 
-* default-plan - Default plan including most world regions
-* demo-plan - Slimmed demo plan
- 
-Optional:
+Other:
 
+* demo - Slimmed account plan
 * jpa - Enables JPA repositories over JDBC
 * outbox - Enables writing transfer requests to a transactional outbox table
 * dev - Enables debug features for Thymeleaf 
+* verbose - Enables verbose debug logging 
    
 Profiles are set during startup with following command line parameter:
 
@@ -77,7 +77,7 @@ Profiles are set during startup with following command line parameter:
     --spring.datasource.url=jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable \
     --spring.datasource.username=root \
     --spring.datasource.password= \
-    --spring.profiles.active=retry-none,crdb-local,default-plan  \
+    --spring.profiles.active=retry-none,crdb-local  \
     --server.port=8090
 
 PostgreSQL example:
@@ -86,6 +86,37 @@ PostgreSQL example:
     --spring.datasource.url=jdbc:cockroachdb://localhost:5432/roach_bank \
     --spring.datasource.username=postgres \
     --spring.datasource.password=root \
-    --spring.profiles.active=retry-none,psql-local,default-plan  \
+    --spring.profiles.active=retry-none,psql-local  \
     --server.port=8090
+
+### Custom Account Plan
+
+Create an `application.yml` in the base directory where the server is 
+started from:
     
+    bank:
+      name: "Custom"
+      default-account-limit: 10
+      report-query-timeout: 60
+      select-for-update: true
+      clear-at-startup: false
+      account-plan:
+        accounts-per-city: 15000
+        initial-balance: "10000.00"
+        currency: USD
+      regions:
+        - name: eu-central-1
+          primary: true
+          cities: "london,amsterdam,rotterdam,berlin,hamburg,frankfurt"
+        - name: eu-north-1
+          cities: "stockholm,copenhagen,helsinki,oslo,riga,tallinn"
+          secondary: true
+        - name: us-east-1
+          cities: "new york,boston,washington dc,miami,charlotte,atlanta"
+      region-mapping:
+        aws-eu-central-1: eu-central-1
+        aws-eu-north-1: eu-north-1
+        aws-us-east-1: us-east-1
+
+See [application.yml](src/main/resources/application.yml) for the default
+config with comments.

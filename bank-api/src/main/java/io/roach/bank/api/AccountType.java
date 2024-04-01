@@ -3,7 +3,11 @@ package io.roach.bank.api;
 import java.util.EnumSet;
 
 public enum AccountType {
-    EXPENSE("E"), ASSET("A"), REVENUE("R"), LIABILITY("L");
+    EXPENSE("Expense"),
+    ASSET("Asset"),
+    REVENUE("Revenue"),
+    LIABILITY("Liability"),
+    EQUITY("Equity");
 
     private String code;
 

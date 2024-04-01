@@ -70,8 +70,8 @@ public class DefaultTransactionService implements TransactionService {
 
         legs.forEach((accountId, value) -> accountIds.add(accountId));
 
-        // Load to get the running balance and for front-end push events.
-        List<Account> accounts = accountRepository.findByIDs(accountIds, transactionForm.getCity(), applicationModel.isSelectForUpdate());
+        List<Account> accounts = accountRepository.findByIDs(accountIds,
+                transactionForm.getCity(), applicationModel.isSelectForUpdate());
 
         legs.forEach((accountId, pair) -> {
             Account account = accounts.stream()

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.roach.bank.changefeed.model.AccountPayload;
 import io.roach.bank.web.account.AccountController;
 import jakarta.annotation.PostConstruct;
 

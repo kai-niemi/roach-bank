@@ -42,7 +42,7 @@ public class Balance extends AbstractCommand {
         Map<String, List<AccountModel>> accounts = bankClient.getTopAccounts(region, limit);
         accounts.forEach((city, accountModels) -> {
             logger.info("Found {} accounts in city [{}]", accountModels.size(), city);
-            console.success(ListAccounts.printContentTable(accountModels));
+//            console.success(ListAccounts.printContentTable(accountModels));
         });
 
         accounts.forEach((city, accountModels) -> {

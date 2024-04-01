@@ -45,6 +45,7 @@ public class DataSourceConfig {
         HikariDataSource ds = dataSourceProperties().initializeDataSourceBuilder()
                 .type(HikariDataSource.class).build();
         ds.addDataSourceProperty(PGProperty.REWRITE_BATCHED_INSERTS.getName(), "true");
+        ds.addDataSourceProperty(PGProperty.APPLICATION_NAME.getName(), "Roach Bank");
 
         if (environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER))) {
             ds.addDataSourceProperty(CockroachProperty.RETRY_CONNECTION_ERRORS.getName(), "true");
