@@ -48,7 +48,6 @@ which are:
 
 Database type, one of:
 
-* crdb-local - Use CockroachDB JDBC driver connecting to localhost (default)
 * crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud
 * pgjdbc-cloud - Use pgJDBC connecting to CockroachDB Cloud
 * psql-local - Use pgJDBC driver connecting to PostgreSQL on localhost 
@@ -91,32 +90,8 @@ PostgreSQL example:
 
 ### Custom Account Plan
 
-Create an `application.yml` in the base directory where the server is 
-started from:
-    
-    bank:
-      name: "Custom"
-      default-account-limit: 10
-      report-query-timeout: 60
-      select-for-update: true
-      clear-at-startup: false
-      account-plan:
-        accounts-per-city: 15000
-        initial-balance: "10000.00"
-        currency: USD
-      regions:
-        - name: eu-central-1
-          primary: true
-          cities: "london,amsterdam,rotterdam,berlin,hamburg,frankfurt"
-        - name: eu-north-1
-          cities: "stockholm,copenhagen,helsinki,oslo,riga,tallinn"
-          secondary: true
-        - name: us-east-1
-          cities: "new york,boston,washington dc,miami,charlotte,atlanta"
-      region-mapping:
-        aws-eu-central-1: eu-central-1
-        aws-eu-north-1: eu-north-1
-        aws-us-east-1: us-east-1
+Copy and edit `application-default.yml` in the base directory from where the server is 
+started:
 
-See [application.yml](src/main/resources/application.yml) for the default
-config with comments.
+    cp src/main/resources/application-default.yml .
+    nano application-default.yml

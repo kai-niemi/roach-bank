@@ -7,7 +7,7 @@ spring:
     enabled: true
     locations: classpath:db/crdb,classpath:db/common
   datasource:
-    url: jdbc:postgresql://kai-odin-mzk.aws-eu-north-1.cockroachlabs.cloud:26257/defaultdb?sslmode=require
+    url: jdbc:postgresql://kai-odin-mzk.aws-eu-north-1.cockroachlabs.cloud:26257/roach_bank?sslmode=require
     username: guest
     password: kFRuMuctqZtnR7f_ksD4sQ
     driver-class-name: org.postgresql.Driver

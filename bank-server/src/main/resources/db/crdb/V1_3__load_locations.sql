@@ -2,15 +2,14 @@
 -- Location data for node map in Admin UI
 --
 
-DELETE FROM system.locations WHERE 1 = 1;
-
-INSERT into system.locations
+UPSERT into system.locations
 VALUES ('region', 'us-east-1', 37.478397, -76.453077),
        ('region', 'us-east-2', 40.417287, -76.453077),
        ('region', 'us-west-1', 38.837522, -120.895824),
        ('region', 'us-west-2', 43.804133, -120.554201),
        ('region', 'ca-central-1', 56.130366, -106.346771),
        ('region', 'eu-central-1', 50.110922, 8.682127),
+       ('region', 'eu-north-1', 59.1, 18.3),
        ('region', 'eu-north-1', 59.1, 18.3),
        ('region', 'eu-west-1', 53.142367, -7.692054),
        ('region', 'eu-west-2', 51.507351, -0.127758),
@@ -75,3 +74,26 @@ VALUES ('region', 'us-east-1', 37.478397, -76.453077),
        ('region', 'asia-southeast-3', 3.140853, 101.693207);
 
 -- update system.locations set latitude=-6.173292, longitude=106.841036 where "localityValue"='ap-southeeast-5';
+
+UPSERT into system.locations
+VALUES ('region', 'aws-us-east-1', 37.478397, -76.453077),
+       ('region', 'aws-us-east-2', 40.417287, -76.453077),
+       ('region', 'aws-us-west-1', 38.837522, -120.895824),
+       ('region', 'aws-us-west-2', 43.804133, -120.554201),
+       ('region', 'aws-ca-central-1', 56.130366, -106.346771),
+       ('region', 'aws-eu-central-1', 50.110922, 8.682127),
+       ('region', 'aws-eu-north-1', 59.1, 18.3),
+       ('region', 'aws-eu-west-1', 53.142367, -7.692054),
+       ('region', 'aws-eu-west-2', 51.507351, -0.127758),
+       ('region', 'aws-eu-west-3', 48.856614, 2.352222),
+       ('region', 'aws-ap-northeast-1', 35.689487, 139.691706),
+       ('region', 'aws-ap-northeast-2', 37.566535, 126.977969),
+       ('region', 'aws-ap-northeast-3', 34.693738, 135.502165),
+       ('region', 'aws-ap-southeast-1', 1.352083, 103.819836),
+       ('region', 'aws-ap-southeast-2', -33.86882, 151.209296),
+       ('region', 'aws-ap-south-1', 19.075984, 72.877656),
+       ('region', 'aws-sa-east-1', -23.55052, -46.633309),
+       ('region', 'aws-us-east1', 33.836082, -81.163727),
+       ('region', 'aws-us-east4', 37.478397, -76.453077),
+       ('region', 'aws-us-central1', 42.032974, -93.581543),
+       ('region', 'aws-us-west1', 43.804133, -120.554201);
