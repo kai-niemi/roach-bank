@@ -33,6 +33,10 @@ public abstract class ProfileNames {
      */
     public static final String DEBUG = "debug";
 
+    public static final String DEMO = "demo";
+
+    public static final String DEFAULT = "default";
+
     /**
      * Enable transactional outbox pattern.
      */

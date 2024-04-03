@@ -33,7 +33,7 @@ public class AccountPlanBuilder {
     private RegionRepository regionRepository;
 
     public void buildAccountPlan() {
-        logger.info("Building account plan: %s".formatted(applicationModel.getName()));
+        logger.info("Building account plan '%s'".formatted(applicationModel.getName()));
 
         if (applicationModel.isClearAtStartup()) {
             logger.info("Clear existing account plan");

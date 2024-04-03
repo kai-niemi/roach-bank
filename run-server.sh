@@ -59,12 +59,11 @@ done
 ########################################
 
 PS3='Please select retry strategy: '
-options=("<Skip>" "retry-client" "retry-driver" "retry-savepoint" "retry-none")
+options=("<Skip>" "retry-driver" "retry-savepoint" "retry-none")
 
 select option in "${options[@]}"; do
   case $option in
     "<Skip>")
-      retry_option="retry-client"
       break
       ;;
     *)
@@ -78,11 +77,11 @@ done
 ########################################
 
 PS3='Please select optional profile(s): '
-options=("<Skip>" "demo" "jpa" "outbox" "debug" "verbose" )
+options=("<Start>" "demo" "jpa" "outbox" "debug" "verbose" )
 
 select option in "${options[@]}"; do
   case $option in
-    "<Skip>")
+    "<Start>")
       break
       ;;
     *)
@@ -92,7 +91,6 @@ select option in "${options[@]}"; do
         extra_option=$option
       fi
       fn_print_cyan "Selected profiles: $option"
-      fn_print_blue "(Select <Skip> to start)"
       ;;
   esac
 done

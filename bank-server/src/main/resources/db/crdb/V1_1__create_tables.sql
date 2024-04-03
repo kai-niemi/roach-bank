@@ -47,7 +47,7 @@ create table account
     primary key (id)
 );
 
-create index if not exists account_city_storing_rec_idx on roach_bank.public.account (city)
+create index if not exists account_city_storing_rec_idx on account (city)
     storing (balance, currency, name, description, type, closed, allow_negative, updated_at);
 
 create table transaction
@@ -105,4 +105,4 @@ alter table transaction_item
         foreign key (account_id) references account (id);
 alter table region_mapping
     add constraint fk_mapping_ref_region
-        foreign key (region) references roach_bank.public.region (name);
+        foreign key (region) references region (name);

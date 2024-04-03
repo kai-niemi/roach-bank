@@ -7,7 +7,7 @@ spring:
     enabled: true
     locations: classpath:db/crdb,classpath:db/common
   datasource:
-    url: jdbc:cockroachdb://kai-odin-hnb.aws-eu-north-1.cockroachlabs.cloud:26257/roach_bank?sslmode=require
+    url: jdbc:cockroachdb://kai-munin-1273.j77.aws-eu-central-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full
     username: guest
-    password: UqhyOq3l_M8Yn_Uq0S4VvA
+    password: V4FvqDrHnBbKo7-Sx3wp3g
     driver-class-name: io.cockroachdb.jdbc.CockroachDriver

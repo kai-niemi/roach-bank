@@ -14,7 +14,7 @@ import java.util.Map;
 @Validated
 @ConfigurationProperties(prefix = "bank")
 public class ApplicationModel {
-    private String name;
+    private String name = "Unnamed";
 
     private int defaultAccountLimit;
 

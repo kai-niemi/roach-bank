@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -42,7 +40,7 @@ import io.roach.bank.service.AccountPlanBuilder;
 @ComponentScan(basePackages = "io.roach")
 @ServletComponentScan
 public class ServerApplication implements ApplicationRunner {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final String SPRING_PROFILES_ACTIVE = "spring.profiles.active";
 
     private static void printHelpAndExit(String message) {
         System.out.println("Usage: java --jar bank-server.jar <options> [args..]");
@@ -63,14 +61,12 @@ public class ServerApplication implements ApplicationRunner {
         LinkedList<String> passThroughArgs = new LinkedList<>();
 
         Set<String> profiles =
-                StringUtils.commaDelimitedListToSet(System.getProperty("spring.profiles.active", ""));
+                StringUtils.commaDelimitedListToSet(System.getProperty(SPRING_PROFILES_ACTIVE, ""));
 
         while (!argsList.isEmpty()) {
             String arg = argsList.pop();
             if (arg.equals("--help")) {
                 printHelpAndExit("");
-            } else if (arg.equals("--dev")) {
-                profiles.add(ProfileNames.PGJDBC_DEV);
             } else if (arg.startsWith("--profiles") || arg.startsWith("--spring.profiles.active")) {
                 String[] parts = arg.split("=");
                 if (parts.length != 2) {
@@ -83,13 +79,19 @@ public class ServerApplication implements ApplicationRunner {
             }
         }
 
+        // Must have a retry profile
         if (profiles.stream().filter(string -> string.startsWith("retry-"))
                 .findAny().isEmpty()) {
-//            System.out.printf("Didnt find retry profile in %s - adding %s\n", profiles, ProfileNames.RETRY_CLIENT);
             profiles.add(ProfileNames.RETRY_CLIENT);
         }
 
-        System.setProperty("spring.profiles.active", StringUtils.collectionToCommaDelimitedString(profiles));
+        // Must have either demo or default profile
+        if (profiles.stream().filter(string -> string.startsWith(ProfileNames.DEMO))
+                .findAny().isEmpty()) {
+            profiles.add(ProfileNames.DEFAULT);
+        }
+
+        System.setProperty(SPRING_PROFILES_ACTIVE, StringUtils.collectionToCommaDelimitedString(profiles));
 
         new SpringApplicationBuilder(ServerApplication.class)
                 .web(WebApplicationType.SERVLET)

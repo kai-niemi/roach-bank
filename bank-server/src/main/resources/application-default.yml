@@ -1,0 +1,84 @@
+#############################
+# Bank server config
+#############################
+bank:
+  name: "Default"
+  # Default accounts per city scan limit
+  default-account-limit: 10
+  # Interval of pushing cached balance reports (seconds)
+  report-query-timeout: 60
+  # SELECT using '.. FOR UPDATE' locks
+  select-for-update: true
+  # Clear all data at startup
+  clear-at-startup: false
+  # Account plan to run workload against
+  account-plan:
+    # Number of accounts per city
+    accounts-per-city: 5000
+    # Initial balance per account in same currency
+    initial-balance: "10000.00"
+    # Account currency
+    currency: USD
+  # Region to city mappings (does not need to match CRDB regions)
+  regions:
+    - name: us-east-1
+      cities: "new york,boston,washington dc,miami,charlotte,atlanta"
+    - name: us-east-2
+      cities: "st louis,indianapolis,nashville,dallas,houston,detroit"
+    - name: us-west-1
+      cities: "san francisco,los angeles,san diego,las vegas,salt lake city"
+    - name: us-west-2
+      cities: "seattle,tacoma,portland,salem,bend,eugene"
+    - name: us-central-1
+      cities: "phoenix,minneapolis,chicago,detroit"
+    - name: eu-central-1
+      primary: true
+      cities: "berlin,hamburg,munich,frankfurt,dusseldorf,leipzig,dortmund,essen,stuttgart"
+    - name: eu-central-2
+      secondary: true
+      cities: "zurich,krakov,zagraeb,zaragoza,lodz,athens,bratislava,prague,sofia,bucharest,vienna,warsaw,budapest"
+    - name: eu-west-1
+      cities: "dublin,belfast,liverpool,manchester,glasgow,birmingham,leeds"
+    - name: eu-west-2
+      cities: "london,amsterdam,rotterdam,antwerp,hague,ghent,brussels"
+    - name: eu-west-3
+      cities: "lyon,lisbon,toulouse,paris,cologne,seville,marseille"
+    - name: eu-south-1
+      cities: "rome,milan,naples,turin,valencia,palermo"
+    - name: eu-south-2
+      cities: "madrid,barcelona,sintra,lisbon"
+    - name: eu-north-1
+      cities: "stockholm,copenhagen,helsinki,oslo,riga,tallinn"
+    - name: ap-northeast-1
+      cities: "hong kong,beijing,shanghai,tokyo"
+    - name: ap-southeast-2
+      cities: "singapore,jakarta,sydney,melbourne"
+    - name: ca-central-1
+      cities: "calgary,edmonton,winnipeg,regina,brandon,dryden"
+    - name: sa-east-1
+      cities: "sao paulo,rio de janeiro,salvador,buenos aires"
+    - name: af-south-1
+      cities: "cape town,durban,johannesburg,pretoria,grahamstown,kimberley"
+  # Mapping of CRDB regions to bank regions (keys must match existing locality regions)
+  region-mapping:
+    aws-eu-central-1: eu-central-1
+    aws-eu-central-2: eu-central-2
+    aws-eu-west-1: eu-west-1
+    aws-eu-west-2: eu-west-2
+    aws-eu-west-3: eu-west-3
+    aws-eu-south-1: eu-south-1
+    aws-eu-south-2: eu-south-2
+    aws-eu-north-1: eu-north-1
+    gcp-europe-central2: eu-central-2
+    gcp-europe-west1: eu-west-1
+    gcp-europe-west2: eu-west-2
+    gcp-europe-west3: eu-central-1
+    gcp-europe-west4: eu-west-3
+    gcp-europe-west6: eu-central-1
+    gcp-europe-west8: eu-south-1
+    gcp-europe-west9: eu-south-1
+    gcp-europe-west10: eu-central-1
+    gcp-europe-west12: eu-south-2
+    gcp-europe-southwest1: eu-south-2
+    gcp-europe-southwest2: eu-south-1
+    gcp-europe-north1: eu-north-1
