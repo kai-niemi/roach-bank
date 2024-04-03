@@ -8,7 +8,6 @@ import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.pool.PoolReusePolicy;
 import org.apache.hc.core5.util.Timeout;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
@@ -18,7 +17,7 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import io.roach.bank.client.command.support.HypermediaClient;
+import io.roach.bank.client.support.HypermediaClient;
 
 @Configuration
 @EnableHypermediaSupport(type = {

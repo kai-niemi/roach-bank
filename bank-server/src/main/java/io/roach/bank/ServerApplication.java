@@ -49,7 +49,7 @@ public class ServerApplication implements ApplicationRunner {
         System.out.println();
         System.out.println("Options:");
         System.out.println("--help                    this help");
-        System.out.println("--profiles [profile,..]   spring profiles to activate");
+        System.out.println("--profiles=[profile,..]   spring profiles to activate");
         System.out.println();
         System.out.println("All other options are passed to the shell.");
         System.out.println();
@@ -71,16 +71,21 @@ public class ServerApplication implements ApplicationRunner {
                 printHelpAndExit("");
             } else if (arg.equals("--dev")) {
                 profiles.add(ProfileNames.PGJDBC_DEV);
-            } else if (arg.equals("--profiles")) {
+            } else if (arg.startsWith("--profiles") || arg.startsWith("--spring.profiles.active")) {
+                String[] parts = arg.split("=");
+                if (parts.length != 2) {
+                    printHelpAndExit("Expected value");
+                }
                 profiles.clear();
-                profiles.addAll(StringUtils.commaDelimitedListToSet(argsList.pop()));
+                profiles.addAll(StringUtils.commaDelimitedListToSet(parts[1].trim()));
             } else {
                 passThroughArgs.add(arg);
             }
         }
 
-        if (profiles.stream().filter(string -> string.startsWith("retry_"))
+        if (profiles.stream().filter(string -> string.startsWith("retry-"))
                 .findAny().isEmpty()) {
+//            System.out.printf("Didnt find retry profile in %s - adding %s\n", profiles, ProfileNames.RETRY_CLIENT);
             profiles.add(ProfileNames.RETRY_CLIENT);
         }
 

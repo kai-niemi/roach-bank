@@ -1,4 +1,4 @@
-package io.roach.bank.client.command.support;
+package io.roach.bank.client.support;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -16,10 +16,6 @@ import java.util.stream.Collectors;
 import org.springframework.boot.ansi.AnsiColor;
 
 public class CallMetrics {
-    private static String separator(int len) {
-        return new String(new char[len]).replace('\0', '-');
-    }
-
     private static final String HEADER_PATTERN = "%-35s %9s %7s %8s %10s %10s %10s %10s %10s %9s %9s";
 
     private static final String ROW_PATTERN = "%-35s %,9d %7.0f %c%7.1f %10.1f %10.2f %10.2f %10.2f %10.2f %,9d %,9d";
@@ -27,6 +23,10 @@ public class CallMetrics {
     private static final String FOOTER_PATTERN = "%-35s %,9d %7.0f %c%7.1f %10.1f %10.2f %10.2f %10.2f %10.2f %,9d %,9d";
 
     private final SortedMap<String, Context> metrics = Collections.synchronizedSortedMap(new TreeMap<>());
+
+    private static String separator(int len) {
+        return new String(new char[len]).replace('\0', '-');
+    }
 
     public Context of(String name, Supplier<Integer> concurrencyCallback) {
         return metrics.computeIfAbsent(name, supplier -> new Context(name, concurrencyCallback));

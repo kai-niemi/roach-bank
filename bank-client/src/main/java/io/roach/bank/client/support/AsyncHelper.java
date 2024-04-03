@@ -1,6 +1,5 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client.support;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.Map;
@@ -8,6 +7,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,15 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 
-import io.roach.bank.client.command.event.ExecutionErrorEvent;
-import io.roach.bank.client.command.support.CallMetrics;
-import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
+import io.roach.bank.client.event.ExecutionErrorEvent;
 import jakarta.annotation.PreDestroy;
 
 @Component
@@ -131,45 +127,19 @@ public class AsyncHelper {
             return null;
         });
         futures.add(future);
-
         logger.info("Started '{}' to run {} times", id, iterations);
-
         return future;
     }
 
     private void backoffDelay(int fails, RestClientException ex) {
         try {
-            long backoffMillis = Math.min((long) (Math.pow(2, fails) + Math.random() * 1000), 10_000);
-            String message;
-            if (ex instanceof HttpStatusCodeException) {
-                HttpStatusCode code = ((HttpStatusCodeException) ex).getStatusCode();
-                if (code.is4xxClientError()) {
-                    message = "HTTP client error %s - backing off %d ms due to: %s".formatted(
-                            code,
-                            backoffMillis,
-                            ex.getMessage());
-                } else if (code.is5xxServerError()) {
-                    message = "HTTP server error %s - backing off %d ms due to: %s".formatted(
-                            code,
-                            backoffMillis,
-                            ex.getMessage());
-                } else {
-                    message = "HTTP uncategorized error %s - backing off %d ms due to: %s".formatted(
-                            code,
-                            backoffMillis,
-                            ex.getMessage());
-                }
-            } else {
-                message = "Communication error - backing off %s ms due to: %s".formatted(
-                        backoffMillis,
-                        ex.getMessage());
-            }
-
-            applicationEventPublisher.publishEvent(new ExecutionErrorEvent(this, message, ex));
-
+            long backoffMillis = Math.min((long) (Math.pow(2, fails)
+                            + ThreadLocalRandom.current().nextInt(1000)), 10_000);
             TimeUnit.MILLISECONDS.sleep(backoffMillis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        } finally {
+            applicationEventPublisher.publishEvent(new ExecutionErrorEvent(this, ex.getMessage(), ex));
         }
     }
 

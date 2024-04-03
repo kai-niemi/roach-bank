@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -9,14 +9,24 @@ import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.hateoas.Link;
+import org.springframework.http.ResponseEntity;
 import org.springframework.shell.ExitRequest;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.commands.Quit;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.client.command.support.Console;
-import io.roach.bank.client.command.support.DurationFormat;
+import io.roach.bank.api.MessageModel;
+import io.roach.bank.client.support.Console;
+import io.roach.bank.client.support.DurationFormat;
+import io.roach.bank.client.support.HypermediaClient;
+
+import static io.roach.bank.api.LinkRelations.ACTUATOR_REL;
+import static io.roach.bank.api.LinkRelations.ADMIN_REL;
+import static io.roach.bank.api.LinkRelations.withCurie;
 
 @ShellComponent
 @ShellCommandGroup(Constants.ADMIN_COMMANDS)
@@ -27,10 +37,33 @@ public class Admin implements Quit.Command {
     @Autowired
     private Console console;
 
+    @Autowired
+    private HypermediaClient hypermediaClient;
+
     @ShellMethod(value = "Exit the shell", key = {"quit", "exit", "q"})
     public void quit() {
         applicationContext.close();
         throw new ExitRequest();
+    }
+
+    @ShellMethod(value = "Shutdown server", key = {"shutdown"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void shutdown() {
+        Link submitLink = hypermediaClient.fromRoot()
+                .follow(withCurie(ADMIN_REL))
+                .follow(withCurie(ACTUATOR_REL))
+                .asLink();
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(submitLink.toUri()).path("/shutdown");
+
+        ResponseEntity<MessageModel> response = hypermediaClient
+                .post(Link.of(builder.build().toUriString()), MessageModel.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            console.success("Unexpected HTTP status: %s", response.toString());
+        } else {
+            console.error("%s", response.getBody().getMessage());
+        }
     }
 
     @ShellMethod(value = "Print application uptime")

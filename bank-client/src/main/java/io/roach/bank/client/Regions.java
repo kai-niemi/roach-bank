@@ -1,9 +1,8 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
-import io.roach.bank.api.Region;
-import io.roach.bank.client.command.support.HypermediaClient;
-import io.roach.bank.client.command.support.TableUtils;
-import io.roach.bank.domain.SurvivalGoal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ansi.AnsiColor;
@@ -17,9 +16,10 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.TableModel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import io.roach.bank.api.Region;
+import io.roach.bank.client.support.HypermediaClient;
+import io.roach.bank.client.support.TableUtils;
+import io.roach.bank.domain.SurvivalGoal;
 
 import static io.roach.bank.api.LinkRelations.CONFIG_INDEX_REL;
 import static io.roach.bank.api.LinkRelations.CONFIG_MULTI_REGION_REL;
@@ -55,25 +55,25 @@ public class Regions extends AbstractCommand {
 
             @Override
             public Object getValue(int row, int column) {
-                if (row == 0 ) {
+                if (row == 0) {
                     return List.of("Name", "Cities", "Primary", "Secondary", "DB Region").get(column);
                 }
 
                 switch (column) {
                     case 0 -> {
-                        return regions.get(row-1).getName();
+                        return regions.get(row - 1).getName();
                     }
                     case 1 -> {
-                        return regions.get(row-1).getCities();
+                        return regions.get(row - 1).getCities();
                     }
                     case 2 -> {
-                        return regions.get(row-1).isPrimary();
+                        return regions.get(row - 1).isPrimary();
                     }
                     case 3 -> {
-                        return regions.get(row-1).isSecondary();
+                        return regions.get(row - 1).isSecondary();
                     }
                     case 4 -> {
-                        return regions.get(row-1).getDatabaseRegion();
+                        return regions.get(row - 1).getDatabaseRegion();
                     }
                     default -> {
                         return "??";

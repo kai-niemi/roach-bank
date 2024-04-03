@@ -12,16 +12,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.shell.jline.PromptProvider;
 
-import io.roach.bank.client.command.event.ClearErrorsEvent;
-import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
-import io.roach.bank.client.command.event.ExecutionErrorEvent;
-import io.roach.bank.client.command.support.Console;
+import io.roach.bank.client.event.ClearErrorsEvent;
+import io.roach.bank.client.event.ConnectionUpdatedEvent;
+import io.roach.bank.client.event.ExecutionErrorEvent;
+import io.roach.bank.client.support.Console;
 
 @Configuration
 @EnableAutoConfiguration
 @EnableConfigurationProperties
 @ComponentScan(basePackages = "io.roach.bank.client")
 public class ClientApplication implements PromptProvider {
+    @Autowired
+    private Console console;
+
+    private transient String connection;
+
+    private transient boolean errors;
+
     public static void main(String[] args) {
         new SpringApplicationBuilder(ClientApplication.class)
                 .web(WebApplicationType.NONE)
@@ -30,18 +37,11 @@ public class ClientApplication implements PromptProvider {
                 .run(args);
     }
 
-    @Autowired
-    private Console console;
-
-    private transient String connection;
-
-    private transient boolean errors;
-
     @Override
     public AttributedString getPrompt() {
         if (connection != null) {
             return new AttributedString(connection
-                    + (errors ? "(ERROR)" : "") + ":$ ",
+                    + (errors ? " (ERROR)" : "") + ":$ ",
                     AttributedStyle.DEFAULT.foreground(errors ? AttributedStyle.RED : AttributedStyle.GREEN));
         } else {
             return new AttributedString("disconnected"

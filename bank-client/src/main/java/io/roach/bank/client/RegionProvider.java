@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.springframework.shell.standard.ValueProvider;
 import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.Region;
-import io.roach.bank.client.command.support.HypermediaClient;
+import io.roach.bank.client.support.HypermediaClient;
 
 public class RegionProvider implements ValueProvider {
     @Autowired

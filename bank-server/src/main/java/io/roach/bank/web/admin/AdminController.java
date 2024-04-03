@@ -86,8 +86,10 @@ public class AdminController {
                 .withRel(LinkRelations.TOGGLE_TRACE_LOG)
                 .withTitle("Toggle SQL trace logging"));
 
-        index.add(Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("actuator").buildAndExpand()
-                .toUriString()).withRel(LinkRelations.ACTUATOR_REL).withTitle("Spring boot actuators"));
+        index.add(Link.of(ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .pathSegment("actuator").buildAndExpand().toUriString())
+                .withRel(LinkRelations.ACTUATOR_REL)
+                .withTitle("Spring boot actuators"));
 
         Arrays.asList("hikaricp.connections", "hikaricp.connections.acquire", "hikaricp.connections.active",
                 "hikaricp.connections.idle", "hikaricp.connections.max", "hikaricp.connections.usage",
@@ -196,7 +198,6 @@ public class AdminController {
 
     @PostMapping(value = "/toggle-trace")
     public ResponseEntity<MessageModel> toggleTraceLogging() {
-
         boolean enabled = toggleLogLevel(DataSourceConfig.SQL_TRACE_LOGGER, Level.TRACE);
         logger.info("SQL Trace Logging {}", enabled ? "ENABLED" : "DISABLED");
 

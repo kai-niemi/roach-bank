@@ -1,10 +1,9 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
-import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.command.support.DurationFormat;
-import io.roach.bank.client.command.support.HypermediaClient;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.shell.standard.ShellCommandGroup;
@@ -13,9 +12,12 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import io.roach.bank.api.AccountModel;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.support.RandomData;
+import io.roach.bank.client.support.AsyncHelper;
+import io.roach.bank.client.support.DurationFormat;
+import io.roach.bank.client.support.HypermediaClient;
 
 import static io.roach.bank.api.LinkRelations.withCurie;
 

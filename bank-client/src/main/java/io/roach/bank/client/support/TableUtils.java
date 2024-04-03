@@ -1,4 +1,4 @@
-package io.roach.bank.client.command.support;
+package io.roach.bank.client.support;
 
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;

@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.net.URI;
 
@@ -20,7 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;
 
-import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
+import io.roach.bank.client.event.ConnectionUpdatedEvent;
 
 @ShellComponent
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)

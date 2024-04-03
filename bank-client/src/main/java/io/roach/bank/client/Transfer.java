@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,8 +21,9 @@ import io.roach.bank.api.TransactionModel;
 import io.roach.bank.api.support.CockroachFacts;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.api.support.RandomData;
-import io.roach.bank.client.command.support.DurationFormat;
-import io.roach.bank.client.command.support.HypermediaClient;
+import io.roach.bank.client.support.AsyncHelper;
+import io.roach.bank.client.support.DurationFormat;
+import io.roach.bank.client.support.HypermediaClient;
 
 import static io.roach.bank.api.LinkRelations.TRANSFER_FORM_REL;
 
@@ -64,6 +65,8 @@ public class Transfer extends AbstractCommand {
                 .follow(LinkRelations.withCurie(TRANSFER_FORM_REL))
                 .asTemplatedLink();
 
+        logger.info("Find max %d accounts per city in %s".formatted(limit, region));
+
         Map<String, List<AccountModel>> top = bankClient.getTopAccounts(region, limit);
 
         if (city != null) {
@@ -74,7 +77,7 @@ public class Transfer extends AbstractCommand {
 
             List<AccountModel> accountModels = top.get(city);
 
-//            console.success(ListAccounts.printContentTable(accountModels));
+            logger.info("Found %d accounts in %s".formatted(accountModels.size(), city));
 
             if (iterations > 0) {
                 asyncHelper.runAsync(city + " (" + region + ")",
@@ -89,7 +92,7 @@ public class Transfer extends AbstractCommand {
             }
         } else {
             top.forEach((c, accountModels) -> {
-//                console.success(ListAccounts.printContentTable(accountModels));
+                logger.info("Found %d accounts in %s".formatted(accountModels.size(), c));
 
                 if (iterations > 0) {
                     asyncHelper.runAsync(c + " (" + region + ")",

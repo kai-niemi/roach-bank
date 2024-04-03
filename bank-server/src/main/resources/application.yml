@@ -94,7 +94,7 @@ management:
     enabled-by-default: true
     web:
       exposure:
-        include: env,info,health,metrics,flyway,prometheus
+        include: env,info,health,metrics,flyway,prometheus,shutdown
   endpoint:
     health:
       show-details: always

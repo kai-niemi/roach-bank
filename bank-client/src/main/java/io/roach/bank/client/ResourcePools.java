@@ -1,4 +1,4 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,8 +12,8 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import io.roach.bank.client.command.support.HypermediaClient;
-import io.roach.bank.client.command.support.ThreadPoolStats;
+import io.roach.bank.client.support.HypermediaClient;
+import io.roach.bank.client.support.ThreadPoolStats;
 
 import static io.roach.bank.api.LinkRelations.ADMIN_REL;
 import static io.roach.bank.api.LinkRelations.POOL_CONFIG_REL;

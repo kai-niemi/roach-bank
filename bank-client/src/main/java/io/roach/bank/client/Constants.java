@@ -1,9 +1,10 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
-import io.roach.bank.api.AccountModel;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
+
+import io.roach.bank.api.AccountModel;
 
 public abstract class Constants {
     public static final String ADMIN_COMMANDS = "1. Admin Commands";
@@ -17,6 +18,8 @@ public abstract class Constants {
     public static final String WORKLOAD_COMMANDS = "5. Workload Commands";
 
     public static final String LOGGING_COMMANDS = "6. Logging Commands";
+
+    public static final String ERROR_COMMANDS = "7. Error Commands";
 
     public static final String DEFAULT_DURATION = "180m";
 

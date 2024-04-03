@@ -1,4 +1,4 @@
-package io.roach.bank.client.command.event;
+package io.roach.bank.client.event;
 
 import org.springframework.context.ApplicationEvent;
 

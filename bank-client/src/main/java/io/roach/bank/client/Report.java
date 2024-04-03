@@ -1,9 +1,8 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +11,9 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.util.StringUtils;
 
 import io.roach.bank.api.LinkRelations;
-import io.roach.bank.client.command.support.HypermediaClient;
+import io.roach.bank.client.support.HypermediaClient;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_SUMMARY_REL;
 import static io.roach.bank.api.LinkRelations.REPORTING_REL;

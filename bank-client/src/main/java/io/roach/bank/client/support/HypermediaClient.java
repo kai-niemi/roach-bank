@@ -1,10 +1,14 @@
-package io.roach.bank.client.command.support;
+package io.roach.bank.client.support;
 
-import io.roach.bank.api.AccountModel;
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.Region;
-import io.roach.bank.client.command.Constants;
-import io.roach.bank.client.command.event.ConnectionUpdatedEvent;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.hateoas.CollectionModel;
@@ -17,15 +21,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import io.roach.bank.api.AccountModel;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.Region;
+import io.roach.bank.client.Constants;
+import io.roach.bank.client.event.ConnectionUpdatedEvent;
 
 import static io.roach.bank.api.LinkRelations.ACCOUNT_REL;
 import static io.roach.bank.api.LinkRelations.ACCOUNT_TOP;
@@ -36,7 +36,7 @@ import static io.roach.bank.api.LinkRelations.GATEWAY_REGION_REL;
 import static io.roach.bank.api.LinkRelations.REGION_LIST_REL;
 
 public class HypermediaClient {
-    private static final List<MediaType> ACCEPT_TYPES = Arrays.asList(MediaTypes.HAL_JSON);
+    private static final List<MediaType> ACCEPT_TYPES = List.of(MediaTypes.HAL_JSON);
 
     private final RestTemplate restTemplate;
 

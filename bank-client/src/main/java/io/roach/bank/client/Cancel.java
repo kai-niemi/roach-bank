@@ -1,11 +1,12 @@
-package io.roach.bank.client.command;
+package io.roach.bank.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import io.roach.bank.client.command.support.CallMetrics;
+import io.roach.bank.client.support.AsyncHelper;
+import io.roach.bank.client.support.CallMetrics;
 
 @ShellComponent
 @ShellCommandGroup(Constants.WORKLOAD_COMMANDS)
