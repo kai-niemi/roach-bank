@@ -44,7 +44,7 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
         regions.stream()
                 .filter(region -> region.getDatabaseRegion() != null)
                 .forEach(region -> {
-                    if (!region.isPrimary() && region.isSecondary()) {
+                    if (!region.isPrimary() && !region.isSecondary()) {
                         jdbcTemplate.update("ALTER DATABASE roach_bank ADD REGION IF NOT EXISTS \""
                                 + region.getDatabaseRegion() + "\"");
                     }
