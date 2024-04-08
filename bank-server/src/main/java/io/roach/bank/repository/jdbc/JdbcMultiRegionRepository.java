@@ -1,10 +1,11 @@
 package io.roach.bank.repository.jdbc;
 
-import io.cockroachdb.jdbc.util.Assert;
-import io.roach.bank.api.Region;
-import io.roach.bank.domain.SurvivalGoal;
-import io.roach.bank.repository.MultiRegionRepository;
-import io.roach.bank.repository.RegionRepository;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
-import javax.sql.DataSource;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
+import io.roach.bank.api.Region;
+import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.repository.MultiRegionRepository;
+import io.roach.bank.repository.RegionRepository;
 
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
@@ -70,7 +72,9 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
                 .filter(region -> region.getDatabaseRegion() != null)
                 .forEach(region -> {
                     if (!region.isPrimary()) {
-                        jdbcTemplate.update("ALTER DATABASE roach_bank DROP REGION IF EXISTS \"" + region.getDatabaseRegion() + "\"");
+                        jdbcTemplate.update(
+                                "ALTER DATABASE roach_bank DROP REGION IF EXISTS \"" + region.getDatabaseRegion()
+                                        + "\"");
                     }
                 });
     }

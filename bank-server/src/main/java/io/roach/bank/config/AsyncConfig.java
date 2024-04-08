@@ -30,13 +30,10 @@ public class AsyncConfig implements AsyncConfigurer {
     @Override
     @Bean(name = "taskExecutor")
     public AsyncTaskExecutor getAsyncExecutor() {
-        logger.info("Bootstrapping Async Task Executor");
-
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setMaxPoolSize(300);
         executor.setCorePoolSize(300);
         executor.setQueueCapacity(25);
-
         return executor;
     }
 

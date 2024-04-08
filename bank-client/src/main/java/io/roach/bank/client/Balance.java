@@ -41,11 +41,9 @@ public class Balance extends AbstractCommand {
                     valueProvider = RegionProvider.class) String region,
             @ShellOption(help = Constants.DURATION_HELP, defaultValue = Constants.DEFAULT_DURATION) String duration
     ) {
+        logger.info("Find max %d accounts per city in region [%s]".formatted(limit, region));
+
         Map<String, List<AccountModel>> accounts = bankClient.getTopAccounts(region, limit);
-        accounts.forEach((city, accountModels) -> {
-            logger.info("Found {} accounts in city [{}]", accountModels.size(), city);
-//            console.success(ListAccounts.printContentTable(accountModels));
-        });
 
         accounts.forEach((city, accountModels) -> {
             final List<Link> links = new ArrayList<>();

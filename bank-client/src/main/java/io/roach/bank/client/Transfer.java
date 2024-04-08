@@ -65,7 +65,7 @@ public class Transfer extends AbstractCommand {
                 .follow(LinkRelations.withCurie(TRANSFER_FORM_REL))
                 .asTemplatedLink();
 
-        logger.info("Find max %d accounts per city in %s".formatted(limit, region));
+        logger.info("Find max %d accounts per city in region [%s]".formatted(limit, region));
 
         Map<String, List<AccountModel>> top = bankClient.getTopAccounts(region, limit);
 
@@ -76,8 +76,6 @@ public class Transfer extends AbstractCommand {
             }
 
             List<AccountModel> accountModels = top.get(city);
-
-            logger.info("Found %d accounts in %s".formatted(accountModels.size(), city));
 
             if (iterations > 0) {
                 asyncHelper.runAsync(city + " (" + region + ")",

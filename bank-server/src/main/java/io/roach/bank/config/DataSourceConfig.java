@@ -1,7 +1,7 @@
 package io.roach.bank.config;
 
 import com.zaxxer.hikari.HikariDataSource;
-import io.cockroachdb.jdbc.CockroachProperty;
+
 import io.roach.bank.ApplicationModel;
 import io.roach.bank.ProfileNames;
 import net.ttddyy.dsproxy.listener.logging.DefaultQueryLogEntryCreator;
@@ -48,9 +48,9 @@ public class DataSourceConfig {
         ds.addDataSourceProperty(PGProperty.APPLICATION_NAME.getName(), "Roach Bank");
 
         if (environment.acceptsProfiles(Profiles.of(ProfileNames.RETRY_DRIVER))) {
-            ds.addDataSourceProperty(CockroachProperty.RETRY_CONNECTION_ERRORS.getName(), "true");
-            ds.addDataSourceProperty(CockroachProperty.RETRY_TRANSIENT_ERRORS.getName(), "true");
-            ds.addDataSourceProperty(CockroachProperty.IMPLICIT_SELECT_FOR_UPDATE.getName(), applicationModel.isSelectForUpdate() + "");
+            ds.addDataSourceProperty("retryConnectionErrors", "true");
+            ds.addDataSourceProperty("retryTransientErrors", "true");
+            ds.addDataSourceProperty("implicitSelectForUpdate", applicationModel.isSelectForUpdate() + "");
         }
 
         // https://stackoverflow.com/questions/851758/java-enums-jpa-and-postgres-enums-how-do-i-make-them-work-together/43125099#43125099

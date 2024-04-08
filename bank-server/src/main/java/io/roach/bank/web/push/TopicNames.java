@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.web.push;
 
 public abstract class TopicNames {
     private TopicNames() {

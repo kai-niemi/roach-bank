@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.web.push;
 
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.ReportUpdate;

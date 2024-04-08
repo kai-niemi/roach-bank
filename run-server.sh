@@ -76,7 +76,7 @@ done
 
 ########################################
 
-PS3='Please select optional profile(s): '
+PS3='Please select optional profile(s) or 1) to start: '
 options=("<Start>" "demo" "jpa" "outbox" "debug" "verbose" )
 
 select option in "${options[@]}"; do
@@ -106,8 +106,13 @@ function join_by {
 
 profiles=$(join_by , $db_option $retry_option $extra_option)
 
-echo java -jar ${jarfile} --spring.profiles.active=$profiles "$@"
+if [ -n "${profiles}" ]; then
+  echo java -jar ${jarfile} --spring.profiles.active=$profiles "$@"
+  sleep 3
+  java -jar ${jarfile} --spring.profiles.active=$profiles "$@"
+else
+  echo java -jar ${jarfile} "$@"
+  sleep 3
+  java -jar ${jarfile} "$@"
+fi
 
-sleep 3
-
-java -jar ${jarfile} --spring.profiles.active=$profiles "$@"

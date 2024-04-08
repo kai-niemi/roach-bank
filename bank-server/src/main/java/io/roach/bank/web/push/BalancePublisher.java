@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.web.push;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
-public class WebSocketPublisher {
+public class BalancePublisher {
     private static final int BATCH_SIZE = 20;
 
     private final BlockingQueue<AccountPayload> payloadBuffer = new ArrayBlockingQueue<>(BATCH_SIZE);

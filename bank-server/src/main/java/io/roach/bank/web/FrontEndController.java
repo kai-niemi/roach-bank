@@ -2,7 +2,7 @@ package io.roach.bank.web;
 
 import io.roach.bank.api.Region;
 import io.roach.bank.api.support.CockroachFacts;
-import io.roach.bank.changefeed.ReportPublisher;
+import io.roach.bank.web.push.ReportPublisher;
 import io.roach.bank.repository.RegionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

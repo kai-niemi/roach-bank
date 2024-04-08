@@ -1,4 +1,4 @@
-package io.roach.bank.changefeed;
+package io.roach.bank.web.push;
 
 import io.roach.bank.AdvisorOrder;
 import io.roach.bank.domain.Account;
@@ -14,30 +14,26 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Order(AdvisorOrder.OUTBOX_ADVISOR)
-public class AccountBalanceUpdateAspect {
+public class BalanceUpdateAspect {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private WebSocketPublisher webSocketPublisher;
+    private BalancePublisher balancePublisher;
 
     @AfterReturning(pointcut = "execution(* io.roach.bank.service.DefaultTransactionService.createTransaction(..))",
             returning = "transaction")
     public void doAfterTransaction(Transaction transaction) {
-        transaction.getItems()
-                .forEach(transactionItem -> {
+        transaction.getItems().forEach(transactionItem -> {
             Account account = transactionItem.getAccount();
 
-            AccountPayload.Fields fields = new AccountPayload.Fields();
-            fields.setId(account.getId());
-            fields.setName(account.getName());
-            fields.setBalance(account.getBalance().getAmount());
-            fields.setCurrency(account.getBalance().getCurrency().getCurrencyCode());
-            fields.setCity(account.getCity());
-
             AccountPayload payload = new AccountPayload();
-            payload.setAfter(fields);
+            payload.setId(account.getId());
+            payload.setName(account.getName());
+            payload.setBalance(account.getBalance().getAmount());
+            payload.setCurrency(account.getBalance().getCurrency().getCurrencyCode());
+            payload.setCity(account.getCity());
 
-            webSocketPublisher.publishAsync(payload);
+            balancePublisher.publishAsync(payload);
         });
     }
 }
