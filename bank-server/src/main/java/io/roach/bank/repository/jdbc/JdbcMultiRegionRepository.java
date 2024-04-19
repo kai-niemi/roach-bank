@@ -37,6 +37,8 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
     @Override
     public void addDatabaseRegions(List<Region> regions) {
+        logger.info("Add regions {}", regions);
+
         Region primary = regions.stream()
                 .filter(Region::isPrimary)
                 .findFirst().orElseThrow(() -> new IllegalStateException("No primary region defined!"));
@@ -62,6 +64,8 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
     @Override
     public void dropDatabaseRegions(List<Region> regions) {
+        logger.info("Drop regions {}", regions);
+
         regions.forEach(region -> {
             if (region.isPrimary()) {
                 setPrimaryRegion(region);
@@ -81,24 +85,27 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
     @Override
     public void setPrimaryRegion(Region region) {
+        logger.info("Set primary region {}", region.getDatabaseRegion());
         Assert.notNull(region.getDatabaseRegion(), "Database region is null (no mapping?)");
         jdbcTemplate.update("ALTER DATABASE roach_bank SET PRIMARY REGION \"" + region.getDatabaseRegion() + "\"");
     }
 
     @Override
     public void setSecondaryRegion(Region region) {
+        logger.info("Set secondary region {}", region.getDatabaseRegion());
         Assert.notNull(region.getDatabaseRegion(), "Database region is null (no mapping?)");
         jdbcTemplate.update("ALTER DATABASE roach_bank SET SECONDARY REGION \"" + region.getDatabaseRegion() + "\"");
     }
 
     @Override
     public void dropSecondaryRegion() {
+        logger.info("Drop secondary region");
         jdbcTemplate.update("ALTER DATABASE roach_bank DROP SECONDARY REGION");
     }
 
     @Override
     public void setSurvivalGoal(SurvivalGoal survivalGoal) {
-        logger.info("Change survival goal to %s".formatted(survivalGoal));
+        logger.info("Set survival goal to %s".formatted(survivalGoal));
 
         if (survivalGoal.equals(SurvivalGoal.REGION)) {
             jdbcTemplate.update("ALTER DATABASE roach_bank SURVIVE REGION FAILURE");
@@ -108,14 +115,20 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
     }
 
     @Override
-    public void addGlobalTable(String table) {
-        logger.info("Set locality GLOBAL for %s".formatted(table));
+    public void setGlobalTable(String table) {
+        logger.info("Set table locality GLOBAL for %s".formatted(table));
         jdbcTemplate.update("ALTER TABLE " + table + " SET locality GLOBAL");
     }
 
     @Override
-    public void addRegionalByRowTable(String table) {
-        logger.info("Set locality RBR for %s".formatted(table));
+    public void setRegionalByTable(String table) {
+        logger.info("Set table locality RBT for %s".formatted(table));
+        jdbcTemplate.update("ALTER TABLE " + table + " SET locality REGIONAL BY TABLE IN PRIMARY REGION");
+    }
+
+    @Override
+    public void setRegionalByRowTable(String table) {
+        logger.info("Set table locality RBR for %s".formatted(table));
 
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER TABLE ")
@@ -154,11 +167,5 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
 
         jdbcTemplate.execute(sb.toString());
         jdbcTemplate.execute("ALTER TABLE " + table + " SET LOCALITY REGIONAL BY ROW AS region");
-    }
-
-    @Override
-    public void addRegionalTable(String table) {
-        logger.info("Set locality REGIONAL for %s".formatted(table));
-        jdbcTemplate.update("ALTER TABLE " + table + " SET LOCALITY REGIONAL");
     }
 }

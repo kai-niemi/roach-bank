@@ -71,15 +71,19 @@ public class MultiRegionController {
                 .dropSecondaryRegion())
                 .withRel("secondary-region")
                 .withTitle("Drop secondary database regions"));
-
-        index.add(linkTo(methodOn(getClass())
-                .configureMultiRegions())
-                .withRel("configure-multiregion")
-                .withTitle("Configure table localities"));
         index.add(linkTo(methodOn(getClass())
                 .setSurvivalGaol(null))
                 .withRel("survival-goal")
                 .withTitle("Configure survival goal"));
+
+        index.add(linkTo(methodOn(getClass())
+                .enableMultiRegion())
+                .withRel("enable-multiregion")
+                .withTitle("Enable multi-region table localities"));
+        index.add(linkTo(methodOn(getClass())
+                .disableMultiRegion())
+                .withRel("disable-multiregion")
+                .withTitle("Disable multi-region table localities"));
 
         return ResponseEntity.ok().body(index);
     }
@@ -152,19 +156,36 @@ public class MultiRegionController {
         return ResponseEntity.ok(model);
     }
 
-    @PostMapping(value = "/configure")
-    public ResponseEntity<MessageModel> configureMultiRegions() {
-        multiRegionRepository.addGlobalTable("region");
-        multiRegionRepository.addGlobalTable("region_mapping");
-        multiRegionRepository.addRegionalByRowTable("account");
-        multiRegionRepository.addRegionalByRowTable("transaction");
-        multiRegionRepository.addRegionalByRowTable("transaction_item");
+    @PostMapping(value = "/enable")
+    public ResponseEntity<MessageModel> enableMultiRegion() {
+        multiRegionRepository.setGlobalTable("region");
+        multiRegionRepository.setGlobalTable("region_mapping");
+        multiRegionRepository.setRegionalByRowTable("account");
+        multiRegionRepository.setRegionalByRowTable("transaction");
+        multiRegionRepository.setRegionalByRowTable("transaction_item");
         multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
 
-        logger.info("Multi-region configuration completed");
+        logger.info("Multi-region localities added");
 
         MessageModel model = new MessageModel();
         model.setMessage("Configured table localities for multi-region (global and RBR)");
+
+        return ResponseEntity.ok(model);
+    }
+
+    @PostMapping(value = "/disable")
+    public ResponseEntity<MessageModel> disableMultiRegion() {
+        multiRegionRepository.setRegionalByTable("region");
+        multiRegionRepository.setRegionalByTable("region_mapping");
+        multiRegionRepository.setRegionalByTable("account");
+        multiRegionRepository.setRegionalByTable("transaction");
+        multiRegionRepository.setRegionalByTable("transaction_item");
+        multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
+
+        logger.info("Multi-region localities removed");
+
+        MessageModel model = new MessageModel();
+        model.setMessage("Removed table localities for multi-region (global and RBR)");
 
         return ResponseEntity.ok(model);
     }

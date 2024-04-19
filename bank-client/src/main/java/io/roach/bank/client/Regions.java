@@ -91,14 +91,32 @@ public class Regions extends AbstractCommand {
         hypermediaClient.getRegionCities(region).forEach(s -> console.success("%s", s));
     }
 
-    @ShellMethod(value = "Configure table localities for multi-region",
-            key = {"multi-region", "mr"})
+    @ShellMethod(value = "Enable multi-region table localities",
+            key = {"enable-multi-region", "emr"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
-    public void configureMultiRegion() {
+    public void enableMultiRegion() {
         final Link submitLink = hypermediaClient.fromRoot()
                 .follow(withCurie(CONFIG_INDEX_REL))
                 .follow(withCurie(CONFIG_MULTI_REGION_REL))
-                .follow(withCurie("configure-multiregion"))
+                .follow(withCurie("enable-multiregion"))
+                .asLink();
+
+        ResponseEntity<String> response = hypermediaClient.post(submitLink, String.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.warn("Unexpected HTTP status: {}", response);
+        }
+
+        logger.info("{}", response);
+    }
+
+    @ShellMethod(value = "Disable multi-region table localities",
+            key = {"disable-multi-region", "dmr"})
+    @ShellMethodAvailability(Constants.CONNECTED_CHECK)
+    public void disableMultiRegion() {
+        final Link submitLink = hypermediaClient.fromRoot()
+                .follow(withCurie(CONFIG_INDEX_REL))
+                .follow(withCurie(CONFIG_MULTI_REGION_REL))
+                .follow(withCurie("disable-multiregion"))
                 .asLink();
 
         ResponseEntity<String> response = hypermediaClient.post(submitLink, String.class);

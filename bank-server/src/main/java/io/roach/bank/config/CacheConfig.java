@@ -1,18 +1,18 @@
 package io.roach.bank.config;
 
+import java.util.Arrays;
+
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
-
 @Configuration
 @EnableCaching
-public class CacheConfig extends CachingConfigurerSupport {
+public class CacheConfig implements CachingConfigurer {
     public static final String CACHE_ACCOUNT_REPORT_SUMMARY = "accountReportSummary";
 
     public static final String CACHE_TRANSACTION_REPORT_SUMMARY = "transactionReportSummary";

@@ -28,6 +28,5 @@ public abstract class AbstractEntity<T extends Serializable> implements Persista
     }
 
     protected void onCreate() {
-
     }
 }

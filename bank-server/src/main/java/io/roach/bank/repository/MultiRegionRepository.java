@@ -18,9 +18,9 @@ public interface MultiRegionRepository {
 
     void setSurvivalGoal(SurvivalGoal survivalGoal);
 
-    void addGlobalTable(String table);
+    void setGlobalTable(String table);
 
-    void addRegionalByRowTable(String table);
+    void setRegionalByRowTable(String table);
 
-    void addRegionalTable(String table);
+    void setRegionalByTable(String table);
 }

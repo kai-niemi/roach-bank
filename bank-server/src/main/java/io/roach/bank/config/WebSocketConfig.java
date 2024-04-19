@@ -12,7 +12,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/roach-bank")
-//                .setAllowedOrigins("*")
                 .withSockJS()
                 .setHttpMessageCacheSize(128)
                 .setDisconnectDelay(15000)

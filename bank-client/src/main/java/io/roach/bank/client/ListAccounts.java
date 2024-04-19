@@ -123,8 +123,7 @@ public class ListAccounts extends AbstractCommand {
 
         outer_loop:
         for (; ; ) {
-            console.success(printContentTable(
-                    new ArrayList<>(accountPage.getContent())));
+            console.success(printContentTable(new ArrayList<>(accountPage.getContent())));
 
             StringBuilder sb = new StringBuilder("Continue to");
 
