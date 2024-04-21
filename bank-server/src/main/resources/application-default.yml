@@ -35,7 +35,6 @@ bank:
       primary: true
       cities: "berlin,hamburg,munich,frankfurt,dusseldorf,leipzig,dortmund,essen,stuttgart"
     - name: eu-central-2
-      secondary: true
       cities: "zurich,krakov,zagraeb,zaragoza,lodz,athens,bratislava,prague,sofia,bucharest,vienna,warsaw,budapest"
     - name: eu-west-1
       cities: "dublin,belfast,liverpool,manchester,glasgow,birmingham,leeds"

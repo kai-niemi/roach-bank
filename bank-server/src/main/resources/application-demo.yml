@@ -17,7 +17,6 @@ bank:
       cities: "london,amsterdam,rotterdam,berlin,hamburg,frankfurt"
     - name: eu-north-1
       cities: "stockholm,copenhagen,helsinki,oslo,riga,tallinn"
-      secondary: true
     - name: us-east-1
       cities: "new york,boston,washington dc,miami,charlotte,atlanta"
   region-mapping:

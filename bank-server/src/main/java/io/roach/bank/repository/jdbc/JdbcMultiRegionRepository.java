@@ -39,38 +39,31 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
     public void addDatabaseRegions(List<Region> regions) {
         logger.info("Add regions {}", regions);
 
-        Region primary = regions.stream()
+        regions.stream()
                 .filter(Region::isPrimary)
-                .findFirst().orElseThrow(() -> new IllegalStateException("No primary region defined!"));
-
-        jdbcTemplate.update("ALTER DATABASE roach_bank PRIMARY REGION \"" + primary.getDatabaseRegion() + "\"");
+                .findFirst()
+                .ifPresent(region ->
+                        jdbcTemplate.update("ALTER DATABASE roach_bank PRIMARY REGION \""
+                                + region.getDatabaseRegion() + "\""));
 
         regions.stream()
                 .filter(region -> region.getDatabaseRegion() != null)
                 .forEach(region -> {
-                    if (!region.isPrimary() && !region.isSecondary()) {
+                    if (!region.isPrimary()) {
                         jdbcTemplate.update("ALTER DATABASE roach_bank ADD REGION IF NOT EXISTS \""
                                 + region.getDatabaseRegion() + "\"");
+
+                        if (region.isSecondary()) {
+                            jdbcTemplate.update("ALTER DATABASE roach_bank SET SECONDARY REGION \""
+                                    + region.getDatabaseRegion() + "\"");
+                        }
                     }
                 });
-
-        regions.stream()
-                .filter(Region::isSecondary)
-                .findFirst()
-                .ifPresent(region ->
-                        jdbcTemplate.update("ALTER DATABASE roach_bank SET SECONDARY REGION \""
-                                + region.getDatabaseRegion() + "\""));
     }
 
     @Override
     public void dropDatabaseRegions(List<Region> regions) {
         logger.info("Drop regions {}", regions);
-
-        regions.forEach(region -> {
-            if (region.isPrimary()) {
-                setPrimaryRegion(region);
-            }
-        });
 
         regions.stream()
                 .filter(region -> region.getDatabaseRegion() != null)
@@ -79,6 +72,9 @@ public class JdbcMultiRegionRepository implements MultiRegionRepository {
                         jdbcTemplate.update(
                                 "ALTER DATABASE roach_bank DROP REGION IF EXISTS \"" + region.getDatabaseRegion()
                                         + "\"");
+                    }
+                    if (region.isSecondary()) {
+                        dropSecondaryRegion();
                     }
                 });
     }
