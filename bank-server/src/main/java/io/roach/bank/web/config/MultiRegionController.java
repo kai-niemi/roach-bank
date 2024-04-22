@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.Region;
-import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.api.SurvivalGoal;
 import io.roach.bank.repository.MultiRegionRepository;
 import io.roach.bank.repository.RegionRepository;
 
@@ -158,12 +158,14 @@ public class MultiRegionController {
 
     @PostMapping(value = "/enable")
     public ResponseEntity<MessageModel> enableMultiRegion() {
+        multiRegionRepository.addDatabaseRegions(metadataRepository.listRegions(List.of()));
+
         multiRegionRepository.setGlobalTable("region");
         multiRegionRepository.setGlobalTable("region_mapping");
         multiRegionRepository.setRegionalByRowTable("account");
         multiRegionRepository.setRegionalByRowTable("transaction");
         multiRegionRepository.setRegionalByRowTable("transaction_item");
-        multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
+        multiRegionRepository.setSurvivalGoal(SurvivalGoal.REGION);
 
         logger.info("Multi-region localities added");
 
@@ -181,6 +183,8 @@ public class MultiRegionController {
         multiRegionRepository.setRegionalByTable("transaction");
         multiRegionRepository.setRegionalByTable("transaction_item");
         multiRegionRepository.setSurvivalGoal(SurvivalGoal.ZONE);
+
+        multiRegionRepository.dropDatabaseRegions(metadataRepository.listRegions(List.of()));
 
         logger.info("Multi-region localities removed");
 

@@ -8,7 +8,7 @@ bank:
   select-for-update: true
   clear-at-startup: false
   account-plan:
-    accounts-per-city: 15000
+    accounts-per-city: 5000
     initial-balance: "10000.00"
     currency: USD
   regions:

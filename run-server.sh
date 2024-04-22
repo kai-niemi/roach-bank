@@ -41,7 +41,7 @@ fi
 ########################################
 
 PS3='Please select datasource: '
-options=("<Skip>" "pgjdbc-dev" "pgjdbc-cloud" "crdb-dev" "crdb-local" "crdb-cloud" "psql-dev" "psql-local")
+options=("<Skip>" "pgjdbc-dev" "crdb-dev" "crdb-local" "psql-dev" "psql-local")
 
 select option in "${options[@]}"; do
   case $option in

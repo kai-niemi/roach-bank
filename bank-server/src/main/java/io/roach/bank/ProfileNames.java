@@ -63,19 +63,9 @@ public abstract class ProfileNames {
     public static final String CRDB_DEV = "crdb-dev";
 
     /**
-     * crdb-jdbc driver dedicated/serverless.
-     */
-    public static final String CRDB_CLOUD = "crdb-cloud";
-
-    /**
      * pg-jdbc driver dev.
      */
     public static final String PGJDBC_DEV = "pgjdbc-dev";
-
-    /**
-     * pg-jdbc driver dedicated/serverless.
-     */
-    public static final String PGJDBC_CLOUD = "pgjdbc-cloud";
 
     /**
      * PostgreSQL local

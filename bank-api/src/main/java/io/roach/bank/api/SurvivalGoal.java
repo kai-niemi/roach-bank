@@ -1,4 +1,4 @@
-package io.roach.bank.domain;
+package io.roach.bank.api;
 
 public enum SurvivalGoal {
     ZONE,

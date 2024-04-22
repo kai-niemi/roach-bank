@@ -48,8 +48,6 @@ which are:
 
 Database type, one of:
 
-* crdb-cloud - Use CockroachDB JDBC driver connecting to CockroachDB Cloud
-* pgjdbc-cloud - Use pgJDBC connecting to CockroachDB Cloud
 * psql-local - Use pgJDBC driver connecting to PostgreSQL on localhost 
 
 Default is pgJDBC against local CockroachDB.

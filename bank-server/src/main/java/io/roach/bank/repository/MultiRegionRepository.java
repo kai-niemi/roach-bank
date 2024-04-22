@@ -3,7 +3,7 @@ package io.roach.bank.repository;
 import java.util.List;
 
 import io.roach.bank.api.Region;
-import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.api.SurvivalGoal;
 
 public interface MultiRegionRepository {
     void addDatabaseRegions(List<Region> regions);

@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import io.roach.bank.api.Region;
-import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.api.SurvivalGoal;
 import io.roach.bank.repository.MultiRegionRepository;
 import io.roach.bank.repository.RegionRepository;
 

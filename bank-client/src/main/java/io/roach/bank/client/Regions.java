@@ -19,7 +19,7 @@ import org.springframework.shell.table.TableModel;
 import io.roach.bank.api.Region;
 import io.roach.bank.client.support.HypermediaClient;
 import io.roach.bank.client.support.TableUtils;
-import io.roach.bank.domain.SurvivalGoal;
+import io.roach.bank.api.SurvivalGoal;
 
 import static io.roach.bank.api.LinkRelations.CONFIG_INDEX_REL;
 import static io.roach.bank.api.LinkRelations.CONFIG_MULTI_REGION_REL;
@@ -210,15 +210,15 @@ public class Regions extends AbstractCommand {
     @ShellMethod(value = "Set survival goal", key = {"survival-goal", "sg"})
     @ShellMethodAvailability(Constants.CONNECTED_CHECK)
     public void survivalGoal(@ShellOption(help = "survival goal",
-            valueProvider = EnumValueProvider.class) SurvivalGoal survivalGoal) {
+            valueProvider = EnumValueProvider.class) SurvivalGoal goal) {
         final Link submitLink = hypermediaClient.fromRoot()
                 .follow(withCurie(CONFIG_INDEX_REL))
                 .follow(withCurie(CONFIG_MULTI_REGION_REL))
                 .follow(withCurie("survival-goal"))
-                .withTemplateParameters(Collections.singletonMap("goal", survivalGoal))
+                .withTemplateParameters(Collections.singletonMap("goal", goal))
                 .asLink();
 
-        console.textf(AnsiColor.BRIGHT_CYAN, "Set survival goal '%s'", survivalGoal);
+        console.textf(AnsiColor.BRIGHT_CYAN, "Set survival goal '%s'", goal);
 
         ResponseEntity<String> response = hypermediaClient.put(submitLink, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
