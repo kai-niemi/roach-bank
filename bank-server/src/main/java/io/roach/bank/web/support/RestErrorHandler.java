@@ -55,7 +55,7 @@ public class RestErrorHandler extends ResponseEntityExceptionHandler implements 
 
     private ResponseEntity<Object> wrap(Problem problem, Exception ex) {
         if (problem.getStatus().is5xxServerError()) {
-            logger.error("Server error: " + ex);
+            logger.error("Server error", ex);
         } else if (problem.getStatus().is4xxClientError()) {
             logger.warn("Client error: " +  ex);
         } else {

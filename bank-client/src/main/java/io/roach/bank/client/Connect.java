@@ -61,7 +61,7 @@ public class Connect extends AbstractCommand {
                     .follow().toEntity(String.class);
 
             String name = response.getHeaders().toSingleValueMap().get("X-Application-Context");
-            if ("Roach Bank".equals(name)) {
+            if ("bank-server".equals(name)) {
                 String message = JsonPath.parse(response.getBody()).read("$.message", String.class);
 
                 logger.info(message);

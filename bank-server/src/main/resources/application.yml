@@ -5,8 +5,6 @@
 # See README.md for available Spring Profiles
 ##############################################
 spring:
-  profiles:
-    active: default,retry-client
   application:
     name: roach-bank
   output:
@@ -83,11 +81,6 @@ logging:
   logback:
     rollingpolicy:
       max-history: 3
-#############################
-info:
-  build:
-    name: Roach Bank
-    version: 2.0.0
 #############################
 management:
   endpoints:
