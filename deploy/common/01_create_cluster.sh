@@ -35,7 +35,7 @@ fn_stage_lb() {
 
     fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq update'
     fn_failcheck roachprod run ${CLUSTER}:$c 'sudo apt-get -qq install -y openjdk-17-jre-headless htop dstat haproxy'
-    fn_failcheck roachprod run ${CLUSTER}:$c "./cockroach gen haproxy --insecure --host $(roachprod ip $CLUSTER:1 --external) --locality=region=$region"
+    fn_failcheck roachprod run ${CLUSTER}:$c "./cockroach gen haproxy --certs-dir=certs --host $(roachprod ip $CLUSTER:1 --external) --locality=region=$region"
     fn_failcheck roachprod run ${CLUSTER}:$c 'nohup haproxy -f haproxy.cfg > /dev/null 2>&1 &'
   done
 }
@@ -44,7 +44,7 @@ fn_create_db() {
 fn_echo_info_nl "Creating database via $CLUSTER:1"
 
 fn_failcheck roachprod run $CLUSTER:1 <<EOF
-./cockroach sql --insecure --host=`roachprod ip $CLUSTER:1` -e "CREATE DATABASE roach_bank"
+./cockroach sql --certs-dir=certs --host=`roachprod ip $CLUSTER:1` -e "CREATE DATABASE roach_bank; ALTER ROLE root WITH PASSWORD 'cockroach'"
 EOF
 }
 

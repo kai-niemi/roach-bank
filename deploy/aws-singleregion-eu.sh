@@ -6,7 +6,7 @@
 
 title="CockroachDB single region deployment (AWS)"
 # CRDB release version
-releaseversion="v23.2.2"
+releaseversion="v24.2.3"
 # Number of node instances in total including clients
 nodes="12"
 # Nodes hosting CRDB
@@ -33,7 +33,8 @@ eu-central-1b,\
 eu-central-1c"
 
 # AWS/GCE machine types
-machinetypes="m6i.2xlarge"
+# https://aws.amazon.com/ec2/instance-types/m6i/
+machinetypes="m6i.4xlarge"
 
 # DO NOT EDIT BELOW THIS LINE
 #############################
