@@ -1,5 +1,7 @@
 [![Java CI](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml/badge.svg?branch=main)](https://github.com/kai-niemi/roach-bank/actions/workflows/maven.yml)
 
+This project has been deprecated in favor of its successor [ledger](https://github.com/kai-niemi/ledger).
+
 # Roach Bank
 
 Roach Bank represents a full-stack, financial accounting ledger demo running on [CockroachDB](https://www.cockroachlabs.com/)
