@@ -7,9 +7,6 @@ import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +14,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.roach.bank.ProfileNames;
+import io.roach.bank.annotations.TimeTravel;
+import io.roach.bank.annotations.TimeTravelMode;
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
 import io.roach.bank.repository.AccountRepository;
@@ -79,7 +79,7 @@ public class DefaultAccountService implements AccountService {
     }
 
     @Override
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @TransactionExplicit(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public List<Account> findTopAccountsByCity(Collection<String> cities, int limit) {
         return accountRepository.findTopByCity(cities, limit);
     }

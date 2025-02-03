@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,6 +30,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 
 import ch.qos.logback.classic.Level;
+
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.ConnectionPoolConfig;
 import io.roach.bank.api.ConnectionPoolSize;
 import io.roach.bank.api.LinkRelations;
@@ -146,7 +147,7 @@ public class AdminController {
     }
 
     @PostMapping(value = "/clear")
-    @TransactionBoundary
+    @TransactionExplicit
     public ResponseEntity<String> clearAll() {
         logger.warn("Deleting all transactions..");
         transactionService.deleteAll();

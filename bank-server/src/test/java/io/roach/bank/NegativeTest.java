@@ -6,10 +6,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -18,14 +18,14 @@ import io.roach.bank.service.BadRequestException;
 public class NegativeTest extends AbstractIntegrationTest {
     @Test
     @Order(1)
-    @TransactionBoundary
+    @TransactionExplicit
     @Commit
     public void whenStartingTest_exepectInitalAccountsCreated() {
         createInitialTestAccounts();
     }
 
     @Test
-    @TransactionBoundary
+    @TransactionExplicit
     @Rollback
     @Order(2)
     public void whenNonZeroSumTransfer_expectRequestToFail() {
@@ -57,7 +57,7 @@ public class NegativeTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @TransactionBoundary
+    @TransactionExplicit
     @Rollback
     @Order(3)
     public void whenMixedCurrencyTransfer_expectRequestToFail() {

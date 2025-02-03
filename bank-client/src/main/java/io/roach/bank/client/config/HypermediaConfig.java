@@ -21,7 +21,8 @@ import io.roach.bank.client.support.HypermediaClient;
 
 @Configuration
 @EnableHypermediaSupport(type = {
-        EnableHypermediaSupport.HypermediaType.HAL_FORMS, EnableHypermediaSupport.HypermediaType.HAL
+        EnableHypermediaSupport.HypermediaType.HAL_FORMS,
+        EnableHypermediaSupport.HypermediaType.HAL
 })
 public class HypermediaConfig implements RestTemplateCustomizer {
     @Value("${roachbank.http.maxTotal}")

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.4</version>
+        <version>3.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -16,8 +16,8 @@
     <version>2.1.1-SNAPSHOT</version>
 
     <properties>
-        <spring.boot.version>3.3.4</spring.boot.version>
-        <spring.shell.version>3.3.3</spring.shell.version>
+        <spring.boot.version>3.4.2</spring.boot.version>
+        <spring.shell.version>3.4.0</spring.shell.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -206,11 +206,13 @@
                 <artifactId>datasource-proxy</artifactId>
                 <version>1.10</version>
             </dependency>
+<!--
             <dependency>
                 <groupId>io.cockroachdb</groupId>
                 <artifactId>spring-data-cockroachdb</artifactId>
                 <version>1.2.0</version>
             </dependency>
+-->
         </dependencies>
     </dependencyManagement>
 

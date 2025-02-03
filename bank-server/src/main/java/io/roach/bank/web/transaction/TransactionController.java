@@ -5,10 +5,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +19,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.roach.bank.annotations.Retryable;
+import io.roach.bank.annotations.TimeTravel;
+import io.roach.bank.annotations.TimeTravelMode;
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.MessageModel;
 import io.roach.bank.api.TransactionModel;
@@ -79,7 +79,7 @@ public class TransactionController {
     }
 
     @GetMapping(value = "/list")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @TransactionExplicit(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     @Retryable
     public PagedModel<TransactionModel> listTransactions(@PageableDefault(size = 5) Pageable page) {
         return pagedTransactionResourceAssembler
@@ -87,7 +87,7 @@ public class TransactionController {
     }
 
     @GetMapping(value = "/{id}")
-    @TransactionBoundary(readOnly = true)
+    @TransactionExplicit(readOnly = true)
     @Retryable
     public TransactionModel getTransaction(@PathVariable("id") UUID id) {
         Transaction entity = bankService.findById(id);

@@ -7,6 +7,8 @@
 spring:
   application:
     name: roach-bank
+  profiles:
+    default:
   output:
     ansi:
       enabled: ALWAYS
@@ -84,18 +86,10 @@ logging:
 #############################
 management:
   endpoints:
-    enabled-by-default: true
     web:
       exposure:
-        include: env,info,health,metrics,flyway,prometheus,shutdown
-  endpoint:
-    health:
-      show-details: always
-  health:
-    defaults:
-      enabled: true
-    db:
-      enabled: false
+        include: health,info,shutdown,env,threaddump,metrics
+      base-path: /api/actuator
   metrics:
     tags:
       application: ${spring.application.name}
@@ -106,5 +100,8 @@ server:
   error:
     whitelabel:
       enabled: false
-    include-stacktrace: always
+    path: /error
+    include-exception: true
     include-message: always
+    include-stacktrace: always
+    include-binding-errors: always

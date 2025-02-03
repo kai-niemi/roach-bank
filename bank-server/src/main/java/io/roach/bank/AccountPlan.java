@@ -1,7 +1,8 @@
 package io.roach.bank;
 
-import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotNull;
 
 @Validated
 public class AccountPlan {
@@ -40,9 +41,9 @@ public class AccountPlan {
     @Override
     public String toString() {
         return "AccountPlan{" +
-                "accountsPerCity=" + accountsPerCity +
-                ", initialBalance='" + initialBalance + '\'' +
-                ", currency='" + currency + '\'' +
-                '}';
+               "accountsPerCity=" + accountsPerCity +
+               ", initialBalance='" + initialBalance + '\'' +
+               ", currency='" + currency + '\'' +
+               '}';
     }
 }

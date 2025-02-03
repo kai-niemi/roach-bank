@@ -14,11 +14,11 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.AccountType;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.CockroachFacts;
@@ -41,7 +41,7 @@ public class StressTest extends AbstractIntegrationTest {
 
     @Test
     @Order(0)
-    @TransactionBoundary
+    @TransactionExplicit
     @Commit
     public void whenStartingTest_exepectInitalAccountsCreated() {
         createInitialTestAccounts();

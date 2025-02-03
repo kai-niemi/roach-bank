@@ -1,7 +1,7 @@
 #!/bin/bash
 
 db_url="jdbc:postgresql://localhost:26257/roach_bank??ssl=true&sslmode=require"
-spring_profile="retry-client,pgjdbc-local"
+spring_profile="default"
 
 nohup java -jar bank-server.jar \
 --spring.datasource.url="${db_url}" \

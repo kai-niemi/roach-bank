@@ -26,7 +26,7 @@ import io.roach.bank.service.TransactionServiceFacade;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(classes = ServerApplication.class)
 @Tag("integration-test")
-@ActiveProfiles({ProfileNames.RETRY_CLIENT, "integrationtest"})
+@ActiveProfiles({"integrationtest"})
 public abstract class AbstractIntegrationTest {
     @Autowired
     protected TransactionService transactionService;

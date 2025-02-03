@@ -2,8 +2,6 @@ package io.roach.bank.web.support;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Component;
@@ -18,8 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 @WebFilter("/api")
 public class ResponseHeaderFilter extends OncePerRequestFilter {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-
     public static final String HEADER_NAME = "X-Application-Context";
 
     public static final String HEADER_VERSION = "X-Application-Version";

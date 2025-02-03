@@ -1,13 +1,13 @@
 package io.roach.bank.web.config;
 
-import io.roach.bank.api.LinkRelations;
-import io.roach.bank.api.MessageModel;
-import io.roach.bank.api.Region;
-import io.roach.bank.repository.RegionRepository;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import io.roach.bank.annotations.TransactionExplicit;
+import io.roach.bank.api.LinkRelations;
+import io.roach.bank.api.MessageModel;
+import io.roach.bank.api.Region;
+import io.roach.bank.repository.RegionRepository;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -66,14 +65,15 @@ public class RegionController {
     }
 
     @GetMapping(value = "/all")
-    @TransactionBoundary(readOnly = true)
+    @TransactionExplicit(readOnly = true)
     public CollectionModel<EntityModel<Region>> listAllRegions() {
         return regionResourceAssembler.toCollectionModel(metadataRepository.listRegions(List.of()));
     }
 
     @GetMapping(value = "/cities")
-    @TransactionBoundary(readOnly = true)
-    public Set<String> listAllCities(@RequestParam(value = "region", required = false, defaultValue = "all") String region) {
+    @TransactionExplicit(readOnly = true)
+    public Set<String> listAllCities(
+            @RequestParam(value = "region", required = false, defaultValue = "all") String region) {
         List<String> regions = "gateway".equals(region)
                 ? List.of(metadataRepository.getGatewayRegion())
                 : "all".equals(region)
@@ -83,13 +83,13 @@ public class RegionController {
     }
 
     @GetMapping(value = "/{region}")
-    @TransactionBoundary(readOnly = true)
+    @TransactionExplicit(readOnly = true)
     public EntityModel<Region> getRegion(@PathVariable("region") String region) {
         return regionResourceAssembler.toModel(metadataRepository.getRegionByName(region));
     }
 
     @GetMapping(value = "/gateway")
-    @TransactionBoundary(readOnly = true)
+    @TransactionExplicit(readOnly = true)
     public Map<String, String> gatewayRegion() {
         return Collections.singletonMap("region", metadataRepository.getGatewayRegion());
     }

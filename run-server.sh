@@ -40,44 +40,8 @@ fi
 
 ########################################
 
-PS3='Please select datasource: '
-options=("<Skip>" "pgjdbc-dev" "crdb-dev" "crdb-local" "psql-dev" "psql-local")
-
-select option in "${options[@]}"; do
-  case $option in
-    "<Skip>")
-      break
-      ;;
-    *)
-      db_option=$option
-      fn_print_cyan "Selected profile: $option"
-      break
-      ;;
-  esac
-done
-
-########################################
-
-PS3='Please select retry strategy: '
-options=("<Skip>" "retry-driver" "retry-savepoint" "retry-none")
-
-select option in "${options[@]}"; do
-  case $option in
-    "<Skip>")
-      break
-      ;;
-    *)
-      retry_option=$option
-      fn_print_cyan "Selected profile: $option"
-      break
-      ;;
-  esac
-done
-
-########################################
-
 PS3='Please select optional profile(s) or 1) to start: '
-options=("<Start>" "demo" "jpa" "outbox" "debug" "verbose" )
+options=("<Start>" "psql" "jpa" "outbox" "debug" "verbose" )
 
 select option in "${options[@]}"; do
   case $option in
@@ -104,7 +68,7 @@ function join_by {
   fi
 }
 
-profiles=$(join_by , $db_option $retry_option $extra_option)
+profiles=$(join_by , $extra_option)
 
 if [ -n "${profiles}" ]; then
   echo java -jar ${jarfile} --spring.profiles.active=$profiles "$@"

@@ -12,10 +12,6 @@ import io.roach.bank.ApplicationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -39,6 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.roach.bank.annotations.Retryable;
+import io.roach.bank.annotations.TimeTravel;
+import io.roach.bank.annotations.TimeTravelMode;
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.AccountBatchForm;
 import io.roach.bank.api.AccountForm;
 import io.roach.bank.api.AccountModel;
@@ -153,7 +153,7 @@ public class AccountController {
     }
 
     @GetMapping(value = "/all")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @TransactionExplicit(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     public PagedModel<AccountModel> listAccounts(
             @RequestParam(value = "region", defaultValue = "all", required = false) String region,
             @PageableDefault(size = 30) Pageable page) {
@@ -170,21 +170,21 @@ public class AccountController {
     }
 
     @GetMapping(value = "/{id}")
-    @TransactionBoundary(readOnly = true)
+    @TransactionExplicit(readOnly = true)
     @Retryable
     public AccountModel getAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.getAccountById(id));
     }
 
     @GetMapping(value = "/{id}/balance")
-    @TransactionBoundary(readOnly = true)
+    @TransactionExplicit(readOnly = true)
     @Retryable
     public Money getAccountBalance(@PathVariable("id") UUID id) {
         return accountService.getBalance(id);
     }
 
     @GetMapping(value = "/{id}/balance-snapshot")
-    @TransactionBoundary(
+    @TransactionExplicit(
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     @Retryable
     public Money getAccountBalanceSnapshot(@PathVariable("id") UUID id) {
@@ -192,13 +192,13 @@ public class AccountController {
     }
 
     @PutMapping(value = "/{id}/open")
-    @TransactionBoundary
+    @TransactionExplicit
     public AccountModel openAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.openAccount(id));
     }
 
     @PutMapping(value = "/{id}/close")
-    @TransactionBoundary
+    @TransactionExplicit
     public AccountModel closeAccount(@PathVariable("id") UUID id) {
         return accountResourceAssembler.toModel(accountService.closeAccount(id));
     }
@@ -221,7 +221,7 @@ public class AccountController {
     }
 
     @PostMapping(value = "/one/form")
-    @TransactionBoundary
+    @TransactionExplicit
     public HttpEntity<AccountModel> createOneAccount(@Valid @RequestBody AccountForm form) {
         UUID id = "auto".equals(form.getUuid()) ? UUID.randomUUID() : UUID.fromString(form.getUuid());
 
@@ -267,7 +267,7 @@ public class AccountController {
     private static final AtomicInteger SEQ = new AtomicInteger(1);
 
     @PostMapping(value = "/batch/form")
-    @TransactionBoundary
+    @TransactionExplicit
     public HttpEntity<?> createAccountBatch(@Valid @RequestBody AccountBatchForm form) {
         final Money money = Money.of(form.getBalance(), form.getCurrency());
 

@@ -1,5 +1,10 @@
 package io.roach.bank.web.report;
 
+import io.roach.bank.annotations.Retryable;
+import io.roach.bank.annotations.TimeTravel;
+import io.roach.bank.annotations.TimeTravelMode;
+import io.roach.bank.annotations.TransactionExplicit;
+import io.roach.bank.annotations.TransactionPriority;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.LinkRelations;
 import io.roach.bank.api.MessageModel;
@@ -11,11 +16,6 @@ import io.roach.bank.repository.RegionRepository;
 import io.roach.bank.repository.ReportingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,7 +62,7 @@ public class ReportController {
     }
 
     @GetMapping(value = "/account-summary")
-    @TransactionBoundary(readOnly = true,
+    @TransactionExplicit(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.HISTORICAL_READ, interval = "-10s"),
             priority = TransactionPriority.LOW)
     @Retryable
@@ -84,7 +84,7 @@ public class ReportController {
     }
 
     @GetMapping(value = "/transaction-summary")
-    @TransactionBoundary(readOnly = true,
+    @TransactionExplicit(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ),
             priority = TransactionPriority.LOW)
     @Retryable
@@ -105,7 +105,7 @@ public class ReportController {
     }
 
     @GetMapping("/refresh")
-    @TransactionBoundary(readOnly = true,
+    @TransactionExplicit(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ),
             priority = TransactionPriority.LOW)
     public ResponseEntity<String> refreshReport(

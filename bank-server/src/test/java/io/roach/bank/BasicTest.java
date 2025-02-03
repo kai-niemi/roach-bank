@@ -6,9 +6,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.test.annotation.Commit;
 
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.support.Money;
 import io.roach.bank.domain.Account;
@@ -20,7 +20,7 @@ import static io.roach.bank.api.support.Money.USD;
 public class BasicTest extends AbstractIntegrationTest {
     @Test
     @Order(0)
-    @TransactionBoundary
+    @TransactionExplicit
     @Commit
     public void whenStartingTest_exepectInitalAccountsCreated() {
         createInitialTestAccounts();
@@ -28,7 +28,7 @@ public class BasicTest extends AbstractIntegrationTest {
 
     @Test
     @Order(1)
-    @TransactionBoundary
+    @TransactionExplicit
     @Commit
     public void whenFindingAccounts_expectInitialBalance() {
         Account accountA = accountService.getAccountById(account1Id_SEK);
@@ -50,7 +50,7 @@ public class BasicTest extends AbstractIntegrationTest {
 
     @Test
     @Order(2)
-    @TransactionBoundary
+    @TransactionExplicit
     @Commit
     public void whenSubmitBalancedTransaction_expectSuccess() {
         Account accountA = accountService.getAccountById(account1Id_SEK);
@@ -84,7 +84,7 @@ public class BasicTest extends AbstractIntegrationTest {
 
     @Test
     @Order(3)
-    @TransactionBoundary
+    @TransactionExplicit
     @Commit
     public void whenSubmitBalancedMultiLeggedTransaction_expectSuccess() {
         Account accountFromSEK = accountService.getAccountById(account1Id_SEK);

@@ -6,9 +6,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.roach.bank.annotations.Retryable;
+import io.roach.bank.annotations.TransactionExplicit;
+import io.roach.bank.annotations.TransactionPriority;
 import io.roach.bank.api.TransactionForm;
 import io.roach.bank.api.TransactionModel;
 import io.roach.bank.domain.Transaction;
@@ -63,7 +63,7 @@ public class TransferController {
     }
 
     @PostMapping(value = "/form")
-    @TransactionBoundary(priority = TransactionPriority.NORMAL, retryPriority = TransactionPriority.HIGH)
+    @TransactionExplicit(priority = TransactionPriority.NORMAL, retryPriority = TransactionPriority.HIGH)
     @Retryable
     public ResponseEntity<TransactionModel> submitTransactionForm(@Valid @RequestBody TransactionForm form) {
         if (form.getAccountLegs().size() % 2 != 0) {

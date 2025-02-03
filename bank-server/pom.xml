@@ -117,11 +117,6 @@
         <!-- DB -->
         <!-- ======================================================== -->
         <dependency>
-            <groupId>io.cockroachdb</groupId>
-            <artifactId>spring-data-cockroachdb</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
@@ -231,7 +226,7 @@
                                 <include>**/*Test.java</include>
                             </includes>
                             <argLine>
-                                -Dspring.profiles.active=pgjdbc-local,retry-client
+                                -Dspring.profiles.active=psql
                                 -Dtest.datasources.crdb.url=jdbc:cockroachdb://localhost:26257/roach_bank?sslmode=disable
                             </argLine>
                         </configuration>

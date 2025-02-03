@@ -15,5 +15,4 @@ public class TransactionConfig {
     public TransactionTemplate transactionTemplate() {
         return new TransactionTemplate(transactionManager);
     }
-
 }

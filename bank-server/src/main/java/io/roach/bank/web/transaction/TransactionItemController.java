@@ -3,10 +3,6 @@ package io.roach.bank.web.transaction;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -17,6 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.roach.bank.annotations.Retryable;
+import io.roach.bank.annotations.TimeTravel;
+import io.roach.bank.annotations.TimeTravelMode;
+import io.roach.bank.annotations.TransactionExplicit;
 import io.roach.bank.api.TransactionItemModel;
 import io.roach.bank.domain.TransactionItem;
 import io.roach.bank.service.TransactionService;
@@ -34,7 +34,7 @@ public class TransactionItemController {
     private PagedResourcesAssembler<TransactionItem> transactionItemPagedResourcesAssembler;
 
     @GetMapping(value = "/{transactionId}")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @TransactionExplicit(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     @Retryable
     public PagedModel<TransactionItemModel> getTransactionItems(
             @PathVariable("transactionId") UUID transactionId,
@@ -45,7 +45,7 @@ public class TransactionItemController {
     }
 
     @GetMapping(value = "/{transactionId}/{accountId}")
-    @TransactionBoundary(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
+    @TransactionExplicit(timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ), readOnly = true)
     @Retryable
     public TransactionItemModel getTransactionLeg(
             @PathVariable("transactionId") UUID transactionId,

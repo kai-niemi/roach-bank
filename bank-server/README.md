@@ -54,8 +54,6 @@ Default is pgJDBC against local CockroachDB.
 
 Retry strategy, one of:
 
-* retry-driver - Enable JDBC driver level retries (requires crdb-local or crdb-cloud)
-* retry-savepoint - Enables client-side retries using savepoints
 * retry-none - Disable retries
 
 Default is client-side retries with exponential backoff.

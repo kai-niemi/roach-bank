@@ -1,5 +1,10 @@
 package io.roach.bank.web.push;
 
+import io.roach.bank.annotations.Retryable;
+import io.roach.bank.annotations.TimeTravel;
+import io.roach.bank.annotations.TimeTravelMode;
+import io.roach.bank.annotations.TransactionExplicit;
+import io.roach.bank.annotations.TransactionPriority;
 import io.roach.bank.api.AccountSummary;
 import io.roach.bank.api.ReportUpdate;
 import io.roach.bank.api.TransactionSummary;
@@ -8,11 +13,6 @@ import io.roach.bank.repository.ReportingRepository;
 import io.roach.bank.util.ConcurrencyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.cockroachdb.annotations.Retryable;
-import org.springframework.data.cockroachdb.annotations.TimeTravel;
-import org.springframework.data.cockroachdb.annotations.TimeTravelMode;
-import org.springframework.data.cockroachdb.annotations.TransactionBoundary;
-import org.springframework.data.cockroachdb.annotations.TransactionPriority;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -84,7 +84,7 @@ public class ReportPublisher {
         }
     }
 
-    @TransactionBoundary(readOnly = true,
+    @TransactionExplicit(readOnly = true,
             timeTravel = @TimeTravel(mode = TimeTravelMode.FOLLOWER_READ),
             priority = TransactionPriority.LOW)
     @Retryable

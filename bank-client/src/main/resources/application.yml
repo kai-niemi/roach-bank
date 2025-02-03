@@ -2,13 +2,21 @@ spring:
   output:
     ansi:
       enabled: always
+  #############################
   shell:
+    command:
+      stacktrace:
+        enabled: true
+      version:
+        enabled: true
+        showBuildName: true
+        showGitBranch: true
+    script:
+      enabled: true
     interactive:
       enabled: true
-    version:
-      enabled: true
-      showBuildName: true
-      showGitBranch: true
+    noninteractive:
+      enabled: false
     history:
       name: client.history
 logging:

@@ -36,7 +36,7 @@ public class FrontEndController {
         return new ViewModel();
     }
 
-    @GetMapping
+    @GetMapping("/")
     public String homePage(@RequestParam(value = "region", defaultValue = "gateway") String region,
                            @RequestParam(value = "limit", defaultValue = "10") int limit,
                            @ModelAttribute ViewModel viewModel,
@@ -82,6 +82,11 @@ public class FrontEndController {
 
     @PostMapping("/inform")
     public ResponseEntity<?> informPage(Model model) {
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/health")
+    public ResponseEntity<?> healthPage(Model model) {
         return ResponseEntity.ok().build();
     }
 }

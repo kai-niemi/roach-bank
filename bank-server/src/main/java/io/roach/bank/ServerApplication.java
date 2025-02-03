@@ -79,18 +79,6 @@ public class ServerApplication implements ApplicationRunner {
             }
         }
 
-        // Must have a retry profile
-        if (profiles.stream().filter(string -> string.startsWith("retry-"))
-                .findAny().isEmpty()) {
-            profiles.add(ProfileNames.RETRY_CLIENT);
-        }
-
-        // Must have either demo or default profile
-        if (profiles.stream().filter(string -> string.startsWith(ProfileNames.DEMO))
-                .findAny().isEmpty()) {
-            profiles.add(ProfileNames.DEFAULT);
-        }
-
         System.setProperty(SPRING_PROFILES_ACTIVE, StringUtils.collectionToCommaDelimitedString(profiles));
 
         new SpringApplicationBuilder(ServerApplication.class)
