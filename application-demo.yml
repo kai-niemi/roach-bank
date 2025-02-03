@@ -1,0 +1,22 @@
+bank:
+  name: "Demo Plan"
+  default-account-limit: 100
+  report-query-timeout: 60
+  select-for-update: true
+  clear-at-startup: true
+  account-plan:
+    accounts-per-city: 5000
+    initial-balance: "150000.00"
+    currency: USD
+  regions:
+    - name: eu-central-1
+      primary: true
+      cities: "berlin,hamburg,munich,frankfurt,dusseldorf,leipzig,dortmund,essen,stuttgart,zurich,krakov,zagraeb,zaragoza,lodz,athens,bratislava,prague,sofia,bucharest,vienna,warsaw,budapest"
+    - name: eu-west-1
+      cities: "dublin,belfast,liverpool,manchester,glasgow,birmingham,leeds,london,amsterdam,rotterdam,antwerp,hague,ghent,brussels,lyon,lisbon,toulouse,paris,cologne,seville,marseille,rome,milan,naples,turin,valencia,palermo,madrid,barcelona,sintra,lisbon"
+    - name: eu-north-1
+      cities: "stockholm,copenhagen,helsinki,oslo,riga,tallinn"
+  region-mapping:
+    aws-eu-central-1: eu-central-1
+    aws-eu-west-1: eu-west-1
+    aws-eu-north-1: eu-north-1
